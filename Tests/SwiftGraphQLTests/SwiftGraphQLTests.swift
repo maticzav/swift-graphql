@@ -4,10 +4,10 @@ import XCTest
 
 final class SwiftGraphQLTests: XCTestCase {
     func testDownloading() {
-        let endpoint = URL(string: "")!
-        let dir = URL(string: FileManager.default.currentDirectoryPath)!
-        print(dir)
-        let target = URL(fileURLWithPath: "schema.json", relativeTo: dir)
+//        let endpoint = URL(string: "")!
+//        let dir = URL(string: FileManager.default.currentDirectoryPath)!
+//        print(dir)
+//        let target = URL(fileURLWithPath: "schema.json", relativeTo: dir)
     }
     
     func parsing() {

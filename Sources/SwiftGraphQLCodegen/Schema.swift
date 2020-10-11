@@ -198,6 +198,10 @@ public enum GraphQL {
         public var objects: [FullType] {
             types.filter { $0.kind == .object && !$0.isBuiltIn }
         }
+        
+        public var enums: [FullType] {
+            types.filter { $0.kind == .enumeration && !$0.isBuiltIn }
+        }
     }
     
     public enum TypeKind: String, Codable {
@@ -235,13 +239,6 @@ public enum GraphQL {
         }
     }
     
-    public enum Scalar: String, Codable {
-        case string = "String"
-        case boolean = "Boolean"
-        case integer = "Int"
-        case float = "Float"
-    }
-    
     /* Fields */
     
     public struct Field: Decodable {
@@ -255,7 +252,9 @@ public enum GraphQL {
     
     /// Represents a possibly wrapped type.
     public indirect enum TypeRef: Decodable {
-        case named(String)
+        /* Types */
+        case named(NamedType)
+        /* Wrappers */
         case nonNull(TypeRef)
         case list(TypeRef)
         
@@ -265,15 +264,32 @@ public enum GraphQL {
             let kind = try container.decode(TypeKind.self, forKey: .kind)
             
             switch kind {
+            /* Wrappers */
             case .list:
                 let ref = try container.decode(TypeRef.self, forKey: .ofType)
                 self = .list(ref)
             case .nonNull:
                 let ref = try container.decode(TypeRef.self, forKey: .ofType)
                 self = .nonNull(ref)
-            default:
+            /* Named Types */
+            case .scalar:
+                let scalar = try container.decode(Scalar.self, forKey: .name)
+                self = .named(.scalar(scalar))
+            case .object:
                 let name = try container.decode(String.self, forKey: .name)
-                self = .named(name)
+                self = .named(.object(name))
+            case .interface:
+                let name = try container.decode(String.self, forKey: .name)
+                self = .named(.interface(name))
+            case .union:
+                let name = try container.decode(String.self, forKey: .name)
+                self = .named(.union(name))
+            case .enumeration:
+                let name = try container.decode(String.self, forKey: .name)
+                self = .named(.enumeration(name))
+            case .inputObject:
+                let name = try container.decode(String.self, forKey: .name)
+                self = .named(.inputObject(name))
             }
         }
         
@@ -282,7 +298,82 @@ public enum GraphQL {
             case name = "name"
             case ofType = "ofType"
         }
+        
+        // MARK: - Calculated properties
+        
+        var namedType: NamedType {
+            switch self {
+            case .named(let type):
+                return type
+            case .nonNull(let subRef), .list(let subRef):
+                return subRef.namedType
+            }
+        }
     }
+    
+    /// Represents possible referable types.
+    public enum NamedType {
+        case scalar(Scalar)
+        case object(String)
+        case interface(String)
+        case union(String)
+        case enumeration(String)
+        case inputObject(String)
+    }
+    
+    public enum Scalar: Codable {
+        case id
+        case string
+        case boolean
+        case integer
+        case float
+        case custom(String)
+        
+        // MARK: - Initializer
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            
+            let scalar = try container.decode(String.self)
+            
+            switch scalar {
+            case "ID":
+                self = .id
+            case "String":
+                self = .string
+            case "Boolean":
+                self = .boolean
+            case "Int":
+                self = .integer
+            case "Float":
+                self = .float
+            default:
+                self = .custom(scalar)
+            }
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            
+            switch self {
+            case .id:
+                try container.encode("ID")
+            case .string:
+                try container.encode("String")
+            case .boolean:
+                try container.encode("Boolean")
+            case .integer:
+                try container.encode("Int")
+            case .float:
+                try container.encode("Float")
+            case .custom(let scalar):
+                try container.encode(scalar)
+            }
+            
+        }
+    }
+    
+    /* Values */
     
     public struct InputValue: Decodable {
         public let name: String
