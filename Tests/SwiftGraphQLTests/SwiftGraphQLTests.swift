@@ -3,11 +3,11 @@ import XCTest
 @testable import SwiftGraphQLCodegen
 
 final class SwiftGraphQLTests: XCTestCase {
-    func downloading() {
-//        SwiftGraphQLCodegen.downloadFrom(<#T##endpoint: URL##URL#>, to: <#T##URL#>)
-        
-       
-
+    func testDownloading() {
+        let endpoint = URL(string: "")!
+        let dir = URL(string: FileManager.default.currentDirectoryPath)!
+        print(dir)
+        let target = URL(fileURLWithPath: "schema.json", relativeTo: dir)
     }
     
     func parsing() {
@@ -98,8 +98,4 @@ final class SwiftGraphQLTests: XCTestCase {
 //        let res = parse(response, with: query)
 //        print(res)
     }
-
-    static var allTests = [
-        ("Download's the schema.", downloading),
-    ]
 }

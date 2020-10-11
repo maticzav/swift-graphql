@@ -205,7 +205,9 @@ func send<T>(selection: SelectionSet<T, RootQuery>, completionHandler: @escaping
             let errors = json["errors"] as? [GraphQLError] ?? []
             
             /* Process the GraphQL repsonse. */
-            parse(GraphQLResponse(data: data, errors: errors), with: selection)
+            let response = parse(GraphQLResponse(data: data, errors: errors), with: selection)
+            
+            return completionHandler(response)
         }
     }
     

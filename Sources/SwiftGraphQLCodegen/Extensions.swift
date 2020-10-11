@@ -7,8 +7,8 @@
 
 import Foundation
 
-extension [String] {
+extension Collection where Element == String {
     var lines: String {
-        self.join(separator: "\n")
+        self.joined(separator: "\n")
     }
 }
