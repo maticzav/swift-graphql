@@ -5,19 +5,19 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftGraphQL",
+    platforms: [
+        .macOS(.v10_14), .iOS(.v13), .tvOS(.v13)
+    ],
     products: [
         .library(
             name: "SwiftGraphQL",
-            targets: ["SwiftGraphQL"]),
-        .library(
-            name: "SwiftGraphQLCodegen",
-            targets: ["SwiftGraphQLCodegen"]),
+            targets: ["SwiftGraphQL", "SwiftGraphQLCodegen"]),
+        
     ],
     dependencies: [
         .package(
-            name: "GraphQL",
-            url: "https://github.com/GraphQLSwift/GraphQL.git",
-            .upToNextMajor(from: "1.1.7")),
+            url: "https://github.com/apple/swift-format.git",
+            .upToNextMajor(from: "0.50300.0")),
     ],
     targets: [
         .target(
@@ -25,9 +25,9 @@ let package = Package(
             dependencies: []),
         .target(
             name: "SwiftGraphQLCodegen",
-            dependencies: ["GraphQL"]),
+            dependencies: ["swift-format"]),
         .testTarget(
             name: "SwiftGraphQLTests",
-            dependencies: ["SwiftGraphQL"]),
+            dependencies: ["SwiftGraphQL", "SwiftGraphQLCodegen"]),
     ]
 )

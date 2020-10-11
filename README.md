@@ -1,8 +1,28 @@
-# swift-graphql
+# swift-graphql :construction:
 
 
 
-## GraphQL Client
+/*
+ 1. Let's use Swift's "Result" type to handle responses.
+ 2. Use argument hashing to generate unique keys in queries.
+ */
+
+
+
+## Guiding principles
+
+* Use high-level Swift language features instead of a complicated library.
+* Any query you can create is valid.
+ 
+ What this library does:
+ - it lets you build queries programatically,
+ - it lets you send queries through Swift's Network protocol and receive results.
+ 
+ What this library does not do:
+ - it has no caching layer
+
+## Introduction
+
 ```gql
 type Query {
   # Currently logged in user
@@ -64,6 +84,28 @@ struct UserView: View {
   }
 }
 
+```
+
+
+## Generating Swift code
+
+```swift
+import SwiftGraphQLCodegen
+
+let endpoint = URL(string: "http://localhost:5000/")!
+let schema = Path.file("")
+let target = Path.file("")
+
+let options = GraphQLCodegenOptions(
+    namespace: "API"
+)
+
+do {
+    try GraphQLSchema.downloadFrom(endpoint, to: schema)
+    try GraphQLCodegen.generate(target, from: schema)
+} catch {
+    exit(1)
+}
 ```
 
 

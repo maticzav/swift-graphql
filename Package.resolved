@@ -2,39 +2,30 @@
   "object": {
     "pins": [
       {
-        "package": "CRuntime",
-        "repositoryURL": "https://github.com/wickwirew/CRuntime.git",
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser.git",
         "state": {
           "branch": null,
-          "revision": "95f911318d8c885f6fc05e971471f94adfd39405",
-          "version": "2.1.2"
+          "revision": "92646c0cdbaca076c8d3d0207891785b3379cbff",
+          "version": "0.3.1"
         }
       },
       {
-        "package": "GraphQL",
-        "repositoryURL": "https://github.com/GraphQLSwift/GraphQL.git",
+        "package": "swift-format",
+        "repositoryURL": "https://github.com/apple/swift-format.git",
         "state": {
           "branch": null,
-          "revision": "69f2cd4835ff60b5fae841a680abdc1d56592dd4",
-          "version": "1.1.7"
+          "revision": "12089179aa1668a2478b2b2111d98fa37f3531e3",
+          "version": "0.50300.0"
         }
       },
       {
-        "package": "Runtime",
-        "repositoryURL": "https://github.com/wickwirew/Runtime.git",
+        "package": "SwiftSyntax",
+        "repositoryURL": "https://github.com/apple/swift-syntax",
         "state": {
           "branch": null,
-          "revision": "61c9776f47d2951bdc562486ad348e5e1ca2e180",
-          "version": "2.1.1"
-        }
-      },
-      {
-        "package": "swift-nio",
-        "repositoryURL": "https://github.com/apple/swift-nio.git",
-        "state": {
-          "branch": null,
-          "revision": "c3e2359c55cd8b47207ab7363b77c9c398a95294",
-          "version": "2.23.0"
+          "revision": "844574d683f53d0737a9c6d706c3ef31ed2955eb",
+          "version": "0.50300.0"
         }
       }
     ]

@@ -1,25 +1,7 @@
 import Foundation
 
-/*
- Guiding principles:
- - you can use high-level Swift language features instead of a complicated library,
- - any query you create is valid
- 
- 
- What this library does:
- - it lets you build queries programatically,
- - it lets you send queries through Swift's Network protocol and receive results.
- 
- What this library does not do:
- - it has no caching layer
- 
- */
 
 
-/*
- 1. Let's use Swift's "Result" type to handle responses.
- 2. Use argument hashing to generate unique keys in queries.
- */
 
 //decoder : SelectionSet decodesTo typeLock -> Decoder decodesTo
 //decoder (SelectionSet fields decoder_) =
@@ -36,22 +18,21 @@ import Foundation
     built up using generated functions.
 */
 
-enum Operation {
-    enum Query {}
-    enum Mutation {}
-    enum Subscription {}
+public enum Operation {
+    public enum Query {}
+    public enum Mutation {}
+    public enum Subscription {}
 }
 
-typealias RootQuery = Operation.Query
-typealias RootMutation = Operation.Mutation
-typealias RootSubscription = Operation.Subscription
+public typealias RootQuery = Operation.Query
+public typealias RootMutation = Operation.Mutation
+public typealias RootSubscription = Operation.Subscription
+
+
+
 
 
 // MARK: - GraphQLField (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/RawField.elm, https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Document/Field.elm)
-
-//type RawField
-//    = Composite String (List Argument) (List RawField)
-//    | Leaf { typeString : String, fieldName : String } (List Argument)
 
 // TODO: Arguments
 
@@ -93,17 +74,6 @@ enum GraphQLField {
 
 // MARK: - SelectionSet (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/SelectionSet.elm)
 
-//        type SelectionSet decodesTo typeLock
-//            = SelectionSet (List RawField) (Decoder decodesTo)
-
-
-enum GraphQLOperationType: String, CaseIterable {
-    case query = "query"
-    case mutation = "mutation"
-    case subscription = "subscription"
-}
-
-typealias JSONData = [String: Any?]
 
 struct SelectionSet<Type, TypeLock> {
     //    https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/SelectionSet.elm
@@ -162,12 +132,24 @@ struct SelectionSet<Type, TypeLock> {
     }
 }
 
-// MARK: - GraphQLError (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Http/GraphqlError.elm)
+
+enum GraphQLOperationType: String, CaseIterable {
+    case query = "query"
+    case mutation = "mutation"
+    case subscription = "subscription"
+}
+
+typealias JSONData = [String: Any?]
 
 struct GraphQLResponse {
     let data: JSONData?
     let errors: [GraphQLError]
 }
+
+
+
+// MARK: - GraphQLError (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Http/GraphqlError.elm)
+
 
 struct GraphQLError: Error, Codable {
     let message: String
@@ -241,22 +223,6 @@ func parse<Type, TypeLock>(_ response: GraphQLResponse, with selection: Selectio
         return .failure(.graphql(response.errors))
     }
 }
-
-//
-//func send<T>(selection: SelectionSet<T, RootMutation>) -> T {
-//
-//}
-//
-//
-//func send<T>(selection: SelectionSet<T, RootSubscription>) -> T {
-//
-//}
-
-
-
-
-
-
 
 // MARK: - Internals (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Internal/Builder/Object.elm)
 
