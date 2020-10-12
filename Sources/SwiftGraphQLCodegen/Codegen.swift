@@ -16,18 +16,13 @@ public struct GraphQLCodegen {
             let code = self.generate(from: schema)
             
             /* Write the code to the file system. */
-            FileManager.default.createFile(
-                atPath: target.absoluteString,
-                contents: code.data(using: .utf8),
+            let targetDir = target.deletingLastPathComponent()
+            try! FileManager.default.createDirectory(
+                at: targetDir,
+                withIntermediateDirectories: true,
                 attributes: nil
             )
-//            try! FileManager.default.createDirectory(
-//
-//                at: target,
-//                withIntermediateDirectories: true,
-//                attributes: nil
-//            )
-//            try! code.write(to: target, atomically: true, encoding: .utf8)
+            try! code.write(to: target, atomically: true, encoding: .utf8)
             
             onComplete()
         }
@@ -283,15 +278,23 @@ public struct GraphQLCodegen {
             let returnType = generateReturnType(for: field.type)
             return "data[field.name] as! \(returnType)"
         case .enumeration(let enm):
-            if field.type.isWrapped {
-                let decoderType = generateDecoderType("String", for: field.type)
-                return "(data[field.name] as! \(decoderType)).map { \(enm).init(rawValue: $0)! }"
+            let decoderType = generateDecoderType("String", for: field.type)
+            if decoderType == "String" {
+                return "\(enm).init(rawValue: data[field.name] as! String)!"
             }
-            return "\(enm).init(rawValue: data[field.name] as! String)!"
+            return "(data[field.name] as! \(decoderType)).map { \(enm).init(rawValue: $0)! }"
         case .inputObject(_), .interface(_), .object(_), .union(_):
             let decoderType = generateDecoderType("Any", for: field.type)
+            if decoderType == "Any" {
+                return "selection.decode(data: (data[field.name] as! Any))"
+            }
             return "(data[field.name] as! \(decoderType)).map { selection.decode(data: $0) }"
         }
+        /**
+         We might need `list` and `null` selection set since the above nesting may be arbitratily deep.
+            People may use a nested nested list, for example, and schema allows for that. The problem lays in the
+            current decoders.
+         */
     }
     
     /// Generates an intermediate type used in custom decoders to cast JSON representation of the data.
