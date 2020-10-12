@@ -5,17 +5,31 @@ import Foundation
 
 public struct GraphQLCodegen {
     /// Generates a target GraphQL Swift file.
-    public static func generate(_ target: URL, from schemaURL: URL) -> Void {
+    ///
+    public static func generate(
+        _ target: URL,
+        from schemaURL: URL,
+        onComplete: @escaping () -> Void = {}
+    ) -> Void {
         /* Code generator function. */
         func generator(schema: GraphQL.Schema) -> Void {
-            let code = self.generate(from: schema).data(using: .utf8)
+            let code = self.generate(from: schema)
             
             /* Write the code to the file system. */
-            try! FileManager.default.createFile(
+            FileManager.default.createFile(
                 atPath: target.absoluteString,
-                contents: code,
+                contents: code.data(using: .utf8),
                 attributes: nil
             )
+//            try! FileManager.default.createDirectory(
+//
+//                at: target,
+//                withIntermediateDirectories: true,
+//                attributes: nil
+//            )
+//            try! code.write(to: target, atomically: true, encoding: .utf8)
+            
+            onComplete()
         }
         
         /* Download the schema from endpoint. */
@@ -34,30 +48,41 @@ public struct GraphQLCodegen {
         GraphQLSchema.downloadFrom(schemaURL, handler: generator)
     }
     
-//    \(generateSelectionSet("RootQuery", for: schema.queryType))
-//    \(generateSelectionSet("RootMutation", for: schema.queryType))
-//    \(generateSelectionSet("RootSubscription", for: schema.queryType))
+    
+    /* Internals */
+    
     
     /// Generates the code that can be used to define selections.
-    static func generate(from schema: GraphQL.Schema) -> String {
+    private static func generate(from schema: GraphQL.Schema) -> String {
+        /* Data */
+        
+        let operations: [(name: String, type: GraphQL.FullType)] = [
+            ("RootQuery", schema.queryType.name),
+            ("RootMutation",schema.mutationType?.name),
+            ("RootSubscription",schema.subscriptionType?.name)
+        ].compactMap { (name, operation) in
+            schema.types.first(where: { $0.name == operation }).map { (name, $0) }
+        }
+        
+        let objects: [(name: String, type: GraphQL.FullType)] = schema.objects.map {
+            (name: generateObjectType(for: $0.name), type: $0)
+        }
+        
         /* Generate the API. */
         let code = """
             import SwiftGraphQL
 
             // MARK: - Operations
             
-            
+            \(operations.map { generateObject($0.name, for: $0.type) }.lines)
 
             // MARK: - Objects
 
-            enum Object {
-            \(schema.objects.map(generateObjectEnum).lines)
-            }
+            \(generatePhantomTypes(for: schema.objects))
 
             // MARK: - Selection
 
-            \(schema.objects.map { generateObject($0.name, for: $0) }.lines)
-
+            \(objects.map { generateObject($0.name, for: $0.type) }.lines)
 
             // MARK: - Enums
 
@@ -83,78 +108,155 @@ public struct GraphQLCodegen {
     /* Objects */
     
     /// Generates an object phantom type entry.
-    static func generateObjectEnum(_ type: GraphQL.FullType) -> String {
-        "enum \(type.name) {}"
+    private static func generatePhantomTypes(for types: [GraphQL.FullType]) -> String {
+        """
+        enum Object {
+        \(types.map { generatePhantomType(for: $0) }.lines)
+        }
+        
+        \(types.map { generatePhantomTypeAlias(for: $0)}.lines)
+        """
+    }
+    
+    private static func generatePhantomType(for type: GraphQL.FullType) -> String {
+        """
+            enum \(type.name) {}
+        """
+    }
+    
+    private static func generatePhantomTypeAlias(for type: GraphQL.FullType) -> String {
+        """
+            typealias \(type.name)Object = Object.\(type.name)
+        """
+    }
+    
+    /// Generates an object type used for aliasing a phantom type.
+    private static func generateObjectType(for typeName: String) -> String {
+        "\(typeName)Object"
     }
 
     /// Generates a function to handle a type.
-    static func generateObject(_ typeName: String, for type: GraphQL.FullType) -> String {
-        let fields = type.fields ?? []
+    private static func generateObject(_ typeName: String, for type: GraphQL.FullType) -> String {
+        // TODO: add support for all fields!
+        let fields = (type.fields ?? []).filter {
+            switch $0.type.namedType {
+            case .scalar(_), .object(_), .enumeration(_):
+                return true
+            default:
+                return false
+            }
+        }
+        
         return """
         /* \(type.name) */
 
-        typealias \(typeName) = Object.\(type.name)
-
         extension SelectionSet where TypeLock == \(typeName) {
-        /* Fields */
         \(fields.map(generateObjectField).lines)
         }
         """
     }
 
-    static func generateObjectField(_ field: GraphQL.Field) -> String {
+    private static func generateObjectField(_ field: GraphQL.Field) -> String {
+        /* Code Parts */
+        let description = "/// \(field.description ?? "")"
+        let fnDefinition = generateFnDefinition(for: field)
         let returnType = generateReturnType(for: field.type)
+        
+        let fieldLeaf = generateFieldLeaf(for: field)
+        let decoder = generateDecoder(for: field)
         let mockData = generateMockData(for: field.type)
         
-        /* Common */
-        
-        let description = "/// \(field.description ?? "")"
-        let fnType = "func \(field.name)() -> \(returnType)"
-        
-        
         return """
-        /// \(description)
-        \(fnType) {
-            let field = GraphQLField.leaf(name: "\(field.name)")
+            \(description)
+            func \(fnDefinition) -> \(returnType) {
+                let field = \(fieldLeaf)
 
-            if let data = self.data {
-               return data[field.name] as! \(returnType)
+                // decoder
+                if let data = self.data {
+                   return \(decoder)
+                }
+
+                // mock placeholder
+                return \(mockData)
             }
-
-            return \(mockData)
-        }
         """
     }
     
+    /// Generates a function definition for a field.
+    private static func generateFnDefinition(for field: GraphQL.Field) -> String {
+        switch field.type {
+        /* Named Type */
+        case .named(let type):
+            switch type {
+            case .scalar(_), .enumeration(_):
+                return "\(field.name)()"
+            case .inputObject(_),
+                 .interface(_),
+                 .object(_),
+                 .union(_):
+                let typeLock = generateObjectType(for: field.type.namedType.name)
+                return "\(field.name)<Type>(_ selection: SelectionSet<Type, \(typeLock)>)"
+            }
+        /* List Type */
+        case .list(let subRef), .nonNull(let subRef):
+            let subField = GraphQL.Field(
+                name: field.name,
+                description: field.description,
+                args: field.args,
+                type: subRef,
+                isDeprecated: field.isDeprecated,
+                deprecationReason: field.deprecationReason
+            )
+            return generateFnDefinition(for: subField)
+        }
+    }
+    
     /// Recursively generates a return type of a referrable type.
-    static func generateReturnType(for ref: GraphQL.TypeRef) -> String {
+    private static func generateReturnType(for ref: GraphQL.TypeRef) -> String {
         switch ref {
-        /* Custom type */
+        /* Named Type */
         case .named(let type):
             switch type {
             case .scalar(let scalar):
                 return generateReturnType(for: scalar)
-            case .enumeration(let name),
-                 .inputObject(let name),
-                 .interface(let name),
-                 .object(let name),
-                 .union(let name):
-                return "\(name)?" // everything is nullable by default
+            case .enumeration(let enm):
+                return "\(enm)?"
+            case .inputObject(_),
+                 .interface(_),
+                 .object(_),
+                 .union(_):
+                return "Type?"
             }
         /* Wrapped types */
         case .list(let subRef):
-            return "[\(generateReturnType(for: subRef))]"
+            return "[\(generateReturnType(for: subRef))]?"
         case .nonNull(let subRef):
+            // everything is nullable by default, that's why
+            // we are removing question mark
             var nullable = generateReturnType(for: subRef)
             nullable.remove(at: nullable.index(before: nullable.endIndex))
             return nullable
         }
     }
     
+    /// Generates a return type of a named type.
+    private static func generateReturnType(for namedType: GraphQL.NamedType) -> String {
+        switch namedType {
+        case .scalar(let scalar):
+            return generateReturnType(for: scalar)
+        case .enumeration(_),
+             .inputObject(_),
+             .interface(_),
+             .object(_),
+             .union(_):
+            return "Type?"
+        }
+    }
+    
     /// Translates a scalar abstraction into Swift-compatible type.
     ///
     /// - Note: Every type is optional by default since we are comming from GraphQL world.
-    static func generateReturnType(for scalar: GraphQL.Scalar) -> String {
+    private static func generateReturnType(for scalar: GraphQL.Scalar) -> String {
         switch scalar {
         case .boolean:
             return "Bool?"
@@ -169,27 +271,69 @@ public struct GraphQLCodegen {
         }
     }
     
+    /// Generates an internal leaf definition used for composing selection set.
+    private static func generateFieldLeaf(for field: GraphQL.Field) -> String {
+        "GraphQLField.leaf(name: \"\(field.name)\")"
+    }
+    
+    /// Generates a field decoder.
+    private static func generateDecoder(for field: GraphQL.Field) -> String {
+        switch field.type.namedType {
+        case .scalar(_):
+            let returnType = generateReturnType(for: field.type)
+            return "data[field.name] as! \(returnType)"
+        case .enumeration(let enm):
+            if field.type.isWrapped {
+                let decoderType = generateDecoderType("String", for: field.type)
+                return "(data[field.name] as! \(decoderType)).map { \(enm).init(rawValue: $0)! }"
+            }
+            return "\(enm).init(rawValue: data[field.name] as! String)!"
+        case .inputObject(_), .interface(_), .object(_), .union(_):
+            let decoderType = generateDecoderType("Any", for: field.type)
+            return "(data[field.name] as! \(decoderType)).map { selection.decode(data: $0) }"
+        }
+    }
+    
+    /// Generates an intermediate type used in custom decoders to cast JSON representation of the data.
+    private static func generateDecoderType(_ typeName: String, for type: GraphQL.TypeRef) -> String {
+        switch type {
+        case .named(_):
+            return "\(typeName)?"
+        /* Wrapped types */
+        case .list(let subRef):
+            return "[\(generateDecoderType(typeName, for: subRef))]?"
+        case .nonNull(let subRef):
+            // everything is nullable by default, that's why
+            // we are removing question mark
+            var nullable = generateDecoderType(typeName, for: subRef)
+            nullable.remove(at: nullable.index(before: nullable.endIndex))
+            return nullable
+        }
+    }
+    
     /// Generates value placeholders for the API.
-    static func generateMockData(for ref: GraphQL.TypeRef) -> String {
+    private static func generateMockData(for ref: GraphQL.TypeRef) -> String {
         switch ref {
         /* Named Types */
         case let .named(named):
             switch named {
             case .scalar(let scalar):
                 return generateMockData(for: scalar)
+            case .enumeration(let enm):
+                return "\(enm).allCases.first!"
             default:
-                return ""
+                return "selection.mock()"
             }
         /* Wrappers */
         case .list(_):
             return "[]"
-        case .nonNull(_):
-            return ""
+        case .nonNull(let subRef):
+            return generateMockData(for: subRef)
         }
     }
     
     /// Generates mock data for an abstract scalar type.
-    static func generateMockData(for scalar: GraphQL.Scalar) -> String {
+    private static func generateMockData(for scalar: GraphQL.Scalar) -> String {
         switch scalar {
         case .boolean:
             return "true"
@@ -198,9 +342,9 @@ public struct GraphQLCodegen {
         case .integer:
             return "42"
         case .string:
-            return "Matic Zavadlal"
+            return "\"Matic Zavadlal\""
         case .id:
-            return "92"
+            return "\"8378\""
         case .custom(_): // TODO!
             return ""
         }
@@ -209,7 +353,7 @@ public struct GraphQLCodegen {
     /* Enums */
 
     /// Generates an enumeration code.
-    static func generateEnum(_ type: GraphQL.FullType) -> String {
+    private static func generateEnum(_ type: GraphQL.FullType) -> String {
         let cases = type.enumValues ?? []
         return """
         enum \(type.name): String, CaseIterable, Codable {
@@ -218,8 +362,10 @@ public struct GraphQLCodegen {
         """
     }
 
-    static func generateEnumCase(_ env: GraphQL.EnumValue) -> String {
-        "case \(env.name) = \"\(env.name)\""
+    private static func generateEnumCase(_ env: GraphQL.EnumValue) -> String {
+        """
+            case \(env.name) = \"\(env.name)\"
+        """
     }
 
 }

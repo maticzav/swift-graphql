@@ -3,11 +3,18 @@ import XCTest
 @testable import SwiftGraphQLCodegen
 
 final class SwiftGraphQLTests: XCTestCase {
-    func testDownloading() {
-//        let endpoint = URL(string: "")!
-//        let dir = URL(string: FileManager.default.currentDirectoryPath)!
-//        print(dir)
-//        let target = URL(fileURLWithPath: "schema.json", relativeTo: dir)
+    
+    override func setUp() {
+        
+    }
+    
+    func testDownloadsTheSchema() {
+        let endpoint = URL(string: "https://sampleapis.com/futurama/graphql")!
+        
+        GraphQLSchema.downloadFrom(endpoint) { (schema: GraphQL.Schema) in
+            print(schema)
+            XCTAssert(true)
+        }
     }
     
     func parsing() {

@@ -195,10 +195,21 @@ public enum GraphQL {
         
         // MARK: - Calculated values
         
-        public var objects: [FullType] {
-            types.filter { $0.kind == .object && !$0.isBuiltIn }
+        /// Returns names of the operations in schema.
+        public var operations: [String] {
+            [
+                queryType.name,
+                mutationType?.name,
+                subscriptionType?.name
+            ].compactMap { $0 }
         }
         
+        /// Returns object definitions from schema.
+        public var objects: [FullType] {
+            types.filter { $0.kind == .object && !$0.isBuiltIn && !operations.contains($0.name) }
+        }
+        
+        /// Returns enumerator definitions in schema.
         public var enums: [FullType] {
             types.filter { $0.kind == .enumeration && !$0.isBuiltIn }
         }
@@ -309,6 +320,15 @@ public enum GraphQL {
                 return subRef.namedType
             }
         }
+        
+        var isWrapped: Bool {
+            switch self {
+            case .named(_):
+                return false
+            case .nonNull(_), .list(_):
+                return true
+            }
+        }
     }
     
     /// Represents possible referable types.
@@ -319,6 +339,19 @@ public enum GraphQL {
         case union(String)
         case enumeration(String)
         case inputObject(String)
+        
+        var name: String {
+            switch self {
+            case .scalar(let scalar):
+                return scalar.rawValue
+            case .enumeration(let name),
+                 .inputObject(let name),
+                 .interface(let name),
+                 .object(let name),
+                 .union(let name):
+                return name
+            }
+        }
     }
     
     public enum Scalar: Codable {
@@ -354,22 +387,26 @@ public enum GraphQL {
         
         public func encode(to encoder: Encoder) throws {
             var container = encoder.singleValueContainer()
-            
+            try container.encode(self.rawValue)
+        }
+        
+        // MARK: - Calculated properties
+        
+        public var rawValue: String {
             switch self {
             case .id:
-                try container.encode("ID")
+                return "ID"
             case .string:
-                try container.encode("String")
+                return "String"
             case .boolean:
-                try container.encode("Boolean")
+                return "Boolean"
             case .integer:
-                try container.encode("Int")
+                return "Int"
             case .float:
-                try container.encode("Float")
+                return "Float"
             case .custom(let scalar):
-                try container.encode(scalar)
+                return scalar
             }
-            
         }
     }
     
