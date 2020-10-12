@@ -51,23 +51,27 @@ enum GraphQLOperationType: String, CaseIterable {
     case subscription = "subscription"
 }
 
-public class SelectionSet<Type, TypeLock> {
+public struct SelectionSet<Type, TypeLock> {
     /* Data */
     
-    private var fields = [GraphQLField]() // selected fields
-    private var decoder: (SelectionSet) -> Type // function used to decode data and populate selection
+    class Selection {
+        var fields = [GraphQLField]() // selected fields
+    }
+    
+    private let _selection = Selection()
+    private var decoder: (Self) -> Type // function used to decode data and populate selection
     private var mocked: Type? // mock data
-    private var _data: JSONData? // return object
+    private var _data: Any? // response
     
     // MARK: - Initializer
     
-    public init(decoder: @escaping (SelectionSet) -> Type) {
+    public init(decoder: @escaping (Self) -> Type) {
         /* This initializer populates fields (selection set) and grabs a copy of mocked value. */
         self.decoder = decoder
         self.mocked = self.decoder(self)
     }
     
-    private init(decoder: @escaping (SelectionSet) -> Type, data: JSONData) {
+    private init(decoder: @escaping (Self) -> Type, data: JSONData) {
         /* This initializer is used to decode response into Swift data. */
         self.decoder = decoder
         self._data = data
@@ -75,18 +79,18 @@ public class SelectionSet<Type, TypeLock> {
     
     // MARK: - Accessors
     
-    public var data: JSONData? {
+    public var data: Any? {
         return self._data
     }
     
     /// Returns a list of selected fields.
     public var selection: [GraphQLField] {
-        return self.fields
+        return self._selection.fields
     }
     
     /// Lets API add a selection to the selection set.
     public func select(_ field: GraphQLField) {
-        self.fields.append(field)
+        self._selection.fields.append(field)
     }
     
     
@@ -110,7 +114,7 @@ public class SelectionSet<Type, TypeLock> {
     func serialize(for operationType: GraphQLOperationType) -> String {
         """
         \(operationType.rawValue) {
-        \(fields.map(serializeSelection).joined(separator: "\n"))
+        \(selection.map(serializeSelection).joined(separator: "\n"))
         }
         """
     }
@@ -128,27 +132,47 @@ public class SelectionSet<Type, TypeLock> {
         }
     }
 }
-//
-//extension SelectionSet {
-//    /// Let's you convert a type selection into a list selection.
-//    func list() -> SelectionSet<[Type], [TypeLock]> {
-//        SelectionSet<[Type], [TypeLock]> { selection in
+
+extension SelectionSet {
+    /// Lets you convert a type selection into a list selection.
+    public var list: SelectionSet<[Type], [TypeLock]> {
+        SelectionSet<[Type], [TypeLock]> { selection in
+            if let data = self.data {
+                return (data as! [Any]).map { self.decode(data: $0) }
+            }
+
+            return []
+        }
+    }
+
+    /// Lets you decode nullable values.
+    public var nullable: SelectionSet<Type?, TypeLock?> {
+        SelectionSet<Type?, TypeLock?> { selection in
+            // extend the decoder
+            if let data = self.data {
+                return self.decode(data: data)
+            }
+            
+            return nil
+        }
+    }
+    
+    
+//    /// Lets you decode nullable values.
+//    public func nonNullableOrFail<SubType>() -> SelectionSet<SubType, TypeLock?> where Type == Optional<SubType> {
+//        SelectionSet<SubType, TypeLock?> { selection in
+//            // copy over the selection
+//            self.fields = selection.fields
+//            
+//            // extend the decoder
 //            if let data = self.data {
-//                return (data as! [Any]).map(self.decoder)
+//                return self.decode(data: data)!
 //            }
 //            
-//            return []
+//            return self.mock()!
 //        }
 //    }
-//    
-//    func nullable() -> SelectionSet<Type?, TypeLock?> {
-//        SelectionSet<Type?, TypeLock?> { selection in
-//            if let data = self.data {
-//                return (data as! Any?).map(self.decoder)
-//            }
-//        }
-//    }
-//}
+}
 
 
 // MARK: - GraphQLError
@@ -215,6 +239,11 @@ public struct GraphQLClient {
     /// Sends a subscription request to the server.
     public static func send<Type>(selection: SelectionSet<Type, RootSubscription>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
         perform(selection: selection, completionHandler: completionHandler)
+    }
+    
+    /// Returns a query for selection.
+    public static func serialize<Type, TypeLock>(selection: SelectionSet<Type, TypeLock>) -> String {
+        selection.serialize(for: .query)
     }
     
     /* Internals */

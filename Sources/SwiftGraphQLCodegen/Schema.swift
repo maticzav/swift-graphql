@@ -408,6 +408,15 @@ public enum GraphQL {
                 return scalar
             }
         }
+        
+        public var isCustom: Bool {
+            switch self {
+            case .custom(_):
+                return true
+            default:
+                return false
+            }
+        }
     }
     
     /* Values */

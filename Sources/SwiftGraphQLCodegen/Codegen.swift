@@ -120,9 +120,7 @@ public struct GraphQLCodegen {
     }
     
     private static func generatePhantomTypeAlias(for type: GraphQL.FullType) -> String {
-        """
-            typealias \(type.name)Object = Object.\(type.name)
-        """
+        "typealias \(type.name)Object = Object.\(type.name)"
     }
     
     /// Generates an object type used for aliasing a phantom type.
@@ -134,8 +132,10 @@ public struct GraphQLCodegen {
     private static func generateObject(_ typeName: String, for type: GraphQL.FullType) -> String {
         // TODO: add support for all fields!
         let fields = (type.fields ?? []).filter {
-            switch $0.type.namedType {
-            case .scalar(_), .object(_), .enumeration(_):
+            switch $0.type.namedType { // TODO
+            case .scalar(let scalar):
+                return !scalar.isCustom
+            case .object(_), .enumeration(_):
                 return true
             default:
                 return false
@@ -182,90 +182,51 @@ public struct GraphQLCodegen {
     
     /// Generates a function definition for a field.
     private static func generateFnDefinition(for field: GraphQL.Field) -> String {
-        switch field.type {
-        /* Named Type */
-        case .named(let type):
-            switch type {
-            case .scalar(_), .enumeration(_):
-                return "\(field.name)()"
-            case .inputObject(_),
-                 .interface(_),
-                 .object(_),
-                 .union(_):
-                let typeLock = generateObjectType(for: field.type.namedType.name)
-                return "\(field.name)<Type>(_ selection: SelectionSet<Type, \(typeLock)>)"
-            }
-        /* List Type */
-        case .list(let subRef), .nonNull(let subRef):
-            let subField = GraphQL.Field(
-                name: field.name,
-                description: field.description,
-                args: field.args,
-                type: subRef,
-                isDeprecated: field.isDeprecated,
-                deprecationReason: field.deprecationReason
-            )
-            return generateFnDefinition(for: subField)
+        switch field.type.namedType {
+        case .scalar(_), .enumeration(_):
+            return "\(field.name)()"
+        case .inputObject(_),
+             .interface(_),
+             .object(_),
+             .union(_):
+            let typeLock = generateObjectType(for: field.type.namedType.name)
+            let decoderType = generateDecoderType(typeLock, for: field.type)
+            return "\(field.name)<Type>(_ selection: SelectionSet<Type, \(decoderType)>)"
         }
     }
     
     /// Recursively generates a return type of a referrable type.
     private static func generateReturnType(for ref: GraphQL.TypeRef) -> String {
-        switch ref {
-        /* Named Type */
-        case .named(let type):
-            switch type {
-            case .scalar(let scalar):
-                return generateReturnType(for: scalar)
-            case .enumeration(let enm):
-                return "\(enm)?"
-            case .inputObject(_),
-                 .interface(_),
-                 .object(_),
-                 .union(_):
-                return "Type?"
-            }
-        /* Wrapped types */
-        case .list(let subRef):
-            return "[\(generateReturnType(for: subRef))]?"
-        case .nonNull(let subRef):
-            // everything is nullable by default, that's why
-            // we are removing question mark
-            var nullable = generateReturnType(for: subRef)
-            nullable.remove(at: nullable.index(before: nullable.endIndex))
-            return nullable
-        }
-    }
-    
-    /// Generates a return type of a named type.
-    private static func generateReturnType(for namedType: GraphQL.NamedType) -> String {
-        switch namedType {
+        switch ref.namedType {
         case .scalar(let scalar):
-            return generateReturnType(for: scalar)
-        case .enumeration(_),
-             .inputObject(_),
+            let scalarType = generateReturnType(for: scalar)
+            return generateDecoderType(scalarType, for: ref)
+        case .enumeration(let enm):
+            return generateDecoderType(enm, for: ref)
+        case .inputObject(_),
              .interface(_),
              .object(_),
              .union(_):
-            return "Type?"
+            return "Type"
         }
     }
     
+
     /// Translates a scalar abstraction into Swift-compatible type.
     ///
     /// - Note: Every type is optional by default since we are comming from GraphQL world.
     private static func generateReturnType(for scalar: GraphQL.Scalar) -> String {
         switch scalar {
         case .boolean:
-            return "Bool?"
+            return "Bool"
         case .float:
-            return "Double?"
+            return "Double"
         case .integer:
-            return "Int?"
+            return "Int"
         case .string, .id:
-            return "String?"
+            return "String"
         case .custom(let type):
-            return "\(type)?"
+            return "\(type)"
         }
     }
     
@@ -285,19 +246,16 @@ public struct GraphQLCodegen {
         switch field.type.namedType {
         case .scalar(_):
             let returnType = generateReturnType(for: field.type)
-            return "data[field.name] as! \(returnType)"
+            return "(data as! [String: Any])[field.name] as! \(returnType)"
         case .enumeration(let enm):
             let decoderType = generateDecoderType("String", for: field.type)
             if decoderType == "String" {
-                return "\(enm).init(rawValue: data[field.name] as! String)!"
+                return "\(enm).init(rawValue: (data as! [String: Any])[field.name] as! String)!"
             }
-            return "(data[field.name] as! \(decoderType)).map { \(enm).init(rawValue: $0)! }"
+            return "((data as! [String: Any])[field.name] as! \(decoderType)).map { \(enm).init(rawValue: $0)! }"
         case .inputObject(_), .interface(_), .object(_), .union(_):
             let decoderType = generateDecoderType("Any", for: field.type)
-            if decoderType == "Any" {
-                return "selection.decode(data: (data[field.name] as! Any))"
-            }
-            return "(data[field.name] as! \(decoderType)).map { selection.decode(data: $0) }"
+            return "selection.decode(data: ((data as! [String: Any])[field.name] as! \(decoderType)))"
         }
         /**
          We might need `list` and `null` selection set since the above nesting may be arbitratily deep.
@@ -338,7 +296,7 @@ public struct GraphQLCodegen {
             }
         /* Wrappers */
         case .list(_):
-            return "[]"
+            return "selection.mock()"
         case .nonNull(let subRef):
             return generateMockData(for: subRef)
         }
