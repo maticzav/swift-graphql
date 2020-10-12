@@ -166,6 +166,9 @@ public struct GraphQLCodegen {
             func \(fnDefinition) -> \(returnType) {
                 let field = \(fieldLeaf)
 
+                // selection
+                self.select(field)
+
                 // decoder
                 if let data = self.data {
                    return \(decoder)
@@ -268,7 +271,13 @@ public struct GraphQLCodegen {
     
     /// Generates an internal leaf definition used for composing selection set.
     private static func generateFieldLeaf(for field: GraphQL.Field) -> String {
-        "GraphQLField.leaf(name: \"\(field.name)\")"
+        switch field.type.namedType {
+        case .scalar(_), .enumeration(_):
+            return "GraphQLField.leaf(name: \"\(field.name)\")"
+        case .inputObject(_), .interface(_), .object(_), .union(_):
+            return "GraphQLField.composite(name: \"\(field.name)\", selection: selection.selection)"
+        }
+        
     }
     
     /// Generates a field decoder.

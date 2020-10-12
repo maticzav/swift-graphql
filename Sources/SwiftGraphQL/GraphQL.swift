@@ -1,38 +1,7 @@
 import Foundation
 
 
-
-
-//decoder : SelectionSet decodesTo typeLock -> Decoder decodesTo
-//decoder (SelectionSet fields decoder_) =
-//    decoder_ |> Decode.field "data"
-
-
-/* Library */
-
-
-// MARK: - Operations (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Operation.elm)
-
-/*
-    Contains types used to annotate top-level queries which can be
-    built up using generated functions.
-*/
-
-public enum Operation {
-    public enum Query {}
-    public enum Mutation {}
-    public enum Subscription {}
-}
-
-public typealias RootQuery = Operation.Query
-public typealias RootMutation = Operation.Mutation
-public typealias RootSubscription = Operation.Subscription
-
-
-
-
-
-// MARK: - GraphQLField (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/RawField.elm, https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Document/Field.elm)
+// MARK: - GraphQLField
 
 // TODO: Arguments
 
@@ -72,7 +41,7 @@ public enum GraphQLField {
 }
     
 
-// MARK: - SelectionSet (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/SelectionSet.elm)
+// MARK: - SelectionSet
 
 public typealias JSONData = [String: Any?]
 
@@ -82,25 +51,44 @@ enum GraphQLOperationType: String, CaseIterable {
     case subscription = "subscription"
 }
 
-public struct SelectionSet<Type, TypeLock> {
-    //    https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/SelectionSet.elm
-    private var fields = [GraphQLField]()
-    private let decoder: (Self) -> Type
-    private var mocked: Type?
+public class SelectionSet<Type, TypeLock> {
+    /* Data */
     
-    public var data: JSONData? // return object
+    private var fields = [GraphQLField]() // selected fields
+    private var decoder: (SelectionSet) -> Type // function used to decode data and populate selection
+    private var mocked: Type? // mock data
+    private var _data: JSONData? // return object
     
     // MARK: - Initializer
     
-    public init(decoder: @escaping (Self) -> Type) {
+    public init(decoder: @escaping (SelectionSet) -> Type) {
+        /* This initializer populates fields (selection set) and grabs a copy of mocked value. */
         self.decoder = decoder
         self.mocked = self.decoder(self)
     }
     
-    private init(decoder: @escaping (Self) -> Type, data: JSONData) {
+    private init(decoder: @escaping (SelectionSet) -> Type, data: JSONData) {
+        /* This initializer is used to decode response into Swift data. */
         self.decoder = decoder
-        self.data = data
+        self._data = data
     }
+    
+    // MARK: - Accessors
+    
+    public var data: JSONData? {
+        return self._data
+    }
+    
+    /// Returns a list of selected fields.
+    public var selection: [GraphQLField] {
+        return self.fields
+    }
+    
+    /// Lets API add a selection to the selection set.
+    public func select(_ field: GraphQLField) {
+        self.fields.append(field)
+    }
+    
     
     // MARK: - Methods
     
@@ -118,8 +106,6 @@ public struct SelectionSet<Type, TypeLock> {
         return self.mocked!
     }
     
-    // https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Document.elm
-    
     /// Returns a GraphQL query for the current selection set.
     func serialize(for operationType: GraphQLOperationType) -> String {
         """
@@ -128,8 +114,6 @@ public struct SelectionSet<Type, TypeLock> {
         }
         """
     }
-    
-    /* Helper functions */
     
     private func serializeSelection(_ selection: GraphQLField) -> String {
         switch selection {
@@ -144,8 +128,30 @@ public struct SelectionSet<Type, TypeLock> {
         }
     }
 }
+//
+//extension SelectionSet {
+//    /// Let's you convert a type selection into a list selection.
+//    func list() -> SelectionSet<[Type], [TypeLock]> {
+//        SelectionSet<[Type], [TypeLock]> { selection in
+//            if let data = self.data {
+//                return (data as! [Any]).map(self.decoder)
+//            }
+//            
+//            return []
+//        }
+//    }
+//    
+//    func nullable() -> SelectionSet<Type?, TypeLock?> {
+//        SelectionSet<Type?, TypeLock?> { selection in
+//            if let data = self.data {
+//                return (data as! Any?).map(self.decoder)
+//            }
+//        }
+//    }
+//}
 
-// MARK: - GraphQLError (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Http/GraphqlError.elm)
+
+// MARK: - GraphQLError
 
 
 public struct GraphQLError: Error, Codable {
@@ -165,7 +171,24 @@ public enum RequestError: Error {
 }
 
 
-// MARK: - Methods (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Http.elm send and toReadyRequest methods)
+// MARK: - Operations
+
+/*
+    Contains types used to annotate top-level queries which can be
+    built up using generated functions.
+*/
+
+public enum Operation {
+    public enum Query {}
+    public enum Mutation {}
+    public enum Subscription {}
+}
+
+public typealias RootQuery = Operation.Query
+public typealias RootMutation = Operation.Mutation
+public typealias RootSubscription = Operation.Subscription
+
+// MARK: - Methods
 
 struct GraphQLResponse {
     let data: JSONData?
@@ -177,8 +200,29 @@ public typealias GraphQLResult<T> = Result<T?, RequestError>
 public struct GraphQLClient {
     static let endpoint = URL(string: "http://localhost:5000")!
     
+    /* API */
+    
     /// Sends a query request to the server.
-    static func send<T>(selection: SelectionSet<T, RootQuery>, completionHandler: @escaping (GraphQLResult<T>) -> Void) -> Void {
+    public static func send<Type>(selection: SelectionSet<Type, RootQuery>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
+        perform(selection: selection, completionHandler: completionHandler)
+    }
+    
+    /// Sends a mutation request to the server.
+    public static func send<Type>(selection: SelectionSet<Type, RootMutation>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
+        perform(selection: selection, completionHandler: completionHandler)
+    }
+    
+    /// Sends a subscription request to the server.
+    public static func send<Type>(selection: SelectionSet<Type, RootSubscription>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
+        perform(selection: selection, completionHandler: completionHandler)
+    }
+    
+    /* Internals */
+    
+    private static func perform<Type, TypeLock>(
+        selection: SelectionSet<Type, TypeLock>,
+        completionHandler: @escaping (GraphQLResult<Type>
+    ) -> Void) -> Void {
         /* Compose a request. */
         var request = URLRequest(url: endpoint)
         
@@ -239,15 +283,3 @@ public struct GraphQLClient {
 
 }
 
-
-
-// MARK: - Internals (https://github.com/dillonkearns/elm-graphql/blob/master/src/Graphql/Internal/Builder/Object.elm)
-
-
-enum GraphQLScalarType: CaseIterable {
-    case int
-    case float
-    case string
-    case boolean
-    case id
-}
