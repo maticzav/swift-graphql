@@ -131,22 +131,26 @@ public struct Selection<Type, TypeLock> {
     func serialize(for operationType: GraphQLOperationType) -> String {
         """
         \(operationType.rawValue) {
-        \(selection.map(serializeSelection).joined(separator: "\n"))
+        \(selection.map { serializeSelection($0, level: 1) }.joined(separator: "\n"))
         }
         """
     }
     
-    private func serializeSelection(_ selection: GraphQLField) -> String {
+    private func serializeSelection(_ selection: GraphQLField, level indentation: Int) -> String {
         switch selection {
         case .leaf(let field):
-            return "\(field.name)"
+            return "\(generateIndentation(level: indentation))\(field.name)"
         case .composite(let name, let selection):
             return """
-            \(name) {
-            \(selection.map(serializeSelection).joined(separator: "\n"))
-            }
+            \(generateIndentation(level: indentation))\(name) {
+            \(selection.map { serializeSelection($0, level: indentation + 1) }.joined(separator: "\n"))
+            \(generateIndentation(level: indentation))}
             """
         }
+    }
+    
+    private func generateIndentation(level: Int) -> String {
+        String(repeating: " ", count: level * 2)
     }
 }
 
