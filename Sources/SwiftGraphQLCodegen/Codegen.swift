@@ -170,7 +170,7 @@ public struct GraphQLCodegen {
                 self.select(field)
 
                 // decoder
-                if let data = self.data {
+                if let data = self.response {
                    return \(decoder)
                 }
 
@@ -191,7 +191,7 @@ public struct GraphQLCodegen {
              .union(_):
             let typeLock = generateObjectType(for: field.type.namedType.name)
             let decoderType = generateDecoderType(typeLock, for: field.type)
-            return "\(field.name)<Type>(_ selection: SelectionSet<Type, \(decoderType)>)"
+            return "\(field.name)<Type>(_ selection: Selection<Type, \(decoderType)>)"
         }
     }
     

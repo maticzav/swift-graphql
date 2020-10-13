@@ -51,63 +51,80 @@ enum GraphQLOperationType: String, CaseIterable {
     case subscription = "subscription"
 }
 
-public struct SelectionSet<Type, TypeLock> {
-    /* Data */
+/// Global type used to select query fields.
+public class SelectionSet<Type, TypeLock> {
+    private(set) var fields = [GraphQLField]() // selected fields
+    private var data: Any? // response data
     
-    class Selection {
-        var fields = [GraphQLField]() // selected fields
-    }
+    init() {}
     
-    private let _selection = Selection()
-    private var decoder: (Self) -> Type // function used to decode data and populate selection
-    private var mocked: Type? // mock data
-    private var _data: Any? // response
-    
-    // MARK: - Initializer
-    
-    public init(decoder: @escaping (Self) -> Type) {
-        /* This initializer populates fields (selection set) and grabs a copy of mocked value. */
-        self.decoder = decoder
-        self.mocked = self.decoder(self)
-    }
-    
-    private init(decoder: @escaping (Self) -> Type, data: JSONData) {
+    init(data: Any) {
         /* This initializer is used to decode response into Swift data. */
-        self.decoder = decoder
-        self._data = data
+        self.data = data
     }
     
     // MARK: - Accessors
     
-    public var data: Any? {
-        return self._data
+    /// Lets generated code read the data.
+    ///
+    /// - Note: This function should only be used by the generated code.
+    public var response: Any? {
+        data
     }
+    
+    // MARK: - Methods
+    
+    /// Lets generated code add a selection to the selection set.
+    ///
+    /// - Note: This function should only be used by the generated code.
+    public func select(_ field: GraphQLField) {
+        self.fields.append(field)
+    }
+}
+
+/// Global type used to wrap the selection.
+public struct Selection<Type, TypeLock> {
+    public typealias SelectionDecoder = (SelectionSet<Type, TypeLock>) -> Type
+    
+    /* Data */
+
+    private let selectionSet = SelectionSet<Type, TypeLock>()
+    private var decoder: SelectionDecoder // function used to decode data and populate selection
+    private var mocked: Type // mock data
+    
+    
+    // MARK: - Initializer
+    
+    public init(decoder: @escaping SelectionDecoder) {
+        /* This initializer populates fields (selection set) and grabs a copy of mocked value. */
+        self.decoder = decoder
+        self.mocked = decoder(selectionSet)
+    }
+    
+    // MARK: - Accessors
     
     /// Returns a list of selected fields.
     public var selection: [GraphQLField] {
-        return self._selection.fields
+        self.selectionSet.fields
     }
-    
-    /// Lets API add a selection to the selection set.
-    public func select(_ field: GraphQLField) {
-        self._selection.fields.append(field)
-    }
-    
     
     // MARK: - Methods
     
     /// Decodes JSON response into a return type of the selection set.
+    ///
+    /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
     public func decode(data: Any) -> Type {
         /* Construct a copy of the selection set, and use the new selection set to decode data. */
         let data = (data as! [String: Any?])
-        let selection = SelectionSet(decoder: self.decoder, data: data)
-        
-        return self.decoder(selection)
+        let selectionSet = SelectionSet<Type, TypeLock>(data: data)
+        return self.decoder(selectionSet)
     }
     
     /// Mocks the data of a selection.
+    ///
+    /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
     public func mock() -> Type {
-        return self.mocked!
+        self.mocked
     }
     
     /// Returns a GraphQL query for the current selection set.
@@ -133,45 +150,32 @@ public struct SelectionSet<Type, TypeLock> {
     }
 }
 
-extension SelectionSet {
+extension Selection {
     /// Lets you convert a type selection into a list selection.
-    public var list: SelectionSet<[Type], [TypeLock]> {
-        SelectionSet<[Type], [TypeLock]> { selection in
-            if let data = self.data {
+    public var list: Selection<[Type], [TypeLock]> {
+        return Selection<[Type], [TypeLock]> { selection in
+            self.selection.forEach(selection.select)
+            
+            if let data = selection.response {
                 return (data as! [Any]).map { self.decode(data: $0) }
             }
-
+            
             return []
         }
     }
 
     /// Lets you decode nullable values.
-    public var nullable: SelectionSet<Type?, TypeLock?> {
-        SelectionSet<Type?, TypeLock?> { selection in
-            // extend the decoder
-            if let data = self.data {
+    public var nullable: Selection<Type?, TypeLock?> {
+        Selection<Type?, TypeLock?> { selection in
+            self.selection.forEach(selection.select)
+            
+            if let data = selection.response {
                 return self.decode(data: data)
             }
             
             return nil
         }
     }
-    
-    
-//    /// Lets you decode nullable values.
-//    public func nonNullableOrFail<SubType>() -> SelectionSet<SubType, TypeLock?> where Type == Optional<SubType> {
-//        SelectionSet<SubType, TypeLock?> { selection in
-//            // copy over the selection
-//            self.fields = selection.fields
-//            
-//            // extend the decoder
-//            if let data = self.data {
-//                return self.decode(data: data)!
-//            }
-//            
-//            return self.mock()!
-//        }
-//    }
 }
 
 
@@ -227,29 +231,29 @@ public struct GraphQLClient {
     /* API */
     
     /// Sends a query request to the server.
-    public static func send<Type>(selection: SelectionSet<Type, RootQuery>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
+    public static func send<Type>(selection: Selection<Type, RootQuery>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
         perform(selection: selection, completionHandler: completionHandler)
     }
     
     /// Sends a mutation request to the server.
-    public static func send<Type>(selection: SelectionSet<Type, RootMutation>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
+    public static func send<Type>(selection: Selection<Type, RootMutation>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
         perform(selection: selection, completionHandler: completionHandler)
     }
     
     /// Sends a subscription request to the server.
-    public static func send<Type>(selection: SelectionSet<Type, RootSubscription>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
+    public static func send<Type>(selection: Selection<Type, RootSubscription>, completionHandler: @escaping (GraphQLResult<Type>) -> Void) -> Void {
         perform(selection: selection, completionHandler: completionHandler)
     }
     
     /// Returns a query for selection.
-    public static func serialize<Type, TypeLock>(selection: SelectionSet<Type, TypeLock>) -> String {
+    public static func serialize<Type, TypeLock>(selection: Selection<Type, TypeLock>) -> String {
         selection.serialize(for: .query)
     }
     
     /* Internals */
     
     private static func perform<Type, TypeLock>(
-        selection: SelectionSet<Type, TypeLock>,
+        selection: Selection<Type, TypeLock>,
         completionHandler: @escaping (GraphQLResult<Type>
     ) -> Void) -> Void {
         /* Compose a request. */
@@ -299,7 +303,7 @@ public struct GraphQLClient {
     /// Parses the data with given selection.
     private static func parse<Type, TypeLock>(
         _ response: GraphQLResponse,
-        with selection: SelectionSet<Type, TypeLock>
+        with selection: Selection<Type, TypeLock>
     ) -> GraphQLResult<Type> {
         if response.errors.isEmpty {
             /* Return the data. */
