@@ -1,174 +1,121 @@
 import Foundation
 
-public struct GraphQLSchema {
-    /// Downloads a schema from the provided endpoint to the target file path.
-    ///
-    /// - Parameters:
-    ///     - endpoint: The URL of your GraphQL server.
-    ///     - handler: Introspection schema handler.
-    public static func downloadFrom(_ endpoint: URL, handler: @escaping (GraphQL.Schema) -> Void) {
-        self.downloadFrom(endpoint) { (data: Data) -> Void in handler(parse(data)) }
-    }
-    
-    
-    /// Downloads a schema from the provided endpoint to the target file path.
-    ///
-    /// - Parameters:
-    ///     - endpoint: The URL of your GraphQL server.
-    ///     - handler: Introspection schema handler.
-    public static func downloadFrom(_ endpoint: URL, handler: @escaping (Data) -> Void) -> Void {        
-        /* Compose a request. */
-        var request = URLRequest(url: endpoint)
-        
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpMethod = "POST"
-        
-        let query: [String: Any] = ["query": introspectionQuery]
-        
-        request.httpBody = try! JSONSerialization.data(
-            withJSONObject: query,
-            options: JSONSerialization.WritingOptions()
-        )
-        
-        /* Load the schema. */
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            /* Check for errors. */
-            if let _ = error {
-                print("ERROR")
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                print("BAD RES")
-                return
-            }
-            
-            /* Save JSON to file. */
-            if let data = data {
-                handler(data)
-            }
-        }
-        
-        task.resume()
-    }
-
-    public static let introspectionQuery: String = """
-        query IntrospectionQuery($includeDeprecated: Boolean = true) {
-          __schema {
-            queryType {
-              name
-            }
-            mutationType {
-              name
-            }
-            subscriptionType {
-              name
-            }
-            types {
-              ...FullType
-            }
-          }
-        }
-
-        fragment FullType on __Type {
-          kind
-          name
-          description
-          fields(includeDeprecated: $includeDeprecated) {
-            ...Field
-          }
-          inputFields {
-            ...InputValue
-          }
-          interfaces {
-            ...TypeRef
-          }
-          enumValues(includeDeprecated: $includeDeprecated) {
-            ...EnumValue
-          }
-          possibleTypes {
-            ...TypeRef
-          }
-        }
-
-        fragment Field on __Field {
-          name
-          description
-          args {
-            ...InputValue
-          }
-          type {
-            ...TypeRef
-          }
-          isDeprecated
-          deprecationReason
-        }
-
-        fragment InputValue on __InputValue {
-          name
-          description
-          type {
-            ...TypeRef
-          }
-          defaultValue
-        }
-
-        fragment EnumValue on __EnumValue {
-          name
-          description
-          isDeprecated
-          deprecationReason
-        }
-
-
-
-        fragment TypeRef on __Type {
-          kind
-          name
-          ofType {
-            kind
-            name
-            ofType {
-              kind
-              name
-              ofType {
-                kind
-                name
-                ofType {
-                  kind
-                  name
-                  ofType {
-                    kind
-                    name
-                    ofType {
-                      kind
-                      name
-                      ofType {
-                        kind
-                        name
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        """
-    
-    /// Decodes the received schema representation into Swift abstract type.
-    static func parse(_ data: Data) -> GraphQL.Schema {
-        let decoder = JSONDecoder()
-        let result = try! decoder.decode(GraphQL.Reponse<GraphQL.IntrospectionQuery>.self, from: data)
-        
-        return result.data.schema
-    }
-}
-
-/* Parser */
-
 public enum GraphQL {
+     public static let introspectionQuery: String = """
+         query IntrospectionQuery($includeDeprecated: Boolean = true) {
+           __schema {
+             queryType {
+               name
+             }
+             mutationType {
+               name
+             }
+             subscriptionType {
+               name
+             }
+             types {
+               ...FullType
+             }
+           }
+         }
+
+         fragment FullType on __Type {
+           kind
+           name
+           description
+           fields(includeDeprecated: $includeDeprecated) {
+             ...Field
+           }
+           inputFields {
+             ...InputValue
+           }
+           interfaces {
+             ...TypeRef
+           }
+           enumValues(includeDeprecated: $includeDeprecated) {
+             ...EnumValue
+           }
+           possibleTypes {
+             ...TypeRef
+           }
+         }
+
+         fragment Field on __Field {
+           name
+           description
+           args {
+             ...InputValue
+           }
+           type {
+             ...TypeRef
+           }
+           isDeprecated
+           deprecationReason
+         }
+
+         fragment InputValue on __InputValue {
+           name
+           description
+           type {
+             ...TypeRef
+           }
+           defaultValue
+         }
+
+         fragment EnumValue on __EnumValue {
+           name
+           description
+           isDeprecated
+           deprecationReason
+         }
+
+
+
+         fragment TypeRef on __Type {
+           kind
+           name
+           ofType {
+             kind
+             name
+             ofType {
+               kind
+               name
+               ofType {
+                 kind
+                 name
+                 ofType {
+                   kind
+                   name
+                   ofType {
+                     kind
+                     name
+                     ofType {
+                       kind
+                       name
+                       ofType {
+                         kind
+                         name
+                       }
+                     }
+                   }
+                 }
+               }
+             }
+           }
+         }
+         """
+     
+     /// Decodes the received schema representation into Swift abstract type.
+     static func parse(_ data: Data) -> Schema {
+         let decoder = JSONDecoder()
+         let result = try! decoder.decode(Reponse<IntrospectionQuery>.self, from: data)
+         
+         return result.data.schema
+     }
+    
+    // MARK: - Methods
+    
+    
     /* General response format. */
     public struct Reponse<T: Decodable>: Decodable {
         public let data: T
@@ -184,7 +131,7 @@ public enum GraphQL {
         }
     }
     
-    /* Schema */
+    // MARK: - Decoder
     
     public struct Schema: Decodable {
         public let types: [FullType]

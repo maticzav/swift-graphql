@@ -25,6 +25,9 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "SwiftGraphQLTests",
-            dependencies: ["SwiftGraphQL", "SwiftGraphQLCodegen"]),
+            dependencies: ["SwiftGraphQL"]),
+        .testTarget(
+            name: "SwiftGraphQLCodegenTests",
+            dependencies: ["SwiftGraphQLCodegen"]),
     ]
 )

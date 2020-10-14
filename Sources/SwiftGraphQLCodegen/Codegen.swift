@@ -6,15 +6,17 @@ import Foundation
 public struct GraphQLCodegen {
     /// Generates a target GraphQL Swift file.
     ///
+    /// - Parameters:
+    ///     - target: Target output file path.
+    ///     - from: GraphQL server endpoint.
+    ///     - onComplete: A function triggered once the generation finishes.
     public static func generate(
         _ target: URL,
         from schemaURL: URL,
         onComplete: @escaping () -> Void = {}
     ) -> Void {
-        /* Code generator function. */
-        func generator(schema: GraphQL.Schema) -> Void {
-            let code = self.generate(from: schema)
-            
+        /* Delegates to the sub function. */
+        self.generate(from: schemaURL) { code in
             /* Write the code to the file system. */
             let targetDir = target.deletingLastPathComponent()
             try! FileManager.default.createDirectory(
@@ -26,9 +28,6 @@ public struct GraphQLCodegen {
             
             onComplete()
         }
-        
-        /* Download the schema from endpoint. */
-        GraphQLSchema.downloadFrom(schemaURL, handler: generator)
     }
     
     /// Generates the API and returns it to handler.
@@ -40,7 +39,7 @@ public struct GraphQLCodegen {
         }
         
         /* Download the schema from endpoint. */
-        GraphQLSchema.downloadFrom(schemaURL, handler: generator)
+        self.downloadFrom(schemaURL, handler: generator)
     }
     
     
@@ -305,6 +304,8 @@ public struct GraphQLCodegen {
     /// Generates mock data for an abstract scalar type.
     private static func generateMockData(for scalar: GraphQL.Scalar) -> String {
         switch scalar {
+        case .id:
+            return "\"8378\""
         case .boolean:
             return "true"
         case .float:
@@ -313,8 +314,6 @@ public struct GraphQLCodegen {
             return "42"
         case .string:
             return "\"Matic Zavadlal\""
-        case .id:
-            return "\"8378\""
         case .custom(_): // TODO!
             return ""
         }
@@ -336,6 +335,58 @@ public struct GraphQLCodegen {
         """
             case \(env.name) = \"\(env.name)\"
         """
+    }
+    
+    /* Schema Downloader */
+    
+    /// Downloads a schema from the provided endpoint to the target file path.
+    ///
+    /// - Parameters:
+    ///     - endpoint: The URL of your GraphQL server.
+    ///     - handler: Introspection schema handler.
+    public static func downloadFrom(_ endpoint: URL, handler: @escaping (GraphQL.Schema) -> Void) {
+        self.downloadFrom(endpoint) { (data: Data) -> Void in handler(GraphQL.parse(data)) }
+    }
+    
+    
+    /// Downloads a schema from the provided endpoint to the target file path.
+    ///
+    /// - Parameters:
+    ///     - endpoint: The URL of your GraphQL server.
+    ///     - handler: Introspection schema handler.
+    public static func downloadFrom(_ endpoint: URL, handler: @escaping (Data) -> Void) -> Void {
+        /* Compose a request. */
+        var request = URLRequest(url: endpoint)
+        
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpMethod = "POST"
+        
+        let query: [String: Any] = ["query": GraphQL.introspectionQuery]
+        
+        request.httpBody = try! JSONSerialization.data(
+            withJSONObject: query,
+            options: JSONSerialization.WritingOptions()
+        )
+        
+        /* Load the schema. */
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+            /* Check for errors. */
+            if let _ = error {
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                return
+            }
+            
+            /* Save JSON to file. */
+            if let data = data {
+                handler(data)
+            }
+        }
+        
+        task.resume()
     }
 
 }
