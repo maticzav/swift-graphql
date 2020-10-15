@@ -1,44 +1,48 @@
 import Foundation
 
-public typealias JSONData = [String: Any?]
-
-// MARK: - GraphQL Response
-
-public struct GraphQLResponse {
-    public let data: JSONData?
-    public let errors: [GraphQLError]?
-    
-    // MARK: - Methods
-    
-    /// Parses the data with given selection.
-    public func parse<Type, TypeLock>(
-        with selection: Selection<Type, TypeLock>
-    ) -> GraphQLResult<Type> {
-        /**
-            - NOTE: As described in the GraphQL spec, either response contains a set of errors or
-                    contains the data. That's why we force unwrap self.errors when there's no data.
-         */
-        GraphQLResult(
-            data: self.data.map { selection.decode(data: $0) },
-            errors: self.errors
-        )
-    }
-
-}
+public typealias JSONData = [String: Any]
 
 // MARK: - GraphQL Result
 
-public struct GraphQLResult<Type> {
-    public let data: Type?
-    public let errors: [GraphQLError]?
+public struct GraphQLResult<Type, TypeLock> {
+    private let response: Data
+    private let selection: Selection<Type, TypeLock>
+    
+    init(_ response: Data, with selection: Selection<Type, TypeLock>) {
+        self.response = response
+        self.selection = selection
+    }
+    
+    // MARK: - Calculated properties
+    
+    public var errors: [GraphQLError]? {
+        try! JSONDecoder().decode(GraphQLResponse.self, from: self.response).errors
+    }
+    
+    /// Returns the data from the response.
+    public var data: Type? {
+        let json = try! JSONSerialization.jsonObject(with: response, options: []) as! JSONData
+        return (json["data"]).map { selection.decode(data: $0) }
+    }
+    
+    // MARK: - Response
+    
+    struct GraphQLResponse: Codable {
+        // NOTE: There's no data param as data is decoded using generated type casting.
+        let errors: [GraphQLError]?
+    }
 }
 
-extension GraphQLResult: Equatable where Type: Equatable {}
+extension GraphQLResult: Equatable where Type: Equatable {
+    public static func == (lhs: GraphQLResult<Type, TypeLock>, rhs: GraphQLResult<Type, TypeLock>) -> Bool {
+        return lhs.data == rhs.data && lhs.errors == rhs.errors
+    }
+}
 
 // MARK: - GraphQL Error
 
 public struct GraphQLError: Codable, Equatable {
-    public let message: String
+    let message: String
     public let locations: [Location]?
 //    public let path: [String]?
     

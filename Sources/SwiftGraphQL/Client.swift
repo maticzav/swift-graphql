@@ -28,7 +28,7 @@ public struct GraphQLClient {
         self.endpoint = endpoint
     }
     
-    public typealias Response<Type> = Result<GraphQLResult<Type>, NetworkError>
+    public typealias Response<Type, TypeLock> = Result<GraphQLResult<Type, TypeLock>, NetworkError>
     
     public enum NetworkError: Error {
         case network(Error)
@@ -38,12 +38,12 @@ public struct GraphQLClient {
     // MARK: - Methods
     
     /// Sends a query request to the server.
-    public func send<Type>(selection: Selection<Type, RootQuery>, completionHandler: @escaping (Response<Type>) -> Void) -> Void {
+    public func send<Type>(selection: Selection<Type, RootQuery>, completionHandler: @escaping (Response<Type, RootQuery>) -> Void) -> Void {
         perform(selection: selection, completionHandler: completionHandler)
     }
     
     /// Sends a mutation request to the server.
-    public func send<Type>(selection: Selection<Type, RootMutation>, completionHandler: @escaping (Response<Type>) -> Void) -> Void {
+    public func send<Type>(selection: Selection<Type, RootMutation>, completionHandler: @escaping (Response<Type, RootMutation>) -> Void) -> Void {
         perform(selection: selection, completionHandler: completionHandler)
     }
     
@@ -51,7 +51,7 @@ public struct GraphQLClient {
     
     private func perform<Type, TypeLock>(
         selection: Selection<Type, TypeLock>,
-        completionHandler: @escaping (Response<Type>
+        completionHandler: @escaping (Response<Type, TypeLock>
     ) -> Void) -> Void {
         /* Compose a request. */
         var request = URLRequest(url: endpoint)
@@ -80,17 +80,9 @@ public struct GraphQLClient {
                 return completionHandler(.failure(.badCode))
             }
             
-            // TODO: reread spec on how data and errors are formatted.
             /* Serialize received JSON. */
-            if let data = data,
-               let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                let data = json["data"] as? JSONData
-                let errors = json["errors"] as? [GraphQLError]
-                
-                /* Process the GraphQL repsonse. */
-                let response = GraphQLResponse(data: data, errors: errors).parse(with: selection)
-                
-                return completionHandler(.success(response))
+            if let data = data {
+                return completionHandler(.success(GraphQLResult(data, with: selection)))
             }
         }
         
