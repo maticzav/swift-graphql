@@ -121,9 +121,10 @@ public enum GraphQL {
         public let data: T
     }
     
+    
     /* Introspection query decoders. */
     
-    public struct IntrospectionQuery: Decodable {
+    public struct IntrospectionQuery: Decodable, Equatable {
         public let schema: Schema
         
         enum CodingKeys: String, CodingKey {
@@ -133,7 +134,7 @@ public enum GraphQL {
     
     // MARK: - Decoder
     
-    public struct Schema: Decodable {
+    public struct Schema: Decodable, Equatable {
         public let types: [FullType]
         /* Root Types */
         public let queryType: Operation
@@ -162,7 +163,7 @@ public enum GraphQL {
         }
     }
     
-    public enum TypeKind: String, Codable {
+    public enum TypeKind: String, Codable, Equatable {
         case scalar = "SCALAR"
         case object = "OBJECT"
         case interface = "INTERFACE"
@@ -175,11 +176,11 @@ public enum GraphQL {
     
     /* Types */
     
-    public struct Operation: Codable {
+    public struct Operation: Codable, Equatable {
         public let name: String
     }
     
-    public struct FullType: Decodable {
+    public struct FullType: Decodable, Equatable {
         public let kind: TypeKind
         public let name: String
         public let description: String?
@@ -199,7 +200,7 @@ public enum GraphQL {
     
     /* Fields */
     
-    public struct Field: Decodable {
+    public struct Field: Decodable, Equatable {
         public let name: String
         public let description: String?
         public let args: [InputValue]
@@ -209,7 +210,7 @@ public enum GraphQL {
     }
     
     /// Represents a possibly wrapped type.
-    public indirect enum TypeRef: Decodable {
+    public indirect enum TypeRef: Decodable, Equatable {
         /* Types */
         case named(NamedType)
         /* Wrappers */
@@ -279,7 +280,7 @@ public enum GraphQL {
     }
     
     /// Represents possible referable types.
-    public enum NamedType {
+    public enum NamedType: Equatable {
         case scalar(Scalar)
         case object(String)
         case interface(String)
@@ -301,7 +302,7 @@ public enum GraphQL {
         }
     }
     
-    public enum Scalar: Codable {
+    public enum Scalar: Codable, Equatable {
         case id
         case string
         case boolean
@@ -368,14 +369,14 @@ public enum GraphQL {
     
     /* Values */
     
-    public struct InputValue: Decodable {
+    public struct InputValue: Decodable, Equatable {
         public let name: String
         public let description: String?
         public let type: TypeRef
         public let defaultValue: String?
     }
     
-    public struct EnumValue: Codable {
+    public struct EnumValue: Codable, Equatable {
         public let name: String
         public let description: String?
         public let isDeprecated: Bool
@@ -383,3 +384,6 @@ public enum GraphQL {
     }
 }
 
+/* Extensions */
+
+extension GraphQL.Reponse: Equatable where T: Equatable {}
