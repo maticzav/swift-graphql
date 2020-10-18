@@ -5,21 +5,35 @@ import Foundation
  */
 
 extension GraphQLCodegen {
-    /* Enums */
-
     /// Generates an enumeration code.
     static func generateEnum(_ type: GraphQL.FullType) -> String {
-        let cases = type.enumValues ?? []
-        return """
+        """
+        \(generateEnumDoc(for: type))
         enum \(type.name): String, CaseIterable, Codable {
-        \(cases.map(generateEnumCase).joined(separator: "\n\n"))
+        \((type.enumValues ?? []).map { generateEnumCase(for: $0) }.joined(separator: "\n\n"))
         }
         """
     }
+    
+    // MARK: - Private helpers
+    
+    private static func generateEnumDoc(for type: GraphQL.FullType) -> String {
+        "/// \(type.description ?? "\(type.name)")"
+    }
 
-    private static func generateEnumCase(_ env: GraphQL.EnumValue) -> String {
+    private static func generateEnumCase(for env: GraphQL.EnumValue) -> String {
         """
-            case \(env.name) = \"\(env.name)\"
+            \(generateEnumCaseDoc(for: env))
+            \(generateEnumCaseDeprecationDoc(for: env))
+            case \(env.name.camelCase) = \"\(env.name)\"
         """
+    }
+    
+    private static func generateEnumCaseDoc(for env: GraphQL.EnumValue) -> String {
+        "/// \(env.description ?? "\(env.name)")"
+    }
+    
+    private static func generateEnumCaseDeprecationDoc(for env: GraphQL.EnumValue) -> String {
+        env.isDeprecated ? "@available(*, deprecated, message: \"\(env.deprecationReason ?? "")\")" : ""
     }
 }
