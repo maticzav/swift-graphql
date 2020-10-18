@@ -9,8 +9,4 @@ final class StringExtensionsTest: XCTestCase {
     func testPascalCase() {
         XCTAssertEqual("grandfather_father.son grandson".pascalCase, "GrandfatherFatherSonGrandson")
     }
-    
-    func testLines() {
-        XCTAssertEqual(["A", "B", "C"].lines, "A\nB\nC")
-    }
 }
