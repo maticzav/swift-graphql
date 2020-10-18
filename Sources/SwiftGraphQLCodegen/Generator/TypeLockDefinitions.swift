@@ -19,11 +19,11 @@ extension GraphQLCodegen {
     
     private static func generatePhantomType(for type: GraphQL.FullType) -> String {
         """
-            enum \(type.name) {}
+            enum \(type.name.pascalCase) {}
         """
     }
     
     private static func generatePhantomTypeAlias(for type: GraphQL.FullType) -> String {
-        "typealias \(type.name)Object = Object.\(type.name)"
+        "typealias \(type.name.pascalCase)Object = Object.\(type.name.pascalCase)"
     }
 }

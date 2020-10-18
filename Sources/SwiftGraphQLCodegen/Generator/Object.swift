@@ -19,7 +19,7 @@ extension GraphQLCodegen {
         /* \(type.name) */
 
         extension SelectionSet where TypeLock == \(typeName) {
-        \(fields.map(generateField).joined(separator: "\n\n"))
+        \(fields.map { "    \(generateField($0))" }.joined(separator: "\n\n"))
         }
         """
     }

@@ -10,8 +10,8 @@ extension GraphQLCodegen {
     /// - Parameters:
     ///     - endpoint: The URL of your GraphQL server.
     ///     - handler: Introspection schema handler.
-    static func downloadFrom(_ endpoint: URL, handler: @escaping (GraphQL.Schema) -> Void) {
-        self.downloadFrom(endpoint) { (data: Data) -> Void in handler(GraphQL.parse(data)) }
+    static func downloadFrom(_ endpoint: URL) throws -> GraphQL.Schema {
+        GraphQL.parse(try self.downloadFrom(endpoint))
     }
     
     
@@ -20,7 +20,7 @@ extension GraphQLCodegen {
     /// - Parameters:
     ///     - endpoint: The URL of your GraphQL server.
     ///     - handler: Introspection schema handler.
-    static func downloadFrom(_ endpoint: URL, handler: @escaping (Data) -> Void) -> Void {
+    static func downloadFrom(_ endpoint: URL) throws -> Data {
         /* Compose a request. */
         var request = URLRequest(url: endpoint)
         
@@ -35,24 +35,50 @@ extension GraphQLCodegen {
             options: JSONSerialization.WritingOptions()
         )
         
+        /* Semaphore */
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: Result<Data, IntrospectionError>?
+        
         /* Load the schema. */
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
             /* Check for errors. */
-            if let _ = error {
+            if let error = error {
+                result = .failure(.error(error))
+                semaphore.signal()
                 return
             }
             
             guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                result = .failure(.statusCode)
+                semaphore.signal()
                 return
             }
             
             /* Save JSON to file. */
             if let data = data {
-                handler(data)
+                result = .success(data)
+                semaphore.signal()
+                return
             }
-        }
+        }.resume()
         
-        task.resume()
+        /* Result */
+        _ = semaphore.wait(wallTimeout: .distantFuture)
+        
+        switch result {
+        case .success(let data):
+            return data
+        case .failure(let error):
+            throw error
+        default:
+            throw IntrospectionError.unknown
+        }
     }
 
+}
+
+enum IntrospectionError: Error {
+    case error(Error)
+    case statusCode
+    case unknown
 }
