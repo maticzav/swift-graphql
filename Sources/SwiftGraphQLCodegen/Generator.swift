@@ -17,17 +17,18 @@ public struct GraphQLCodegen {
         onComplete: @escaping () -> Void = {}
     ) -> Void {
         /* Delegates to the sub function. */
-        self.generate(from: schemaURL) { code in
+        self.generate(from: schemaURL) { (code: String) in
             /* Write the code to the file system. */
-            let targetDir = target.deletingLastPathComponent()
-            try! FileManager.default.createDirectory(
-                at: targetDir,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
             try! code.write(to: target, atomically: true, encoding: .utf8)
             
             onComplete()
+        }
+    }
+    
+    /// Generates the API and returns it to handler.
+    public static func generate(from schemaURL: URL, handler: @escaping (Data) -> Void) -> Void {
+        self.generate(from: schemaURL) {
+            handler($0.data(using: .utf8)!)
         }
     }
     
