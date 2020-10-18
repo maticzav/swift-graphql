@@ -3,11 +3,187 @@ import XCTest
 
 
 final class SchemaTests: XCTestCase {
+    /* Schema */
+    
     func testDecodeSchema() {
+        let json = """
+        {
+          "data": {
+            "__schema": {
+              "queryType": {
+                "name": "Query"
+              },
+              "mutationType": null,
+              "subscriptionType": null,
+              "types": [
+                {
+                  "kind": "OBJECT",
+                  "name": "Human",
+                  "description": "A humanoid creature in the Star Wars universe.",
+                  "fields": [
+                    {
+                      "name": "name",
+                      "description": "The name of the character",
+                      "args": [],
+                      "type": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      },
+                      "isDeprecated": false,
+                      "deprecationReason": null
+                    }
+                  ],
+                  "inputFields": null,
+                  "interfaces": [
+                    {
+                      "kind": "INTERFACE",
+                      "name": "Character",
+                      "ofType": null
+                    }
+                  ],
+                  "enumValues": null,
+                  "possibleTypes": null
+                }
+              ]
+            }
+          }
+        }
+        """
         
+        /* Decode */
+        
+        let value = GraphQL.parse(json.data(using: .utf8)!)
+        let expected = GraphQL.Schema(
+            types: [
+                GraphQL.FullType(
+                    kind: GraphQL.TypeKind.object,
+                    name: "Human",
+                    description: "A humanoid creature in the Star Wars universe.",
+                    fields: [
+                        GraphQL.Field(
+                            name: "name",
+                            description: "The name of the character",
+                            args: [],
+                            type: .named(.scalar(.string)),
+                            isDeprecated: false,
+                            deprecationReason: nil
+                        )
+                    ],
+                    inputFields: nil,
+                    interfaces: [
+                        .named(.interface("Character"))
+                    ],
+                    enumValues: nil,
+                    possibleTypes: nil
+                ),
+            ],
+            queryType: GraphQL.Operation(name: "Query"),
+            mutationType: nil,
+            subscriptionType: nil
+        )
+        
+        /* Tests */
+        
+        XCTAssertEqual(value, expected)
     }
     
-    func testSchemaCalculatedValues() {
+    func testSchemaObjects() {
+        let schema = GraphQL.Schema(
+            types: [
+                GraphQL.FullType(
+                    kind: GraphQL.TypeKind.object,
+                    name: "Object",
+                    description: nil,
+                    fields: nil,
+                    inputFields: nil,
+                    interfaces: nil,
+                    enumValues: nil,
+                    possibleTypes: nil
+                ),
+                GraphQL.FullType(
+                    kind: GraphQL.TypeKind.object,
+                    name: "__Object",
+                    description: nil,
+                    fields: nil,
+                    inputFields: nil,
+                    interfaces: nil,
+                    enumValues: nil,
+                    possibleTypes: nil
+                ),
+                GraphQL.FullType(
+                    kind: GraphQL.TypeKind.enumeration,
+                    name: "Enum",
+                    description: nil,
+                    fields: nil,
+                    inputFields: nil,
+                    interfaces: nil,
+                    enumValues: nil,
+                    possibleTypes: nil
+                ),
+            ],
+            queryType: GraphQL.Operation(name: "RootQuery"),
+            mutationType: nil,
+            subscriptionType: nil
+        )
+        
+        /* Tests */
+        
+        XCTAssertEqual(
+            schema.objects.map { $0.name },
+            ["Object"]
+        )
+    }
+
+    
+    func testSchemaEnums() {
+        let schema = GraphQL.Schema(
+            types: [
+                GraphQL.FullType(
+                    kind: GraphQL.TypeKind.enumeration,
+                    name: "Enum",
+                    description: nil,
+                    fields: nil,
+                    inputFields: nil,
+                    interfaces: nil,
+                    enumValues: nil,
+                    possibleTypes: nil
+                ),
+                GraphQL.FullType(
+                    kind: GraphQL.TypeKind.enumeration,
+                    name: "__Enum",
+                    description: nil,
+                    fields: nil,
+                    inputFields: nil,
+                    interfaces: nil,
+                    enumValues: nil,
+                    possibleTypes: nil
+                ),
+                GraphQL.FullType(
+                    kind: GraphQL.TypeKind.object,
+                    name: "Object",
+                    description: nil,
+                    fields: nil,
+                    inputFields: nil,
+                    interfaces: nil,
+                    enumValues: nil,
+                    possibleTypes: nil
+                ),
+            ],
+            queryType: GraphQL.Operation(name: "RootQuery"),
+            mutationType: nil,
+            subscriptionType: nil
+        )
+        
+        /* Tests */
+        
+        XCTAssertEqual(
+            schema.enums.map { $0.name },
+            ["Enum"]
+        )
+    }
+    
+    func testSchemaOperations() {
         let schema = GraphQL.Schema(
             types: [],
             queryType: GraphQL.Operation(name: "RootQuery"),
@@ -75,7 +251,62 @@ final class SchemaTests: XCTestCase {
     
     /* TypeRef */
     
-    func testDecodeTypeRef() {
+    func testDecodeNamedTypeRef() {
+        /* Data */
+        let json = """
+            [
+                {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                },
+                {
+                    "kind": "OBJECT",
+                    "name": "Human",
+                    "ofType": null
+                },
+                {
+                    "kind": "INTERFACE",
+                    "name": "Node",
+                    "ofType": null
+                },
+                {
+                    "kind": "UNION",
+                    "name": "Character",
+                    "ofType": null
+                },
+                {
+                    "kind": "ENUM",
+                    "name": "Episode",
+                    "ofType": null
+                },
+                {
+                    "kind": "INPUT_OBJECT",
+                    "name": "HumanParams",
+                    "ofType": null
+                }
+            ]
+            """
+        
+        /* Decoder */
+        
+        let values = try! JSONDecoder().decode([GraphQL.TypeRef].self, from: json.data(using: .utf8)!)
+        
+        /* Tests */
+        
+        XCTAssertEqual(values,
+            [
+                GraphQL.TypeRef.named(.scalar(.string)),
+                GraphQL.TypeRef.named(.object("Human")),
+                GraphQL.TypeRef.named(.interface("Node")),
+                GraphQL.TypeRef.named(.union("Character")),
+                GraphQL.TypeRef.named(.enumeration("Episode")),
+                GraphQL.TypeRef.named(.inputObject("HumanParams"))
+            ]
+        )
+    }
+    
+    func testDecodeNestedTypeRef() {
         let data = [
             (
                 """
