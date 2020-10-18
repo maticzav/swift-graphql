@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  StarWars
-//
-//  Created by Matic Zavadlal on 18/10/2020.
-//
-
 import SwiftUI
 
 struct ContentView: View {

@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0211BC2F253C667400418439 /* SwiftGraphQL in Frameworks */ = {isa = PBXBuildFile; productRef = 0211BC2E253C667400418439 /* SwiftGraphQL */; };
 		02208E77253C596D00014850 /* StarWarsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02208E76253C596D00014850 /* StarWarsApp.swift */; };
 		02208E79253C596D00014850 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02208E78253C596D00014850 /* ContentView.swift */; };
 		02208E7B253C596E00014850 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02208E7A253C596E00014850 /* Assets.xcassets */; };
@@ -14,7 +15,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		02017D92253C61AB0041BABE /* Codegen */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Codegen; sourceTree = "<group>"; };
 		02208E73253C596D00014850 /* StarWars.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StarWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		02208E76253C596D00014850 /* StarWarsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarWarsApp.swift; sourceTree = "<group>"; };
 		02208E78253C596D00014850 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -28,18 +28,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0211BC2F253C667400418439 /* SwiftGraphQL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0211BC2D253C667400418439 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		02208E6A253C596D00014850 = {
 			isa = PBXGroup;
 			children = (
 				02208E75253C596D00014850 /* StarWars */,
 				02208E74253C596D00014850 /* Products */,
-				02017D92253C61AB0041BABE /* Codegen */,
+				0211BC2D253C667400418439 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -88,6 +96,9 @@
 			dependencies = (
 			);
 			name = StarWars;
+			packageProductDependencies = (
+				0211BC2E253C667400418439 /* SwiftGraphQL */,
+			);
 			productName = StarWars;
 			productReference = 02208E73253C596D00014850 /* StarWars.app */;
 			productType = "com.apple.product-type.application";
@@ -352,6 +363,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0211BC2E253C667400418439 /* SwiftGraphQL */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftGraphQL;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 02208E6B253C596D00014850 /* Project object */;
 }

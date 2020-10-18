@@ -9,7 +9,6 @@ let package = Package(
         .library(
             name: "SwiftGraphQL",
             targets: ["SwiftGraphQL", "SwiftGraphQLCodegen"]),
-        
     ],
     dependencies: [
 //        .package(
