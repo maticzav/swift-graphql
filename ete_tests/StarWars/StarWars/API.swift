@@ -6,46 +6,46 @@ import SwiftGraphQL
 
 extension SelectionSet where TypeLock == RootQuery {
     /// human
+    
+    func human<Type>(_ selection: Selection<Type, HumanObject?>) -> Type {
+        /* Selection */
+        let field = GraphQLField.composite(name: "human", selection: selection.selection)
+        self.select(field)
 
-func human<Type>(_ selection: Selection<Type, HumanObject?>) -> Type {
-    /* Selection */
-    let field = GraphQLField.composite(name: "human", selection: selection.selection)
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return selection.decode(data: ((data as! [String: Any])[field.name] as! Any?))
+        /* Decoder */
+        if let data = self.response {
+            return selection.decode(data: ((data as! [String: Any])[field.name] as! Any?))
+        }
+        return selection.mock()
     }
-    return selection.mock()
-}
 
     /// droid
+    
+    func droid<Type>(_ selection: Selection<Type, DroidObject?>) -> Type {
+        /* Selection */
+        let field = GraphQLField.composite(name: "droid", selection: selection.selection)
+        self.select(field)
 
-func droid<Type>(_ selection: Selection<Type, DroidObject?>) -> Type {
-    /* Selection */
-    let field = GraphQLField.composite(name: "droid", selection: selection.selection)
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return selection.decode(data: ((data as! [String: Any])[field.name] as! Any?))
+        /* Decoder */
+        if let data = self.response {
+            return selection.decode(data: ((data as! [String: Any])[field.name] as! Any?))
+        }
+        return selection.mock()
     }
-    return selection.mock()
-}
 
     /// humans
+    
+    func humans<Type>(_ selection: Selection<Type, [HumanObject?]?>) -> Type {
+        /* Selection */
+        let field = GraphQLField.composite(name: "humans", selection: selection.selection)
+        self.select(field)
 
-func humans<Type>(_ selection: Selection<Type, [HumanObject?]?>) -> Type {
-    /* Selection */
-    let field = GraphQLField.composite(name: "humans", selection: selection.selection)
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return selection.decode(data: ((data as! [String: Any])[field.name] as! [Any?]?))
+        /* Decoder */
+        if let data = self.response {
+            return selection.decode(data: ((data as! [String: Any])[field.name] as! [Any?]?))
+        }
+        return selection.mock()
     }
-    return selection.mock()
-}
 }
 
 // MARK: - Objects
@@ -64,60 +64,60 @@ typealias HumanObject = Object.Human
 
 extension SelectionSet where TypeLock == DroidObject {
     /// The id of the character
+    
+    func id() -> String? {
+        /* Selection */
+        let field = GraphQLField.leaf(name: "id")
+        self.select(field)
 
-func id() -> String? {
-    /* Selection */
-    let field = GraphQLField.leaf(name: "id")
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return (data as! [String: Any])[field.name] as! String?
+        /* Decoder */
+        if let data = self.response {
+            return (data as! [String: Any])[field.name] as! String?
+        }
+        return "Matic Zavadlal"
     }
-    return "Matic Zavadlal"
-}
 
     /// The name of the character
+    
+    func name() -> String? {
+        /* Selection */
+        let field = GraphQLField.leaf(name: "name")
+        self.select(field)
 
-func name() -> String? {
-    /* Selection */
-    let field = GraphQLField.leaf(name: "name")
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return (data as! [String: Any])[field.name] as! String?
+        /* Decoder */
+        if let data = self.response {
+            return (data as! [String: Any])[field.name] as! String?
+        }
+        return "Matic Zavadlal"
     }
-    return "Matic Zavadlal"
-}
 
     /// Which movies they appear in.
+    
+    func appearsIn() -> [Episode?]? {
+        /* Selection */
+        let field = GraphQLField.leaf(name: "appearsIn")
+        self.select(field)
 
-func appearsIn() -> [Episode?]? {
-    /* Selection */
-    let field = GraphQLField.leaf(name: "appearsIn")
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return ((data as! [String: Any])[field.name] as! [String?]?).map { Episode.init(rawValue: $0)! }
+        /* Decoder */
+        if let data = self.response {
+            return ((data as! [String: Any])[field.name] as! [String?]?).map { Episode.init(rawValue: $0)! }
+        }
+        return selection.mock()
     }
-    return selection.mock()
-}
 
     /// The primary function of the droid.
+    
+    func primaryFunction() -> String? {
+        /* Selection */
+        let field = GraphQLField.leaf(name: "primaryFunction")
+        self.select(field)
 
-func primaryFunction() -> String? {
-    /* Selection */
-    let field = GraphQLField.leaf(name: "primaryFunction")
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return (data as! [String: Any])[field.name] as! String?
+        /* Decoder */
+        if let data = self.response {
+            return (data as! [String: Any])[field.name] as! String?
+        }
+        return "Matic Zavadlal"
     }
-    return "Matic Zavadlal"
-}
 }
 
 
@@ -125,60 +125,60 @@ func primaryFunction() -> String? {
 
 extension SelectionSet where TypeLock == HumanObject {
     /// The id of the character
+    
+    func id() -> String? {
+        /* Selection */
+        let field = GraphQLField.leaf(name: "id")
+        self.select(field)
 
-func id() -> String? {
-    /* Selection */
-    let field = GraphQLField.leaf(name: "id")
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return (data as! [String: Any])[field.name] as! String?
+        /* Decoder */
+        if let data = self.response {
+            return (data as! [String: Any])[field.name] as! String?
+        }
+        return "Matic Zavadlal"
     }
-    return "Matic Zavadlal"
-}
 
     /// The name of the character
+    
+    func name() -> String? {
+        /* Selection */
+        let field = GraphQLField.leaf(name: "name")
+        self.select(field)
 
-func name() -> String? {
-    /* Selection */
-    let field = GraphQLField.leaf(name: "name")
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return (data as! [String: Any])[field.name] as! String?
+        /* Decoder */
+        if let data = self.response {
+            return (data as! [String: Any])[field.name] as! String?
+        }
+        return "Matic Zavadlal"
     }
-    return "Matic Zavadlal"
-}
 
     /// Which movies they appear in.
+    
+    func appearsIn() -> [Episode?]? {
+        /* Selection */
+        let field = GraphQLField.leaf(name: "appearsIn")
+        self.select(field)
 
-func appearsIn() -> [Episode?]? {
-    /* Selection */
-    let field = GraphQLField.leaf(name: "appearsIn")
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return ((data as! [String: Any])[field.name] as! [String?]?).map { Episode.init(rawValue: $0)! }
+        /* Decoder */
+        if let data = self.response {
+            return ((data as! [String: Any])[field.name] as! [String?]?).map { Episode.init(rawValue: $0)! }
+        }
+        return selection.mock()
     }
-    return selection.mock()
-}
 
     /// The home planet of the human, or null if unknown.
+    
+    func homePlanet() -> String? {
+        /* Selection */
+        let field = GraphQLField.leaf(name: "homePlanet")
+        self.select(field)
 
-func homePlanet() -> String? {
-    /* Selection */
-    let field = GraphQLField.leaf(name: "homePlanet")
-    self.select(field)
-
-    /* Decoder */
-    if let data = self.response {
-        return (data as! [String: Any])[field.name] as! String?
+        /* Decoder */
+        if let data = self.response {
+            return (data as! [String: Any])[field.name] as! String?
+        }
+        return "Matic Zavadlal"
     }
-    return "Matic Zavadlal"
-}
 }
 
 // MARK: - Enums

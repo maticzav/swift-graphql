@@ -4,8 +4,6 @@ import Foundation
  This file contains publicly accessible functions used to generate SwiftGraphQL code.
  */
 
-#if os(macOS)
-
 public struct GraphQLCodegen {
     /// Generates a target GraphQL Swift file.
     ///
@@ -34,6 +32,3 @@ public struct GraphQLCodegen {
         return self.generate(from: schema)
     }
 }
-
-
-#endif

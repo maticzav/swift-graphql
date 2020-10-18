@@ -16,7 +16,7 @@ extension GraphQLCodegen {
             }
             return \(generateMockData(for: field.type))
         }
-        """
+    """
     }
     
     // MARK: - Private helpers
