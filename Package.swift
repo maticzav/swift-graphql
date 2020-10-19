@@ -11,9 +11,7 @@ let package = Package(
             targets: ["SwiftGraphQL", "SwiftGraphQLCodegen"]),
     ],
     dependencies: [
-//        .package(
-//            url: "https://github.com/apple/swift-format.git",
-//            .branch("swift-5.3-branch")),
+        .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0")
     ],
     targets: [
         .target(
@@ -27,6 +25,6 @@ let package = Package(
             dependencies: ["SwiftGraphQL"]),
         .testTarget(
             name: "SwiftGraphQLCodegenTests",
-            dependencies: ["SwiftGraphQLCodegen"]),
+            dependencies: ["Files", "SwiftGraphQLCodegen"]),
     ]
 )

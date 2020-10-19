@@ -6,12 +6,12 @@ extension GraphQLCodegen {
         // TODO: add support for all fields!
         let fields = (type.fields ?? []).filter {
             switch $0.type.namedType { // TODO
-            case .scalar(let scalar):
-                return !scalar.isCustom
-            case .object(_), .enumeration(_):
-                return true
-            default:
-                return false
+                case .scalar(let scalar):
+                    return !scalar.isCustom
+                case .object(_), .enumeration(_):
+                    return true
+                default:
+                    return false
             }
         }
         

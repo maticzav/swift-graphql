@@ -22,11 +22,6 @@ public struct GraphQLCodegen {
     }
     
     /// Generates the API and returns it to handler.
-    public static func generate(from schemaURL: URL) throws -> Data {
-        try self.generate(from: schemaURL).data(using: .utf8)!
-    }
-    
-    /// Generates the API and returns it to handler.
     public static func generate(from schemaURL: URL) throws -> String {
         let schema: GraphQL.Schema = try self.downloadFrom(schemaURL)
         return self.generate(from: schema)

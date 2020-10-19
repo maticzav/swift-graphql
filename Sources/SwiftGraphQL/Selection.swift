@@ -85,12 +85,13 @@ extension Selection {
     /// Lets you convert a type selection into a list selection.
     public var list: Selection<[Type], [TypeLock]> {
         return Selection<[Type], [TypeLock]> { selection in
+            /* Selection */
             self.selection.forEach(selection.select)
             
+            /* Decoder */
             if let data = selection.response {
                 return (data as! [Any]).map { self.decode(data: $0) }
             }
-            
             return []
         }
     }
@@ -98,12 +99,13 @@ extension Selection {
     /// Lets you decode nullable values.
     public var nullable: Selection<Type?, TypeLock?> {
         Selection<Type?, TypeLock?> { selection in
+            /* Selection */
             self.selection.forEach(selection.select)
             
+            /* Decoder */
             if let data = selection.response {
                 return self.decode(data: data)
             }
-            
             return nil
         }
     }
@@ -111,14 +113,14 @@ extension Selection {
     // Lets you leave the selection empty.
     public var empty: Selection<String, TypeLock> {
         Selection<String, TypeLock> { selection in
+            /* Selection */
             let field = GraphQLField.leaf(name: "__typename")
-            
             selection.select(field)
             
+            /* Decoder */
             if let data = selection.response {
                 return (data as! [String: Any])["__typename"] as! String
             }
-            
             return "__typename"
         }
     }

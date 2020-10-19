@@ -74,7 +74,7 @@ extension SelectionSet where TypeLock == DroidObject {
         if let data = self.response {
             return (data as! [String: Any])[field.name] as! String?
         }
-        return "Matic Zavadlal"
+        return nil
     }
 
     /// The name of the character
@@ -88,7 +88,7 @@ extension SelectionSet where TypeLock == DroidObject {
         if let data = self.response {
             return (data as! [String: Any])[field.name] as! String?
         }
-        return "Matic Zavadlal"
+        return nil
     }
 
     /// Which movies they appear in.
@@ -100,9 +100,9 @@ extension SelectionSet where TypeLock == DroidObject {
 
         /* Decoder */
         if let data = self.response {
-            return ((data as! [String: Any])[field.name] as! [String?]?).map { Episode.init(rawValue: $0)! }
+//            return ((data as! [String: Any])[field.name] as! [String?]?).map { Episode.init(rawValue: $0)! }
         }
-        return selection.mock()
+        return []
     }
 
     /// The primary function of the droid.
@@ -116,7 +116,7 @@ extension SelectionSet where TypeLock == DroidObject {
         if let data = self.response {
             return (data as! [String: Any])[field.name] as! String?
         }
-        return "Matic Zavadlal"
+        return nil
     }
 }
 
@@ -135,7 +135,7 @@ extension SelectionSet where TypeLock == HumanObject {
         if let data = self.response {
             return (data as! [String: Any])[field.name] as! String?
         }
-        return "Matic Zavadlal"
+        return nil
     }
 
     /// The name of the character
@@ -149,7 +149,7 @@ extension SelectionSet where TypeLock == HumanObject {
         if let data = self.response {
             return (data as! [String: Any])[field.name] as! String?
         }
-        return "Matic Zavadlal"
+        return nil
     }
 
     /// Which movies they appear in.
@@ -161,9 +161,9 @@ extension SelectionSet where TypeLock == HumanObject {
 
         /* Decoder */
         if let data = self.response {
-            return ((data as! [String: Any])[field.name] as! [String?]?).map { Episode.init(rawValue: $0)! }
+//            return ((data as! [String: Any])[field.name] as! [String?]?).map { Episode.init(rawValue: $0)! }
         }
-        return selection.mock()
+        return []
     }
 
     /// The home planet of the human, or null if unknown.
@@ -177,7 +177,7 @@ extension SelectionSet where TypeLock == HumanObject {
         if let data = self.response {
             return (data as! [String: Any])[field.name] as! String?
         }
-        return "Matic Zavadlal"
+        return nil
     }
 }
 

@@ -4,7 +4,6 @@ import Foundation
  This file contains code used to generate type-locks for selection set.
  */
 
-
 extension GraphQLCodegen {
     /// Generates an object phantom type entry.
     static func generatePhantomTypes(for types: [GraphQL.FullType]) -> String {
