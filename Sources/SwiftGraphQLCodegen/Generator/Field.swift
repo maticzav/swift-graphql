@@ -1,32 +1,37 @@
 import Foundation
 
 extension GraphQLCodegen {
+    /// Generates a SwiftGraphQL field.
     static func generateField(_ field: GraphQL.Field) -> String {
-        """
-        \(generateFieldDoc(for: field))
-        \(generateFieldDeprecationDoc(for: field))
-        func \(generateFnDefinition(for: field)) -> \(generateReturnType(for: field.type)) {
-            /* Selection */
-            let field = \(generateFieldLeaf(for: field))
-            self.select(field)
-
-            /* Decoder */
-            if let data = self.response {
-                return \(generateDecoder(for: field))
-            }
-            return \(generateMockData(for: field.type))
-        }
-    """
+        [ generateFieldDoc(for: field)
+        , generateFieldDeprecationDoc(for: field)
+        , "func \(generateFnDefinition(for: field)) -> \(generateReturnType(for: field.type)) {"
+        , "    /* Selection */"
+        , "    let field = \(generateFieldLeaf(for: field))"
+        , "    self.select(field)"
+        , ""
+        , "    /* Decoder */"
+        , "    if let data = self.response as? [String: Any] {"
+        , "        return \(generateDecoder(for: field))"
+        , "    }"
+        , "    return \(generateMockData(for: field.type))"
+        , "}"
+        ]
+        .compactMap { $0 }
+        .map { "    \($0)"}
+        .joined(separator: "\n")
     }
     
     // MARK: - Documentation
     
-    private static func generateFieldDoc(for field: GraphQL.Field) -> String {
-        "/// \(field.description ?? field.name)"
+    /// Generates field documentation.
+    private static func generateFieldDoc(for field: GraphQL.Field) -> String? {
+        field.description.map { "/// \($0)" }
     }
     
-    private static func generateFieldDeprecationDoc(for field: GraphQL.Field) -> String {
-        field.isDeprecated ? "@available(*, deprecated, message: \"\(field.deprecationReason ?? "")\")" : ""
+    /// Generates deprecation documentation.
+    private static func generateFieldDeprecationDoc(for field: GraphQL.Field) -> String? {
+        field.isDeprecated ? "@available(*, deprecated, message: \"\(field.deprecationReason ?? "")\")" : nil
     }
     
     // MARK: - Function definition
@@ -102,35 +107,57 @@ extension GraphQLCodegen {
     /// Generates a field decoder.
     private static func generateDecoder(for field: GraphQL.Field) -> String {
         switch field.type.namedType {
+        /* Scalar */
         case .scalar(_):
             let returnType = generateReturnType(for: field.type)
-            return "(data as! [String: Any])[field.name] as! \(returnType)"
+            return "data[field.name] as! \(returnType)"
+        /* Enumeartion */
         case .enumeration(let enm):
-            let decoderType = generateDecoderType("String", for: field.type)
-            if decoderType == "String" {
-                return "\(enm).init(rawValue: (data as! [String: Any])[field.name] as! String)!"
+            switch field.type.inverted {
+            case .named(_):
+                return "\(enm).init(rawValue: data[field.name] as! String)!"
+            case .list(let subRef), .nullable(let subRef):
+                let decoderType = generateDecoderType("String", for: field.type)
+                let decoderMapping = generateDecoderMapping("\(enm).init(rawValue: $0)!", for: subRef)
+                return "(data[field.name] as! \(decoderType)).map { \(decoderMapping) }"
             }
-            return "((data as! [String: Any])[field.name] as! \(decoderType)).map { \(enm).init(rawValue: $0)! }"
+        /* Selections */
         case .inputObject(_), .interface(_), .object(_), .union(_):
             let decoderType = generateDecoderType("Any", for: field.type)
-            return "selection.decode(data: ((data as! [String: Any])[field.name] as! \(decoderType)))"
+            switch field.type.inverted {
+            case .nullable(_):
+                return "(data[field.name] as! \(decoderType)).map { selection.decode(data: $0) } ?? selection.mock()"
+            default:
+                return "selection.decode(data: (data[field.name] as! \(decoderType)))"
+            }
+            
         }
+    }
+    
+    /// Generates consecutive nested `.map` functions based on referable type nesting.
+    private static func generateDecoderMapping(_ decoder: String, for ref: GraphQL.InvertedTypeRef) -> String {
+        switch ref {
+        case .named(_):
+            return decoder
+        case .list(let subRef), .nullable(let subRef):
+            return "$0.map { \(generateDecoderMapping(decoder, for: subRef)) }"
+        }
+    }
+    
+    /// Generates an intermediate type used in custom decoders to cast JSON representation of the data.
+    private static func generateDecoderType(_ typeName: String, for ref: GraphQL.TypeRef) -> String {
+        generateDecoderType(typeName, for: ref.inverted)
     }
 
     /// Generates an intermediate type used in custom decoders to cast JSON representation of the data.
-    private static func generateDecoderType(_ typeName: String, for type: GraphQL.TypeRef) -> String {
-        switch type {
+    private static func generateDecoderType(_ typeName: String, for ref: GraphQL.InvertedTypeRef) -> String {
+        switch ref {
         case .named(_):
-            return "\(typeName)?"
-        /* Wrapped types */
+            return typeName
         case .list(let subRef):
-            return "[\(generateDecoderType(typeName, for: subRef))]?"
-        case .nonNull(let subRef):
-            // everything is nullable by default, that's why
-            // we are removing question mark
-            var nullable = generateDecoderType(typeName, for: subRef)
-            nullable.remove(at: nullable.index(before: nullable.endIndex))
-            return nullable
+            return "[\(generateDecoderType(typeName, for: subRef))]"
+        case .nullable(let subRef):
+            return "\(generateDecoderType(typeName, for: subRef))?"
         }
     }
     
@@ -150,14 +177,20 @@ extension GraphQLCodegen {
         }
     }
     
-    private static func generateMockWrapper(_ value: String, for type: GraphQL.TypeRef) -> String {
-        switch type {
+    /// Generates the mock value for wrapped type.
+    private static func generateMockWrapper(_ value: String, for ref: GraphQL.TypeRef) -> String {
+        generateMockWrapper(value, for: ref.inverted)
+    }
+    
+    /// Generates the mock value for wrapped type.
+    private static func generateMockWrapper(_ value: String, for ref: GraphQL.InvertedTypeRef) -> String {
+        switch ref {
         case .named(_):
-            return "nil"
-        case .list(let subRef):
-            return "[]"
-        case .nonNull(let subRef):
             return value
+        case .list(_):
+            return "[]"
+        case .nullable(_):
+            return "nil"
         }
     }
 

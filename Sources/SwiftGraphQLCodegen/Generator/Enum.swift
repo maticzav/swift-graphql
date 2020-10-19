@@ -22,18 +22,20 @@ extension GraphQLCodegen {
     }
 
     private static func generateEnumCase(for env: GraphQL.EnumValue) -> String {
-        """
-            \(generateEnumCaseDoc(for: env))
-            \(generateEnumCaseDeprecationDoc(for: env))
-            case \(env.name.camelCase) = \"\(env.name)\"
-        """
+        [ generateEnumCaseDoc(for: env)
+        , generateEnumCaseDeprecationDoc(for: env)
+        , #"case \#(env.name.camelCase) = "\#(env.name)""#
+        ]
+        .compactMap { $0 }
+        .map { "    \($0)" }
+        .joined(separator: "\n")
     }
     
-    private static func generateEnumCaseDoc(for env: GraphQL.EnumValue) -> String {
-        "/// \(env.description ?? "\(env.name)")"
+    private static func generateEnumCaseDoc(for env: GraphQL.EnumValue) -> String? {
+        env.description.map { "/// \($0)" }
     }
     
-    private static func generateEnumCaseDeprecationDoc(for env: GraphQL.EnumValue) -> String {
-        env.isDeprecated ? "@available(*, deprecated, message: \"\(env.deprecationReason ?? "")\")" : ""
+    private static func generateEnumCaseDeprecationDoc(for env: GraphQL.EnumValue) -> String? {
+        env.isDeprecated ? "@available(*, deprecated, message: \"\(env.deprecationReason ?? "")\")" : nil
     }
 }

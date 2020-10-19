@@ -174,11 +174,11 @@ public enum GraphQL {
         case nonNull = "NON_NULL"
     }
     
-    /* Types */
-    
     public struct Operation: Codable, Equatable {
         public let name: String
     }
+    
+    // MARK: - Type
     
     public struct FullType: Decodable, Equatable {
         public let kind: TypeKind
@@ -198,7 +198,7 @@ public enum GraphQL {
         }
     }
     
-    /* Fields */
+    // MARK: - Field
     
     public struct Field: Decodable, Equatable {
         public let name: String
@@ -208,6 +208,8 @@ public enum GraphQL {
         public let isDeprecated: Bool
         public let deprecationReason: String?
     }
+    
+    // MARK: - Reference Type
     
     /// Represents a possibly wrapped type.
     public indirect enum TypeRef: Decodable, Equatable {
@@ -278,6 +280,8 @@ public enum GraphQL {
             }
         }
     }
+    
+    // MARK: - Named Type
     
     /// Represents possible referable types.
     public enum NamedType: Equatable {
@@ -367,7 +371,7 @@ public enum GraphQL {
         }
     }
     
-    /* Values */
+    // MARK: - Values
     
     public struct InputValue: Decodable, Equatable {
         public let name: String

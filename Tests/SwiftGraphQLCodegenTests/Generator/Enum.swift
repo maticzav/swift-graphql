@@ -50,7 +50,6 @@ final class EnumTests: XCTestCase {
         /// Episodes
         enum Episodes: String, CaseIterable, Codable {
             /// Released in 1977.
-            
             case newhope = "NEWHOPE"
         }
         """
@@ -105,18 +104,14 @@ final class EnumTests: XCTestCase {
         /// Collection of all StarWars episodes.
         enum Episodes: String, CaseIterable, Codable {
             /// Released in 1977.
-            
             case newhope = "NEWHOPE"
 
-            /// EMPIRE
-            
             case empire = "EMPIRE"
 
             /// Released in 1983.
             @available(*, deprecated, message: "Was too good.")
             case jedi = "JEDI"
 
-            /// SKYWALKER
             @available(*, deprecated, message: "")
             case skywalker = "SKYWALKER"
         }
