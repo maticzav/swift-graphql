@@ -11,6 +11,7 @@
 		02208E79253C596D00014850 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02208E78253C596D00014850 /* ContentView.swift */; };
 		02208E7B253C596E00014850 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02208E7A253C596E00014850 /* Assets.xcassets */; };
 		02208E7E253C596E00014850 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02208E7D253C596E00014850 /* Preview Assets.xcassets */; };
+		028E0F45253DA859007A3A1F /* SwiftGraphQL in Frameworks */ = {isa = PBXBuildFile; productRef = 028E0F44253DA859007A3A1F /* SwiftGraphQL */; };
 		02CA03EE253CA05C00B05BD1 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02CA03ED253CA05B00B05BD1 /* API.swift */; };
 /* End PBXBuildFile section */
 
@@ -29,6 +30,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				028E0F45253DA859007A3A1F /* SwiftGraphQL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +100,7 @@
 			);
 			name = StarWars;
 			packageProductDependencies = (
+				028E0F44253DA859007A3A1F /* SwiftGraphQL */,
 			);
 			productName = StarWars;
 			productReference = 02208E73253C596D00014850 /* StarWars.app */;
@@ -364,6 +367,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		028E0F44253DA859007A3A1F /* SwiftGraphQL */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftGraphQL;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 02208E6B253C596D00014850 /* Project object */;
 }
