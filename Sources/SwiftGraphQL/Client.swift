@@ -24,7 +24,7 @@ public struct GraphQLClient {
     
     // MARK: - Initializers
     
-    init(endpoint: URL) {
+    public init(endpoint: URL) {
         self.endpoint = endpoint
     }
     
@@ -75,10 +75,10 @@ public struct GraphQLClient {
                 return completionHandler(.failure(.network(error)))
             }
             
-            guard let httpResponse = response as? HTTPURLResponse,
-                (200...299).contains(httpResponse.statusCode) else {
-                return completionHandler(.failure(.badCode))
-            }
+//            guard let httpResponse = response as? HTTPURLResponse,
+//                (200...299).contains(httpResponse.statusCode) else {
+//                return completionHandler(.failure(.badCode))
+//            }
             
             /* Serialize received JSON. */
             if let data = data {

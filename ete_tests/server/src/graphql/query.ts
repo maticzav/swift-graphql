@@ -45,6 +45,7 @@ export const Query = objectType({
     t.field('humans', {
       type: 'Human',
       list: true,
+      nullable: false,
       resolve: () => data.allHumans,
     })
   },

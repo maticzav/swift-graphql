@@ -5,22 +5,22 @@ interface Character {
   """
   Which movies they appear in.
   """
-  appearsIn(id: ID!): [Episode]
+  appearsIn(id: ID!): [Episode]!
 
   """
   The friends of the character, or an empty list if they have none.
   """
-  friends: [Character]
+  friends: [Character]!
 
   """
   The id of the character
   """
-  id: String
+  id: String!
 
   """
   The name of the character
   """
-  name: String
+  name: String!
 }
 
 """
@@ -30,27 +30,27 @@ type Droid implements Character {
   """
   Which movies they appear in.
   """
-  appearsIn(id: ID!): [Episode]
+  appearsIn(id: ID!): [Episode]!
 
   """
   The friends of the character, or an empty list if they have none.
   """
-  friends: [Character]
+  friends: [Character]!
 
   """
   The id of the character
   """
-  id: String
+  id: String!
 
   """
   The name of the character
   """
-  name: String
+  name: String!
 
   """
   The primary function of the droid.
   """
-  primaryFunction: String
+  primaryFunction: String!
 }
 
 """
@@ -80,12 +80,12 @@ type Human implements Character {
   """
   Which movies they appear in.
   """
-  appearsIn(id: ID!): [Episode]
+  appearsIn(id: ID!): [Episode]!
 
   """
   The friends of the character, or an empty list if they have none.
   """
-  friends: [Character]
+  friends: [Character]!
 
   """
   The home planet of the human, or null if unknown.
@@ -95,12 +95,12 @@ type Human implements Character {
   """
   The id of the character
   """
-  id: String
+  id: String!
 
   """
   The name of the character
   """
-  name: String
+  name: String!
 }
 
 enum MoreEpisodes {
@@ -127,18 +127,18 @@ type Query {
     id of the character
     """
     id: String!
-  ): Droid
+  ): Droid!
   hero(
     """
     If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.
     """
-    episode: Episode
-  ): Character
+    episode: Episode!
+  ): Character!
   human(
     """
     id of the character
     """
     id: String!
-  ): Human
-  humans: [Human]
+  ): Human!
+  humans: [Human]!
 }

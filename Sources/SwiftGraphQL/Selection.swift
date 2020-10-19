@@ -64,7 +64,6 @@ public struct Selection<Type, TypeLock> {
     /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
     public func decode(data: Any) -> Type {
         /* Construct a copy of the selection set, and use the new selection set to decode data. */
-        let data = (data as! [String: Any?])
         let selectionSet = SelectionSet<Type, TypeLock>(data: data)
         return self.decoder(selectionSet)
     }

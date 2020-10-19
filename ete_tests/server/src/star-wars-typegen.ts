@@ -44,33 +44,33 @@ export interface NexusGenAllTypes extends NexusGenRootTypes {
 export interface NexusGenFieldTypes {
   Droid: {
     // field return type
-    appearsIn: Array<NexusGenEnums['Episode'] | null> | null // [Episode]
-    friends: Array<NexusGenRootTypes['Character'] | null> | null // [Character]
-    id: string | null // String
-    name: string | null // String
-    primaryFunction: string | null // String
+    appearsIn: Array<NexusGenEnums['Episode'] | null> // [Episode]!
+    friends: Array<NexusGenRootTypes['Character'] | null> // [Character]!
+    id: string // String!
+    name: string // String!
+    primaryFunction: string // String!
   }
   Human: {
     // field return type
-    appearsIn: Array<NexusGenEnums['Episode'] | null> | null // [Episode]
-    friends: Array<NexusGenRootTypes['Character'] | null> | null // [Character]
+    appearsIn: Array<NexusGenEnums['Episode'] | null> // [Episode]!
+    friends: Array<NexusGenRootTypes['Character'] | null> // [Character]!
     homePlanet: string | null // String
-    id: string | null // String
-    name: string | null // String
+    id: string // String!
+    name: string // String!
   }
   Query: {
     // field return type
-    droid: NexusGenRootTypes['Droid'] | null // Droid
-    hero: NexusGenRootTypes['Character'] | null // Character
-    human: NexusGenRootTypes['Human'] | null // Human
-    humans: Array<NexusGenRootTypes['Human'] | null> | null // [Human]
+    droid: NexusGenRootTypes['Droid'] // Droid!
+    hero: NexusGenRootTypes['Character'] // Character!
+    human: NexusGenRootTypes['Human'] // Human!
+    humans: Array<NexusGenRootTypes['Human'] | null> // [Human]!
   }
   Character: {
     // field return type
-    appearsIn: Array<NexusGenEnums['Episode'] | null> | null // [Episode]
-    friends: Array<NexusGenRootTypes['Character'] | null> | null // [Character]
-    id: string | null // String
-    name: string | null // String
+    appearsIn: Array<NexusGenEnums['Episode'] | null> // [Episode]!
+    friends: Array<NexusGenRootTypes['Character'] | null> // [Character]!
+    id: string // String!
+    name: string // String!
   }
 }
 
@@ -94,7 +94,7 @@ export interface NexusGenArgTypes {
     }
     hero: {
       // args
-      episode?: NexusGenEnums['Episode'] | null // Episode
+      episode: NexusGenEnums['Episode'] // Episode!
     }
     human: {
       // args
@@ -163,13 +163,6 @@ declare global {
   interface NexusGenPluginFieldConfig<
     TypeName extends string,
     FieldName extends string
-  > {
-    /**
-     * The nullability guard can be helpful, but is also a potentially expensive operation for lists.
-     * We need to iterate the entire list to check for null items to guard against. Set this to true
-     * to skip the null guard on a specific field if you know there's no potential for unsafe types.
-     */
-    skipNullGuard?: boolean
-  }
+  > {}
   interface NexusGenPluginSchemaConfig {}
 }

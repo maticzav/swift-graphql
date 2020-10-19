@@ -15,16 +15,11 @@ const schema = makeSchema({
       './star-wars-typegen.ts',
     ),
   },
-  plugins: [
-    nullabilityGuardPlugin({
-      shouldGuard: true,
-      fallbackValues: {
-        String: () => '',
-        ID: () => 'MISSING_ID',
-        Boolean: () => true,
-      },
-    }),
-  ],
+  nonNullDefaults: {
+    input: true,
+    output: true,
+  },
+  plugins: [],
   typegenAutoConfig: {
     sources: [
       {
@@ -44,6 +39,21 @@ const schema = makeSchema({
 
 const server = new ApolloServer({
   schema,
+  debug: true,
+  plugins: [
+    {
+      // Fires whenever a GraphQL request is received from a client.
+      requestDidStart(requestContext) {
+        console.log('Request started! Query:\n' + requestContext.request.query)
+
+        return {
+          willSendResponse(context) {
+            console.log(context.errors)
+          },
+        }
+      },
+    },
+  ],
 })
 
 const port = process.env.PORT || 4000

@@ -5,38 +5,38 @@ import SwiftGraphQL
 /* Query */
 
 extension SelectionSet where TypeLock == RootQuery {
-    func human<Type>(_ selection: Selection<Type, HumanObject?>) -> Type {
+    func human<Type>(_ selection: Selection<Type, HumanObject>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(name: "human", selection: selection.selection)
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return (data[field.name] as! Any?).map { selection.decode(data: $0) } ?? selection.mock()
+            return selection.decode(data: (data[field.name] as! Any))
         }
         return selection.mock()
     }
 
-    func droid<Type>(_ selection: Selection<Type, DroidObject?>) -> Type {
+    func droid<Type>(_ selection: Selection<Type, DroidObject>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(name: "droid", selection: selection.selection)
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return (data[field.name] as! Any?).map { selection.decode(data: $0) } ?? selection.mock()
+            return selection.decode(data: (data[field.name] as! Any))
         }
         return selection.mock()
     }
 
-    func humans<Type>(_ selection: Selection<Type, [HumanObject?]?>) -> Type {
+    func humans<Type>(_ selection: Selection<Type, [HumanObject?]>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(name: "humans", selection: selection.selection)
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return (data[field.name] as! [Any?]?).map { selection.decode(data: $0) } ?? selection.mock()
+            return selection.decode(data: (data[field.name] as! [Any?]))
         }
         return selection.mock()
     }
@@ -58,55 +58,55 @@ typealias HumanObject = Object.Human
 
 extension SelectionSet where TypeLock == DroidObject {
     /// The id of the character
-    func id() -> String? {
+    func id() -> String {
         /* Selection */
         let field = GraphQLField.leaf(name: "id")
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return data[field.name] as! String?
+            return data[field.name] as! String
         }
-        return nil
+        return "Matic Zavadlal"
     }
 
     /// The name of the character
-    func name() -> String? {
+    func name() -> String {
         /* Selection */
         let field = GraphQLField.leaf(name: "name")
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return data[field.name] as! String?
+            return data[field.name] as! String
         }
-        return nil
+        return "Matic Zavadlal"
     }
 
     /// Which movies they appear in.
-    func appearsIn() -> [Episode?]? {
+    func appearsIn() -> [Episode?] {
         /* Selection */
         let field = GraphQLField.leaf(name: "appearsIn")
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return (data[field.name] as! [String?]?).map { $0.map { $0.map { Episode.init(rawValue: $0)! } } }
+            return (data[field.name] as! [String?]).map { $0.map { Episode.init(rawValue: $0)! } }
         }
-        return nil
+        return []
     }
 
     /// The primary function of the droid.
-    func primaryFunction() -> String? {
+    func primaryFunction() -> String {
         /* Selection */
         let field = GraphQLField.leaf(name: "primaryFunction")
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return data[field.name] as! String?
+            return data[field.name] as! String
         }
-        return nil
+        return "Matic Zavadlal"
     }
 }
 
@@ -115,42 +115,42 @@ extension SelectionSet where TypeLock == DroidObject {
 
 extension SelectionSet where TypeLock == HumanObject {
     /// The id of the character
-    func id() -> String? {
+    func id() -> String {
         /* Selection */
         let field = GraphQLField.leaf(name: "id")
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return data[field.name] as! String?
+            return data[field.name] as! String
         }
-        return nil
+        return "Matic Zavadlal"
     }
 
     /// The name of the character
-    func name() -> String? {
+    func name() -> String {
         /* Selection */
         let field = GraphQLField.leaf(name: "name")
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return data[field.name] as! String?
+            return data[field.name] as! String
         }
-        return nil
+        return "Matic Zavadlal"
     }
 
     /// Which movies they appear in.
-    func appearsIn() -> [Episode?]? {
+    func appearsIn() -> [Episode?] {
         /* Selection */
         let field = GraphQLField.leaf(name: "appearsIn")
         self.select(field)
     
         /* Decoder */
         if let data = self.response as? [String: Any] {
-            return (data[field.name] as! [String?]?).map { $0.map { $0.map { Episode.init(rawValue: $0)! } } }
+            return (data[field.name] as! [String?]).map { $0.map { Episode.init(rawValue: $0)! } }
         }
-        return nil
+        return []
     }
 
     /// The home planet of the human, or null if unknown.
