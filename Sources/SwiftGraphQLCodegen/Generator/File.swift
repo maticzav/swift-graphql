@@ -14,15 +14,15 @@ extension GraphQLCodegen {
         /* Data */
         
         let operations: [(name: String, type: GraphQL.FullType)] = [
-            ("RootQuery", schema.queryType.name),
-            ("RootMutation",schema.mutationType?.name),
-            ("RootSubscription",schema.subscriptionType?.name)
+            ("RootQuery", schema.queryType.name.pascalCase),
+            ("RootMutation",schema.mutationType?.name.pascalCase),
+            ("RootSubscription",schema.subscriptionType?.name.pascalCase)
         ].compactMap { (name, operation) in
             schema.types.first(where: { $0.name == operation }).map { (name, $0) }
         }
         
         let objects: [(name: String, type: GraphQL.FullType)] = schema.objects.map {
-            (name: generateObjectTypeLock(for: $0.name), type: $0)
+            (name: generateObjectTypeLock(for: $0.name.pascalCase), type: $0)
         }
         
         /* Generate the API. */

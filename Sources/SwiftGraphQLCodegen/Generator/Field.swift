@@ -44,11 +44,11 @@ extension GraphQLCodegen {
          */
         switch field.type.namedType {
         case .scalar(_), .enumeration(_):
-            return "\(field.name)()"
+            return "\(field.name.camelCase)()"
         case .inputObject(_), .interface(_), .object(_), .union(_):
-            let typeLock = generateObjectTypeLock(for: field.type.namedType.name)
+            let typeLock = generateObjectTypeLock(for: field.type.namedType.name.pascalCase)
             let decoderType = generateDecoderType(typeLock, for: field.type)
-            return "\(field.name)<Type>(_ selection: Selection<Type, \(decoderType)>)"
+            return "\(field.name.camelCase)<Type>(_ selection: Selection<Type, \(decoderType)>)"
         }
     }
     
@@ -96,9 +96,9 @@ extension GraphQLCodegen {
     private static func generateFieldLeaf(for field: GraphQL.Field) -> String {
         switch field.type.namedType {
         case .scalar(_), .enumeration(_):
-            return "GraphQLField.leaf(name: \"\(field.name)\")"
+            return "GraphQLField.leaf(name: \"\(field.name)\", arguments: [])"
         case .inputObject(_), .interface(_), .object(_), .union(_):
-            return "GraphQLField.composite(name: \"\(field.name)\", selection: selection.selection)"
+            return "GraphQLField.composite(name: \"\(field.name)\", selection: selection.selection, arguments: [])"
         }
     }
     

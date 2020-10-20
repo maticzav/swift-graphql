@@ -113,7 +113,7 @@ extension Selection {
     public var empty: Selection<String, TypeLock> {
         Selection<String, TypeLock> { selection in
             /* Selection */
-            let field = GraphQLField.leaf(name: "__typename")
+            let field = GraphQLField.leaf(name: "__typename", arguments: [])
             selection.select(field)
             
             /* Decoder */
