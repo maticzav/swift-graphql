@@ -3,20 +3,23 @@ import Foundation
 extension GraphQLCodegen {
     /// Generates a SwiftGraphQL field.
     static func generateField(_ field: GraphQL.Field) -> String {
-        [ generateFieldDoc(for: field)
-        , generateFieldDeprecationDoc(for: field)
-        , "func \(generateFnDefinition(for: field)) -> \(generateReturnType(for: field.type)) {"
-        , "    /* Selection */"
-        , "    let field = \(generateFieldLeaf(for: field))"
-        , "    self.select(field)"
-        , ""
-        , "    /* Decoder */"
-        , "    if let data = self.response as? [String: Any] {"
-        , "        return \(generateDecoder(for: field))"
-        , "    }"
-        , "    return \(generateMockData(for: field.type))"
-        , "}"
-        ]
+        (
+            [ generateFieldDoc(for: field)
+            , generateFieldDeprecationDoc(for: field)
+            , "func \(generateFnDefinition(for: field)) -> \(generateReturnType(for: field.type)) {"
+            , "    /* Selection */"
+            ] +
+            generateFieldSelection(for: field).map { "    \($0)" } +
+            [ "    self.select(field)"
+            , ""
+            , "    /* Decoder */"
+            , "    if let data = self.response as? [String: Any] {"
+            , "        return \(generateDecoder(for: field))"
+            , "    }"
+            , "    return \(generateMockData(for: field.type))"
+            , "}"
+            ]
+        )
         .compactMap { $0 }
         .map { "    \($0)"}
         .joined(separator: "\n")
@@ -44,11 +47,81 @@ extension GraphQLCodegen {
          */
         switch field.type.namedType {
         case .scalar(_), .enumeration(_):
-            return "\(field.name.camelCase)()"
+            return "\(field.name.camelCase)(\(generateFnArguments(for: field)))"
         case .inputObject(_), .interface(_), .object(_), .union(_):
             let typeLock = generateObjectTypeLock(for: field.type.namedType.name.pascalCase)
             let decoderType = generateDecoderType(typeLock, for: field.type)
-            return "\(field.name.camelCase)<Type>(_ selection: Selection<Type, \(decoderType)>)"
+            // Generate based on arguments.
+            if field.args.isEmpty {
+                return "\(field.name.camelCase)<Type>(_ selection: Selection<Type, \(decoderType)>)"
+            }
+            return "\(field.name.camelCase)<Type>(\(generateFnArguments(for: field)), _ selection: Selection<Type, \(decoderType)>)"
+        }
+    }
+    
+    /// Generates arguments for accessor function.
+    private static func generateFnArguments(for field: GraphQL.Field) -> String {
+        field.args.map { generateArgumentParameter(for: $0) }.joined(separator: ", ")
+    }
+    
+    /// Generates a function parameter based on an input value.
+    private static func generateArgumentParameter(for input: GraphQL.InputValue) -> String {
+        if let defaultValue = input.defaultValue {
+            return "\(input.name.camelCase): \(generateArgumentParameterType(for: input.type)) = \(generateArgumentDefaultValue(defaultValue, for: input.type))"
+        }
+        return "\(input.name.camelCase): \(generateArgumentParameterType(for: input.type))"
+    }
+    
+    /// Generates a type definition for an argument function parameter.
+    private static func generateArgumentParameterType(for ref: GraphQL.TypeRef) -> String {
+        generateArgumentParameterType(for: ref.inverted)
+    }
+    
+    /// Generates a type definition for an argument function parameter.
+    private static func generateArgumentParameterType(for ref: GraphQL.InvertedTypeRef) -> String {
+        switch ref {
+        case .named(let named):
+            switch named {
+            case .scalar(let scalar):
+                return generateReturnType(for: scalar)
+            case .enumeration(_):
+                return named.name.pascalCase
+            default:
+                return "" // TODO
+            }
+        case .list(let subref):
+            return "[\(generateArgumentParameterType(for: subref))]"
+        case .nullable(let subref):
+            return "\(generateArgumentParameterType(for: subref))?"
+        }
+    }
+    
+    /// Prints a formatted default value for input parameter.
+    private static func generateArgumentDefaultValue(_ value: String, for ref: GraphQL.TypeRef) -> String {
+        generateArgumentDefaultValue(value, for: ref.inverted)
+    }
+    
+    /// Prints a formatted default value for input parameter.
+    private static func generateArgumentDefaultValue(_ value: String, for ref: GraphQL.InvertedTypeRef) -> String {
+        switch ref {
+        case .named(let named):
+            switch named {
+            case .scalar(let scalar):
+                switch scalar {
+                case .string:
+                    return "\"\(value)\""
+                default:
+                    return value
+                }
+            case .enumeration(let enm):
+                return "\(named.name.pascalCase).init(string: \"\(enm)\")!"
+            default:
+                return "" // TODO
+            }
+        case .list(let subref):
+            return "[\(generateArgumentDefaultValue(value, for: subref))]"
+        case .nullable(_):
+            return "" // TODO
         }
     }
     
@@ -93,12 +166,73 @@ extension GraphQLCodegen {
     // MARK: - Selection
 
     /// Generates an internal leaf definition used for composing selection set.
-    private static func generateFieldLeaf(for field: GraphQL.Field) -> String {
+    private static func generateFieldSelection(for field: GraphQL.Field) -> [String] {
         switch field.type.namedType {
         case .scalar(_), .enumeration(_):
-            return "GraphQLField.leaf(name: \"\(field.name)\", arguments: [])"
+            return
+                [ "let field = GraphQLField.leaf("
+                , "    name: \"\(field.name)\","
+                , "    arguments: ["
+                , generateSelectionArguments(for: field).map { "        \($0)" }.joined(separator: "\n")
+                , "    ]"
+                , ")"
+                ]
         case .inputObject(_), .interface(_), .object(_), .union(_):
-            return "GraphQLField.composite(name: \"\(field.name)\", selection: selection.selection, arguments: [])"
+            return
+                [ "let field = GraphQLField.composite("
+                , "    name: \"\(field.name)\","
+                , "    arguments: ["
+                , generateSelectionArguments(for: field).map { "    \($0)" }.joined(separator: "\n")
+                , "    ],"
+                , "    selection: selection.selection"
+                , ")"
+                ]
+        }
+    }
+    
+    /// Generates a dictionary of argument builders.
+    private static func generateSelectionArguments(for field: GraphQL.Field) -> [String] {
+        field.args
+            .map { #""\#($0.name)": \#(generateArgumentEncoder($0.name, for: $0.type)),"# }
+    }
+    
+    /// Generates a function that will encode the argument.
+    private static func generateArgumentEncoder(_ paramName: String, for ref: GraphQL.TypeRef) -> String {
+        generateArgumentEncoder(paramName, for: ref.inverted)
+    }
+    
+    /// Generates a function that will encode the argument.
+    private static func generateArgumentEncoder(_ paramName: String, for ref: GraphQL.InvertedTypeRef) -> String {
+        switch ref {
+        case .named(let named):
+            switch named {
+            case .scalar(let scalar):
+                return generateScalarArgumentEncoder(paramName, for: scalar)
+            default:
+                return "" // TODO
+            }
+        case .list(let subref):
+            return "Value.list(\(paramName)) { \(generateArgumentEncoder("$0", for: subref)) }"
+        case .nullable(let subref):
+            return "\(paramName).map { \(generateArgumentEncoder("$0", for: subref)) }"
+        }
+    }
+    
+    /// Generates an encoder for scalar type.
+    private static func generateScalarArgumentEncoder(_ paramName: String, for scalar: GraphQL.Scalar) -> String {
+        switch scalar {
+        case .id:
+            return "Value.id(\(paramName))"
+        case .boolean:
+            return "Value.boolean(\(paramName))"
+        case .float:
+            return "Value.float(\(paramName))"
+        case .integer:
+            return "Value.int(\(paramName))"
+        case .string:
+            return "Value.string(\(paramName))"
+        case .custom(_):
+            return "" // TODO: Custom input scalars?
         }
     }
     

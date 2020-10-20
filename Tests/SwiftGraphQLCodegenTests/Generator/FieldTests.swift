@@ -18,7 +18,12 @@ final class FieldTests: XCTestCase {
             @available(*, deprecated, message: "Use ID instead.")
             func id() -> String? {
                 /* Selection */
-                let field = GraphQLField.leaf(name: "id")
+                let field = GraphQLField.leaf(
+                    name: "id",
+                    arguments: [
+                
+                    ]
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -49,7 +54,12 @@ final class FieldTests: XCTestCase {
         let expected = """
             func id() -> String {
                 /* Selection */
-                let field = GraphQLField.leaf(name: "id")
+                let field = GraphQLField.leaf(
+                    name: "id",
+                    arguments: [
+                
+                    ]
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -78,7 +88,12 @@ final class FieldTests: XCTestCase {
         let expected = """
             func id() -> String? {
                 /* Selection */
-                let field = GraphQLField.leaf(name: "id")
+                let field = GraphQLField.leaf(
+                    name: "id",
+                    arguments: [
+                
+                    ]
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -107,7 +122,12 @@ final class FieldTests: XCTestCase {
         let expected = """
             func id() -> [String]? {
                 /* Selection */
-                let field = GraphQLField.leaf(name: "id")
+                let field = GraphQLField.leaf(
+                    name: "id",
+                    arguments: [
+                
+                    ]
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -136,7 +156,12 @@ final class FieldTests: XCTestCase {
         let expected = """
             func id() -> [String] {
                 /* Selection */
-                let field = GraphQLField.leaf(name: "id")
+                let field = GraphQLField.leaf(
+                    name: "id",
+                    arguments: [
+                
+                    ]
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -167,7 +192,12 @@ final class FieldTests: XCTestCase {
         let expected = """
             func episode() -> Episode {
                 /* Selection */
-                let field = GraphQLField.leaf(name: "episode")
+                let field = GraphQLField.leaf(
+                    name: "episode",
+                    arguments: [
+                
+                    ]
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -197,7 +227,12 @@ final class FieldTests: XCTestCase {
         let expected = """
             func episode() -> Episode? {
                 /* Selection */
-                let field = GraphQLField.leaf(name: "episode")
+                let field = GraphQLField.leaf(
+                    name: "episode",
+                    arguments: [
+                
+                    ]
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -226,7 +261,12 @@ final class FieldTests: XCTestCase {
         let expected = """
             func episode() -> [Episode?] {
                 /* Selection */
-                let field = GraphQLField.leaf(name: "episode")
+                let field = GraphQLField.leaf(
+                    name: "episode",
+                    arguments: [
+                
+                    ]
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -257,7 +297,13 @@ final class FieldTests: XCTestCase {
         let expected = """
             func hero<Type>(_ selection: Selection<Type, HeroObject>) -> Type {
                 /* Selection */
-                let field = GraphQLField.composite(name: "hero", selection: selection.selection)
+                let field = GraphQLField.composite(
+                    name: "hero",
+                    arguments: [
+                
+                    ],
+                    selection: selection.selection
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -286,7 +332,13 @@ final class FieldTests: XCTestCase {
         let expected = """
             func hero<Type>(_ selection: Selection<Type, HeroObject?>) -> Type {
                 /* Selection */
-                let field = GraphQLField.composite(name: "hero", selection: selection.selection)
+                let field = GraphQLField.composite(
+                    name: "hero",
+                    arguments: [
+                
+                    ],
+                    selection: selection.selection
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -315,7 +367,13 @@ final class FieldTests: XCTestCase {
         let expected = """
             func hero<Type>(_ selection: Selection<Type, [HeroObject]>) -> Type {
                 /* Selection */
-                let field = GraphQLField.composite(name: "hero", selection: selection.selection)
+                let field = GraphQLField.composite(
+                    name: "hero",
+                    arguments: [
+                
+                    ],
+                    selection: selection.selection
+                )
                 self.select(field)
             
                 /* Decoder */
@@ -323,6 +381,49 @@ final class FieldTests: XCTestCase {
                     return selection.decode(data: (data[field.name] as! [Any]))
                 }
                 return selection.mock()
+            }
+        """
+        
+        /* Test */
+        
+        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+    }
+    
+    // MARK: - Arguments
+    
+    func testGenerateFieldWithArguments() {
+        let field = GraphQL.Field(
+            name: "hero",
+            description: nil,
+            args: [
+                GraphQL.InputValue(
+                    name: "id",
+                    description: nil,
+                    type: .nonNull(.named(.scalar(.id))),
+                    defaultValue: nil
+                )
+            ],
+            type: .nonNull(.named(.scalar(.id))),
+            isDeprecated: false,
+            deprecationReason: nil
+        )
+        
+        let expected = """
+            func hero(id: String) -> String {
+                /* Selection */
+                let field = GraphQLField.leaf(
+                    name: "hero",
+                    arguments: [
+                        "id": Value.id(id),
+                    ]
+                )
+                self.select(field)
+            
+                /* Decoder */
+                if let data = self.response as? [String: Any] {
+                    return data[field.name] as! String
+                }
+                return "8378"
             }
         """
         
