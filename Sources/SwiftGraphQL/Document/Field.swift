@@ -2,6 +2,7 @@ import Foundation
 
 public enum GraphQLField {
     public typealias Name = String
+//    public typealias Arguments = [String: Value]
     
     case composite(Name, [Argument], [GraphQLField])
     case leaf(Name, [Argument])

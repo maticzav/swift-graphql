@@ -8,40 +8,40 @@ public struct Value {
     /* Scalars */
     
     /// Encode nil.
-    static func `nil`() -> Value {
+    public static func `nil`() -> Value {
         Value(value: .nil)
     }
     
     /// Encode an integer.
-    static func int(_ int: Int) -> Value {
+    public static func int(_ int: Int) -> Value {
         Value(value: .int(int))
     }
     
     /// Encode a float.
-    static func float(_ float: Double) -> Value {
+    public static func float(_ float: Double) -> Value {
         Value(value: .float(float))
     }
     
     /// Encode a boolean.
-    static func bool(_ bool: Bool) -> Value {
+    public static func bool(_ bool: Bool) -> Value {
         Value(value: .bool(bool))
     }
     
     /// Encode a string.
-    static func string(_ string: String) -> Value {
+    public static func string(_ string: String) -> Value {
         Value(value: .string(string))
     }
     
     /* Enumerator */
     
     /// Encode an enumerator.
-    static func `enum`(_ enm: String) -> Value {
+    public static func `enum`(_ enm: String) -> Value {
         Value(value: .enumValue(enm))
     }
     
     /* Wrappers */
     
-    static func list<T>(_ elements: [T], _ encoder: (T) -> Value) -> Value {
+    public static func list<T>(_ elements: [T], _ encoder: (T) -> Value) -> Value {
         Value(value: .list(elements.map(encoder)))
     }
     
@@ -75,7 +75,7 @@ public struct Value {
     
     // MARK: - Private implementation
     
-    fileprivate indirect enum _Value {
+    private indirect enum _Value {
         case `nil`
         /* Scalar */
         case int(Int)

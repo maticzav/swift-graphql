@@ -161,6 +161,11 @@ public enum GraphQL {
         public var enums: [FullType] {
             types.filter { $0.kind == .enumeration && !$0.isBuiltIn }
         }
+        
+        /// Returns object definitions from schema.
+        public var inputObjects: [FullType] {
+            types.filter { $0.kind == .object && !$0.isBuiltIn }
+        }
     }
     
     public enum TypeKind: String, Codable, Equatable {
@@ -356,6 +361,23 @@ public enum GraphQL {
                 return "Int"
             case .float:
                 return "Float"
+            case .custom(let scalar):
+                return scalar
+            }
+        }
+        
+        public var swiftType: String {
+            switch self {
+            case .id:
+                return "String"
+            case .string:
+                return "String"
+            case .boolean:
+                return "Bool"
+            case .integer:
+                return "Int"
+            case .float:
+                return "Double"
             case .custom(let scalar):
                 return scalar
             }

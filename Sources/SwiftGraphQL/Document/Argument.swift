@@ -1,8 +1,13 @@
 import Foundation
 
 public struct Argument {
-    var name: String
-    var value: Value
+    fileprivate var name: String
+    fileprivate var value: Value
+    
+    public init(name: String, value: Value) {
+        self.name = name
+        self.value = value
+    }
 }
 
 // MARK: - Methods

@@ -182,7 +182,7 @@ extension GraphQLCodegen {
                 [ "let field = GraphQLField.composite("
                 , "    name: \"\(field.name)\","
                 , "    arguments: ["
-                , generateSelectionArguments(for: field).map { "    \($0)" }.joined(separator: "\n")
+                , generateSelectionArguments(for: field).map { "        \($0)" }.joined(separator: "\n")
                 , "    ],"
                 , "    selection: selection.selection"
                 , ")"
@@ -193,7 +193,7 @@ extension GraphQLCodegen {
     /// Generates a dictionary of argument builders.
     private static func generateSelectionArguments(for field: GraphQL.Field) -> [String] {
         field.args
-            .map { #""\#($0.name)": \#(generateArgumentEncoder($0.name, for: $0.type)),"# }
+            .map { #"Argument(name: "\#($0.name)", value: \#(generateArgumentEncoder($0.name, for: $0.type))),"# }
     }
     
     /// Generates a function that will encode the argument.
@@ -221,15 +221,13 @@ extension GraphQLCodegen {
     /// Generates an encoder for scalar type.
     private static func generateScalarArgumentEncoder(_ paramName: String, for scalar: GraphQL.Scalar) -> String {
         switch scalar {
-        case .id:
-            return "Value.id(\(paramName))"
         case .boolean:
             return "Value.boolean(\(paramName))"
         case .float:
             return "Value.float(\(paramName))"
         case .integer:
             return "Value.int(\(paramName))"
-        case .string:
+        case .string, .id:
             return "Value.string(\(paramName))"
         case .custom(_):
             return "" // TODO: Custom input scalars?
