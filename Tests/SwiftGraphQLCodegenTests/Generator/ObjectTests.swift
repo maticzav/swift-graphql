@@ -6,15 +6,11 @@ final class ObjectTests: XCTestCase {
     
     func testGenerateObject() {
         /* Type */
-        let type = GraphQL.FullType(
-            kind: .object,
+        let type = GraphQL.ObjectType(
             name: "Query",
             description: nil,
-            fields: nil,
-            inputFields: nil,
-            interfaces: nil,
-            enumValues: nil,
-            possibleTypes: nil
+            fields: [],
+            interfaces: []
         )
         
         /* Test */

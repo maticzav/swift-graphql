@@ -56,7 +56,7 @@ final class SchemaTests: XCTestCase {
         let value = GraphQL.parse(json.data(using: .utf8)!)
         let expected = GraphQL.Schema(
             types: [
-                GraphQL.FullType(
+                GraphQL.InstrospectionType(
                     kind: GraphQL.TypeKind.object,
                     name: "Human",
                     description: "A humanoid creature in the Star Wars universe.",
@@ -91,7 +91,7 @@ final class SchemaTests: XCTestCase {
     func testSchemaObjects() {
         let schema = GraphQL.Schema(
             types: [
-                GraphQL.FullType(
+                GraphQL.InstrospectionType(
                     kind: GraphQL.TypeKind.object,
                     name: "Object",
                     description: nil,
@@ -101,7 +101,7 @@ final class SchemaTests: XCTestCase {
                     enumValues: nil,
                     possibleTypes: nil
                 ),
-                GraphQL.FullType(
+                GraphQL.InstrospectionType(
                     kind: GraphQL.TypeKind.object,
                     name: "__Object",
                     description: nil,
@@ -111,7 +111,7 @@ final class SchemaTests: XCTestCase {
                     enumValues: nil,
                     possibleTypes: nil
                 ),
-                GraphQL.FullType(
+                GraphQL.InstrospectionType(
                     kind: GraphQL.TypeKind.enumeration,
                     name: "Enum",
                     description: nil,
@@ -139,7 +139,7 @@ final class SchemaTests: XCTestCase {
     func testSchemaEnums() {
         let schema = GraphQL.Schema(
             types: [
-                GraphQL.FullType(
+                GraphQL.InstrospectionType(
                     kind: GraphQL.TypeKind.enumeration,
                     name: "Enum",
                     description: nil,
@@ -149,7 +149,7 @@ final class SchemaTests: XCTestCase {
                     enumValues: nil,
                     possibleTypes: nil
                 ),
-                GraphQL.FullType(
+                GraphQL.InstrospectionType(
                     kind: GraphQL.TypeKind.enumeration,
                     name: "__Enum",
                     description: nil,
@@ -159,7 +159,7 @@ final class SchemaTests: XCTestCase {
                     enumValues: nil,
                     possibleTypes: nil
                 ),
-                GraphQL.FullType(
+                GraphQL.InstrospectionType(
                     kind: GraphQL.TypeKind.object,
                     name: "Object",
                     description: nil,
@@ -371,9 +371,6 @@ final class SchemaTests: XCTestCase {
             GraphQL.TypeRef.nonNull(.list(.named(.scalar(.id)))).namedType,
             GraphQL.NamedType.scalar(.id)
         )
-        XCTAssertTrue(GraphQL.TypeRef.nonNull(.named(.scalar(.id))).isWrapped)
-        XCTAssertFalse(GraphQL.TypeRef.named(.scalar(.id)).isWrapped)
-        
     }
     
     /* Named Type */

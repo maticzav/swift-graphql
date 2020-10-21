@@ -13,17 +13,24 @@ extension GraphQLCodegen {
     static func generate(from schema: GraphQL.Schema) -> String {
         /* Data */
         
-        let operations: [(name: String, type: GraphQL.FullType)] = [
+        // ObjectTypes for operations
+        let operations: [(name: String, type: GraphQL.ObjectType)] = [
             ("RootQuery", schema.queryType.name.pascalCase),
             ("RootMutation",schema.mutationType?.name.pascalCase),
             ("RootSubscription",schema.subscriptionType?.name.pascalCase)
         ].compactMap { (name, operation) in
-            schema.types.first(where: { $0.name == operation }).map { (name, $0) }
+            schema.objects.first(where: { $0.name == operation }).map { (name, $0) }
         }
         
-        let objects: [(name: String, type: GraphQL.FullType)] = schema.objects.map {
-            (name: generateObjectTypeLock(for: $0.name.pascalCase), type: $0)
-        }
+        // Object types for all other objects.
+        let objects: [(name: String, type: GraphQL.ObjectType)] = schema.objects
+            .filter { !schema.operations.contains($0.name)}
+            .map { (name: generateObjectTypeLock(for: $0.name.pascalCase), type: $0) }
+        
+        // Phantom type references
+        var types = [GraphQL.NamedType]()
+        types.append(contentsOf: schema.objects.map { .object($0) })
+        types.append(contentsOf: schema.inputObjects.map { .inputObject($0) })
         
         /* Generate the API. */
         let code = """
@@ -35,7 +42,7 @@ extension GraphQLCodegen {
 
             // MARK: - Objects
 
-            \(generatePhantomTypes(for: schema.objects))
+            \(generatePhantomTypes(for: types))
 
             // MARK: - Selection
 

@@ -5,16 +5,15 @@ import XCTest
 final class FileTests: XCTestCase {
     func testGenerateFromSchema() {
         let schema = GraphQL.Schema(
+            description: nil,
             types: [
-                GraphQL.FullType(
-                    kind: .object,
-                    name: "Query",
-                    description: nil,
-                    fields: nil,
-                    inputFields: nil,
-                    interfaces: nil,
-                    enumValues: nil,
-                    possibleTypes: nil
+                .object(
+                    GraphQL.ObjectType(
+                        name: "Query",
+                        description: nil,
+                        fields: [],
+                        interfaces: []
+                    )
                 )
             ],
             queryType: GraphQL.Operation(name: "Query"),

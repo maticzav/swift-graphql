@@ -2,9 +2,9 @@ import Foundation
 
 extension GraphQLCodegen {
     /// Generates struct that is applicable to input object.
-    static func generateInputObject(_ name: String, for type: GraphQL.FullType) -> String {
+    static func generateInputObject(_ name: String, for type: GraphQL.InputObjectType) -> String {
         [ "struct \(name): Codable {"
-        , (type.inputFields ?? [])
+        , type.inputFields
             .map(generateInputField)
             .joined(separator: "\n")
         , "}"
@@ -28,20 +28,21 @@ extension GraphQLCodegen {
         field.description.map { "/// \($0)" }
     }
     
-    private static func generatePropertyType(for ref: GraphQL.TypeRef) -> String {
+    private static func generatePropertyType(for ref: GraphQL.InputTypeRef) -> String {
         generatePropertyType(for: ref.inverted)
     }
     
-    private static func generatePropertyType(for ref: GraphQL.InvertedTypeRef) -> String {
+    private static func generatePropertyType(for ref: GraphQL.InvertedInputTypeRef) -> String {
         switch ref {
         case .named(let named):
             switch named {
             case .scalar(let scalar):
-                return scalar.swiftType
-            case .enumeration(let enm):
-                return enm
-            default:
-                return "" // TODO
+                // TODO:
+                return scalar.name
+            case .enum(let enm):
+                return enm.name
+            case .inputObject(let inputObject):
+                return inputObject.name.pascalCase
             }
         case .list(let subref):
             return "[\(generatePropertyType(for: subref))]"

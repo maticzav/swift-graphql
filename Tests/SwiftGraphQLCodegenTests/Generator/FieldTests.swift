@@ -8,7 +8,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: "Object identifier.",
             args: [],
-            type: .named(.scalar(.id)),
+            type: .named(.scalar(GraphQL.ScalarType(name: "ID", description: nil))),
             isDeprecated: true,
             deprecationReason: "Use ID instead."
         )
@@ -46,7 +46,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: nil,
             args: [],
-            type: .nonNull(.named(.scalar(.id))),
+            type: .nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -80,7 +80,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: nil,
             args: [],
-            type: .named(.scalar(.id)),
+            type: .named(.scalar(GraphQL.ScalarType(name: "ID", description: nil))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -114,7 +114,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: nil,
             args: [],
-            type: .list(.nonNull(.named(.scalar(.id)))),
+            type: .list(.nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil))))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -148,7 +148,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: nil,
             args: [],
-            type: .nonNull(.list(.nonNull(.named(.scalar(.id))))),
+            type: .nonNull(.list(.nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -289,7 +289,7 @@ final class FieldTests: XCTestCase {
             name: "hero",
             description: nil,
             args: [],
-            type: .nonNull(.named(.object("Hero"))),
+            type: .nonNull(.named(.object(GraphQL.ObjectType(name: "Hero", description: nil, fields: [], interfaces: [])))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -399,11 +399,11 @@ final class FieldTests: XCTestCase {
                 GraphQL.InputValue(
                     name: "id",
                     description: nil,
-                    type: .nonNull(.named(.scalar(.id))),
+                    type: .nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))),
                     defaultValue: nil
                 )
             ],
-            type: .nonNull(.named(.scalar(.id))),
+            type: .nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))),
             isDeprecated: false,
             deprecationReason: nil
         )

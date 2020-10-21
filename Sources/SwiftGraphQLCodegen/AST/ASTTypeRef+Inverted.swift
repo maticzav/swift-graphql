@@ -1,15 +1,19 @@
+import Foundation
+
 extension GraphQL {
-    indirect public enum InvertedTypeRef: Equatable {
-        case named(GraphQL.NamedType)
+    indirect public enum InvertedTypeRef<Type> {
+        case named(Type)
         case nullable(InvertedTypeRef)
         case list(InvertedTypeRef)
     }
 }
 
-// MARK: - Conversions
+extension GraphQL.InvertedTypeRef: Equatable where Type: Equatable {}
+
+// MARK: - Conversion
 
 extension GraphQL.TypeRef {
-    public var inverted: GraphQL.InvertedTypeRef {
+    var inverted: GraphQL.InvertedTypeRef<Type> {
         switch self {
         case .named(let named):
             return .nullable(.named(named))
@@ -28,7 +32,7 @@ extension GraphQL.TypeRef {
 }
 
 extension GraphQL.InvertedTypeRef {
-    public var inverted: GraphQL.TypeRef {
+    var inverted: GraphQL.TypeRef<Type> {
         switch self {
         case .named(let named):
             return .nonNull(.named(named))
@@ -44,4 +48,12 @@ extension GraphQL.InvertedTypeRef {
             }
         }
     }
+}
+
+// MARK: - Type Alias
+
+extension GraphQL {
+    typealias InvertedNamedTypeRef = InvertedTypeRef<NamedType>
+    typealias InvertedOutputTypeRef = InvertedTypeRef<OutputType>
+    typealias InvertedInputTypeRef = InvertedTypeRef<InputType>
 }

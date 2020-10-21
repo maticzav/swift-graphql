@@ -4,15 +4,10 @@ import XCTest
 
 final class InputObjectTests: XCTestCase {
     func testEmptyInputObject() {
-        let type = GraphQL.FullType(
-            kind: .inputObject,
+        let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
-            fields: nil,
-            inputFields: [],
-            interfaces: nil,
-            enumValues: nil,
-            possibleTypes: nil
+            inputFields: []
         )
         
         /* Tests */
@@ -31,23 +26,17 @@ final class InputObjectTests: XCTestCase {
     // MARK: - Fields
     
     func testFieldDocs() {
-        let type = GraphQL.FullType(
-            kind: .inputObject,
+        let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
-            fields: nil,
             inputFields: [
                 /* Scalar, Docs */
                 GraphQL.InputValue(
                     name: "id",
                     description: "Field description.",
-                    type: .named(.scalar(.id)),
-                    defaultValue: nil
+                    type: .named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))
                 ),
-            ],
-            interfaces: nil,
-            enumValues: nil,
-            possibleTypes: nil
+            ]
         )
         
         /* Tests */
@@ -65,57 +54,17 @@ final class InputObjectTests: XCTestCase {
     }
     
     func testScalarField() {
-        let type = GraphQL.FullType(
-            kind: .inputObject,
+        let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
-            fields: nil,
             inputFields: [
                 /* Scalar, Docs */
                 GraphQL.InputValue(
                     name: "id",
                     description: "Field description.",
-                    type: .named(.scalar(.id)),
-                    defaultValue: nil
+                    type: .named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))
                 ),
-            ],
-            interfaces: nil,
-            enumValues: nil,
-            possibleTypes: nil
-        )
-        
-        /* Tests */
-        let expected = """
-        struct InputObjectTest: Codable {
-            /// Field description.
-            let id: String?
-        }
-        """
-        
-        XCTAssertEqual(
-            GraphQLCodegen.generateInputObject("InputObjectTest", for: type),
-            expected
-        )
-    }
-    
-    func testDefaultValueField() {
-        let type = GraphQL.FullType(
-            kind: .inputObject,
-            name: "InputObject",
-            description: nil,
-            fields: nil,
-            inputFields: [
-                /* Scalar, default value */
-                GraphQL.InputValue(
-                    name: "int",
-                    description: nil,
-                    type: .nonNull(.named(.scalar(.integer))),
-                    defaultValue: "15"
-                ),
-            ],
-            interfaces: nil,
-            enumValues: nil,
-            possibleTypes: nil
+            ]
         )
         
         /* Tests */

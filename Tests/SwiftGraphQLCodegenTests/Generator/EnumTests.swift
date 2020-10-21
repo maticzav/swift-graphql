@@ -4,15 +4,10 @@ import XCTest
 
 final class EnumTests: XCTestCase {
     func testGenerateEmptyEnum() {
-        let type = GraphQL.FullType(
-            kind: .enumeration,
+        let type = GraphQL.EnumType(
             name: "Episodes",
             description: "Collection of all StarWars episodes.",
-            fields: nil,
-            inputFields: nil,
-            interfaces: nil,
-            enumValues: nil,
-            possibleTypes: nil
+            enumValues: []
         )
         
         let expected = """
@@ -28,13 +23,9 @@ final class EnumTests: XCTestCase {
     }
     
     func testGenerateEnumWithoutDescription() {
-        let type = GraphQL.FullType(
-            kind: .enumeration,
+        let type = GraphQL.EnumType(
             name: "Episodes",
-            description: nil,
-            fields: nil,
-            inputFields: nil,
-            interfaces: nil,
+            description: "Collection of all StarWars episodes.",
             enumValues: [
                 GraphQL.EnumValue(
                     name: "NEWHOPE",
@@ -42,8 +33,7 @@ final class EnumTests: XCTestCase {
                     isDeprecated: false,
                     deprecationReason: nil
                 ),
-            ],
-            possibleTypes: nil
+            ]
         )
         
         let expected = """
@@ -64,13 +54,9 @@ final class EnumTests: XCTestCase {
     func testGenerateEnumWithDescription() {
         /* Declaration */
         
-        let type = GraphQL.FullType(
-            kind: .enumeration,
+        let type = GraphQL.EnumType(
             name: "Episodes",
             description: "Collection of all StarWars episodes.",
-            fields: nil,
-            inputFields: nil,
-            interfaces: nil,
             enumValues: [
                 GraphQL.EnumValue(
                     name: "NEWHOPE",
@@ -96,8 +82,7 @@ final class EnumTests: XCTestCase {
                     isDeprecated: true,
                     deprecationReason: nil
                 ),
-            ],
-            possibleTypes: nil
+            ]
         )
         
         let expected = """

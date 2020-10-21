@@ -4,7 +4,7 @@ import XCTest
 final class InvertedTypeRefTests: XCTestCase {
     func testInversion() {
         // [String]!
-        let string = GraphQL.NamedType.scalar(.string)
+        let string = GraphQL.NamedType.scalar(GraphQL.ScalarType(name: "ID", description: nil))
         let typeRef = GraphQL.TypeRef.nonNull(.list(.list(.named(string))))
         let iTypeRef = GraphQL.InvertedTypeRef.list(.list(.nullable(.named(string))))
         
@@ -13,7 +13,7 @@ final class InvertedTypeRefTests: XCTestCase {
     }
     
     func testNullability() {
-        let string = GraphQL.NamedType.scalar(.string)
+        let string = GraphQL.NamedType.scalar(GraphQL.ScalarType(name: "ID", description: nil))
         
         // String!
         

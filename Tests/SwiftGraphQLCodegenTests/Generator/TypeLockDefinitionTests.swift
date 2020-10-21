@@ -4,37 +4,22 @@ import XCTest
 final class TypeLockDefinitionTests: XCTestCase {
     func testGeneratePhantomTypes() {
         /* Data */
-        let types = [
-            GraphQL.FullType(
-                kind: GraphQL.TypeKind.object,
-                name: "Hero",
-                description: nil,
-                fields: nil,
-                inputFields: nil,
-                interfaces: nil,
-                enumValues: nil,
-                possibleTypes: nil
+        let types: [GraphQL.NamedType] = [
+            .object(
+                GraphQL.ObjectType(
+                    name: "Hero",
+                    description: nil,
+                    fields: [],
+                    interfaces: []
+                )
             ),
-            GraphQL.FullType(
-                kind: GraphQL.TypeKind.object,
-                name: "Human",
-                description: nil,
-                fields: nil,
-                inputFields: nil,
-                interfaces: nil,
-                enumValues: nil,
-                possibleTypes: nil
-            ),
-            GraphQL.FullType(
-                kind: GraphQL.TypeKind.object,
-                name: "Episode",
-                description: nil,
-                fields: nil,
-                inputFields: nil,
-                interfaces: nil,
-                enumValues: nil,
-                possibleTypes: nil
-            ),
+            .inputObject(
+                GraphQL.InputObjectType(
+                    name: "Human",
+                    description: nil,
+                    inputFields: []
+                )
+            )
         ]
         
         /* Types */
@@ -43,12 +28,10 @@ final class TypeLockDefinitionTests: XCTestCase {
         enum Object {
             enum Hero {}
             enum Human {}
-            enum Episode {}
         }
 
         typealias HeroObject = Object.Hero
         typealias HumanObject = Object.Human
-        typealias EpisodeObject = Object.Episode
         """
         
         XCTAssertEqual(
