@@ -1,4 +1,11 @@
-import { Character, Human, Droid } from './types/backingTypes'
+export type Human = {
+  type: 'Human',
+  id: string,
+  name: string,
+  friends: string[],
+  appears_in: number[],
+  home_planet?: string
+}
 
 /**
  * Copied from GraphQL JS:
@@ -68,57 +75,6 @@ const humanData = {
   '1004': tarkin,
 } as { [key in string]: Human }
 
-const threepio = {
-  type: 'Droid',
-  id: '2000',
-  name: 'C-3PO',
-  friends: ['1000', '1002', '1003', '2001'],
-  appears_in: [4, 5, 6],
-  primary_function: 'Protocol',
-}
-
-const artoo = {
-  type: 'Droid',
-  id: '2001',
-  name: 'R2-D2',
-  friends: ['1000', '1002', '1003'],
-  appears_in: [4, 5, 6],
-  primary_function: 'Astromech',
-}
-
-const droidData = {
-  '2000': threepio,
-  '2001': artoo,
-} as { [key in string]: Droid }
-
-/**
- * Helper function to get a character by ID.
- */
-function getCharacter(id: string) {
-  // Returning a promise just to illustrate GraphQL.js's support.
-  return Promise.resolve(humanData[id] || droidData[id])
-}
-
-/**
- * Allows us to query for a character's friends.
- */
-export function getFriends(character: Character): Promise<Human[]> {
-  // Notice that GraphQL accepts Arrays of Promises.
-  return Promise.all(character.friends.map(id => getCharacter(id)))
-}
-
-/**
- * Allows us to fetch the undisputed hero of the Star Wars trilogy, R2-D2.
- */
-export function getHero(episode?: number | null): Character {
-  if (episode === 5) {
-    // Luke is the hero of Episode V.
-    return luke as Human
-  }
-  // Artoo is the hero otherwise.
-  return artoo as Droid
-}
-
 export const allHumans = Object.keys(humanData).map(key => humanData[key])
 
 /**
@@ -128,11 +84,3 @@ export function getHuman(id: string): Human {
   return humanData[id]
 }
 
-export const allDroids = Object.keys(droidData).map(key => droidData[key])
-
-/**
- * Allows us to query for the droid with the given id.
- */
-export function getDroid(id: string): Droid {
-  return droidData[id]
-}

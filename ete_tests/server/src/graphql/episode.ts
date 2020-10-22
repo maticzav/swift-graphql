@@ -12,7 +12,3 @@ export const Episode = enumType({
   members: OriginalEpisodes,
 })
 
-export const MoreEpisodes = enumType({
-  name: 'MoreEpisodes',
-  members: [...OriginalEpisodes, 'OTHER'],
-})

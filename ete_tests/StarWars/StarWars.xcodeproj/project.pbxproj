@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		02208E77253C596D00014850 /* StarWarsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02208E76253C596D00014850 /* StarWarsApp.swift */; };
+		02208E77253C596D00014850 /* Main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02208E76253C596D00014850 /* Main.swift */; };
 		02208E79253C596D00014850 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02208E78253C596D00014850 /* ContentView.swift */; };
 		02208E7B253C596E00014850 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02208E7A253C596E00014850 /* Assets.xcassets */; };
 		02208E7E253C596E00014850 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02208E7D253C596E00014850 /* Preview Assets.xcassets */; };
@@ -17,7 +17,7 @@
 
 /* Begin PBXFileReference section */
 		02208E73253C596D00014850 /* StarWars.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StarWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		02208E76253C596D00014850 /* StarWarsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarWarsApp.swift; sourceTree = "<group>"; };
+		02208E76253C596D00014850 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
 		02208E78253C596D00014850 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		02208E7A253C596E00014850 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		02208E7D253C596E00014850 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -65,7 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				02CA03ED253CA05B00B05BD1 /* API.swift */,
-				02208E76253C596D00014850 /* StarWarsApp.swift */,
+				02208E76253C596D00014850 /* Main.swift */,
 				02208E78253C596D00014850 /* ContentView.swift */,
 				02208E7A253C596E00014850 /* Assets.xcassets */,
 				02208E7F253C596E00014850 /* Info.plist */,
@@ -167,7 +167,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"${SRCROOT}\"/Codegen\nxcrun -sdk macosx swift run\n";
+			shellScript = "# cd \"${SRCROOT}\"/Codegen\n# xcrun -sdk macosx swift run\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -178,7 +178,7 @@
 			files = (
 				02208E79253C596D00014850 /* ContentView.swift in Sources */,
 				02CA03EE253CA05C00B05BD1 /* API.swift in Sources */,
-				02208E77253C596D00014850 /* StarWarsApp.swift in Sources */,
+				02208E77253C596D00014850 /* Main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

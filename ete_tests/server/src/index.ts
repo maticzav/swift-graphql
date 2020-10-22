@@ -1,4 +1,4 @@
-import { makeSchema, nullabilityGuardPlugin } from '@nexus/schema'
+import { makeSchema } from '@nexus/schema'
 import { ApolloServer } from 'apollo-server'
 import * as path from 'path'
 
@@ -16,10 +16,8 @@ const schema = makeSchema({
     ),
   },
   nonNullDefaults: {
-    input: true,
     output: true,
   },
-  plugins: [],
   typegenAutoConfig: {
     sources: [
       {
@@ -41,18 +39,7 @@ const server = new ApolloServer({
   schema,
   debug: true,
   plugins: [
-    {
-      // Fires whenever a GraphQL request is received from a client.
-      requestDidStart(requestContext) {
-        console.log('Request started! Query:\n' + requestContext.request.query)
-
-        return {
-          willSendResponse(context) {
-            console.log(context.errors)
-          },
-        }
-      },
-    },
+    // {
   ],
 })
 

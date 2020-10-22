@@ -13,7 +13,6 @@ export interface NexusGenInputs {}
 
 export interface NexusGenEnums {
   Episode: 5 | 6 | 4
-  MoreEpisodes: 5 | 6 | 4 | 'OTHER'
 }
 
 export interface NexusGenScalars {
@@ -25,15 +24,16 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenRootTypes {
-  Droid: swapi.Droid
-  Human: swapi.Human
+  Human: {
+    // root type
+    id: string // ID!
+    name: string // String!
+  }
   Query: {}
-  Character: swapi.Character
 }
 
 export interface NexusGenAllTypes extends NexusGenRootTypes {
   Episode: NexusGenEnums['Episode']
-  MoreEpisodes: NexusGenEnums['MoreEpisodes']
   String: NexusGenScalars['String']
   Int: NexusGenScalars['Int']
   Float: NexusGenScalars['Float']
@@ -42,86 +42,39 @@ export interface NexusGenAllTypes extends NexusGenRootTypes {
 }
 
 export interface NexusGenFieldTypes {
-  Droid: {
-    // field return type
-    appearsIn: Array<NexusGenEnums['Episode'] | null> // [Episode]!
-    friends: Array<NexusGenRootTypes['Character'] | null> // [Character]!
-    id: string // String!
-    name: string // String!
-    primaryFunction: string // String!
-  }
   Human: {
     // field return type
-    appearsIn: Array<NexusGenEnums['Episode'] | null> // [Episode]!
-    friends: Array<NexusGenRootTypes['Character'] | null> // [Character]!
     homePlanet: string | null // String
-    id: string // String!
+    id: string // ID!
     name: string // String!
   }
   Query: {
     // field return type
-    droid: NexusGenRootTypes['Droid'] // Droid!
-    hero: NexusGenRootTypes['Character'] // Character!
-    human: NexusGenRootTypes['Human'] // Human!
+    human: NexusGenRootTypes['Human'] | null // Human
     humans: Array<NexusGenRootTypes['Human'] | null> // [Human]!
-  }
-  Character: {
-    // field return type
-    appearsIn: Array<NexusGenEnums['Episode'] | null> // [Episode]!
-    friends: Array<NexusGenRootTypes['Character'] | null> // [Character]!
-    id: string // String!
-    name: string // String!
   }
 }
 
 export interface NexusGenArgTypes {
-  Droid: {
-    appearsIn: {
-      // args
-      id: string // ID!
-    }
-  }
-  Human: {
-    appearsIn: {
-      // args
-      id: string // ID!
-    }
-  }
   Query: {
-    droid: {
-      // args
-      id: string // String!
-    }
-    hero: {
-      // args
-      episode: NexusGenEnums['Episode'] // Episode!
-    }
     human: {
-      // args
-      id: string // String!
-    }
-  }
-  Character: {
-    appearsIn: {
       // args
       id: string // ID!
     }
   }
 }
 
-export interface NexusGenAbstractResolveReturnTypes {
-  Character: 'Droid' | 'Human'
-}
+export interface NexusGenAbstractResolveReturnTypes {}
 
 export interface NexusGenInheritedFields {}
 
-export type NexusGenObjectNames = 'Droid' | 'Human' | 'Query'
+export type NexusGenObjectNames = 'Human' | 'Query'
 
 export type NexusGenInputNames = never
 
-export type NexusGenEnumNames = 'Episode' | 'MoreEpisodes'
+export type NexusGenEnumNames = 'Episode'
 
-export type NexusGenInterfaceNames = 'Character'
+export type NexusGenInterfaceNames = never
 
 export type NexusGenScalarNames = 'Boolean' | 'Float' | 'ID' | 'Int' | 'String'
 
