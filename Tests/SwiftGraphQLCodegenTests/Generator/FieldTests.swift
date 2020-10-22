@@ -8,7 +8,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: "Object identifier.",
             args: [],
-            type: .named(.scalar(GraphQL.ScalarType(name: "ID", description: nil))),
+            type: .named(.scalar("ID")),
             isDeprecated: true,
             deprecationReason: "Use ID instead."
         )
@@ -46,7 +46,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: nil,
             args: [],
-            type: .nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))),
+            type: .nonNull(.named(.scalar("ID"))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -80,7 +80,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: nil,
             args: [],
-            type: .named(.scalar(GraphQL.ScalarType(name: "ID", description: nil))),
+            type: .named(.scalar("ID")),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -114,7 +114,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: nil,
             args: [],
-            type: .list(.nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil))))),
+            type: .list(.nonNull(.named(.scalar("ID")))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -148,7 +148,7 @@ final class FieldTests: XCTestCase {
             name: "id",
             description: nil,
             args: [],
-            type: .nonNull(.list(.nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))))),
+            type: .nonNull(.list(.nonNull(.named(.scalar("ID"))))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -184,7 +184,7 @@ final class FieldTests: XCTestCase {
             name: "episode",
             description: nil,
             args: [],
-            type: .nonNull(.named(.enumeration("Episode"))),
+            type: .nonNull(.named(.enum("Episode"))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -219,7 +219,7 @@ final class FieldTests: XCTestCase {
             name: "episode",
             description: nil,
             args: [],
-            type: .named(.enumeration("Episode")),
+            type: .named(.enum("Episode")),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -253,7 +253,7 @@ final class FieldTests: XCTestCase {
             name: "episode",
             description: nil,
             args: [],
-            type: .nonNull(.list(.named(.enumeration("Episode")))),
+            type: .nonNull(.list(.named(.enum("Episode")))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -289,7 +289,7 @@ final class FieldTests: XCTestCase {
             name: "hero",
             description: nil,
             args: [],
-            type: .nonNull(.named(.object(GraphQL.ObjectType(name: "Hero", description: nil, fields: [], interfaces: [])))),
+            type: .nonNull(.named(.object("Hero"))),
             isDeprecated: false,
             deprecationReason: nil
         )
@@ -399,11 +399,10 @@ final class FieldTests: XCTestCase {
                 GraphQL.InputValue(
                     name: "id",
                     description: nil,
-                    type: .nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))),
-                    defaultValue: nil
+                    type: .nonNull(.named(.scalar("ID")))
                 )
             ],
-            type: .nonNull(.named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))),
+            type: .nonNull(.named(.scalar("ID"))),
             isDeprecated: false,
             deprecationReason: nil
         )

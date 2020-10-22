@@ -34,7 +34,7 @@ final class InputObjectTests: XCTestCase {
                 GraphQL.InputValue(
                     name: "id",
                     description: "Field description.",
-                    type: .named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))
+                    type: .named(.scalar("ID"))
                 ),
             ]
         )
@@ -62,7 +62,7 @@ final class InputObjectTests: XCTestCase {
                 GraphQL.InputValue(
                     name: "id",
                     description: "Field description.",
-                    type: .named(.scalar(GraphQL.ScalarType(name: "ID", description: nil)))
+                    type: .named(.scalar("ID"))
                 ),
             ]
         )

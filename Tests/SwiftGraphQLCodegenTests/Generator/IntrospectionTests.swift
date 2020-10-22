@@ -12,7 +12,11 @@ final class IntrospectionTests: XCTestCase {
         XCTAssertNotNil(schema)
         XCTAssertEqual(
             schema.objects.map { $0.name },
-            ["Droid", "Human"]
+            [
+                "Droid",
+                "Human",
+                "Query",
+            ]
         )
     }
 }

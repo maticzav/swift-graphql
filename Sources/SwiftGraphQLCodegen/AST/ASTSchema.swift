@@ -37,6 +37,9 @@ extension GraphQL.Schema {
         types.compactMap {
             switch $0 {
             case .object(let type):
+                if type.isInternal {
+                    return nil
+                }
                 return type
             default:
                 return nil
@@ -49,6 +52,9 @@ extension GraphQL.Schema {
         types.compactMap {
             switch $0 {
             case .enum(let type):
+                if type.isInternal {
+                    return nil
+                }
                 return type
             default:
                 return nil
@@ -61,6 +67,9 @@ extension GraphQL.Schema {
         types.compactMap {
             switch $0 {
             case .inputObject(let type):
+                if type.isInternal {
+                    return nil
+                }
                 return type
             default:
                 return nil

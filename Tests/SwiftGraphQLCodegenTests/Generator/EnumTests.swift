@@ -37,7 +37,7 @@ final class EnumTests: XCTestCase {
         )
         
         let expected = """
-        /// Episodes
+        /// Collection of all StarWars episodes.
         enum Episodes: String, CaseIterable, Codable {
             /// Released in 1977.
             case newhope = "NEWHOPE"

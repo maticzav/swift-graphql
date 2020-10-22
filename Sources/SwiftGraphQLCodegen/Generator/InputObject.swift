@@ -38,11 +38,11 @@ extension GraphQLCodegen {
             switch named {
             case .scalar(let scalar):
                 // TODO:
-                return scalar.name
+                return scalar
             case .enum(let enm):
-                return enm.name
+                return enm
             case .inputObject(let inputObject):
-                return inputObject.name.pascalCase
+                return inputObject.pascalCase
             }
         case .list(let subref):
             return "[\(generatePropertyType(for: subref))]"

@@ -49,7 +49,7 @@ extension GraphQLCodegen {
         case .scalar(_), .enum(_):
             return "\(field.name.camelCase)(\(generateFnArguments(for: field.args)))"
         case .interface(_), .object(_), .union(_):
-            let typeLock = generateObjectTypeLock(for: field.type.namedType.type.name.pascalCase)
+            let typeLock = generateObjectTypeLock(for: field.type.namedType.name.pascalCase)
             let decoderType = generateDecoderType(typeLock, for: field.type)
             // Function generator
             if field.args.isEmpty {
@@ -82,11 +82,11 @@ extension GraphQLCodegen {
         case .named(let named):
             switch named {
             case .scalar(let scalar):
-                return scalar.name
+                return scalar
             case .enum(let enm):
-                return enm.name
+                return enm
             case .inputObject(let inputObject):
-                return inputObject.name.pascalCase
+                return inputObject.pascalCase
             }
         case .list(let subref):
             return "[\(generateArgumentType(for: subref))]"
@@ -101,9 +101,9 @@ extension GraphQLCodegen {
     private static func generateReturnType(for ref: GraphQL.OutputTypeRef) -> String {
         switch ref.namedType {
         case .scalar(let scalar):
-            return generateDecoderType(scalar.name, for: ref)
+            return generateDecoderType(scalar, for: ref)
         case .enum(let enm):
-            return generateDecoderType(enm.name, for: ref)
+            return generateDecoderType(enm, for: ref)
         case .interface(_),
             .object(_),
             .union(_):
@@ -115,21 +115,21 @@ extension GraphQLCodegen {
     /// Translates a scalar abstraction into Swift-compatible type.
     ///
     /// - Note: Every type is optional by default since we are comming from GraphQL world.
-    private static func generateReturnType(for scalar: GraphQL.Scalar) -> String {
-        // TODO: Generate custom ID types.
-        switch scalar {
-        case .boolean:
-            return "Bool"
-        case .float:
-            return "Double"
-        case .integer:
-            return "Int"
-        case .string, .id:
-            return "String"
-        case .custom(let type):
-            return "\(type)"
-        }
-    }
+//    private static func generateReturnType(for scalar: GraphQL.Scalar) -> String {
+//        // TODO: Generate custom ID types.
+//        switch scalar {
+//        case .boolean:
+//            return "Bool"
+//        case .float:
+//            return "Double"
+//        case .integer:
+//            return "Int"
+//        case .string, .id:
+//            return "String"
+//        case .custom(let type):
+//            return "\(type)"
+//        }
+//    }
     
     // MARK: - Selection
 
@@ -173,12 +173,6 @@ extension GraphQLCodegen {
         switch ref {
         case .named(let named):
             return "" // TODO!
-//            switch named {
-//            case .scalar(let scalar):
-//                return generateScalarArgumentEncoder(paramName, for: scalar)
-//            default:
-//                return "" // TODO
-//            }
         case .list(let subref):
             return "Value.list(\(paramName)) { \(generateArgumentEncoder("$0", for: subref)) }"
         case .nullable(let subref):
@@ -187,20 +181,20 @@ extension GraphQLCodegen {
     }
     
     /// Generates an encoder for scalar type.
-    private static func generateScalarArgumentEncoder(_ paramName: String, for scalar: GraphQL.Scalar) -> String {
-        switch scalar {
-        case .boolean:
-            return "Value.boolean(\(paramName))"
-        case .float:
-            return "Value.float(\(paramName))"
-        case .integer:
-            return "Value.int(\(paramName))"
-        case .string, .id:
-            return "Value.string(\(paramName))"
-        case .custom(_):
-            return "" // TODO: Custom input scalars?
-        }
-    }
+//    private static func generateScalarArgumentEncoder(_ paramName: String, for scalar: GraphQL.Scalar) -> String {
+//        switch scalar {
+//        case .boolean:
+//            return "Value.boolean(\(paramName))"
+//        case .float:
+//            return "Value.float(\(paramName))"
+//        case .integer:
+//            return "Value.int(\(paramName))"
+//        case .string, .id:
+//            return "Value.string(\(paramName))"
+//        case .custom(_):
+//            return "" // TODO: Custom input scalars?
+//        }
+//    }
     
     // MARK: - Decoders
 
@@ -271,7 +265,7 @@ extension GraphQLCodegen {
 //            let value = generateMockData(for: scalar)
 //            return generateMockWrapper(value, for: ref)
         case .enum(let enm):
-            let value = "\(enm.name).allCases.first!"
+            let value = "\(enm).allCases.first!"
             return generateMockWrapper(value, for: ref)
         case .interface(_), .object(_), .union(_):
             return "selection.mock()"
@@ -296,20 +290,20 @@ extension GraphQLCodegen {
     }
 
     /// Generates mock data for an abstract scalar type.
-    private static func generateMockData(for scalar: GraphQL.Scalar) -> String {
-        switch scalar {
-        case .id:
-            return "\"8378\""
-        case .boolean:
-            return "true"
-        case .float:
-            return "3.14"
-        case .integer:
-            return "42"
-        case .string:
-            return "\"Matic Zavadlal\""
-        case .custom(_): // TODO!
-            return ""
-        }
-    }
+//    private static func generateMockData(for scalar: GraphQL.Scalar) -> String {
+//        switch scalar {
+//        case .id:
+//            return "\"8378\""
+//        case .boolean:
+//            return "true"
+//        case .float:
+//            return "3.14"
+//        case .integer:
+//            return "42"
+//        case .string:
+//            return "\"Matic Zavadlal\""
+//        case .custom(_): // TODO!
+//            return ""
+//        }
+//    }
 }

@@ -53,7 +53,7 @@ extension GraphQL.InvertedTypeRef {
 // MARK: - Type Alias
 
 extension GraphQL {
-    typealias InvertedNamedTypeRef = InvertedTypeRef<NamedType>
-    typealias InvertedOutputTypeRef = InvertedTypeRef<OutputType>
-    typealias InvertedInputTypeRef = InvertedTypeRef<InputType>
+    typealias InvertedNamedTypeRef = InvertedTypeRef<NamedRef>
+    typealias InvertedOutputTypeRef = InvertedTypeRef<OutputRef>
+    typealias InvertedInputTypeRef = InvertedTypeRef<InputRef>
 }
