@@ -6,9 +6,9 @@ import Foundation
 */
 
 public enum Operation {
-    public enum Query {}
-    public enum Mutation {}
-    public enum Subscription {}
+    public struct Query: Decodable {}
+    public struct Mutation: Decodable {}
+    public struct Subscription: Decodable {}
 }
 
 public typealias RootQuery = Operation.Query
@@ -39,20 +39,29 @@ public struct GraphQLClient {
     
     /// Sends a query request to the server.
     public func send<Type>(selection: Selection<Type, RootQuery>, completionHandler: @escaping (Response<Type, RootQuery>) -> Void) -> Void {
-        perform(selection: selection, completionHandler: completionHandler)
+        perform(
+            operation: .query,
+            selection: selection,
+            completionHandler: completionHandler
+        )
     }
     
     /// Sends a mutation request to the server.
     public func send<Type>(selection: Selection<Type, RootMutation>, completionHandler: @escaping (Response<Type, RootMutation>) -> Void) -> Void {
-        perform(selection: selection, completionHandler: completionHandler)
+        perform(
+            operation: .mutation,
+            selection: selection,
+            completionHandler: completionHandler
+        )
     }
     
     /* Internals */
     
     private func perform<Type, TypeLock>(
+        operation: GraphQLOperationType,
         selection: Selection<Type, TypeLock>,
         completionHandler: @escaping (Response<Type, TypeLock>
-    ) -> Void) -> Void {
+    ) -> Void) -> Void where TypeLock: Decodable {
         /* Compose a request. */
         var request = URLRequest(url: endpoint)
         
@@ -60,7 +69,7 @@ public struct GraphQLClient {
         request.httpMethod = "POST"
         
         let query: [String: Any] = [
-            "query": selection.selection.serialize(for: .query)
+            "query": selection.selection.serialize(for: operation)
         ]
         
         request.httpBody = try! JSONSerialization.data(
@@ -82,7 +91,8 @@ public struct GraphQLClient {
             
             /* Serialize received JSON. */
             if let data = data {
-                return completionHandler(.success(GraphQLResult(data, with: selection)))
+                let result = try! GraphQLResult(data, with: selection)
+                return completionHandler(.success(result))
             }
         }
         

@@ -1,13 +1,15 @@
 import Foundation
 
+// MARK: - SelectionSet
+
 /// Global type used to select query fields.
-public class SelectionSet<Type, TypeLock> {
+public final class SelectionSet<Type, TypeLock> {
     private(set) var fields = [GraphQLField]() // selected fields
-    private var data: Any? // response data
+    private var data: TypeLock? // response data
     
     init() {}
     
-    init(data: Any) {
+    init(data: TypeLock) {
         /* This initializer is used to decode response into Swift data. */
         self.data = data
     }
@@ -17,7 +19,7 @@ public class SelectionSet<Type, TypeLock> {
     /// Lets generated code read the data.
     ///
     /// - Note: This function should only be used by the generated code.
-    public var response: Any? {
+    public var response: TypeLock? {
         data
     }
     
@@ -30,6 +32,17 @@ public class SelectionSet<Type, TypeLock> {
         self.fields.append(field)
     }
 }
+
+// MARK: - SelectionSet decoder
+
+extension SelectionSet: Decodable where TypeLock: Decodable {
+    public convenience init(from decoder: Decoder) throws {
+        let data = try TypeLock(from: decoder)
+        self.init(data: data)
+    }
+}
+
+// MARK: - Selection
 
 /// Global type used to wrap the selection.
 public struct Selection<Type, TypeLock> {
@@ -62,7 +75,7 @@ public struct Selection<Type, TypeLock> {
     /// Decodes JSON response into a return type of the selection set.
     ///
     /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
-    public func decode(data: Any) -> Type {
+    public func decode(data: TypeLock) -> Type {
         /* Construct a copy of the selection set, and use the new selection set to decode data. */
         let selectionSet = SelectionSet<Type, TypeLock>(data: data)
         return self.decoder(selectionSet)
@@ -76,11 +89,9 @@ public struct Selection<Type, TypeLock> {
     }
 }
 
+// MARK: - Selection Utility functions
 
-/* Selection Extension */
-
-
-extension Selection {
+extension Selection where TypeLock: Decodable {
     /// Lets you convert a type selection into a list selection.
     public var list: Selection<[Type], [TypeLock]> {
         return Selection<[Type], [TypeLock]> { selection in
@@ -89,7 +100,7 @@ extension Selection {
             
             /* Decoder */
             if let data = selection.response {
-                return (data as! [Any]).map { self.decode(data: $0) }
+                return data.map { self.decode(data: $0) }
             }
             return []
         }
@@ -103,7 +114,7 @@ extension Selection {
             
             /* Decoder */
             if let data = selection.response {
-                return self.decode(data: data)
+                return data.map { self.decode(data: $0) }
             }
             return nil
         }

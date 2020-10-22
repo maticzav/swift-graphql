@@ -11,7 +11,9 @@ extension GraphQLCodegen {
     ///     - endpoint: The URL of your GraphQL server.
     ///     - handler: Introspection schema handler.
     static func downloadFrom(_ endpoint: URL) throws -> GraphQL.Schema {
-        GraphQL.parse(try self.downloadFrom(endpoint))
+        let introspection: Data = try self.downloadFrom(endpoint)
+        let schema = try GraphQL.parse(introspection)
+        return schema
     }
     
     

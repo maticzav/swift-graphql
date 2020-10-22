@@ -102,9 +102,9 @@ public enum GraphQL {
     // MARK: - Methods
      
      /// Decodes the received schema representation into Swift abstract type.
-     static func parse(_ data: Data) -> Schema {
+     static func parse(_ data: Data) throws -> Schema {
          let decoder = JSONDecoder()
-         let result = try! decoder.decode(Reponse<IntrospectionQuery>.self, from: data)
+         let result = try decoder.decode(Reponse<IntrospectionQuery>.self, from: data)
          
          return result.data.schema
      }

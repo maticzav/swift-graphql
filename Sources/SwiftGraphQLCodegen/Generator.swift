@@ -26,4 +26,30 @@ public struct GraphQLCodegen {
         let schema: GraphQL.Schema = try self.downloadFrom(schemaURL)
         return self.generate(from: schema)
     }
+    
+    /// Generator options.
+    ///
+    /// - Parameters:
+    ///     - scalarMappings: A dicitonary of GraphQL scalar keys and Swift type mappings.
+    public struct Options {
+        typealias ScalarMap = [String: String]
+        
+        let scalarMappings: ScalarMap
+        
+        init(scalarMappings: ScalarMap = [:]) {
+            let map = builtInScalars.merging(scalarMappings, uniquingKeysWith: { (_, override) in override })
+            
+            self.scalarMappings = map
+        }
+        
+        // MARK: - Default values
+        
+        private let builtInScalars: ScalarMap = [
+            "ID": "String",
+            "String": "String",
+            "Int": "Int",
+            "Boolean": "Bool",
+            "Float": "Double"
+        ]
+    }
 }

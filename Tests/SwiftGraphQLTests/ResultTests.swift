@@ -2,24 +2,22 @@ import XCTest
 @testable import SwiftGraphQL
 
 final class ParserTests: XCTestCase {
-    func testSuccessfulResponse() {
+    func testSuccessfulResponse() throws {
         /* Data */
         let data: Data = """
         {
-          "data": {
-            "hello": "World!"
-          }
+          "data": "World!"
         }
         """.data(using: .utf8)!
-        let selection = Selection<String, Any> {
+        let selection = Selection<String, String> {
             if let data = $0.response {
-                return (data as! [String: String])["hello"]!
+                return data
             }
             
             return "wrong"
         }
         
-        let result = GraphQLResult(data, with: selection)
+        let result = try GraphQLResult(data, with: selection)
         
         /* Test */
         
@@ -27,7 +25,7 @@ final class ParserTests: XCTestCase {
         XCTAssertEqual(result.errors, nil)
     }
     
-    func testFailingResponse() {
+    func testFailingResponse() throws {
         /* Data */
         let response: Data = """
         {
@@ -38,20 +36,22 @@ final class ParserTests: XCTestCase {
               "path": [ "hero", "heroFriends", 1, "name" ]
             }
           ],
-          "data": {
-            "hero": {
-              "name": "R2-D2",
-              "heroFriends": []
-            }
-          }
+          "data": "data"
         }
         """.data(using: .utf8)!
+        let selection = Selection<String, String> {
+            if let data = $0.response {
+                return data
+            }
+            
+            return "wrong"
+        }
         
-        let result = GraphQLResult(response, with: Selection<String, Any> { _ in "ignored" })
+        let result = try GraphQLResult(response, with: selection)
         
         /* Test */
         
-        XCTAssertEqual(result.data, "ignored")
+        XCTAssertEqual(result.data, "data")
         XCTAssertEqual(result.errors, [
             GraphQLError(
                 message: "Message.",
@@ -60,21 +60,17 @@ final class ParserTests: XCTestCase {
         ])
     }
     
-    func testGraphQLResultEquality() {
+    func testGraphQLResultEquality() throws {
         /* Data */
         let data: Data = """
         {
-          "data": {
-            "hello": "World!"
-          }
+          "data": "World!"
         }
         """.data(using: .utf8)!
         
         let dataWithErrors: Data = """
         {
-          "data": {
-            "hello": "World!"
-          },
+          "data": "World!",
           "errors": [
             {
               "message": "Message.",
@@ -85,9 +81,9 @@ final class ParserTests: XCTestCase {
         }
         """.data(using: .utf8)!
         
-        let selection = Selection<String, Any> {
+        let selection = Selection<String, String> {
             if let data = $0.response {
-                return (data as! [String: String])["hello"]!
+                return data
             }
             
             return "wrong"
@@ -96,13 +92,13 @@ final class ParserTests: XCTestCase {
         /* Test */
         
         XCTAssertEqual(
-            GraphQLResult(data, with: selection),
-            GraphQLResult(data, with: selection)
+            try GraphQLResult(data, with: selection),
+            try GraphQLResult(data, with: selection)
         )
         
         XCTAssertNotEqual(
-            GraphQLResult(dataWithErrors, with: selection),
-            GraphQLResult(data, with: selection)
+            try GraphQLResult(dataWithErrors, with: selection),
+            try GraphQLResult(data, with: selection)
         )
     }
 }

@@ -5,37 +5,39 @@ public typealias JSONData = [String: Any]
 // MARK: - GraphQL Result
 
 public struct GraphQLResult<Type, TypeLock> {
-    private let response: Data
     private let selection: Selection<Type, TypeLock>
-    
-    init(_ response: Data, with selection: Selection<Type, TypeLock>) {
-        self.response = response
+    private let data: TypeLock?
+    let errors: [GraphQLError]?
+}
+
+extension GraphQLResult: Equatable where Type: Equatable, TypeLock: Decodable {
+    public static func == (lhs: GraphQLResult<Type, TypeLock>, rhs: GraphQLResult<Type, TypeLock>) -> Bool {
+        return lhs.data == rhs.data && lhs.errors == rhs.errors
+    }
+}
+
+extension GraphQLResult where TypeLock: Decodable {
+    init(_ response: Data, with selection: Selection<Type, TypeLock>) throws {
         self.selection = selection
+        
+        /* Decode data. */
+        let decoder = JSONDecoder()
+        let response = try decoder.decode(GraphQLResponse.self, from: response)
+        
+        self.data = response.data
+        self.errors = response.errors
     }
     
     // MARK: - Calculated properties
-    
-    public var errors: [GraphQLError]? {
-        try! JSONDecoder().decode(GraphQLResponse.self, from: self.response).errors
-    }
-    
-    /// Returns the data from the response.
     public var data: Type? {
-        let json = try! JSONSerialization.jsonObject(with: response, options: []) as! JSONData
-        return (json["data"]).map { selection.decode(data: $0) }
+        return self.data.map { selection.decode(data: $0) }
     }
     
     // MARK: - Response
     
-    struct GraphQLResponse: Codable {
-        // NOTE: There's no data param as data is decoded using generated type casting.
+    struct GraphQLResponse: Decodable {
+        let data: TypeLock?
         let errors: [GraphQLError]?
-    }
-}
-
-extension GraphQLResult: Equatable where Type: Equatable {
-    public static func == (lhs: GraphQLResult<Type, TypeLock>, rhs: GraphQLResult<Type, TypeLock>) -> Bool {
-        return lhs.data == rhs.data && lhs.errors == rhs.errors
     }
 }
 

@@ -5,7 +5,7 @@ import XCTest
 final class ASTTests: XCTestCase {
     /* Schema */
     
-    func testDecodeSchema() {
+    func testDecodeSchema() throws {
         let json = """
         {
           "data": {
@@ -53,7 +53,7 @@ final class ASTTests: XCTestCase {
         
         /* Decode */
         
-        let value = GraphQL.parse(json.data(using: .utf8)!)
+        let value = try GraphQL.parse(json.data(using: .utf8)!)
         let expected = GraphQL.Schema(
             description: nil,
             types: [
