@@ -127,6 +127,6 @@ public enum GraphQL {
     }
 }
 
-/* Extensions */
+// MARK: - Extensions
 
 extension GraphQL.Reponse: Equatable where T: Equatable {}

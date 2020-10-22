@@ -33,17 +33,17 @@ extension GraphQL {
         case `enum`(String)
         case inputObject(String)
         
-        var name: String {
-            switch self {
-            case .scalar(let name),
-                 .object(let name),
-                 .interface(let name),
-                 .union(let name),
-                 .enum(let name),
-                 .inputObject(let name):
-                return name
-            }
-        }
+//        var name: String {
+//            switch self {
+//            case .scalar(let name),
+//                 .object(let name),
+//                 .interface(let name),
+//                 .union(let name),
+//                 .enum(let name),
+//                 .inputObject(let name):
+//                return name
+//            }
+//        }
     }
     
     enum OutputRef: Equatable {
@@ -70,14 +70,14 @@ extension GraphQL {
         case `enum`(String)
         case inputObject(String)
         
-        var name: String {
-            switch self {
-            case .scalar(let name),
-                 .enum(let name),
-                 .inputObject(let name):
-                return name
-            }
-        }
+//        var name: String {
+//            switch self {
+//            case .scalar(let name),
+//                 .enum(let name),
+//                 .inputObject(let name):
+//                return name
+//            }
+//        }
     }
 }
 
