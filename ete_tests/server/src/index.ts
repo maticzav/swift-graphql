@@ -15,9 +15,6 @@ const schema = makeSchema({
       './star-wars-typegen.ts',
     ),
   },
-  nonNullDefaults: {
-    output: true,
-  },
   typegenAutoConfig: {
     sources: [
       {

@@ -26,8 +26,8 @@ export interface NexusGenScalars {
 export interface NexusGenRootTypes {
   Human: {
     // root type
-    id: string // ID!
-    name: string // String!
+    id?: string | null // ID
+    name?: string | null // String
   }
   Query: {}
 }
@@ -45,13 +45,14 @@ export interface NexusGenFieldTypes {
   Human: {
     // field return type
     homePlanet: string | null // String
-    id: string // ID!
-    name: string // String!
+    id: string | null // ID
+    name: string | null // String
   }
   Query: {
     // field return type
     human: NexusGenRootTypes['Human'] | null // Human
-    humans: Array<NexusGenRootTypes['Human'] | null> // [Human]!
+    humans: Array<NexusGenRootTypes['Human'] | null> | null // [Human]
+    test: Array<string | null> | null // [ID]
   }
 }
 

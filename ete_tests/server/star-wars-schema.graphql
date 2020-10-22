@@ -29,8 +29,8 @@ type Human {
   The home planet of the human, or null if unknown.
   """
   homePlanet: String
-  id: ID!
-  name: String!
+  id: ID
+  name: String
 }
 
 type Query {
@@ -40,5 +40,6 @@ type Query {
     """
     id: ID!
   ): Human
-  humans: [Human]!
+  humans: [Human]
+  test: [ID]
 }
