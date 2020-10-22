@@ -57,7 +57,7 @@ public struct GraphQLClient {
     
     /* Internals */
     
-    private func perform<Type, TypeLock>(
+    public func perform<Type, TypeLock>(
         operation: GraphQLOperationType,
         selection: Selection<Type, TypeLock>,
         completionHandler: @escaping (Response<Type, TypeLock>

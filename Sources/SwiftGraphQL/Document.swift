@@ -32,7 +32,7 @@ extension Collection where Element == GraphQLField {
     }
 }
 
-enum GraphQLOperationType: String, CaseIterable {
+public enum GraphQLOperationType: String, CaseIterable {
     case query = "query"
     case mutation = "mutation"
     case subscription = "subscription"

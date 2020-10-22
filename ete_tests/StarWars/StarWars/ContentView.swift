@@ -28,13 +28,33 @@ enum Objects {
     struct Human: Decodable {
         let id: String?
         let name: String?
-        let homePlanet: Bool?
+        let homePlanet: String?
     }
 }
 
 typealias QueryObject = Objects.Query
 typealias HumanObject = Objects.Human
 
+
+extension SelectionSet where TypeLock == QueryObject {
+    func humans<Type>(_ selection: Selection<Type, [HumanObject?]>) -> Type {
+        /* Selection */
+        let field = GraphQLField.composite(
+            name: "humans",
+            arguments: [
+
+            ],
+            selection: selection.selection
+        )
+        self.select(field)
+
+        /* Decoder */
+        if let data = self.response {
+            return selection.decode(data: data.humans)
+        }
+        return selection.mock()
+    }
+}
 
 extension SelectionSet where TypeLock == HumanObject {
     /// The id of the character
@@ -56,10 +76,10 @@ extension SelectionSet where TypeLock == HumanObject {
     }
     
     /// The id of the character
-    func id() -> String {
+    func name() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
-            name: "id",
+            name: "name",
             arguments: [
                 
             ]
@@ -68,16 +88,16 @@ extension SelectionSet where TypeLock == HumanObject {
     
         /* Decoder */
         if let data = self.response {
-            return data.id!
+            return data.name!
         }
         return "Matic Zavadlal"
     }
     
     /// The id of the character
-    func id() -> String {
+    func homePlanet() -> String? {
         /* Selection */
         let field = GraphQLField.leaf(
-            name: "id",
+            name: "homePlanet",
             arguments: [
                 
             ]
@@ -86,16 +106,32 @@ extension SelectionSet where TypeLock == HumanObject {
     
         /* Decoder */
         if let data = self.response {
-            return data.id!
+            return data.homePlanet
         }
         return "Matic Zavadlal"
     }
 }
 
 
-extension SelectionSet where TypeLock == QueryObject {
-    
+struct Human {
+    let id: String
+    let name: String
+    let homePlanet: String
 }
+
+let human = Selection<Human, HumanObject> {
+    Human(
+        id: $0.id(),
+        name: $0.name(),
+        homePlanet: $0.homePlanet() ?? "Unknown"
+    )
+}
+
+let query = Selection<[Human?], QueryObject> {
+    $0.humans(human.nullable.list)
+}
+
+
 
 
 //struct Rocket {
@@ -131,22 +167,6 @@ extension SelectionSet where TypeLock == QueryObject {
 //    $0.rockets(rocket.nullable.list.nullable).map { $0.compactMap { $0 } }
 //}
 
-//struct Human {
-//    let id: String
-//    let name: String
-//}
-//
-//let human = Selection<Human, HumanObject> {
-//    Human(
-//        id: $0.id(),
-//        name: $0.name()
-//    )
-//}
-//
-//let query = Selection<Human?, RootQuery> {
-//    $0.human(id: "1001", human.nullable)
-//}
-
 
 
 
@@ -166,11 +186,11 @@ class AppState: ObservableObject {
     // MARK: - Intentions
     
     func fetch() {
-        client.send(selection: query) { result in
+        client.perform(operation: .query, selection: query) { result in
             do {
                 let data = try result.get()
                 DispatchQueue.main.async {
-                    self.humans = data.data.map { [$0!] } ?? []
+                    self.humans = data.data!.compactMap { $0 }
                 }
             } catch let error {
                 print(error)
@@ -189,7 +209,7 @@ struct ContentView: View {
                 ForEach(state.humans, id: \.id) { human in
                     VStack {
                         Text(human.name)
-//                        Text(human.homePlanet ?? "Unknown")
+                        Text(human.homePlanet)
 //                        Text(human.appearsIn)
                     }
                 }
