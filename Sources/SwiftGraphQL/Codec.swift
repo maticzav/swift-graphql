@@ -17,17 +17,17 @@ protocol Codec: Codable {
 // MARK: - Built-In Codecs
 
 extension String: Codec {
-    static let mockValue = "Matic Zavadlal"
+    public static let mockValue = "Matic Zavadlal"
 }
 
 extension Int: Codec {
-    static let mockValue = 92
+    public static let mockValue = 92
 }
 
 extension Bool: Codec {
-    static let mockValue = true
+    public static let mockValue = true
 }
 
 extension Double: Codec {
-    static let mockValue = 3.14
+    public static let mockValue = 3.14
 }

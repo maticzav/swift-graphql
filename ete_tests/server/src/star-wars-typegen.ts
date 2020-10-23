@@ -9,10 +9,21 @@ declare global {
   interface NexusGen extends NexusGenTypes {}
 }
 
-export interface NexusGenInputs {}
+export interface NexusGenInputs {
+  Greeting: {
+    // input type
+    language?: NexusGenEnums['Language'] | null // Language
+    name: string // String!
+  }
+  GreetingOptions: {
+    // input type
+    prefix?: string | null // String
+  }
+}
 
 export interface NexusGenEnums {
   Episode: 5 | 6 | 4
+  Language: 'EN' | 'SL'
 }
 
 export interface NexusGenScalars {
@@ -26,14 +37,17 @@ export interface NexusGenScalars {
 export interface NexusGenRootTypes {
   Human: {
     // root type
-    id?: string | null // ID
-    name?: string | null // String
+    id: string // ID!
+    name: string // String!
   }
   Query: {}
 }
 
 export interface NexusGenAllTypes extends NexusGenRootTypes {
+  Greeting: NexusGenInputs['Greeting']
+  GreetingOptions: NexusGenInputs['GreetingOptions']
   Episode: NexusGenEnums['Episode']
+  Language: NexusGenEnums['Language']
   String: NexusGenScalars['String']
   Int: NexusGenScalars['Int']
   Float: NexusGenScalars['Float']
@@ -44,21 +58,25 @@ export interface NexusGenAllTypes extends NexusGenRootTypes {
 export interface NexusGenFieldTypes {
   Human: {
     // field return type
-    appearsIn: Array<NexusGenEnums['Episode'] | null> | null // [Episode]
+    appearsIn: NexusGenEnums['Episode'][] // [Episode!]!
     homePlanet: string | null // String
-    id: string | null // ID
-    name: string | null // String
+    id: string // ID!
+    name: string // String!
   }
   Query: {
     // field return type
+    greeting: string // String!
     human: NexusGenRootTypes['Human'] | null // Human
-    humans: Array<NexusGenRootTypes['Human'] | null> | null // [Human]
-    test: Array<string | null> | null // [ID]
+    humans: NexusGenRootTypes['Human'][] // [Human!]!
   }
 }
 
 export interface NexusGenArgTypes {
   Query: {
+    greeting: {
+      // args
+      input: NexusGenInputs['Greeting'] // Greeting!
+    }
     human: {
       // args
       id: string // ID!
@@ -72,9 +90,9 @@ export interface NexusGenInheritedFields {}
 
 export type NexusGenObjectNames = 'Human' | 'Query'
 
-export type NexusGenInputNames = never
+export type NexusGenInputNames = 'Greeting' | 'GreetingOptions'
 
-export type NexusGenEnumNames = 'Episode'
+export type NexusGenEnumNames = 'Episode' | 'Language'
 
 export type NexusGenInterfaceNames = never
 

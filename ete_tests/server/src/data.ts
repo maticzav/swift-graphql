@@ -1,9 +1,9 @@
 export type Human = {
-  type: 'Human',
-  id: string,
-  name: string,
-  friends: string[],
-  appears_in: number[],
+  type: 'Human'
+  id: string
+  name: string
+  friends: string[]
+  appears_in: number[]
   home_planet?: string
 }
 
@@ -75,12 +75,20 @@ const humanData = {
   '1004': tarkin,
 } as { [key in string]: Human }
 
-export const allHumans = Object.keys(humanData).map(key => humanData[key])
-
-/**
- * Allows us to query for the human with the given id.
- */
-export function getHuman(id: string): Human {
-  return humanData[id]
+export interface Data {
+  allHumans: Human[]
+  getHuman: (id: string) => Human | null
 }
 
+export const data = {
+  /**
+   * Contains all humans.
+   */
+  allHumans: Object.keys(humanData).map((key) => humanData[key]),
+  /**
+   * Allows us to query for the human with the given id.
+   */
+  getHuman: (id: string): Human | null => {
+    return humanData[id] || null
+  },
+}

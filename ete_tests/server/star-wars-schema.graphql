@@ -21,27 +21,41 @@ enum Episode {
   NEWHOPE
 }
 
+input Greeting {
+  language: Language
+  name: String!
+}
+
+input GreetingOptions {
+  prefix: String
+}
+
 """
 A humanoid creature in the Star Wars universe.
 """
 type Human {
-  appearsIn: [Episode]
+  appearsIn: [Episode!]!
 
   """
   The home planet of the human, or null if unknown.
   """
   homePlanet: String
-  id: ID
-  name: String
+  id: ID!
+  name: String!
+}
+
+enum Language {
+  EN
+  SL
 }
 
 type Query {
+  greeting(input: Greeting!): String!
   human(
     """
     id of the character
     """
     id: ID!
   ): Human
-  humans: [Human]
-  test: [ID]
+  humans: [Human!]!
 }

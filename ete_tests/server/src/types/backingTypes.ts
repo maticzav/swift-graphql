@@ -1,1 +1,5 @@
-export interface ContextType {}
+import { Data } from "../data";
+
+export interface ContextType {
+    data: Data
+}

@@ -2,6 +2,7 @@ import { makeSchema } from '@nexus/schema'
 import { ApolloServer } from 'apollo-server'
 import * as path from 'path'
 
+import { data } from './data'
 import * as allTypes from './graphql'
 
 /* Schema */
@@ -35,6 +36,9 @@ const schema = makeSchema({
 const server = new ApolloServer({
   schema,
   debug: true,
+  context: () => ({
+    data: data,
+  }),
   plugins: [
     {
       requestDidStart(requestContext) {

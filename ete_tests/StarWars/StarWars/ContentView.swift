@@ -12,8 +12,8 @@ struct Human {
 
 let human = Selection<Human, HumanObject> {
     Human(
-        id: $0.id() ?? "ID",
-        name: $0.name() ?? "Anonymous",
+        id: $0.id(),
+        name: $0.name(),
         homePlanet: "Unknown"
     )
 }
@@ -22,8 +22,12 @@ let human = Selection<Human, HumanObject> {
 //    $0.humans(human.nullable.list.nullable) ?? []
 //}
 
-let query = Selection<[Human], RootQuery> {
-    $0.human(id: "1001", human.nullable).map { [$0] } ?? []
+struct Model {
+    let greeting: String
+}
+
+let query = Selection<Model, RootQuery> {
+    Model(greeting: $0.greeting(input: InputObjects.Greeting(name: "Matic")))
 }
 
 /* View */
@@ -33,7 +37,7 @@ class AppState: ObservableObject {
     
     // MARK: - State
     
-    @Published private(set) var humans: [Human] = []
+    @Published private(set) var model = Model(greeting: "Not greeted yet.")
 
     // MARK: - Intentions
     
@@ -42,7 +46,9 @@ class AppState: ObservableObject {
             do {
                 let data = try result.get()
                 DispatchQueue.main.async {
-                    self.humans = data.data!.compactMap { $0 }
+                    if let data = data.data {
+                        self.model = data
+                    }
                 }
             } catch let error {
                 print(error)
@@ -57,20 +63,23 @@ struct ContentView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(state.humans, id: \.id) { human in
-                    VStack {
-                        Text(human.name)
-                        Text(human.homePlanet)
-//                        Text(human.appearsIn)
-                    }
-                }
+//            List {
+//                ForEach(state.humans, id: \.id) { human in
+//                    VStack {
+//                        Text(human.name)
+//                        Text(human.homePlanet)
+////                        Text(human.appearsIn)
+//                    }
+//                }
+//            }
+            Group {
+                Text(state.model.greeting)
             }
-            .onAppear(perform: {
-                state.fetch()
-            })
             .navigationTitle("StarWars 🌌")
         }
+        .onAppear(perform: {
+            state.fetch()
+        })
     }
 }
 

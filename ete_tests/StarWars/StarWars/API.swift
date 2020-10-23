@@ -7,10 +7,10 @@ enum Objects {}
 /* Query */
 
 extension Objects {
-    struct Query: Codable {
+    struct Query: Codable, Hashable {
         let human: Human?
-        let test: [String?]?
-        let humans: [Human?]?
+        let humans: [Human]?
+        let greeting: String?
     }
 }
 
@@ -22,7 +22,7 @@ extension SelectionSet where TypeLock == RootQuery {
         let field = GraphQLField.composite(
             name: "human",
             arguments: [
-                Argument(name: "id", value: id),
+                Argument(name: "id", type: "String!", value: id),
             ],
             selection: selection.selection
         )
@@ -35,24 +35,7 @@ extension SelectionSet where TypeLock == RootQuery {
         return selection.mock()
     }
 
-    func test() -> [String?]? {
-        /* Selection */
-        let field = GraphQLField.leaf(
-            name: "test",
-            arguments: [
-        
-            ]
-        )
-        self.select(field)
-    
-        /* Decoder */
-        if let data = self.response {
-            return data.test
-        }
-        return nil
-    }
-
-    func humans<Type>(_ selection: Selection<Type, [HumanObject?]?>) -> Type {
+    func humans<Type>(_ selection: Selection<Type, [HumanObject]>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "humans",
@@ -65,9 +48,26 @@ extension SelectionSet where TypeLock == RootQuery {
     
         /* Decoder */
         if let data = self.response {
-            return data.humans.map { selection.decode(data: $0) } ?? selection.mock()
+            return selection.decode(data: data.humans!)
         }
         return selection.mock()
+    }
+
+    func greeting(input: InputObjects.Greeting) -> String {
+        /* Selection */
+        let field = GraphQLField.leaf(
+            name: "greeting",
+            arguments: [
+                Argument(name: "input", type: "Greeting!", value: input),
+            ]
+        )
+        self.select(field)
+    
+        /* Decoder */
+        if let data = self.response {
+            return data.greeting!
+        }
+        return String.mockValue
     }
 }
 
@@ -76,18 +76,18 @@ extension SelectionSet where TypeLock == RootQuery {
 /* Human */
 
 extension Objects {
-    struct Human: Codable {
+    struct Human: Codable, Hashable {
         let id: String?
         let name: String?
         let homePlanet: String?
-        let appearsIn: [Episode?]?
+        let appearsIn: [Episode]?
     }
 }
 
 typealias HumanObject = Objects.Human
 
 extension SelectionSet where TypeLock == HumanObject {
-    func id() -> String? {
+    func id() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "id",
@@ -99,12 +99,12 @@ extension SelectionSet where TypeLock == HumanObject {
     
         /* Decoder */
         if let data = self.response {
-            return data.id
+            return data.id!
         }
-        return nil
+        return String.mockValue
     }
 
-    func name() -> String? {
+    func name() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "name",
@@ -116,9 +116,9 @@ extension SelectionSet where TypeLock == HumanObject {
     
         /* Decoder */
         if let data = self.response {
-            return data.name
+            return data.name!
         }
-        return nil
+        return String.mockValue
     }
 
     /// The home planet of the human, or null if unknown.
@@ -139,7 +139,7 @@ extension SelectionSet where TypeLock == HumanObject {
         return nil
     }
 
-    func appearsin() -> [Episode?]? {
+    func appearsin() -> [Episode] {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "appearsIn",
@@ -151,9 +151,17 @@ extension SelectionSet where TypeLock == HumanObject {
     
         /* Decoder */
         if let data = self.response {
-            return data.appearsIn
+            return data.appearsIn!
         }
-        return nil
+        return []
+    }
+}
+
+// MARK: - Input Objects
+
+enum InputObjects {
+    struct Greeting: Codable, Hashable {
+        let name: String
     }
 }
 
@@ -169,4 +177,12 @@ enum Episode: String, CaseIterable, Codable {
 
     /// Released in 1983
     case jedi = "JEDI"
+}
+
+
+/// Language
+enum Language: String, CaseIterable, Codable {
+    case en = "EN"
+
+    case sl = "SL"
 }

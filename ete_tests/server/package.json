@@ -5,7 +5,7 @@
     "start": "ts-node-dev --ignore-watch star-wars-typegen.ts --no-notify --respawn ./src"
   },
   "dependencies": {
-    "@nexus/schema": "^0.16.0",
+    "@nexus/schema": "0.15.0",
     "apollo-server": "^2.18.1",
     "graphql": "^15.3.0",
     "graphql-tools": "^6.2.4",
