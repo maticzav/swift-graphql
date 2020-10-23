@@ -4,6 +4,12 @@ import SwiftGraphQL
 /* Playground */
 
 enum Objects {
+    // Objects here can all conform to decodable since they are all composed of lists/optionals/named scalar types in the end.
+}
+
+/* Query */
+
+extension Objects {
     /**
      type Query {
        hero(episode: Episode!): Character!
@@ -12,29 +18,12 @@ enum Objects {
        humans: [Human]!
      }
      */
-    struct Query: Decodable {
-        let humans: [Human?]
-    }
-    
-    
-    /**
-     type Human {
-       id: String!
-       name: String!
-       homePlanet: String
-     }
-     */
-    // Objects here can all conform to decodable since they are all composed of lists/optionals/named scalar types in the end.
-    struct Human: Decodable {
-        let id: String?
-        let name: String?
-        let homePlanet: String?
+    struct Query: Codable {
+        let humans: [Human?]?
     }
 }
 
 typealias QueryObject = Objects.Query
-typealias HumanObject = Objects.Human
-
 
 extension SelectionSet where TypeLock == QueryObject {
     func humans<Type>(_ selection: Selection<Type, [HumanObject?]>) -> Type {
@@ -50,11 +39,32 @@ extension SelectionSet where TypeLock == QueryObject {
 
         /* Decoder */
         if let data = self.response {
-            return selection.decode(data: data.humans)
+            return selection.decode(data: data.humans!)
         }
         return selection.mock()
     }
 }
+
+/* Human */
+
+extension Objects {
+    /**
+     type Human {
+       id: String!
+       name: String!
+       homePlanet: String
+     }
+     */
+
+    struct Human: Codable {
+        let id: String?
+        let name: String?
+        let homePlanet: String?
+        let appearsIn: [Episode]?
+    }
+}
+
+typealias HumanObject = Objects.Human
 
 extension SelectionSet where TypeLock == HumanObject {
     /// The id of the character
@@ -110,20 +120,55 @@ extension SelectionSet where TypeLock == HumanObject {
         }
         return "Matic Zavadlal"
     }
+    
+    /// The id of the character
+    func appearsIn() -> [Episode] {
+        /* Selection */
+        let field = GraphQLField.leaf(
+            name: "appearsIn",
+            arguments: [
+                
+            ]
+        )
+        self.select(field)
+    
+        /* Decoder */
+        if let data = self.response {
+            return data.appearsIn!
+        }
+        return []
+    }
 }
+
+/// One of the films in the Star Wars Trilogy
+enum Episode: String, CaseIterable, Codable {
+    /// Released in 1977.
+    case newhope = "NEWHOPE"
+
+    /// Released in 1980.
+    case empire = "EMPIRE"
+
+    /// Released in 1983
+    case jedi = "JEDI"
+}
+
+
+/* Playground */
 
 
 struct Human {
     let id: String
     let name: String
     let homePlanet: String
+    let appearsIn: String
 }
 
 let human = Selection<Human, HumanObject> {
     Human(
         id: $0.id(),
         name: $0.name(),
-        homePlanet: $0.homePlanet() ?? "Unknown"
+        homePlanet: $0.homePlanet() ?? "Unknown",
+        appearsIn: $0.appearsIn().map { $0.rawValue }.joined(separator: "\n")
     )
 }
 
@@ -131,6 +176,16 @@ let query = Selection<[Human?], QueryObject> {
     $0.humans(human.nullable.list)
 }
 
+
+let luke = Objects.Human(
+    id: "21",
+    name: "Luke",
+    homePlanet: nil,
+    appearsIn: []
+)
+
+let encoder = JSONEncoder()
+let json = try? encoder.encode(luke)
 
 
 
@@ -210,7 +265,7 @@ struct ContentView: View {
                     VStack {
                         Text(human.name)
                         Text(human.homePlanet)
-//                        Text(human.appearsIn)
+                        Text(human.appearsIn)
                     }
                 }
             }
