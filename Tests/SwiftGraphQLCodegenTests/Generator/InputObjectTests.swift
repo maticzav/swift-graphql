@@ -3,6 +3,10 @@ import XCTest
 
 
 final class InputObjectTests: XCTestCase {
+    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
+    
+    // MARK: - Tests
+    
     func testEmptyInputObject() {
         let type = GraphQL.InputObjectType(
             name: "InputObject",
@@ -18,7 +22,7 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            GraphQLCodegen.generateInputObject("InputObjectTest", for: type),
+            generator.generateInputObject("InputObjectTest", for: type),
             expected
         )
     }
@@ -48,7 +52,7 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            GraphQLCodegen.generateInputObject("InputObjectTest", for: type),
+            generator.generateInputObject("InputObjectTest", for: type),
             expected
         )
     }
@@ -76,7 +80,7 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            GraphQLCodegen.generateInputObject("InputObjectTest", for: type),
+            generator.generateInputObject("InputObjectTest", for: type),
             expected
         )
     }

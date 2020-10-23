@@ -3,6 +3,10 @@ import XCTest
 
 
 final class EnumTests: XCTestCase {
+    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
+    
+    // MARK: - Tests
+    
     func testGenerateEmptyEnum() {
         let type = GraphQL.EnumType(
             name: "Episodes",
@@ -19,7 +23,7 @@ final class EnumTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateEnum(type), expected)
+        XCTAssertEqual(generator.generateEnum(type), expected)
     }
     
     func testGenerateEnumWithoutDescription() {
@@ -46,7 +50,7 @@ final class EnumTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateEnum(type), expected)
+        XCTAssertEqual(generator.generateEnum(type), expected)
     }
     
     
@@ -104,7 +108,7 @@ final class EnumTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateEnum(type), expected)
+        XCTAssertEqual(generator.generateEnum(type), expected)
     }
 }
 

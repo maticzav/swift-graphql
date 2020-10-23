@@ -8,6 +8,18 @@ extension GraphQL {
     }
 }
 
+extension GraphQL.InvertedTypeRef {
+    /// Returns the bottom most named type in reference.
+    var namedType: Type {
+        switch self {
+        case .named(let type):
+            return type
+        case .nullable(let subRef), .list(let subRef):
+            return subRef.namedType
+        }
+    }
+}
+
 extension GraphQL.InvertedTypeRef: Equatable where Type: Equatable {}
 
 // MARK: - Conversion

@@ -5,6 +5,14 @@ import Foundation
  */
 
 public struct GraphQLCodegen {
+    let options: Options
+    
+    public init(options: Options = Options()) {
+        self.options = options
+    }
+    
+    // MARK: - Methods
+    
     /// Generates a target GraphQL Swift file.
     ///
     /// - Parameters:
@@ -13,7 +21,7 @@ public struct GraphQLCodegen {
     ///     - onComplete: A function triggered once the generation finishes.
     ///
     /// - Note: This function does not create a target file. You should make sure file exists beforehand.
-    public static func generate(
+    public func generate(
         _ target: URL,
         from schemaURL: URL
     ) throws {
@@ -22,8 +30,8 @@ public struct GraphQLCodegen {
     }
     
     /// Generates the API and returns it to handler.
-    public static func generate(from schemaURL: URL) throws -> String {
-        let schema: GraphQL.Schema = try self.downloadFrom(schemaURL)
+    public func generate(from schemaURL: URL) throws -> String {
+        let schema: GraphQL.Schema = try GraphQLCodegen.downloadFrom(schemaURL)
         return self.generate(from: schema)
     }
     
@@ -32,11 +40,11 @@ public struct GraphQLCodegen {
     /// - Parameters:
     ///     - scalarMappings: A dicitonary of GraphQL scalar keys and Swift type mappings.
     public struct Options {
-        typealias ScalarMap = [String: String]
+        public typealias ScalarMap = [String: String]
         
         let scalarMappings: ScalarMap
         
-        init(scalarMappings: ScalarMap = [:]) {
+        public init(scalarMappings: ScalarMap = [:]) {
             let map = builtInScalars.merging(scalarMappings, uniquingKeysWith: { (_, override) in override })
             
             self.scalarMappings = map

@@ -2,9 +2,11 @@ import XCTest
 @testable import SwiftGraphQLCodegen
 
 final class ObjectTests: XCTestCase {
-    /* Generator */
+    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
     
-    func testGenerateObject() {
+    // MARK: - Tests
+    
+    func testEmptyObject() {
         /* Type */
         let type = GraphQL.ObjectType(
             name: "Query",
@@ -18,17 +20,25 @@ final class ObjectTests: XCTestCase {
         let expected = """
         /* Query */
 
+        extension Objects {
+            struct RootQuery: Codable {
+
+            }
+        }
+
+        typealias RootQueryObject = Objects.RootQuery
+
         extension SelectionSet where TypeLock == RootQuery {
 
         }
         """
         
-        XCTAssertEqual(GraphQLCodegen.generateObject("RootQuery", for: type), expected)
+        XCTAssertEqual(generator.generateObject("RootQuery", for: type), expected)
     }
     
     /* TypeLock */
     
     func testObjectTypeLock() {
-        XCTAssertEqual(GraphQLCodegen.generateObjectTypeLock(for: "Hero"), "HeroObject")
+        XCTAssertEqual(generator.generateObjectTypeLock(for: "Hero"), "HeroObject")
     }
 }

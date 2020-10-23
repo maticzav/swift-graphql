@@ -6,7 +6,7 @@ import Foundation
 
 extension GraphQLCodegen {
     /// Generates an enumeration code.
-    static func generateEnum(_ type: GraphQL.EnumType) -> String {
+    func generateEnum(_ type: GraphQL.EnumType) -> String {
         """
         \(generateEnumDoc(for: type))
         enum \(type.name): String, CaseIterable, Codable {
@@ -17,11 +17,11 @@ extension GraphQLCodegen {
     
     // MARK: - Private helpers
     
-    private static func generateEnumDoc(for type: GraphQL.EnumType) -> String {
+    private func generateEnumDoc(for type: GraphQL.EnumType) -> String {
         "/// \(type.description ?? "\(type.name)")"
     }
 
-    private static func generateEnumCase(for env: GraphQL.EnumValue) -> String {
+    private func generateEnumCase(for env: GraphQL.EnumValue) -> String {
         [ generateEnumCaseDoc(for: env)
         , generateEnumCaseDeprecationDoc(for: env)
         , #"case \#(env.name.camelCase) = "\#(env.name)""#
@@ -31,11 +31,11 @@ extension GraphQLCodegen {
         .joined(separator: "\n")
     }
     
-    private static func generateEnumCaseDoc(for env: GraphQL.EnumValue) -> String? {
+    private func generateEnumCaseDoc(for env: GraphQL.EnumValue) -> String? {
         env.description.map { "/// \($0)" }
     }
     
-    private static func generateEnumCaseDeprecationDoc(for env: GraphQL.EnumValue) -> String? {
+    private func generateEnumCaseDeprecationDoc(for env: GraphQL.EnumValue) -> String? {
         env.isDeprecated ? "@available(*, deprecated, message: \"\(env.deprecationReason ?? "")\")" : nil
     }
 }

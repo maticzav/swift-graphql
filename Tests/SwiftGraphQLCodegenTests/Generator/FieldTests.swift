@@ -3,6 +3,10 @@ import XCTest
 
 
 final class FieldTests: XCTestCase {
+    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
+    
+    // MARK: - Tests
+    
     func testGenerateFieldDocs() {
         let field = GraphQL.Field(
             name: "id",
@@ -27,8 +31,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return data[field.name] as! String?
+                if let data = self.response {
+                    return data.id
                 }
                 return nil
             }
@@ -36,7 +40,7 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     // MARK: - Scalar
@@ -63,16 +67,16 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return data[field.name] as! String
+                if let data = self.response {
+                    return data.id!
                 }
-                return "8378"
+                return String.mockValue
             }
         """
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
   
     func testGenerateNullableScalarField() {
@@ -97,8 +101,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return data[field.name] as! String?
+                if let data = self.response {
+                    return data.id
                 }
                 return nil
             }
@@ -106,12 +110,12 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     func testGenerateListScalarField() {
         let field = GraphQL.Field(
-            name: "id",
+            name: "ids",
             description: nil,
             args: [],
             type: .list(.nonNull(.named(.scalar("ID")))),
@@ -120,10 +124,10 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func id() -> [String]? {
+            func ids() -> [String]? {
                 /* Selection */
                 let field = GraphQLField.leaf(
-                    name: "id",
+                    name: "ids",
                     arguments: [
                 
                     ]
@@ -131,8 +135,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return data[field.name] as! [String]?
+                if let data = self.response {
+                    return data.ids
                 }
                 return nil
             }
@@ -140,12 +144,12 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     func testGenearateNonNullableListScalarField() {
         let field = GraphQL.Field(
-            name: "id",
+            name: "ids",
             description: nil,
             args: [],
             type: .nonNull(.list(.nonNull(.named(.scalar("ID"))))),
@@ -154,10 +158,10 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func id() -> [String] {
+            func ids() -> [String] {
                 /* Selection */
                 let field = GraphQLField.leaf(
-                    name: "id",
+                    name: "ids",
                     arguments: [
                 
                     ]
@@ -165,8 +169,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return data[field.name] as! [String]
+                if let data = self.response {
+                    return data.ids!
                 }
                 return []
             }
@@ -174,7 +178,7 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     // MARK: - Enumerators
@@ -201,8 +205,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return Episode.init(rawValue: data[field.name] as! String)!
+                if let data = self.response {
+                    return data.episode!
                 }
                 return Episode.allCases.first!
             }
@@ -210,7 +214,7 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     
@@ -236,8 +240,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return (data[field.name] as! String?).map { Episode.init(rawValue: $0)! }
+                if let data = self.response {
+                    return data.episode
                 }
                 return nil
             }
@@ -245,7 +249,7 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     func testGenerateNullableListEnumField() {
@@ -270,8 +274,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return (data[field.name] as! [String?]).map { $0.map { Episode.init(rawValue: $0)! } }
+                if let data = self.response {
+                    return data.episode!
                 }
                 return []
             }
@@ -279,7 +283,7 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     // MARK: - Selections
@@ -307,8 +311,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return selection.decode(data: (data[field.name] as! Any))
+                if let data = self.response {
+                    return selection.decode(data: data.hero!)
                 }
                 return selection.mock()
             }
@@ -316,7 +320,7 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     func testGenerateNullableSelectionField() {
@@ -342,8 +346,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return (data[field.name] as! Any?).map { selection.decode(data: $0) } ?? selection.mock()
+                if let data = self.response {
+                    return data.hero.map { selection.decode(data: $0) } ?? selection.mock()
                 }
                 return selection.mock()
             }
@@ -351,7 +355,7 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
 
     func testGenerateListSelectionField() {
@@ -377,8 +381,8 @@ final class FieldTests: XCTestCase {
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return selection.decode(data: (data[field.name] as! [Any]))
+                if let data = self.response {
+                    return selection.decode(data: data.hero!)
                 }
                 return selection.mock()
             }
@@ -386,7 +390,7 @@ final class FieldTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
     
     // MARK: - Arguments
@@ -413,22 +417,22 @@ final class FieldTests: XCTestCase {
                 let field = GraphQLField.leaf(
                     name: "hero",
                     arguments: [
-                        "id": Value.id(id),
+                        Argument(name: "id", value: id),
                     ]
                 )
                 self.select(field)
             
                 /* Decoder */
-                if let data = self.response as? [String: Any] {
-                    return data[field.name] as! String
+                if let data = self.response {
+                    return data.hero!
                 }
-                return "8378"
+                return String.mockValue
             }
         """
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generateField(field), expected)
+        XCTAssertEqual(generator.generateField(field), expected)
     }
 }
 

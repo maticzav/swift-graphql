@@ -44,6 +44,7 @@ export interface NexusGenAllTypes extends NexusGenRootTypes {
 export interface NexusGenFieldTypes {
   Human: {
     // field return type
+    appearsIn: Array<NexusGenEnums['Episode'] | null> | null // [Episode]
     homePlanet: string | null // String
     id: string | null // ID
     name: string | null // String

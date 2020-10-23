@@ -1,34 +1,39 @@
 import Foundation
 
 public struct Argument {
-    fileprivate var name: String
-    fileprivate var value: Value
+    var name: String
+    var value: Data
     
-    public init(name: String, value: Value) {
+    init(name: String, value: Data) {
         self.name = name
         self.value = value
     }
 }
 
-// MARK: - Methods
+extension Argument {
+    public init<Value: Encodable>(name: String, value: Value) {
+        self.name = name
+        self.value = try! JSONEncoder().encode(value)
+    }
+}
+
+// MARK: - Serialization Methods
 
 extension Argument {
     /// Serializes a single argument into query.
     func serialize() -> String {
-        "\(self.name): \(self.value.serialize())"
+        "\(self.name): \(String(data: self.value, encoding: .utf8)!)"
     }
 }
 
-extension Collection where Element == Argument {
-    
+extension Collection {
     /// Serializes a collection of arguments into a query string.
-    func serialize() -> String {
+    func serialize() -> String where Element == Argument {
         /* Return empty string for no arguments. */
-        guard self.count > 0 else {
+        if self.isEmpty {
             return ""
         }
-        
-        /* Parse each argument individually otherwise. */
         return "(\(self.map { $0.serialize() }.joined(separator: ", ")))"
+        
     }
 }

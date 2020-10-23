@@ -10,7 +10,7 @@ extension GraphQLCodegen {
     
     
     /// Generates the code that can be used to define selections.
-    static func generate(from schema: GraphQL.Schema) -> String {
+    func generate(from schema: GraphQL.Schema) -> String {
         /* Data */
         
         // ObjectTypes for operations
@@ -36,13 +36,11 @@ extension GraphQLCodegen {
         let code = """
             import SwiftGraphQL
 
+            enum Objects {}
+
             // MARK: - Operations
             
             \(operations.map { generateObject($0.name, for: $0.type) }.joined(separator: "\n\n\n"))
-
-            // MARK: - Objects
-
-            \(generatePhantomTypes(for: types))
 
             // MARK: - Selection
 

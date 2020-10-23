@@ -4,6 +4,10 @@ import Files
 
 
 final class GeneratorTests: XCTestCase {
+    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
+    
+    // MARK: - Tests
+    
     func testGenerateTarget() throws {
         /* Target */
         let tmp = try Folder.temporary.createSubfolderIfNeeded(at: "SwiftGraphQL")
@@ -13,7 +17,7 @@ final class GeneratorTests: XCTestCase {
         
         /* Fetching */
         let endpoint = URL(string: "http://localhost:4000")!
-        try GraphQLCodegen.generate(target, from: endpoint)
+        try generator.generate(target, from: endpoint)
         
         /* Tests */
         let generated = try String(contentsOf: target)

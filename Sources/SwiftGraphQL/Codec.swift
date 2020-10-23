@@ -21,7 +21,7 @@ extension String: Codec {
 }
 
 extension Int: Codec {
-    static let mockValue = 42
+    static let mockValue = 92
 }
 
 extension Bool: Codec {

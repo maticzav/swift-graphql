@@ -3,6 +3,10 @@ import XCTest
 
 
 final class FileTests: XCTestCase {
+    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
+    
+    // MARK: - Tests
+    
     func testGenerateFromSchema() {
         let schema = GraphQL.Schema(
             description: nil,
@@ -24,21 +28,22 @@ final class FileTests: XCTestCase {
         let expected = """
         import SwiftGraphQL
 
+        enum Objects {}
+
         // MARK: - Operations
 
         /* Query */
 
+        extension Objects {
+            struct RootQuery: Codable {
+            }
+        }
+
+        typealias RootQueryObject = Objects.RootQuery
+
         extension SelectionSet where TypeLock == RootQuery {
 
         }
-
-        // MARK: - Objects
-
-        enum Object {
-
-        }
-
-
 
         // MARK: - Selection
 
@@ -51,7 +56,7 @@ final class FileTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(GraphQLCodegen.generate(from: schema), expected)
+        XCTAssertEqual(generator.generate(from: schema), expected)
     }
 }
 

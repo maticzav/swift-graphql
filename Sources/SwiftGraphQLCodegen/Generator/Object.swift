@@ -2,28 +2,32 @@ import Foundation
 
 extension GraphQLCodegen {
     /// Generates a function to handle a type.
-    static func generateObject(_ typeName: String, for type: GraphQL.ObjectType) -> String {
-        // TODO: add support for all fields!
-        let fields = type.fields.filter {
-            switch $0.type.namedType { // TODO
-            case .object(_), .enum(_), .scalar(_):
-                return true
-            default:
-                return false
-            }
-        }
-        
-        return """
-        /* \(type.name) */
-
-        extension SelectionSet where TypeLock == \(typeName) {
-        \(fields.map(generateField).joined(separator: "\n\n"))
-        }
-        """
+    func generateObject(_ typeName: String, for type: GraphQL.ObjectType) -> String {
+        [ "/* \(type.name) */",
+          "",
+          "extension Objects {",
+          "    struct \(type.name): Codable {",
+          type.fields.map { generateFieldDecoder(for: $0) }
+            .map { "        \($0)" }
+            .joined(separator: "\n"),
+          "    }",
+          "}",
+          "",
+          "typealias \(typeName) = Objects.\(type.name)",
+          "",
+          "extension SelectionSet where TypeLock == \(typeName) {",
+          type.fields.map(generateField).joined(separator: "\n\n"),
+          "}"
+        ]
+        .joined(separator: "\n")
     }
     
+    
+    
+    // MARK: - Type Name
+    
     /// Generates an object type used for aliasing a phantom type.
-    static func generateObjectTypeLock(for typeName: String) -> String {
+    func generateObjectTypeLock(for typeName: String) -> String {
         "\(typeName)Object"
     }
 }

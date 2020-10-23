@@ -167,7 +167,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# cd \"${SRCROOT}\"/Codegen\n# xcrun -sdk macosx swift run\n";
+			shellScript = "cd \"${SRCROOT}\"/Codegen\nxcrun -sdk macosx swift run\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

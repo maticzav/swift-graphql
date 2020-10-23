@@ -38,3 +38,18 @@ extension OptionalArgument {
 // MARK: - Protocols
 
 extension OptionalArgument: Equatable where Type: Equatable {}
+
+extension OptionalArgument: Encodable where Type: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        
+        switch self {
+        case .absent:
+            ()
+        case .null:
+            try container.encodeNil()
+        case .present(let value):
+            try container.encode(value)
+        }
+    }
+}

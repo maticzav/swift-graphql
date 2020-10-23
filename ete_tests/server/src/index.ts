@@ -36,7 +36,13 @@ const server = new ApolloServer({
   schema,
   debug: true,
   plugins: [
-    // {
+    {
+      requestDidStart(requestContext) {
+        console.log('Request started! Query:\n' + requestContext.request.query)
+
+        return {}
+      },
+    },
   ],
 })
 

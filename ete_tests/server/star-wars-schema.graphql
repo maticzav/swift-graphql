@@ -25,6 +25,8 @@ enum Episode {
 A humanoid creature in the Star Wars universe.
 """
 type Human {
+  appearsIn: [Episode]
+
   """
   The home planet of the human, or null if unknown.
   """
