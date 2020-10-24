@@ -6,7 +6,7 @@ extension String {
     // MARK: - Public properties
     
     var pascalCase: String {
-        self.words.map { $0.capitalizedFirst }.joined()
+        self.words.map { $0.capitalized }.joined()
     }
     
     var camelCase: String {
@@ -15,22 +15,21 @@ extension String {
     
     // MARK: - Internal interface
     
-    private var words: [String] {
-        let separators = CharacterSet(charactersIn: ",;-_() .")
-        let words = self.components(separatedBy: separators)
-        return words.compactMap { $0.trimmed.nonEmpty }
-    }
-    
-    private var nonEmpty: String? {
-        self == "" ? nil : self
-    }
-    
-    private var trimmed: String {
-        self.trimmingCharacters(in: CharacterSet(charactersIn: " "))
-    }
-    
-    private var capitalizedFirst: String {
-        self[startIndex].uppercased() + self.dropFirst()
+    /// Returns the words split either by special characters or trnsition from small charater to big one.
+    private var words: [Substring] {
+        guard !self.isEmpty else { return [] }
+        
+        var words = [Range<String.Index>]()
+        
+        var wordStart = self.startIndex
+        var searchRange: Range<String.Index> = self.index(after: wordStart)..<self.endIndex
+        
+        /* Algorithm */
+        while let upperCaseRange = self.rangeOfCharacter(from: <#T##CharacterSet#>)
+        
+        /* Result */
+        let result = words.map { range in self[range] }
+        return result
     }
 }
 

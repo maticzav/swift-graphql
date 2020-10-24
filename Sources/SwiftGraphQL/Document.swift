@@ -5,6 +5,8 @@ import Foundation
  */
 
 extension Collection where Element == GraphQLField {
+    // MARK: - Methods
+    
     /// Returns a GraphQL query for the current selection set.
     func serialize(for operationType: GraphQLOperationType) -> String {
         """

@@ -37,10 +37,9 @@ extension GraphQLCodegen {
         case .named(let named):
             switch named {
             case .scalar(let scalar):
-                // TODO:
-                return scalar
+                return self.options.scalar(scalar)
             case .enum(let enm):
-                return enm
+                return enm.pascalCase
             case .inputObject(let inputObject):
                 return inputObject.pascalCase
             }

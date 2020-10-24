@@ -9,7 +9,7 @@ extension GraphQLCodegen {
     func generateEnum(_ type: GraphQL.EnumType) -> String {
         """
         \(generateEnumDoc(for: type))
-        enum \(type.name): String, CaseIterable, Codable {
+        enum \(type.name.pascalCase): String, CaseIterable, Codable {
         \(type.enumValues.map { generateEnumCase(for: $0) }.joined(separator: "\n\n"))
         }
         """

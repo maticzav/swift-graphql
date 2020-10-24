@@ -167,7 +167,7 @@ extension GraphQLCodegen {
     
     /// Generates a dictionary of argument builders.
     private func generateSelectionArguments(for args: [GraphQL.InputValue]) -> [String] {
-        args.map { #"Argument(name: "\#($0.name)", value: \#($0.name)),"# }
+        args.map { #"Argument(name: "\#($0.name.camelCase)", value: \#($0.name.camelCase)),"# }
     }
     
     // MARK: - Accessors
@@ -204,7 +204,7 @@ extension GraphQLCodegen {
             return generateMockWrapper("\(options.scalar(scalar)).mockValue", for: ref)
         /* Enumerations */
         case .enum(let enm):
-            return generateMockWrapper("\(enm).allCases.first!", for: ref)
+            return generateMockWrapper("\(enm.pascalCase).allCases.first!", for: ref)
         /* Selections */
         case .interface(_), .object(_), .union(_):
             return "selection.mock()"
