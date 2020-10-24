@@ -2,27 +2,24 @@ import Foundation
 
 public struct Argument {
     var name: String
-    var value: Data
-    
-    init(name: String, value: Data) {
-        self.name = name
-        self.value = value
-    }
+    var value: String
 }
 
 extension Argument {
-    public init<Value: Encodable>(name: String, value: Value) {
+    public init<T: Encodable>(name: String, value: T) {
         self.name = name
-        self.value = try! JSONEncoder().encode(value)
+        self.value = try! GQLEncoder().encode(value)
     }
 }
 
 // MARK: - Serialization Methods
 
 extension Argument {
+    // MARK: - Methods
+    
     /// Serializes a single argument into query.
     func serialize() -> String {
-        "\(self.name): \(String(data: self.value, encoding: .utf8)!)"
+        "\(self.name): \(self.value)"
     }
 }
 

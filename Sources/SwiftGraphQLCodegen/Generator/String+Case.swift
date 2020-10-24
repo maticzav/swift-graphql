@@ -5,12 +5,12 @@ extension String {
     
     // MARK: - Public properties
     
-    var pascalCase : String {
-        self.words.map { $0.capitalized }.joined()
+    var pascalCase: String {
+        self.words.map { $0.capitalizedFirst }.joined()
     }
     
-    var camelCase : String {
-        self[startIndex].lowercased() + self.pascalCase.dropFirst(1)
+    var camelCase: String {
+        self[startIndex].lowercased() + self.pascalCase.dropFirst()
     }
     
     // MARK: - Internal interface
@@ -27,6 +27,10 @@ extension String {
     
     private var trimmed: String {
         self.trimmingCharacters(in: CharacterSet(charactersIn: " "))
+    }
+    
+    private var capitalizedFirst: String {
+        self[startIndex].uppercased() + self.dropFirst()
     }
 }
 

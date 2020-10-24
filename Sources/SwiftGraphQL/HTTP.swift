@@ -68,12 +68,14 @@ public struct GraphQLClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
         
-        let query: [String: Any] = [
-            "query": selection.selection.serialize(for: operation)
+        /* Compose body */
+        let query = selection.selection.serialize(for: operation)
+        let body: [String: Any] = [
+            "query": query,
         ]
         
         request.httpBody = try! JSONSerialization.data(
-            withJSONObject: query,
+            withJSONObject: body,
             options: JSONSerialization.WritingOptions()
         )
         

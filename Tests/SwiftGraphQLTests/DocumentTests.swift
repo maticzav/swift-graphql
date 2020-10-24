@@ -44,8 +44,9 @@ final class DocumentTests: XCTestCase {
     func testSingleFieldWithArgument() {
         let document = [
             GraphQLField.leaf(
-                name: "fruit", arguments: [
-                    Argument(name: "name", value: "apple")
+                name: "fruit",
+                arguments: [
+                    Argument(name: "name", value: "\"apple\"")
                 ]
             )
         ]
@@ -65,7 +66,7 @@ final class DocumentTests: XCTestCase {
             GraphQLField.composite(
                 name: "cart",
                 arguments: [
-                    Argument(name: "name", value: "apple")
+                    Argument(name: "name", value: "\"apple\"")
                 ],
                 selection: [
                     GraphQLField.leaf(name: "items"),
