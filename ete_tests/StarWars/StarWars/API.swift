@@ -7,7 +7,7 @@ enum Objects {}
 /* Query */
 
 extension Objects {
-    struct Query: Codable, Hashable {
+    struct Query: Codable {
         let human: Human?
         let humans: [Human]?
         let greeting: String?
@@ -22,7 +22,7 @@ extension SelectionSet where TypeLock == RootQuery {
         let field = GraphQLField.composite(
             name: "human",
             arguments: [
-                Argument(name: "id", type: "String!", value: id),
+                Argument(name: "id", value: id),
             ],
             selection: selection.selection
         )
@@ -34,7 +34,6 @@ extension SelectionSet where TypeLock == RootQuery {
         }
         return selection.mock()
     }
-
     func humans<Type>(_ selection: Selection<Type, [HumanObject]>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(
@@ -52,13 +51,12 @@ extension SelectionSet where TypeLock == RootQuery {
         }
         return selection.mock()
     }
-
     func greeting(input: InputObjects.Greeting) -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "greeting",
             arguments: [
-                Argument(name: "input", type: "Greeting!", value: input),
+                Argument(name: "input", value: input),
             ]
         )
         self.select(field)
@@ -71,16 +69,16 @@ extension SelectionSet where TypeLock == RootQuery {
     }
 }
 
-// MARK: - Selection
+// MARK: - Objects
 
 /* Human */
 
 extension Objects {
-    struct Human: Codable, Hashable {
+    struct Human: Codable {
         let id: String?
         let name: String?
         let homePlanet: String?
-        let appearsIn: [Episode]?
+        let appearsIn: [Enums.Episode]?
     }
 }
 
@@ -103,7 +101,6 @@ extension SelectionSet where TypeLock == HumanObject {
         }
         return String.mockValue
     }
-
     func name() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
@@ -120,9 +117,8 @@ extension SelectionSet where TypeLock == HumanObject {
         }
         return String.mockValue
     }
-
     /// The home planet of the human, or null if unknown.
-    func homeplanet() -> String? {
+    func homePlanet() -> String? {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "homePlanet",
@@ -138,8 +134,7 @@ extension SelectionSet where TypeLock == HumanObject {
         }
         return nil
     }
-
-    func appearsin() -> [Episode] {
+    func appearsIn() -> [Enums.Episode] {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "appearsIn",
@@ -157,32 +152,42 @@ extension SelectionSet where TypeLock == HumanObject {
     }
 }
 
-// MARK: - Input Objects
+// MARK: - Enums
 
-enum InputObjects {
-    struct Greeting: Codable, Hashable {
-        let name: String
+enum Enums {
+    /// One of the films in the Star Wars Trilogy
+    enum Episode: String, CaseIterable, Codable {
+        /// Released in 1977.
+        case newhope = "NEWHOPE"
+        
+        /// Released in 1980.
+        case empire = "EMPIRE"
+        
+        /// Released in 1983
+        case jedi = "JEDI"
+        
+    }
+
+
+    /// Language
+    enum Language: String, CaseIterable, Codable {
+        case en = "EN"
+        
+        case sl = "SL"
+        
     }
 }
 
-// MARK: - Enums
+// MARK: - Input Objects
 
-/// One of the films in the Star Wars Trilogy
-enum Episode: String, CaseIterable, Codable {
-    /// Released in 1977.
-    case newhope = "NEWHOPE"
-
-    /// Released in 1980.
-    case empire = "EMPIRE"
-
-    /// Released in 1983
-    case jedi = "JEDI"
-}
+enum InputObjects {
+    struct Greeting: Codable {
+        let language: Enums.Language?
+        let name: String
+    }
 
 
-/// Language
-enum Language: String, CaseIterable, Codable {
-    case en = "EN"
-
-    case sl = "SL"
+    struct GreetingOptions: Codable {
+        let prefix: String?
+    }
 }

@@ -7,7 +7,7 @@ final class FieldTests: XCTestCase {
     
     // MARK: - Tests
     
-    func testGenerateFieldDocs() {
+    func testFieldDocs() {
         let field = GraphQL.Field(
             name: "id",
             description: "Object identifier.",
@@ -18,34 +18,37 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            /// Object identifier.
-            @available(*, deprecated, message: "Use ID instead.")
-            func id() -> String? {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "id",
-                    arguments: [
-                
-                    ]
-                )
-                self.select(field)
+        /// Object identifier.
+        @available(*, deprecated, message: "Use ID instead.")
+        func id() -> String? {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "id",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.id
-                }
-                return nil
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.id
             }
+            return nil
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
     // MARK: - Scalar
     
-    func testGenerateScalarField() {
+    func testScalarField() {
         let field = GraphQL.Field(
             name: "id",
             description: nil,
@@ -56,30 +59,33 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func id() -> String {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "id",
-                    arguments: [
-                
-                    ]
-                )
-                self.select(field)
+        func id() -> String {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "id",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.id!
-                }
-                return String.mockValue
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.id!
             }
+            return String.mockValue
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
   
-    func testGenerateNullableScalarField() {
+    func testNullableScalarField() {
         let field = GraphQL.Field(
             name: "id",
             description: nil,
@@ -90,30 +96,33 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func id() -> String? {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "id",
-                    arguments: [
-                
-                    ]
-                )
-                self.select(field)
+        func id() -> String? {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "id",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.id
-                }
-                return nil
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.id
             }
+            return nil
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
-    func testGenerateListScalarField() {
+    func testListScalarField() {
         let field = GraphQL.Field(
             name: "ids",
             description: nil,
@@ -124,27 +133,30 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func ids() -> [String]? {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "ids",
-                    arguments: [
-                
-                    ]
-                )
-                self.select(field)
+        func ids() -> [String]? {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "ids",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.ids
-                }
-                return nil
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.ids
             }
+            return nil
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
     func testGenearateNonNullableListScalarField() {
@@ -158,32 +170,35 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func ids() -> [String] {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "ids",
-                    arguments: [
-                
-                    ]
-                )
-                self.select(field)
+        func ids() -> [String] {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "ids",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.ids!
-                }
-                return []
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.ids!
             }
+            return []
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
     // MARK: - Enumerators
     
-    func testGenerateEnumField() {
+    func testEnumField() {
         let field = GraphQL.Field(
             name: "episode",
             description: nil,
@@ -194,31 +209,34 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func episode() -> Episode {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "episode",
-                    arguments: [
-                
-                    ]
-                )
-                self.select(field)
+        func episode() -> Enums.Episode {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "episode",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.episode!
-                }
-                return Episode.allCases.first!
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.episode!
             }
+            return Enums.Episode.allCases.first!
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
     
-    func testGenerateNullableEnumField() {
+    func testNullableEnumField() {
         let field = GraphQL.Field(
             name: "episode",
             description: nil,
@@ -229,30 +247,33 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func episode() -> Episode? {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "episode",
-                    arguments: [
-                
-                    ]
-                )
-                self.select(field)
+        func episode() -> Enums.Episode? {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "episode",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.episode
-                }
-                return nil
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.episode
             }
+            return nil
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
-    func testGenerateNullableListEnumField() {
+    func testNullableListEnumField() {
         let field = GraphQL.Field(
             name: "episode",
             description: nil,
@@ -263,32 +284,35 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func episode() -> [Episode?] {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "episode",
-                    arguments: [
-                
-                    ]
-                )
-                self.select(field)
+        func episode() -> [Enums.Episode?] {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "episode",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.episode!
-                }
-                return []
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.episode!
             }
+            return []
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
     // MARK: - Selections
 
-    func testGenerateSelectionField() {
+    func testSelectionField() {
         let field = GraphQL.Field(
             name: "hero",
             description: nil,
@@ -299,31 +323,34 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func hero<Type>(_ selection: Selection<Type, HeroObject>) -> Type {
-                /* Selection */
-                let field = GraphQLField.composite(
-                    name: "hero",
-                    arguments: [
-                
-                    ],
-                    selection: selection.selection
-                )
-                self.select(field)
+        func hero<Type>(_ selection: Selection<Type, HeroObject>) -> Type {
+            /* Selection */
+            let field = GraphQLField.composite(
+                name: "hero",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return selection.decode(data: data.hero!)
-                }
-                return selection.mock()
+                ],
+                selection: selection.selection
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return selection.decode(data: data.hero!)
             }
+            return selection.mock()
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
-    func testGenerateNullableSelectionField() {
+    func testNullableSelectionField() {
         let field = GraphQL.Field(
             name: "hero",
             description: nil,
@@ -334,31 +361,34 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func hero<Type>(_ selection: Selection<Type, HeroObject?>) -> Type {
-                /* Selection */
-                let field = GraphQLField.composite(
-                    name: "hero",
-                    arguments: [
-                
-                    ],
-                    selection: selection.selection
-                )
-                self.select(field)
+        func hero<Type>(_ selection: Selection<Type, HeroObject?>) -> Type {
+            /* Selection */
+            let field = GraphQLField.composite(
+                name: "hero",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return data.hero.map { selection.decode(data: $0) } ?? selection.mock()
-                }
-                return selection.mock()
+                ],
+                selection: selection.selection
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.hero.map { selection.decode(data: $0) } ?? selection.mock()
             }
+            return selection.mock()
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
 
-    func testGenerateListSelectionField() {
+    func testListSelectionField() {
         let field = GraphQL.Field(
             name: "hero",
             description: nil,
@@ -369,33 +399,36 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func hero<Type>(_ selection: Selection<Type, [HeroObject]>) -> Type {
-                /* Selection */
-                let field = GraphQLField.composite(
-                    name: "hero",
-                    arguments: [
-                
-                    ],
-                    selection: selection.selection
-                )
-                self.select(field)
+        func hero<Type>(_ selection: Selection<Type, [HeroObject]>) -> Type {
+            /* Selection */
+            let field = GraphQLField.composite(
+                name: "hero",
+                arguments: [
             
-                /* Decoder */
-                if let data = self.response {
-                    return selection.decode(data: data.hero!)
-                }
-                return selection.mock()
+                ],
+                selection: selection.selection
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return selection.decode(data: data.hero!)
             }
+            return selection.mock()
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
     
     // MARK: - Arguments
     
-    func testGenerateFieldWithArguments() {
+    func testFieldWithScalarArgument() {
         let field = GraphQL.Field(
             name: "hero",
             description: nil,
@@ -412,27 +445,73 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-            func hero(id: String) -> String {
-                /* Selection */
-                let field = GraphQLField.leaf(
-                    name: "hero",
-                    arguments: [
-                        Argument(name: "id", value: id),
-                    ]
-                )
-                self.select(field)
-            
-                /* Decoder */
-                if let data = self.response {
-                    return data.hero!
-                }
-                return String.mockValue
+        func hero(id: String) -> String {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "hero",
+                arguments: [
+                    Argument(name: "id", value: id),
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.hero!
             }
+            return String.mockValue
+        }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateField(field), expected)
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
+    }
+    
+    func testFieldWithInputObjectArgument() {
+        let field = GraphQL.Field(
+            name: "hero",
+            description: nil,
+            args: [
+                GraphQL.InputValue(
+                    name: "id",
+                    description: nil,
+                    type: .nonNull(.named(.inputObject("Input")))
+                )
+            ],
+            type: .nonNull(.named(.scalar("ID"))),
+            isDeprecated: false,
+            deprecationReason: nil
+        )
+        
+        let expected = """
+        func hero(id: InputObjects.Input) -> String {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "hero",
+                arguments: [
+                    Argument(name: "id", value: id),
+                ]
+            )
+            self.select(field)
+        
+            /* Decoder */
+            if let data = self.response {
+                return data.hero!
+            }
+            return String.mockValue
+        }
+        """
+        
+        /* Test */
+        
+        XCTAssertEqual(
+            generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
     }
 }
 

@@ -17,17 +17,16 @@ final class InputObjectTests: XCTestCase {
         /* Tests */
         let expected = """
         struct InputObjectTest: Codable {
-
         }
         """
         
         XCTAssertEqual(
-            generator.generateInputObject("InputObjectTest", for: type),
+            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
     
-    // MARK: - Fields
+    // MARK: - Docs
     
     func testFieldDocs() {
         let type = GraphQL.InputObjectType(
@@ -52,10 +51,12 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            generator.generateInputObject("InputObjectTest", for: type),
+            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
+    
+    // MARK: - Fields
     
     func testScalarField() {
         let type = GraphQL.InputObjectType(
@@ -80,18 +81,64 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            generator.generateInputObject("InputObjectTest", for: type),
+            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
+            expected
+        )
+    }
+    
+    func testInputObjectField() {
+        let type = GraphQL.InputObjectType(
+            name: "InputObject",
+            description: nil,
+            inputFields: [
+                /* Scalar, Docs */
+                GraphQL.InputValue(
+                    name: "id",
+                    description: "Field description.",
+                    type: .named(.inputObject("AnotherInputObject"))
+                ),
+            ]
+        )
+        
+        /* Tests */
+        let expected = """
+        struct InputObjectTest: Codable {
+            /// Field description.
+            let id: AnotherInputObject?
+        }
+        """
+        
+        XCTAssertEqual(
+            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
+            expected
+        )
+    }
+    
+    func testEnumField() {
+        let type = GraphQL.InputObjectType(
+            name: "InputObject",
+            description: nil,
+            inputFields: [
+                /* Scalar, Docs */
+                GraphQL.InputValue(
+                    name: "id",
+                    description: "Field description.",
+                    type: .named(.enum("ENUM"))
+                ),
+            ]
+        )
+        
+        /* Tests */
+        let expected = """
+        struct InputObjectTest: Codable {
+            /// Field description.
+            let id: Enums.Enum?
+        }
+        """
+        
+        XCTAssertEqual(
+            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
 }
-
-
-                
-//                /* Scalar, default value */
-//                GraphQL.InputValue(
-//                    name: "int",
-//                    description: nil,
-//                    type: .named(.scalar(.integer)),
-//                    defaultValue: "15"
-//                ),

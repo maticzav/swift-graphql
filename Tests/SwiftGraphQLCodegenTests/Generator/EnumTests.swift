@@ -17,13 +17,15 @@ final class EnumTests: XCTestCase {
         let expected = """
         /// Collection of all StarWars episodes.
         enum Episodes: String, CaseIterable, Codable {
-
         }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateEnum(type), expected)
+        XCTAssertEqual(
+            generator.generateEnum(type).joined(separator: "\n"),
+            expected
+        )
     }
     
     func testGenerateEnumWithoutDescription() {
@@ -45,12 +47,16 @@ final class EnumTests: XCTestCase {
         enum Episodes: String, CaseIterable, Codable {
             /// Released in 1977.
             case newhope = "NEWHOPE"
+            
         }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateEnum(type), expected)
+        XCTAssertEqual(
+            generator.generateEnum(type).joined(separator: "\n"),
+            expected
+        )
     }
     
     
@@ -94,21 +100,25 @@ final class EnumTests: XCTestCase {
         enum Episodes: String, CaseIterable, Codable {
             /// Released in 1977.
             case newhope = "NEWHOPE"
-
+            
             case empire = "EMPIRE"
-
+            
             /// Released in 1983.
             @available(*, deprecated, message: "Was too good.")
             case jedi = "JEDI"
-
+            
             @available(*, deprecated, message: "")
             case skywalker = "SKYWALKER"
+            
         }
         """
         
         /* Test */
         
-        XCTAssertEqual(generator.generateEnum(type), expected)
+        XCTAssertEqual(
+            generator.generateEnum(type).joined(separator: "\n"),
+            expected
+        )
     }
 }
 

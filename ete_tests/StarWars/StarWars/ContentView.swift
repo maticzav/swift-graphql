@@ -27,7 +27,9 @@ struct Model {
 }
 
 let query = Selection<Model, RootQuery> {
-    Model(greeting: $0.greeting(input: InputObjects.Greeting(name: "Matic")))
+    Model(greeting: $0.greeting(
+            input: InputObjects.Greeting(language: nil, name: "Matic"))
+    )
 }
 
 /* View */

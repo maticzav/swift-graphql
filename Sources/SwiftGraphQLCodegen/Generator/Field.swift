@@ -21,7 +21,8 @@ extension GraphQLCodegen {
             return "let \(field.name): \(generateDecoderType(options.scalar(scalar), for: nullableType))"
         /* Enumerator */
         case .enum(let enm):
-            return "let \(field.name): \(generateDecoderType(enm, for: nullableType))"
+            let type = "Enums.\(enm.pascalCase)"
+            return "let \(field.name): \(generateDecoderType(type, for: nullableType))"
         /* Selections */
         case .object(let type), .interface(let type), .union(let type):
             return "let \(field.name): \(generateDecoderType(type.pascalCase, for: nullableType))"
@@ -31,14 +32,14 @@ extension GraphQLCodegen {
     // MARK: - Field Selection
     
     /// Generates a SwiftGraphQL field.
-    func generateField(_ field: GraphQL.Field) -> String {
+    func generateField(_ field: GraphQL.Field) -> [String] {
         let lines: [String?] = [
             generateFieldDoc(for: field),
             generateFieldDeprecationDoc(for: field),
             "func \(generateFnDefinition(for: field)) -> \(generateReturnType(for: field.type)) {",
             "    /* Selection */"
         ]
-        + generateFieldSelection(for: field).map { "    \($0)" }
+        + generateFieldSelection(for: field).indent(by: 4)
         + [ "    self.select(field)",
             "",
             "    /* Decoder */",
@@ -50,7 +51,7 @@ extension GraphQLCodegen {
         ]
         
         
-        return lines.compactMap { $0 }.map { "    \($0)"}.joined(separator: "\n")
+        return lines.compactMap { $0 }
     }
     
     // MARK: - Documentation
@@ -101,9 +102,11 @@ extension GraphQLCodegen {
         case .scalar(let scalar):
             return generateDecoderType(options.scalar(scalar), for: ref)
         case .enum(let enm):
-            return generateDecoderType(enm, for: ref)
+            let type = "Enums.\(enm.pascalCase)"
+            return generateDecoderType(type, for: ref)
         case .inputObject(let inputObject):
-            return generateDecoderType(inputObject.pascalCase, for: ref)
+            let type = "InputObjects.\(inputObject.pascalCase)"
+            return generateDecoderType(type, for: ref)
         }
     }
 
@@ -113,7 +116,8 @@ extension GraphQLCodegen {
         case .scalar(let scalar):
             return generateDecoderType(options.scalar(scalar), for: ref)
         case .enum(let enm):
-            return generateDecoderType(enm, for: ref)
+            let type = "Enums.\(enm.pascalCase)"
+            return generateDecoderType(type, for: ref)
         case .interface(_),
             .object(_),
             .union(_):
@@ -148,7 +152,7 @@ extension GraphQLCodegen {
                 [ "let field = GraphQLField.leaf(",
                   "    name: \"\(field.name)\",",
                   "    arguments: [",
-                  generateSelectionArguments(for: field.args).map { "        \($0)" }.joined(separator: "\n"),
+                  generateSelectionArguments(for: field.args).indent(by: 8).joined(separator: "\n"),
                   "    ]",
                   ")"
                 ]
@@ -157,7 +161,7 @@ extension GraphQLCodegen {
                 [ "let field = GraphQLField.composite(",
                   "    name: \"\(field.name)\",",
                   "    arguments: [",
-                  generateSelectionArguments(for: field.args).map { "        \($0)" }.joined(separator: "\n"),
+                  generateSelectionArguments(for: field.args).indent(by: 8).joined(separator: "\n"),
                   "    ],",
                   "    selection: selection.selection",
                   ")"
@@ -204,7 +208,7 @@ extension GraphQLCodegen {
             return generateMockWrapper("\(options.scalar(scalar)).mockValue", for: ref)
         /* Enumerations */
         case .enum(let enm):
-            return generateMockWrapper("\(enm.pascalCase).allCases.first!", for: ref)
+            return generateMockWrapper("Enums.\(enm.pascalCase).allCases.first!", for: ref)
         /* Selections */
         case .interface(_), .object(_), .union(_):
             return "selection.mock()"

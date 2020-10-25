@@ -2,24 +2,20 @@ import Foundation
 
 extension GraphQLCodegen {
     /// Generates a function to handle a type.
-    func generateObject(_ typeName: String, for type: GraphQL.ObjectType) -> String {
+    func generateObject(_ typeName: String, for type: GraphQL.ObjectType) -> [String] {
         [ "/* \(type.name) */",
           "",
           "extension Objects {",
-          "    struct \(type.name.pascalCase): Codable {",
-          type.fields.map { generateFieldDecoder(for: $0) }
-            .map { "        \($0)" }
-            .joined(separator: "\n"),
-          "    }",
+          "    struct \(type.name.pascalCase): Codable {"
+        ] + type.fields.map { generateFieldDecoder(for: $0) }.indent(by: 8) +
+        [ "    }",
           "}",
           "",
           "typealias \(typeName) = Objects.\(type.name.pascalCase)",
           "",
-          "extension SelectionSet where TypeLock == \(typeName) {",
-          type.fields.map(generateField).joined(separator: "\n\n"),
-          "}"
-        ]
-        .joined(separator: "\n")
+          "extension SelectionSet where TypeLock == \(typeName) {"
+        ] + type.fields.flatMap(generateField).indent(by: 4) +
+        [ "}" ]
     }
     
     

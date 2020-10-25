@@ -21,19 +21,20 @@ final class ObjectTests: XCTestCase {
         /* Query */
 
         extension Objects {
-            struct RootQuery: Codable {
-
+            struct Query: Codable {
             }
         }
 
-        typealias RootQueryObject = Objects.RootQuery
+        typealias RootQuery = Objects.Query
 
         extension SelectionSet where TypeLock == RootQuery {
-
         }
         """
         
-        XCTAssertEqual(generator.generateObject("RootQuery", for: type), expected)
+        XCTAssertEqual(
+            generator.generateObject("RootQuery", for: type).joined(separator: "\n"),
+            expected
+        )
     }
     
     /* TypeLock */

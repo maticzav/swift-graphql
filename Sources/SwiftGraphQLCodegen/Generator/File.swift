@@ -32,7 +32,25 @@ extension GraphQLCodegen {
         types.append(contentsOf: schema.objects.map { .object($0) })
         types.append(contentsOf: schema.inputObjects.map { .inputObject($0) })
         
-        /* Generate the API. */
+        /* Code parts. */
+        
+        let operationsPart = operations.map {
+            generateObject($0.name, for: $0.type).joined(separator: "\n")
+        }.joined(separator: "\n\n\n")
+        
+        let objectsPart = objects.map {
+            generateObject($0.name, for: $0.type).joined(separator: "\n")
+        }.joined(separator: "\n\n\n")
+        
+        let enumsPart = schema.enums.map {
+            generateEnum($0).indent(by: 4).joined(separator: "\n")
+        }.joined(separator: "\n\n\n")
+        
+        let inputObjectsPart = schema.inputObjects.map {
+            generateInputObject($0.name.pascalCase, for: $0).indent(by: 4).joined(separator: "\n")
+        }.joined(separator: "\n\n\n")
+        
+        /* File. */
         let code = """
             import SwiftGraphQL
 
@@ -40,15 +58,23 @@ extension GraphQLCodegen {
 
             // MARK: - Operations
             
-            \(operations.map { generateObject($0.name, for: $0.type) }.joined(separator: "\n\n\n"))
+            \(operationsPart)
 
-            // MARK: - Selection
+            // MARK: - Objects
 
-            \(objects.map { generateObject($0.name, for: $0.type) }.joined(separator: "\n\n\n"))
+            \(objectsPart)
 
             // MARK: - Enums
 
-            \(schema.enums.map { generateEnum($0) }.joined(separator: "\n\n\n"))
+            enum Enums {
+            \(enumsPart)
+            }
+
+            // MARK: - Input Objects
+
+            enum InputObjects {
+            \(inputObjectsPart)
+            }
             """
         
         return code

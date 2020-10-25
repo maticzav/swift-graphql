@@ -2,26 +2,20 @@ import Foundation
 
 extension GraphQLCodegen {
     /// Generates struct that is applicable to input object.
-    func generateInputObject(_ name: String, for type: GraphQL.InputObjectType) -> String {
+    func generateInputObject(_ name: String, for type: GraphQL.InputObjectType) -> [String] {
         [ "struct \(name): Codable {"
-        , type.inputFields
-            .map(generateInputField)
-            .joined(separator: "\n")
-        , "}"
-        ]
-        .joined(separator: "\n")
+        ] + type.inputFields.flatMap(generateInputField).indent(by: 4) +
+        [ "}" ]
     }
     
     // MARK: - Private helpers
     
     /// Generates a single fileld.
-    private func generateInputField(_ field: GraphQL.InputValue) -> String {
+    private func generateInputField(_ field: GraphQL.InputValue) -> [String] {
         [ generateDescription(for: field)
         , "let \(field.name): \(generatePropertyType(for: field.type))"
         ]
         .compactMap { $0 }
-        .map { "    \($0)" }
-        .joined(separator: "\n")
     }
     
     private func generateDescription(for field: GraphQL.InputValue) -> String? {
@@ -39,7 +33,7 @@ extension GraphQLCodegen {
             case .scalar(let scalar):
                 return self.options.scalar(scalar)
             case .enum(let enm):
-                return enm.pascalCase
+                return "Enums.\(enm.pascalCase)"
             case .inputObject(let inputObject):
                 return inputObject.pascalCase
             }

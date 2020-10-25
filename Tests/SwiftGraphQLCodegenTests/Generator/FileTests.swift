@@ -35,23 +35,30 @@ final class FileTests: XCTestCase {
         /* Query */
 
         extension Objects {
-            struct RootQuery: Codable {
+            struct Query: Codable {
             }
         }
 
-        typealias RootQueryObject = Objects.RootQuery
+        typealias RootQuery = Objects.Query
 
         extension SelectionSet where TypeLock == RootQuery {
-
         }
 
-        // MARK: - Selection
+        // MARK: - Objects
 
 
 
         // MARK: - Enums
 
+        enum Enums {
 
+        }
+
+        // MARK: - Input Objects
+
+        enum InputObjects {
+
+        }
         """
         
         /* Test */
