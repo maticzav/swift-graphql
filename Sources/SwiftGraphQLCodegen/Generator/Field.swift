@@ -4,7 +4,7 @@ extension GraphQLCodegen {
     
     // MARK: - Field Decoders
     
-    func generateFieldDecoder(for field: GraphQL.Field) -> String {
+    func generateFieldDecoder(for field: GraphQL.Field) throws -> String {
         // Make the type optional.
         var nullableType = field.type
         switch nullableType {
@@ -18,25 +18,26 @@ extension GraphQLCodegen {
         switch field.type.inverted.namedType {
         /* Scalar */
         case .scalar(let scalar):
-            return "let \(field.name): \(generateDecoderType(options.scalar(scalar), for: nullableType))"
+            let scalar = try options.scalar(scalar)
+            return "let \(field.name.normalize): \(generateDecoderType(scalar, for: nullableType))"
         /* Enumerator */
         case .enum(let enm):
             let type = "Enums.\(enm.pascalCase)"
-            return "let \(field.name): \(generateDecoderType(type, for: nullableType))"
+            return "let \(field.name.normalize): \(generateDecoderType(type, for: nullableType))"
         /* Selections */
         case .object(let type), .interface(let type), .union(let type):
-            return "let \(field.name): \(generateDecoderType(type.pascalCase, for: nullableType))"
+            return "let \(field.name.normalize): \(generateDecoderType(type.pascalCase, for: nullableType))"
         }
     }
     
     // MARK: - Field Selection
     
     /// Generates a SwiftGraphQL field.
-    func generateField(_ field: GraphQL.Field) -> [String] {
+    func generateField(_ field: GraphQL.Field) throws -> [String] {
         let lines: [String?] = [
             generateFieldDoc(for: field),
             generateFieldDeprecationDoc(for: field),
-            "func \(generateFnDefinition(for: field)) -> \(generateReturnType(for: field.type)) {",
+            "func \(try generateFnDefinition(for: field)) -> \(try generateReturnType(for: field.type)) {",
             "    /* Selection */"
         ]
         + generateFieldSelection(for: field).indent(by: 4)
@@ -46,7 +47,7 @@ extension GraphQLCodegen {
             "    if let data = self.response {",
             "        return \(generateDecoder(for: field))",
             "    }",
-            "    return \(generateMockData(for: field.type))",
+            "    return \(try generateMockData(for: field.type))",
             "}"
         ]
         
@@ -69,38 +70,41 @@ extension GraphQLCodegen {
     // MARK: - Function definition
 
     /// Generates a function definition for a field.
-    private func generateFnDefinition(for field: GraphQL.Field) -> String {
+    private func generateFnDefinition(for field: GraphQL.Field) throws -> String {
         switch field.type.namedType {
         /* Scalar, Enum */
         case .scalar(_), .enum(_):
-            return "\(field.name.camelCase)(\(generateFnArguments(for: field.args)))"
+            let arguments = try generateFnArguments(for: field.args)
+            return "\(field.name.camelCase.normalize)(\(arguments))"
         /* Selections */
         case .interface(_), .object(_), .union(_):
             let typeLock = generateObjectTypeLock(for: field.type.namedType.name.pascalCase)
             let decoderType = generateDecoderType(typeLock, for: field.type)
             // Function generator
             if field.args.isEmpty {
-                return "\(field.name.camelCase)<Type>(_ selection: Selection<Type, \(decoderType)>)"
+                return "\(field.name.camelCase.normalize)<Type>(_ selection: Selection<Type, \(decoderType)>)"
             }
-            return "\(field.name.camelCase)<Type>(\(generateFnArguments(for: field.args)), _ selection: Selection<Type, \(decoderType)>)"
+            let arguments = try generateFnArguments(for: field.args)
+            return "\(field.name.camelCase.normalize)<Type>(\(arguments), _ selection: Selection<Type, \(decoderType)>)"
         }
     }
     
     /// Generates arguments for accessor function.
-    private func generateFnArguments(for args: [GraphQL.InputValue]) -> String {
-        args.map { generateArgument(for: $0) }.joined(separator: ", ")
+    private func generateFnArguments(for args: [GraphQL.InputValue]) throws -> String {
+        try args.map { try generateArgument(for: $0) }.joined(separator: ", ")
     }
     
     /// Generates a function parameter based on an input value.
-    private func generateArgument(for input: GraphQL.InputValue) -> String {
-        "\(input.name.camelCase): \(generateArgumentType(for: input.type))"
+    private func generateArgument(for input: GraphQL.InputValue) throws -> String {
+        "\(input.name.camelCase.normalize): \(try generateArgumentType(for: input.type))"
     }
     
     /// Generates a type definition for an argument function parameter.
-    private func generateArgumentType(for ref: GraphQL.InputTypeRef) -> String {
+    private func generateArgumentType(for ref: GraphQL.InputTypeRef) throws -> String {
         switch ref.namedType {
         case .scalar(let scalar):
-            return generateDecoderType(options.scalar(scalar), for: ref)
+            let scalar = try options.scalar(scalar)
+            return generateDecoderType(scalar, for: ref)
         case .enum(let enm):
             let type = "Enums.\(enm.pascalCase)"
             return generateDecoderType(type, for: ref)
@@ -111,10 +115,11 @@ extension GraphQLCodegen {
     }
 
     /// Recursively generates a return type of a referrable type.
-    private func generateReturnType(for ref: GraphQL.OutputTypeRef) -> String {
+    private func generateReturnType(for ref: GraphQL.OutputTypeRef) throws -> String {
         switch ref.namedType {
         case .scalar(let scalar):
-            return generateDecoderType(options.scalar(scalar), for: ref)
+            let scalar = try options.scalar(scalar)
+            return generateDecoderType(scalar, for: ref)
         case .enum(let enm):
             let type = "Enums.\(enm.pascalCase)"
             return generateDecoderType(type, for: ref)
@@ -151,18 +156,18 @@ extension GraphQLCodegen {
             return
                 [ "let field = GraphQLField.leaf(",
                   "    name: \"\(field.name)\",",
-                  "    arguments: [",
-                  generateSelectionArguments(for: field.args).indent(by: 8).joined(separator: "\n"),
-                  "    ]",
+                  "    arguments: ["
+                ] + generateSelectionArguments(for: field.args).indent(by: 8) +
+                [ "    ]",
                   ")"
                 ]
         case .interface(_), .object(_), .union(_):
             return
                 [ "let field = GraphQLField.composite(",
                   "    name: \"\(field.name)\",",
-                  "    arguments: [",
-                  generateSelectionArguments(for: field.args).indent(by: 8).joined(separator: "\n"),
-                  "    ],",
+                  "    arguments: ["
+                ] + generateSelectionArguments(for: field.args).indent(by: 8) +
+                [ "    ],",
                   "    selection: selection.selection",
                   ")"
                 ]
@@ -171,7 +176,7 @@ extension GraphQLCodegen {
     
     /// Generates a dictionary of argument builders.
     private func generateSelectionArguments(for args: [GraphQL.InputValue]) -> [String] {
-        args.map { #"Argument(name: "\#($0.name.camelCase)", value: \#($0.name.camelCase)),"# }
+        args.map { #"Argument(name: "\#($0.name.camelCase)", value: \#($0.name.camelCase.normalize)),"# }
     }
     
     // MARK: - Accessors
@@ -201,11 +206,12 @@ extension GraphQLCodegen {
     // MARK: - Mocking
 
     /// Generates value placeholders for the API.
-    private func generateMockData(for ref: GraphQL.OutputTypeRef) -> String {
+    private func generateMockData(for ref: GraphQL.OutputTypeRef) throws -> String {
         switch ref.namedType {
         /* Scalars */
         case .scalar(let scalar):
-            return generateMockWrapper("\(options.scalar(scalar)).mockValue", for: ref)
+            let type = try options.scalar(scalar)
+            return generateMockWrapper("\(type).mockValue", for: ref)
         /* Enumerations */
         case .enum(let enm):
             return generateMockWrapper("Enums.\(enm.pascalCase).allCases.first!", for: ref)

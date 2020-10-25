@@ -10,7 +10,7 @@ extension GraphQLCodegen {
     
     
     /// Generates the code that can be used to define selections.
-    func generate(from schema: GraphQL.Schema) -> String {
+    func generate(from schema: GraphQL.Schema) throws -> String {
         /* Data */
         
         // ObjectTypes for operations
@@ -34,20 +34,24 @@ extension GraphQLCodegen {
         
         /* Code parts. */
         
-        let operationsPart = operations.map {
-            generateObject($0.name, for: $0.type).joined(separator: "\n")
+        let operationsPart = try operations.map {
+            try generateObject($0.name, for: $0.type).joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
-        let objectsPart = objects.map {
-            generateObject($0.name, for: $0.type).joined(separator: "\n")
+        let objectsPart = try objects.map {
+            try generateObject($0.name, for: $0.type).joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
         let enumsPart = schema.enums.map {
-            generateEnum($0).indent(by: 4).joined(separator: "\n")
+            generateEnum($0)
+                .indent(by: 4)
+                .joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
-        let inputObjectsPart = schema.inputObjects.map {
-            generateInputObject($0.name.pascalCase, for: $0).indent(by: 4).joined(separator: "\n")
+        let inputObjectsPart = try schema.inputObjects.map {
+            try generateInputObject($0.name.pascalCase, for: $0)
+                .indent(by: 4)
+                .joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
         /* File. */

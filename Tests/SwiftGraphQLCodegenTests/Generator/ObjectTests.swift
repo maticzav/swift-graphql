@@ -6,7 +6,7 @@ final class ObjectTests: XCTestCase {
     
     // MARK: - Tests
     
-    func testEmptyObject() {
+    func testEmptyObject() throws {
         /* Type */
         let type = GraphQL.ObjectType(
             name: "Query",
@@ -32,7 +32,7 @@ final class ObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            generator.generateObject("RootQuery", for: type).joined(separator: "\n"),
+            try generator.generateObject("RootQuery", for: type).joined(separator: "\n"),
             expected
         )
     }

@@ -20,10 +20,10 @@ extension GraphQLCodegen {
     }
 
     private func generateEnumCase(for env: GraphQL.EnumValue) -> [String] {
-        [ generateEnumCaseDoc(for: env)
-        , generateEnumCaseDeprecationDoc(for: env)
-        , #"case \#(env.name.camelCase) = "\#(env.name)""#
-        , ""
+        [ generateEnumCaseDoc(for: env),
+          generateEnumCaseDeprecationDoc(for: env),
+          #"case \#(env.name.camelCase.normalize) = "\#(env.name)""#,
+          ""
         ]
         .compactMap { $0 }
     }

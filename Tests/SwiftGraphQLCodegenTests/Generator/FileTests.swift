@@ -7,7 +7,7 @@ final class FileTests: XCTestCase {
     
     // MARK: - Tests
     
-    func testGenerateFromSchema() {
+    func testGenerateFromSchema() throws {
         let schema = GraphQL.Schema(
             description: nil,
             types: [
@@ -63,7 +63,7 @@ final class FileTests: XCTestCase {
         
         /* Test */
         
-        XCTAssertEqual(generator.generate(from: schema), expected)
+        XCTAssertEqual(try generator.generate(from: schema), expected)
     }
 }
 

@@ -32,7 +32,8 @@ public struct GraphQLCodegen {
     /// Generates the API and returns it to handler.
     public func generate(from schemaURL: URL) throws -> String {
         let schema: GraphQL.Schema = try GraphQLCodegen.downloadFrom(schemaURL)
-        return self.generate(from: schema)
+        let code = try self.generate(from: schema)
+        return code
     }
     
     /// Generator options.

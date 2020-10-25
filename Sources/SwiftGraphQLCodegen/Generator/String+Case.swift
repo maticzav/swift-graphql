@@ -77,6 +77,14 @@ extension String {
         let pascal = self.pascalCase
         return pascal[pascal.startIndex].lowercased() + pascal.dropFirst()
     }
+    
+    /// Add backticks on reserved words.
+    var normalize: String {
+        if reservedWords.contains(self) {
+            return "`\(self)`"
+        }
+        return self
+    }
 }
 
 // https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html

@@ -7,7 +7,7 @@ final class InputObjectTests: XCTestCase {
     
     // MARK: - Tests
     
-    func testEmptyInputObject() {
+    func testEmptyInputObject() throws {
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
@@ -21,14 +21,14 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
+            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
     
     // MARK: - Docs
     
-    func testFieldDocs() {
+    func testFieldDocs() throws {
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
@@ -51,14 +51,14 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
+            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
     
     // MARK: - Fields
     
-    func testScalarField() {
+    func testScalarField() throws {
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
@@ -81,12 +81,12 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
+            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
     
-    func testInputObjectField() {
+    func testInputObjectField() throws {
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
@@ -109,12 +109,12 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
+            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
     
-    func testEnumField() {
+    func testEnumField() throws {
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
@@ -137,7 +137,7 @@ final class InputObjectTests: XCTestCase {
         """
         
         XCTAssertEqual(
-            generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
+            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
