@@ -22,7 +22,7 @@ extension SelectionSet where TypeLock == RootQuery {
         let field = GraphQLField.composite(
             name: "human",
             arguments: [
-                Argument(name: "id", value: id),
+                Argument(name: "id", type: "ID!", value: id),
             ],
             selection: selection.selection
         )
@@ -39,7 +39,6 @@ extension SelectionSet where TypeLock == RootQuery {
         let field = GraphQLField.composite(
             name: "humans",
             arguments: [
-        
             ],
             selection: selection.selection
         )
@@ -56,7 +55,7 @@ extension SelectionSet where TypeLock == RootQuery {
         let field = GraphQLField.leaf(
             name: "greeting",
             arguments: [
-                Argument(name: "input", value: input),
+                Argument(name: "input", type: "Greeting!", value: input),
             ]
         )
         self.select(field)
@@ -90,7 +89,6 @@ extension SelectionSet where TypeLock == HumanObject {
         let field = GraphQLField.leaf(
             name: "id",
             arguments: [
-        
             ]
         )
         self.select(field)
@@ -106,7 +104,6 @@ extension SelectionSet where TypeLock == HumanObject {
         let field = GraphQLField.leaf(
             name: "name",
             arguments: [
-        
             ]
         )
         self.select(field)
@@ -123,7 +120,6 @@ extension SelectionSet where TypeLock == HumanObject {
         let field = GraphQLField.leaf(
             name: "homePlanet",
             arguments: [
-        
             ]
         )
         self.select(field)
@@ -139,7 +135,6 @@ extension SelectionSet where TypeLock == HumanObject {
         let field = GraphQLField.leaf(
             name: "appearsIn",
             arguments: [
-        
             ]
         )
         self.select(field)

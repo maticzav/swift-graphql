@@ -34,4 +34,29 @@ public enum GraphQLField {
             return field
         }
     }
+    
+    /// Returns the list of all arguments in the selection tree.
+    var arguments: [Argument] {
+        switch self {
+        case .leaf(_, let arguments):
+            return arguments
+        case .composite(_, var arguments, let selection):
+            for subSelection in selection {
+                arguments.append(contentsOf: subSelection.arguments)
+            }
+            return arguments
+        }
+    }
+}
+
+// MARK: - Utility extensions
+
+extension Collection where Element == GraphQLField {
+    /// Returns a collection of all arguments in subselection.
+    var arguments: [Argument] {
+        var arguments = [Argument]()
+        self.forEach { arguments.append(contentsOf: $0.arguments) }
+        
+        return arguments
+    }
 }

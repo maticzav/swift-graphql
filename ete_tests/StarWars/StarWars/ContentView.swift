@@ -44,15 +44,19 @@ class AppState: ObservableObject {
     // MARK: - Intentions
     
     func fetch() {
+        print("FETCHING")
         client.perform(operation: .query, selection: query) { result in
             do {
                 let data = try result.get()
+                print("DATA")
+                print(data)
                 DispatchQueue.main.async {
                     if let data = data.data {
                         self.model = data
                     }
                 }
             } catch let error {
+                print("ERROR")
                 print(error)
             }
         }

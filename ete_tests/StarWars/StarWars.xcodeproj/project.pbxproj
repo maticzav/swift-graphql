@@ -13,6 +13,7 @@
 		02208E7E253C596E00014850 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02208E7D253C596E00014850 /* Preview Assets.xcassets */; };
 		028E0F45253DA859007A3A1F /* SwiftGraphQL in Frameworks */ = {isa = PBXBuildFile; productRef = 028E0F44253DA859007A3A1F /* SwiftGraphQL */; };
 		02CA03EE253CA05C00B05BD1 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02CA03ED253CA05B00B05BD1 /* API.swift */; };
+		02EBAE3D254579CE009B2554 /* Codecs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02EBAE3C254579CE009B2554 /* Codecs.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		02208E7D253C596E00014850 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		02208E7F253C596E00014850 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		02CA03ED253CA05B00B05BD1 /* API.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+		02EBAE3C254579CE009B2554 /* Codecs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Codecs.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +67,7 @@
 			isa = PBXGroup;
 			children = (
 				02CA03ED253CA05B00B05BD1 /* API.swift */,
+				02EBAE3C254579CE009B2554 /* Codecs.swift */,
 				02208E76253C596D00014850 /* Main.swift */,
 				02208E78253C596D00014850 /* ContentView.swift */,
 				02208E7A253C596E00014850 /* Assets.xcassets */,
@@ -176,6 +179,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02EBAE3D254579CE009B2554 /* Codecs.swift in Sources */,
 				02208E79253C596D00014850 /* ContentView.swift in Sources */,
 				02CA03EE253CA05C00B05BD1 /* API.swift in Sources */,
 				02208E77253C596D00014850 /* Main.swift in Sources */,

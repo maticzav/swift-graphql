@@ -43,6 +43,7 @@ const server = new ApolloServer({
     {
       requestDidStart(requestContext) {
         console.log('Request started! Query:\n' + requestContext.request.query)
+        console.log(requestContext.request.variables)
 
         return {}
       },

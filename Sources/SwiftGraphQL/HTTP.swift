@@ -1,20 +1,9 @@
 import Foundation
 
-/*
-    Contains types used to annotate top-level queries which can be
-    built up using generated functions.
-*/
-
-public enum Operation {
-    public struct Query: Decodable {}
-    public struct Mutation: Decodable {}
-    public struct Subscription: Decodable {}
+struct GQLRequestBody: Encodable {
+    let query: String
+    let variables: [String: Data]
 }
-
-public typealias RootQuery = Operation.Query
-public typealias RootMutation = Operation.Mutation
-public typealias RootSubscription = Operation.Subscription
-
 
 /* Client */
 
@@ -70,14 +59,21 @@ public struct GraphQLClient {
         
         /* Compose body */
         let query = selection.selection.serialize(for: operation)
-        let body: [String: Any] = [
-            "query": query,
-        ]
+        var variables = [String: Data]()
         
-        request.httpBody = try! JSONSerialization.data(
-            withJSONObject: body,
-            options: JSONSerialization.WritingOptions()
+        for argument in selection.selection.arguments {
+            variables[argument.hash] = argument.value
+        }
+        
+        let body = GQLRequestBody(
+            query: query,
+            variables: variables
         )
+        
+        let encoder = JSONEncoder()
+        encoder.dataEncodingStrategy = .deferredToData
+        
+        request.httpBody = try! encoder.encode(body)
         
         /* Parse the data and return the result. */
         func onComplete(data: Data?, response: URLResponse?, error: Error?) -> Void {

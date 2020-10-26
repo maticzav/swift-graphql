@@ -74,7 +74,7 @@ extension GraphQLCodegen {
         switch field.type.namedType {
         /* Scalar, Enum */
         case .scalar(_), .enum(_):
-            let arguments = try generateFnArguments(for: field.args)
+            let arguments = try generateFnParameters(for: field.args)
             return "\(field.name.camelCase.normalize)(\(arguments))"
         /* Selections */
         case .interface(_), .object(_), .union(_):
@@ -84,23 +84,23 @@ extension GraphQLCodegen {
             if field.args.isEmpty {
                 return "\(field.name.camelCase.normalize)<Type>(_ selection: Selection<Type, \(decoderType)>)"
             }
-            let arguments = try generateFnArguments(for: field.args)
+            let arguments = try generateFnParameters(for: field.args)
             return "\(field.name.camelCase.normalize)<Type>(\(arguments), _ selection: Selection<Type, \(decoderType)>)"
         }
     }
     
     /// Generates arguments for accessor function.
-    private func generateFnArguments(for args: [GraphQL.InputValue]) throws -> String {
-        try args.map { try generateArgument(for: $0) }.joined(separator: ", ")
+    private func generateFnParameters(for args: [GraphQL.InputValue]) throws -> String {
+        try args.map { try generateParameter(for: $0) }.joined(separator: ", ")
     }
     
     /// Generates a function parameter based on an input value.
-    private func generateArgument(for input: GraphQL.InputValue) throws -> String {
-        "\(input.name.camelCase.normalize): \(try generateArgumentType(for: input.type))"
+    private func generateParameter(for input: GraphQL.InputValue) throws -> String {
+        "\(input.name.camelCase.normalize): \(try generateParameterType(for: input.type))"
     }
     
     /// Generates a type definition for an argument function parameter.
-    private func generateArgumentType(for ref: GraphQL.InputTypeRef) throws -> String {
+    private func generateParameterType(for ref: GraphQL.InputTypeRef) throws -> String {
         switch ref.namedType {
         case .scalar(let scalar):
             let scalar = try options.scalar(scalar)
@@ -176,7 +176,24 @@ extension GraphQLCodegen {
     
     /// Generates a dictionary of argument builders.
     private func generateSelectionArguments(for args: [GraphQL.InputValue]) -> [String] {
-        args.map { #"Argument(name: "\#($0.name.camelCase)", value: \#($0.name.camelCase.normalize)),"# }
+        args.map { #"Argument(name: "\#($0.name.camelCase)", type: "\#(generateArgumentType(for: $0.type))", value: \#($0.name.camelCase.normalize)),"# }
+    }
+    
+    /// Generates a GraphQL acceptable type of an argument.
+    private func generateArgumentType(for ref: GraphQL.InputTypeRef) -> String {
+        switch ref {
+        /* Named Type */
+        case .named(let named):
+            switch named {
+            case .enum(let name), .inputObject(let name), .scalar(let name):
+                return name
+            }
+        /* Wrappers */
+        case .list(let subref):
+            return "[\(generateArgumentType(for: subref))]"
+        case .nonNull(let subref):
+            return "\(generateArgumentType(for: subref))!"
+        }
     }
     
     // MARK: - Accessors

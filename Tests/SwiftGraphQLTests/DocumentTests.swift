@@ -42,32 +42,30 @@ final class DocumentTests: XCTestCase {
     // MARK: - Arguments
     
     func testSingleFieldWithArgument() {
+        let argument = Argument(name: "name", type: "String!", value: "\"apple\"")
         let document = [
             GraphQLField.leaf(
                 name: "fruit",
-                arguments: [
-                    Argument(name: "name", value: "\"apple\"")
-                ]
+                arguments: [argument]
             )
         ]
         
         /* Test */
         
         let query = """
-        query {
-          fruit(name: "apple")
+        query($\(argument.hash): String!) {
+          fruit(name: $\(argument.hash))
         }
         """
         XCTAssertEqual(document.serialize(for: .query), query)
     }
     
     func testNestedFieldWithArgument() {
+        let argument = Argument(name: "name", type: "String!", value: "\"apple\"")
         let document = [
             GraphQLField.composite(
                 name: "cart",
-                arguments: [
-                    Argument(name: "name", value: "\"apple\"")
-                ],
+                arguments: [argument],
                 selection: [
                     GraphQLField.leaf(name: "items"),
                     GraphQLField.leaf(name: "total"),
@@ -79,8 +77,8 @@ final class DocumentTests: XCTestCase {
         /* Test */
         
         let query = """
-        query {
-          cart(name: "apple") {
+        query($\(argument.hash): String!) {
+          cart(name: $\(argument.hash)) {
             items
             total
           }

@@ -439,7 +439,7 @@ final class FieldTests: XCTestCase {
             let field = GraphQLField.leaf(
                 name: "hero",
                 arguments: [
-                    Argument(name: "id", value: id),
+                    Argument(name: "id", type: "ID!", value: id),
                 ]
             )
             self.select(field)
@@ -482,7 +482,7 @@ final class FieldTests: XCTestCase {
             let field = GraphQLField.leaf(
                 name: "hero",
                 arguments: [
-                    Argument(name: "id", value: id),
+                    Argument(name: "id", type: "Input!", value: id),
                 ]
             )
             self.select(field)
