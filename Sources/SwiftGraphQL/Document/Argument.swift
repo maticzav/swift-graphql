@@ -3,16 +3,20 @@ import Foundation
 public struct Argument {
     var name: String
     var type: String
-    var value: Data
+    var value: NSObject
 }
+
+
 
 // MARK: - Initializers
 
 extension Argument {
-    public init<T: Encodable>(name: String, type: String, value: T) {
+    public init<T: Encodable & Hashable>(name: String, type: String, value: T) {
         self.name = name
         self.type = type
-        self.value = try! JSONEncoder().encode(value)
+        
+        /* Encode value */
+        self.value = try! VariableEncoder().encode(value)
     }
 }
 
@@ -23,7 +27,9 @@ extension Argument {
     
     // Returns the hash of the argument.
     var hash: String {
-        String(self.value.hashValue, radix: 36).replacingOccurrences(of: "-", with: "_")
+        let hash = String(self.value.hashValue, radix: 36)
+        let normalized = hash.replacingOccurrences(of: "-", with: "_")
+        return "_\(normalized)"
     }
     
     // MARK: - Methods

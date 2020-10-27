@@ -1,9 +1,9 @@
 import Foundation
 
-struct GQLRequestBody: Encodable {
-    let query: String
-    let variables: [String: Data]
-}
+//struct GQLRequestBody: Encodable {
+//    let query: String
+//    let variables: [String: Data]
+//}
 
 /* Client */
 
@@ -65,21 +65,24 @@ public struct GraphQLClient {
         
         /* Compose body */
         let query = selection.selection.serialize(for: operation)
-        var variables = [String: Data]()
+        var variables = [String: NSObject]()
         
         for argument in selection.selection.arguments {
             variables[argument.hash] = argument.value
         }
         
-        let body = GQLRequestBody(
-            query: query,
-            variables: variables
+        /* Finish the encoding of the query. */
+        let body: Any = [
+            "query": query,
+            "variables": variables
+        ]
+        
+        let httpBody = try! JSONSerialization.data(
+            withJSONObject: body,
+            options: JSONSerialization.WritingOptions()
         )
+        request.httpBody = httpBody
         
-        let encoder = JSONEncoder()
-        encoder.dataEncodingStrategy = .deferredToData
-        
-        request.httpBody = try! encoder.encode(body)
         
         /* Parse the data and return the result. */
         func onComplete(data: Data?, response: URLResponse?, error: Error?) -> Void {

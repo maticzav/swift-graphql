@@ -4,7 +4,7 @@ extension GraphQLCodegen {
     /// Generates struct that is applicable to input object.
     func generateInputObject(_ name: String, for type: GraphQL.InputObjectType) throws -> [String] {
         try
-            [ "struct \(name): Codable {"
+            [ "struct \(name): Codable, Hashable {"
             ] + type.inputFields.flatMap { try generateInputField($0) }.indent(by: 4) +
             [ "}" ]
     }

@@ -176,13 +176,13 @@ enum Enums {
 // MARK: - Input Objects
 
 enum InputObjects {
-    struct Greeting: Codable {
+    struct Greeting: Codable, Hashable {
         let language: Enums.Language?
         let name: String
     }
 
 
-    struct GreetingOptions: Codable {
+    struct GreetingOptions: Codable, Hashable {
         let prefix: String?
     }
 }
