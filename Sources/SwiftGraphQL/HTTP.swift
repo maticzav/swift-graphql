@@ -27,7 +27,10 @@ public struct GraphQLClient {
     // MARK: - Methods
     
     /// Sends a query request to the server.
-    public func send<Type>(selection: Selection<Type, RootQuery>, completionHandler: @escaping (Response<Type, RootQuery>) -> Void) -> Void {
+    public func send<Type, RootQuery>(
+        selection: Selection<Type, RootQuery>,
+        completionHandler: @escaping (Response<Type, RootQuery>) -> Void
+    ) -> Void where RootQuery: GraphQLRootQuery & Decodable {
         perform(
             operation: .query,
             selection: selection,
@@ -36,7 +39,10 @@ public struct GraphQLClient {
     }
     
     /// Sends a mutation request to the server.
-    public func send<Type>(selection: Selection<Type, RootMutation>, completionHandler: @escaping (Response<Type, RootMutation>) -> Void) -> Void {
+    public func send<Type, RootMutation>(
+        selection: Selection<Type, RootMutation>,
+        completionHandler: @escaping (Response<Type, RootMutation>) -> Void
+    ) -> Void where RootMutation: GraphQLRootMutation & Decodable {
         perform(
             operation: .mutation,
             selection: selection,
@@ -46,7 +52,7 @@ public struct GraphQLClient {
     
     /* Internals */
     
-    public func perform<Type, TypeLock>(
+    private func perform<Type, TypeLock>(
         operation: GraphQLOperationType,
         selection: Selection<Type, TypeLock>,
         completionHandler: @escaping (Response<Type, TypeLock>

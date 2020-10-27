@@ -14,12 +14,12 @@ extension GraphQLCodegen {
         /* Data */
         
         // ObjectTypes for operations
-        let operations: [(name: String, type: GraphQL.ObjectType)] = [
-            ("RootQuery", schema.queryType.name.pascalCase),
-            ("RootMutation",schema.mutationType?.name.pascalCase),
-            ("RootSubscription",schema.subscriptionType?.name.pascalCase)
-        ].compactMap { (name, operation) in
-            schema.objects.first(where: { $0.name == operation }).map { (name, $0) }
+        let operations: [(name: String, type: GraphQL.ObjectType, operation: GraphQLCodegen.Operation)] = [
+            ("RootQuery", schema.queryType.name.pascalCase, .query),
+            ("RootMutation", schema.mutationType?.name.pascalCase,  .mutation),
+//            ("RootSubscription",schema.subscriptionType?.name.pascalCase, .subscription)
+        ].compactMap { (name, type, operation) in
+            schema.objects.first(where: { $0.name == type }).map { (name, $0, operation) }
         }
         
         // Object types for all other objects.
@@ -35,7 +35,7 @@ extension GraphQLCodegen {
         /* Code parts. */
         
         let operationsPart = try operations.map {
-            try generateObject($0.name, for: $0.type).joined(separator: "\n")
+            try generateObject($0.name, for: $0.type, operation: $0.operation).joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
         let objectsPart = try objects.map {

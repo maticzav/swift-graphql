@@ -2,12 +2,16 @@ import Foundation
 
 extension GraphQLCodegen {
     /// Generates a function to handle a type.
-    func generateObject(_ typeName: String, for type: GraphQL.ObjectType) throws -> [String] {
+    func generateObject(
+        _ typeName: String,
+        for type: GraphQL.ObjectType,
+        operation: Operation? = nil
+    ) throws -> [String] {
         try
             [ "/* \(type.name) */",
               "",
               "extension Objects {",
-              "    struct \(type.name.pascalCase): Codable {"
+              "    struct \(type.name.pascalCase): \(generateObjectProtocols(for: operation)) {"
             ] + type.fields.map { try generateFieldDecoder(for: $0) }.indent(by: 8) +
             [ "    }",
               "}",
@@ -19,6 +23,17 @@ extension GraphQLCodegen {
             [ "}" ]
     }
     
+    // MARK: - Private helpers
+    
+    enum Operation: String {
+        case query = "GraphQLRootQuery"
+        case mutation = "GraphQLRootMutation"
+    }
+    
+    /// Generates protocol conformance strings for the object.
+    private func generateObjectProtocols(for operation: Operation?) -> String {
+        [operation?.rawValue, "Codable"].compactMap { $0 }.joined(separator: ", ")
+    }
     
     
     // MARK: - Type Name

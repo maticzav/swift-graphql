@@ -7,7 +7,7 @@ enum Objects {}
 /* Query */
 
 extension Objects {
-    struct Query: Codable {
+    struct Query: GraphQLRootQuery, Codable {
         let human: Human?
         let humans: [Human]?
         let greeting: String?

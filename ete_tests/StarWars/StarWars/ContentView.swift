@@ -45,7 +45,7 @@ class AppState: ObservableObject {
     
     func fetch() {
         print("FETCHING")
-        client.perform(operation: .query, selection: query) { result in
+        client.send(selection: query) { result in
             do {
                 let data = try result.get()
                 print("DATA")
