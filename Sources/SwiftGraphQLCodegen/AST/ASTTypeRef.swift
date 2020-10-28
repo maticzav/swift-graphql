@@ -33,17 +33,39 @@ extension GraphQL {
         case `enum`(String)
         case inputObject(String)
         
-//        var name: String {
-//            switch self {
-//            case .scalar(let name),
-//                 .object(let name),
-//                 .interface(let name),
-//                 .union(let name),
-//                 .enum(let name),
-//                 .inputObject(let name):
-//                return name
-//            }
-//        }
+        var name: String {
+            switch self {
+            case .scalar(let name),
+                 .object(let name),
+                 .interface(let name),
+                 .union(let name),
+                 .enum(let name),
+                 .inputObject(let name):
+                return name
+            }
+        }
+    }
+    
+    enum ObjectRef: Equatable {
+        case object(String)
+        
+        var name: String {
+            switch self {
+            case .object(let name):
+                return name
+            }
+        }
+    }
+    
+    enum InterfaceRef: Equatable {
+        case interface(String)
+        
+        var name: String {
+            switch self {
+            case .interface(let name):
+                return name
+            }
+        }
     }
     
     enum OutputRef: Equatable {
@@ -149,6 +171,58 @@ extension GraphQL.NamedRef: Decodable {
     }
 }
 
+extension GraphQL.ObjectRef: Decodable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let kind = try container.decode(NamedTypeKind.self, forKey: .kind)
+        let name = try container.decode(String.self, forKey: .name)
+        
+        switch kind {
+        case .object:
+            self = .object(name)
+        default:
+            throw DecodingError.typeMismatch(
+                GraphQL.OutputRef.self,
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Couldn't decode output object."
+                )
+            )
+        }
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case kind = "kind"
+        case name = "name"
+    }
+}
+
+extension GraphQL.InterfaceRef: Decodable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let kind = try container.decode(NamedTypeKind.self, forKey: .kind)
+        let name = try container.decode(String.self, forKey: .name)
+        
+        switch kind {
+        case .interface:
+            self = .interface(name)
+        default:
+            throw DecodingError.typeMismatch(
+                GraphQL.OutputRef.self,
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Couldn't decode output object."
+                )
+            )
+        }
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case kind = "kind"
+        case name = "name"
+    }
+}
+
 extension GraphQL.OutputRef: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -219,4 +293,6 @@ extension GraphQL {
     typealias NamedTypeRef = TypeRef<NamedRef>
     typealias OutputTypeRef = TypeRef<OutputRef>
     typealias InputTypeRef = TypeRef<InputRef>
+    typealias ObjectTypeRef = TypeRef<ObjectRef>
+    typealias InterfaceTypeRef = TypeRef<InterfaceRef>
 }

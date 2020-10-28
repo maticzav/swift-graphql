@@ -29,44 +29,44 @@ extension NamedTypeProtocol {
 extension GraphQL {
     /* Scalar */
     struct ScalarType: NamedTypeProtocol, Decodable, Equatable {
-        let kind: NamedTypeKind = .scalar
+        var kind: NamedTypeKind = .scalar
         let name: String
         let description: String?
     }
     
     /* Object */
     struct ObjectType: NamedTypeProtocol, Decodable, Equatable {
-        let kind: NamedTypeKind = .object
+        var kind: NamedTypeKind = .object
         let name: String
         let description: String?
         
         let fields: [Field]
-        let interfaces: [NamedTypeRef]
+        let interfaces: [InterfaceTypeRef]
     }
     
     /* Interface */
     struct InterfaceType: NamedTypeProtocol, Decodable, Equatable {
-        let kind: NamedTypeKind = .interface
+        var kind: NamedTypeKind = .interface
         let name: String
         let description: String?
         
         let fields: [Field]
-        let interfaces: [NamedTypeRef]
-        let possibleTypes: [NamedTypeRef]
+        let interfaces: [InterfaceTypeRef]
+        let possibleTypes: [ObjectTypeRef]
     }
     
     /* Union */
     struct UnionType: NamedTypeProtocol, Decodable, Equatable {
-        let kind: NamedTypeKind = .union
+        var kind: NamedTypeKind = .union
         let name: String
         let description: String?
         
-        let possibleTypes: [NamedTypeRef]
+        let possibleTypes: [ObjectTypeRef]
     }
     
     /* Enum */
     struct EnumType: NamedTypeProtocol, Decodable, Equatable {
-        let kind: NamedTypeKind = .enumeration
+        var kind: NamedTypeKind = .enumeration
         let name: String
         let description: String?
         
@@ -75,7 +75,7 @@ extension GraphQL {
     
     /* Input Object */
     struct InputObjectType: NamedTypeProtocol, Decodable, Equatable {
-        let kind: NamedTypeKind = .inputObject
+        var kind: NamedTypeKind = .inputObject
         let name: String
         let description: String?
         

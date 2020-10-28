@@ -15,17 +15,16 @@ extension GraphQLCodegen {
         
         // ObjectTypes for operations
         let operations: [(name: String, type: GraphQL.ObjectType, operation: GraphQLCodegen.Operation)] = [
-            ("RootQuery", schema.queryType.name.pascalCase, .query),
-            ("RootMutation", schema.mutationType?.name.pascalCase,  .mutation),
+            ("Query", schema.queryType.name.pascalCase, .query),
+            ("Mutation", schema.mutationType?.name.pascalCase,  .mutation),
 //            ("RootSubscription",schema.subscriptionType?.name.pascalCase, .subscription)
         ].compactMap { (name, type, operation) in
             schema.objects.first(where: { $0.name == type }).map { (name, $0, operation) }
         }
         
         // Object types for all other objects.
-        let objects: [(name: String, type: GraphQL.ObjectType)] = schema.objects
+        let objects: [GraphQL.ObjectType] = schema.objects
             .filter { !schema.operations.contains($0.name)}
-            .map { (name: generateObjectTypeLock(for: $0.name.pascalCase), type: $0) }
         
         // Phantom type references
         var types = [GraphQL.NamedType]()
@@ -35,11 +34,15 @@ extension GraphQLCodegen {
         /* Code parts. */
         
         let operationsPart = try operations.map {
-            try generateObject($0.name, for: $0.type, operation: $0.operation).joined(separator: "\n")
+            try generateOperation($0.name, for: $0.type, operation: $0.operation).joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
         let objectsPart = try objects.map {
-            try generateObject($0.name, for: $0.type).joined(separator: "\n")
+            try generateObject($0).joined(separator: "\n")
+        }.joined(separator: "\n\n\n")
+        
+        let interfacesPart = try schema.interfaces.map {
+            try generateInterface($0, with: objects).joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
         let enumsPart = schema.enums.map {
@@ -55,31 +58,39 @@ extension GraphQLCodegen {
         }.joined(separator: "\n\n\n")
         
         /* File. */
-        let code = """
-            import SwiftGraphQL
-
-            enum Objects {}
-
-            // MARK: - Operations
-            
-            \(operationsPart)
-
-            // MARK: - Objects
-
-            \(objectsPart)
-
-            // MARK: - Enums
-
-            enum Enums {
-            \(enumsPart)
-            }
-
-            // MARK: - Input Objects
-
-            enum InputObjects {
-            \(inputObjectsPart)
-            }
-            """
+        let code = [
+            "import SwiftGraphQL",
+            "",
+            "// MARK: - Operations",
+            "",
+            "enum Operations {}",
+            "",
+            operationsPart,
+            "",
+            "// MARK: - Objects",
+            "",
+            "enum Objects {}",
+            "",
+            objectsPart,
+            "",
+            "// MARK: - Interfaces",
+            "",
+            "enum Interfaces {}",
+            "",
+            interfacesPart,
+            "",
+            "// MARK: - Enums",
+            "",
+            "enum Enums {",
+            enumsPart,
+            "}",
+            "",
+            "// MARK: - Input Objects",
+            "",
+            "enum InputObjects {",
+            inputObjectsPart,
+            "}"
+        ].joined(separator: "\n")
         
         return code
         

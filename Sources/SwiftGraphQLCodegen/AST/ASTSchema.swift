@@ -43,6 +43,18 @@ extension GraphQL.Schema {
             }
         }
     }
+    
+    /// Returns object definitions from schema.
+    var interfaces: [GraphQL.InterfaceType] {
+        types.compactMap {
+            switch $0 {
+            case .interface(let type) where !type.isInternal:
+                return type
+            default:
+                return nil
+            }
+        }
+    }
 
     /// Returns enumerator definitions in schema.
     var enums: [GraphQL.EnumType] {

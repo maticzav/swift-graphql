@@ -65,12 +65,7 @@ extension Dictionary : _JSONStringDictionaryDecodableMarker where Key == String,
 //===----------------------------------------------------------------------===//
 // JSON Encoder
 //===----------------------------------------------------------------------===//
-/// `JSONEncoder` facilitates the encoding of `Encodable` values into JSON.
-// NOTE: older overlays had Foundation.JSONEncoder as the ObjC name.
-// The two must coexist, so it was renamed. The old name must not be
-// used in the new runtime. _TtC10Foundation13__JSONEncoder is the
-// mangled name for Foundation.__JSONEncoder.
-@_objcRuntimeName(_TtC10Foundation13__JSONEncoder)
+
 open class VariableEncoder {
     // MARK: Options
     /// The formatting of the output JSON data.

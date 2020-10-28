@@ -14,19 +14,27 @@ extension GraphQLCodegen {
             ()
         }
         
+        let name = field.name.normalize
+        
         // Generate decoder.
         switch field.type.inverted.namedType {
-        /* Scalar */
+        /* Scalar, Enumerator */
         case .scalar(let scalar):
             let scalar = try options.scalar(scalar)
-            return "let \(field.name.normalize): \(generateDecoderType(scalar, for: nullableType))"
-        /* Enumerator */
+            return "let \(name): \(generateDecoderType(scalar, for: nullableType))"
         case .enum(let enm):
             let type = "Enums.\(enm.pascalCase)"
-            return "let \(field.name.normalize): \(generateDecoderType(type, for: nullableType))"
+            return "let \(name): \(generateDecoderType(type, for: nullableType))"
         /* Selections */
-        case .object(let type), .interface(let type), .union(let type):
-            return "let \(field.name.normalize): \(generateDecoderType(type.pascalCase, for: nullableType))"
+        case .object(let type):
+            let type = "Objects.\(type.pascalCase)"
+            return "let \(name): \(generateDecoderType(type, for: nullableType))"
+        case .interface(let type):
+            let type = "Interfaces.\(type.pascalCase)"
+            return "let \(name): \(generateDecoderType(type, for: nullableType))"
+        case .union(let type):
+            let type = "Unions.\(type.pascalCase)"
+            return "let \(name): \(generateDecoderType(type, for: nullableType))"
         }
     }
     
@@ -71,22 +79,55 @@ extension GraphQLCodegen {
 
     /// Generates a function definition for a field.
     private func generateFnDefinition(for field: GraphQL.Field) throws -> String {
+        let fnName = field.name.camelCase.normalize
+        
+        /* Kinds of fields. */
         switch field.type.namedType {
         /* Scalar, Enum */
         case .scalar(_), .enum(_):
             let arguments = try generateFnParameters(for: field.args)
-            return "\(field.name.camelCase.normalize)(\(arguments))"
+            return "\(fnName)(\(arguments))"
         /* Selections */
-        case .interface(_), .object(_), .union(_):
-            let typeLock = generateObjectTypeLock(for: field.type.namedType.name.pascalCase)
+        case .object(let typeLock):
+            let type = "Objects.\(typeLock.pascalCase)"
+            let decoderType = generateDecoderType(type, for: field.type)
+            return try generateFnDefinitionWithSelection(
+                name: fnName,
+                args: field.args,
+                decoderType: decoderType
+            )
+        case .interface(let typeLock):
+            let typeLock = "Interfaces.\(typeLock.pascalCase)"
             let decoderType = generateDecoderType(typeLock, for: field.type)
-            // Function generator
-            if field.args.isEmpty {
-                return "\(field.name.camelCase.normalize)<Type>(_ selection: Selection<Type, \(decoderType)>)"
-            }
-            let arguments = try generateFnParameters(for: field.args)
-            return "\(field.name.camelCase.normalize)<Type>(\(arguments), _ selection: Selection<Type, \(decoderType)>)"
+            return try generateFnDefinitionWithSelection(
+                name: fnName,
+                args: field.args,
+                decoderType: decoderType
+            )
+        case .union(let typeLock):
+            let typeLock = "Unions.\(typeLock.pascalCase)"
+            let decoderType = generateDecoderType(typeLock, for: field.type)
+            return try generateFnDefinitionWithSelection(
+                name: fnName,
+                args: field.args,
+                decoderType: decoderType
+            )
         }
+    }
+    
+    /// Returns a string representation of function defenition that has selection and might have arguments.
+    private func generateFnDefinitionWithSelection(
+        name: String,
+        args: [GraphQL.InputValue],
+        decoderType: String
+    ) throws -> String {
+        /* Function without arguments. */
+        if args.isEmpty {
+            return "\(name)<Type>(_ selection: Selection<Type, \(decoderType)>)"
+        }
+        /* Function with arguments. */
+        let arguments = try generateFnParameters(for: args)
+        return "\(name)<Type>(\(arguments), _ selection: Selection<Type, \(decoderType)>)"
     }
     
     /// Generates arguments for accessor function.

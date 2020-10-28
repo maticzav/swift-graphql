@@ -254,29 +254,30 @@ extension SelectionSet where TypeLock == Objects.Human {
     }
 }
 
-/* Interfaces */
+// MARK: - Interfaces
 
 enum Interfaces {}
+
+/* Character */
 
 extension Interfaces {
     struct Character: Codable {
         let __typename: TypeName
         let id: String?
         let name: String?
-        // This type should pack all fields that interface implementations have.
         let primaryFunction: String?
-        let homePlanet: String?
         let appearsIn: [Enums.Episode]?
-        
+        let homePlanet: String?
+
         enum TypeName: String, Codable {
-            case human = "Human"
             case droid = "Droid"
+            case human = "Human"
         }
     }
 }
 
-/* Fields */
 extension SelectionSet where TypeLock == Interfaces.Character {
+    /// The id of the character
     func id() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
@@ -292,6 +293,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
         }
         return String.mockValue
     }
+    /// The name of the character
     func name() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
@@ -316,27 +318,12 @@ extension SelectionSet where TypeLock == Interfaces.Character {
     ) -> Type {
         /* Selection */
         self.select([
-            GraphQLField.fragment(
-                type: "Droid",
-                selection: droid.selection
-            ),
-            GraphQLField.fragment(
-                type: "Human",
-                selection: human.selection
-            )
+            GraphQLField.fragment(type: "Droid", selection: droid.selection),
+            GraphQLField.fragment(type: "Human", selection: human.selection),
         ])
-        
         /* Decoder */
         if let data = self.response {
             switch data.__typename {
-            case .human:
-                let data = Objects.Human(
-                    id: data.id,
-                    name: data.name,
-                    homePlanet: data.homePlanet,
-                    appearsIn: data.appearsIn
-                )
-                return human.decode(data: data)
             case .droid:
                 let data = Objects.Droid(
                     id: data.id,
@@ -345,6 +332,14 @@ extension SelectionSet where TypeLock == Interfaces.Character {
                     appearsIn: data.appearsIn
                 )
                 return droid.decode(data: data)
+            case .human:
+                let data = Objects.Human(
+                    id: data.id,
+                    name: data.name,
+                    homePlanet: data.homePlanet,
+                    appearsIn: data.appearsIn
+                )
+                return human.decode(data: data)
             }
         }
         
