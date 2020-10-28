@@ -31,6 +31,13 @@ public final class SelectionSet<Type, TypeLock> {
     public func select(_ field: GraphQLField) {
         self.fields.append(field)
     }
+    
+    /// Lets generated code add a selection to the selection set.
+    ///
+    /// - Note: This function should only be used by the generated code.
+    public func select(_ fields: [GraphQLField]) {
+        self.fields.append(contentsOf: fields)
+    }
 }
 
 // MARK: - SelectionSet decoder

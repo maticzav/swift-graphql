@@ -16,7 +16,7 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable {
+        struct InputObjectTest: Codable, Hashable {
         }
         """
         
@@ -44,7 +44,7 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable {
+        struct InputObjectTest: Codable, Hashable {
             /// Field description.
             let id: String?
         }
@@ -74,7 +74,7 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable {
+        struct InputObjectTest: Codable, Hashable {
             /// Field description.
             let id: String?
         }
@@ -102,7 +102,7 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable {
+        struct InputObjectTest: Codable, Hashable {
             /// Field description.
             let id: AnotherInputObject?
         }
@@ -130,7 +130,7 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable {
+        struct InputObjectTest: Codable, Hashable {
             /// Field description.
             let id: Enums.Enum?
         }

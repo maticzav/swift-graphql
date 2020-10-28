@@ -31,6 +31,7 @@ final class DocumentTests: XCTestCase {
         query {
           fruit
           cart {
+            __typename
             items
             total
           }
@@ -79,10 +80,39 @@ final class DocumentTests: XCTestCase {
         let query = """
         query($\(argument.hash): String!) {
           cart(name: $\(argument.hash)) {
+            __typename
             items
             total
           }
           fruit
+        }
+        """
+        XCTAssertEqual(document.serialize(for: .query), query)
+    }
+    
+    // MARK: - Fragments
+    
+    func testFragment() {
+        let document = [
+            GraphQLField.composite(name: "cart", selection: [
+                GraphQLField.leaf(name: "id"),
+                GraphQLField.fragment(type: "Fruit", selection: [
+                    GraphQLField.leaf(name: "name")
+                ])
+            ])
+        ]
+        
+        /* Test */
+        
+        let query = """
+        query {
+          cart {
+            __typename
+            id
+            ...on Fruit {
+              name
+            }
+          }
         }
         """
         XCTAssertEqual(document.serialize(for: .query), query)

@@ -35,7 +35,7 @@ final class FileTests: XCTestCase {
         /* Query */
 
         extension Objects {
-            struct Query: Codable {
+            struct Query: GraphQLRootQuery, Codable {
             }
         }
 

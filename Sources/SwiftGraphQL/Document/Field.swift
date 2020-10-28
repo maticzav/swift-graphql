@@ -1,24 +1,31 @@
 import Foundation
 
 public enum GraphQLField {
-    public typealias Name = String
-//    public typealias Arguments = [String: Value]
+    public typealias SelectionSet = [GraphQLField]
     
-    case composite(Name, [Argument], [GraphQLField])
-    case leaf(Name, [Argument])
+    case composite(String, [Argument], SelectionSet)
+    case leaf(String, [Argument])
+    case fragment(String, SelectionSet)
     
     // MARK: - Constructors
     
     /// Returns a leaf field with a given name.
-    static public func leaf(name: Name, arguments: [Argument] = []) -> GraphQLField {
+    static public func leaf(name: String, arguments: [Argument] = []) -> GraphQLField {
         .leaf(name, arguments)
     }
     
     /// Returns a composite GraphQLField.
     ///
-    /// - Note: This is a shorthand for constructing leaf case yourself.
-    static public func composite(name: Name, arguments: [Argument] = [], selection: [GraphQLField]) -> GraphQLField {
+    /// - Note: This is a shorthand for constructing composite yourself.
+    static public func composite(name: String, arguments: [Argument] = [], selection: SelectionSet) -> GraphQLField {
         .composite(name, arguments, selection)
+    }
+    
+    /// Returns a fragment GraphQLField.
+    ///
+    /// - Note: This is a shorthand for constructing fragment yourself.
+    static public func fragment(type: String, selection: SelectionSet) -> GraphQLField {
+        .fragment(type, selection)
     }
     
     // MARK: - Calculated properties
@@ -28,10 +35,10 @@ public enum GraphQLField {
     /// - Note: Used inside generated function decoders to know which field to look at.
     public var name: String {
         switch self {
-        case .composite(let name, _, _):
+        case .composite(let name, _, _),
+             .leaf(let name, _),
+             .fragment(let name, _):
             return name
-        case .leaf(let field, _):
-            return field
         }
     }
     
@@ -41,6 +48,12 @@ public enum GraphQLField {
         case .leaf(_, let arguments):
             return arguments
         case .composite(_, var arguments, let selection):
+            for subSelection in selection {
+                arguments.append(contentsOf: subSelection.arguments)
+            }
+            return arguments
+        case .fragment(_, let selection):
+            var arguments = [Argument]()
             for subSelection in selection {
                 arguments.append(contentsOf: subSelection.arguments)
             }

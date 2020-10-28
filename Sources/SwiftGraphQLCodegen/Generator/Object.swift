@@ -3,24 +3,30 @@ import Foundation
 extension GraphQLCodegen {
     /// Generates a function to handle a type.
     func generateObject(
-        _ typeName: String,
+        _ identifier: String,
         for type: GraphQL.ObjectType,
         operation: Operation? = nil
     ) throws -> [String] {
-        try
-            [ "/* \(type.name) */",
+        let name = type.name.pascalCase
+        let protocols = generateObjectProtocols(for: operation)
+        
+        /* Code */
+        let code = try
+            [ "/* \(name) */",
               "",
               "extension Objects {",
-              "    struct \(type.name.pascalCase): \(generateObjectProtocols(for: operation)) {"
+              "    struct \(name): \(protocols) {"
             ] + type.fields.map { try generateFieldDecoder(for: $0) }.indent(by: 8) +
             [ "    }",
               "}",
               "",
-              "typealias \(typeName) = Objects.\(type.name.pascalCase)",
+              "typealias \(identifier) = Objects.\(name)",
               "",
-              "extension SelectionSet where TypeLock == \(typeName) {"
+              "extension SelectionSet where TypeLock == \(identifier) {"
             ] + type.fields.flatMap { try generateField($0) }.indent(by: 4) +
             [ "}" ]
+        
+        return code
     }
     
     // MARK: - Private helpers
@@ -32,7 +38,7 @@ extension GraphQLCodegen {
     
     /// Generates protocol conformance strings for the object.
     private func generateObjectProtocols(for operation: Operation?) -> String {
-        [operation?.rawValue, "Codable"].compactMap { $0 }.joined(separator: ", ")
+        [operation?.rawValue, "Decodable"].compactMap { $0 }.joined(separator: ", ")
     }
     
     

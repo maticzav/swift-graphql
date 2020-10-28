@@ -4,50 +4,86 @@ import Foundation
     This file contains source code used for encoding and decoding selection.
  */
 
-extension Collection where Element == GraphQLField {
-    /// Returns a GraphQL query for the current selection set.
-    func serialize(for operationType: GraphQLOperationType) -> String {
-        """
-        \(operationType.rawValue)\(serializeVariables(for: self.arguments)) {
-        \(self.map { serializeSelection($0, level: 1) }.joined(separator: "\n"))
-        }
-        """
-    }
-    
-    // MARK: - Private helpers
-    
-    private func serializeSelection(_ selection: GraphQLField, level indentation: Int) -> String {
-        switch selection {
-        case .leaf(_, let arguments):
-            return "\(generateIndentation(level: indentation))\(selection.name)\(arguments.serialize())"
-        case .composite(_, let arguments, let subSelection):
-            return """
-            \(generateIndentation(level: indentation))\(selection.name)\(arguments.serialize()) {
-            \(subSelection.map { serializeSelection($0, level: indentation + 1) }.joined(separator: "\n"))
-            \(generateIndentation(level: indentation))}
-            """
-        }
-    }
-    
-    /// Returns serialized query variables.
-    private func serializeVariables(for arguments: [Argument]) -> String {
-        // Return empty string if there's no arguments.
-        guard !arguments.isEmpty else {
-            return ""
-        }
-        // Wrap them in parantheses otherwise.
-        return "(\(arguments.map { "$\($0.hash): \($0.type)" }.joined(separator: ", ")))"
-    }
-    
-    /// Returns spaces needed for indentation.
-    private func generateIndentation(level: Int) -> String {
-        String(repeating: " ", count: level * 2)
-    }
-}
+
 
 public enum GraphQLOperationType: String, CaseIterable {
     case query = "query"
     case mutation = "mutation"
     case subscription = "subscription"
 }
+
+extension Collection where Element == GraphQLField {
+    /// Returns a GraphQL query for the current selection set.
+    func serialize(for operationType: GraphQLOperationType) -> String {
+        [ "\(operationType.rawValue)\(self.arguments.serializedForVariables) {",
+          self.serialized.indent(by: 2).joined(separator: "\n"),
+          "}"
+        ].joined(separator: "\n")
+    }
+}
     
+// MARK: - Private helpers
+
+extension GraphQLField {
+    fileprivate var serialized: [String] {
+        switch self {
+        case .leaf(let name, let arguments):
+            return [ "\(name)\(arguments.serializedForArguments)" ]
+        case .composite(let name, let arguments, let subselection):
+            return
+                [ "\(name)\(arguments.serializedForArguments) {",
+                  "__typename".indent(by: 2)
+                ] +
+                subselection.serialized.indent(by: 2) +
+                [ "}" ]
+        case .fragment(let type, let subselection):
+            return
+                [ "...on \(type) {" ] +
+                subselection.serialized.indent(by: 2) +
+                [ "}" ]
+        }
+    }
+}
+
+extension Collection where Element == GraphQLField {
+    /// Returns a GraphQL query for the current selection set.
+    var serialized: [String] {
+        self.flatMap { $0.serialized }
+    }
+}
+
+// MARK: - Argument Serialization
+
+extension Argument {
+    /// Returns a serialized query parameter.
+    var serializedForArgument: String {
+        "\(self.name): $\(self.hash)"
+    }
+    
+    /// Returns a serialized query variable.
+    var serializedForVariable: String {
+        "$\(self.hash): \(self.type)"
+    }
+}
+
+extension Collection where Element == Argument {
+    /// Serializes a collection of arguments into a query string.
+    var serializedForArguments: String {
+        /* Return empty string for no arguments. */
+        if self.isEmpty {
+            return ""
+        }
+        return "(\(self.map { $0.serializedForArgument }.joined(separator: ", ")))"
+
+    }
+    
+    /// Returns serialized query variables.
+    var serializedForVariables: String {
+        // Return empty string if there's no arguments.
+        guard !self.isEmpty else {
+            return ""
+        }
+        // Wrap them in parantheses otherwise.
+        return "(\(self.map { $0.serializedForVariable }.joined(separator: ", ")))"
+    }
+}

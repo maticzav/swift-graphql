@@ -4,17 +4,20 @@ import SwiftGraphQL
 /* Playground */
 
 
-struct Human {
+struct Character: Identifiable {
     let id: String
     let name: String
-    let homePlanet: String
+    let message: String
 }
 
-let human = Selection<Human, HumanObject> {
-    Human(
+let character = Selection<Character, CharacterObject> {
+    Character(
         id: $0.id(),
         name: $0.name(),
-        homePlanet: "Unknown"
+        message: $0.on(
+            droid: .init { $0.primaryFunction() },
+            human: .init { $0.homePlanet() ?? "Unknown" }
+        )
     )
 }
 
@@ -24,11 +27,13 @@ let human = Selection<Human, HumanObject> {
 
 struct Model {
     let greeting: String
+    let characters: [Character]
 }
 
 let query = Selection<Model, RootQuery> {
-    Model(greeting: $0.greeting(
-            input: .init(language: .en, name: "Matic"))
+    Model(
+        greeting: $0.greeting(input: .init(language: .en, name: "Matic")),
+        characters: $0.characters(character.list)
     )
 }
 
@@ -39,7 +44,10 @@ class AppState: ObservableObject {
     
     // MARK: - State
     
-    @Published private(set) var model = Model(greeting: "Not greeted yet.")
+    @Published private(set) var model = Model(
+        greeting: "Not greeted yet.",
+        characters: []
+    )
 
     // MARK: - Intentions
     
@@ -69,17 +77,23 @@ struct ContentView: View {
     
     var body: some View {
         NavigationView {
-//            List {
-//                ForEach(state.humans, id: \.id) { human in
-//                    VStack {
-//                        Text(human.name)
-//                        Text(human.homePlanet)
-////                        Text(human.appearsIn)
-//                    }
-//                }
-//            }
-            Group {
-                Text(state.model.greeting)
+            VStack {
+                /* Greeting */
+                HStack {
+                    Text(state.model.greeting)
+                        .font(.headline)
+                    Spacer()
+                }
+                .padding()
+                /* Characters */
+                List {
+                    ForEach(state.model.characters, id: \.id) { character in
+                        VStack {
+                            Text(character.name)
+                            Text(character.message)
+                        }
+                    }
+                }
             }
             .navigationTitle("StarWars 🌌")
         }

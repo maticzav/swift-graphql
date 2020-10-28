@@ -35,12 +35,10 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenRootTypes {
-  Human: {
-    // root type
-    id: string // ID!
-    name: string // String!
-  }
+  Droid: swapi.Droid
+  Human: swapi.Human
   Query: {}
+  Character: swapi.Character
 }
 
 export interface NexusGenAllTypes extends NexusGenRootTypes {
@@ -56,6 +54,13 @@ export interface NexusGenAllTypes extends NexusGenRootTypes {
 }
 
 export interface NexusGenFieldTypes {
+  Droid: {
+    // field return type
+    appearsIn: NexusGenEnums['Episode'][] // [Episode!]!
+    id: string // ID!
+    name: string // String!
+    primaryFunction: string // String!
+  }
   Human: {
     // field return type
     appearsIn: NexusGenEnums['Episode'][] // [Episode!]!
@@ -65,9 +70,16 @@ export interface NexusGenFieldTypes {
   }
   Query: {
     // field return type
+    characters: NexusGenRootTypes['Character'][] // [Character!]!
+    droids: NexusGenRootTypes['Droid'][] // [Droid!]!
     greeting: string // String!
     human: NexusGenRootTypes['Human'] | null // Human
     humans: NexusGenRootTypes['Human'][] // [Human!]!
+  }
+  Character: {
+    // field return type
+    id: string // ID!
+    name: string // String!
   }
 }
 
@@ -84,17 +96,19 @@ export interface NexusGenArgTypes {
   }
 }
 
-export interface NexusGenAbstractResolveReturnTypes {}
+export interface NexusGenAbstractResolveReturnTypes {
+  Character: 'Droid' | 'Human'
+}
 
 export interface NexusGenInheritedFields {}
 
-export type NexusGenObjectNames = 'Human' | 'Query'
+export type NexusGenObjectNames = 'Droid' | 'Human' | 'Query'
 
 export type NexusGenInputNames = 'Greeting' | 'GreetingOptions'
 
 export type NexusGenEnumNames = 'Episode' | 'Language'
 
-export type NexusGenInterfaceNames = never
+export type NexusGenInterfaceNames = 'Character'
 
 export type NexusGenScalarNames = 'Boolean' | 'Float' | 'ID' | 'Int' | 'String'
 

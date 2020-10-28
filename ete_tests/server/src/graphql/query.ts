@@ -19,11 +19,21 @@ export const Query = objectType({
       resolve: (_, { id }, ctx) => ctx.data.getHuman(id),
     })
 
-    /* Collections */
+    /* Collections, Interfaces */
 
     t.list.field('humans', {
       type: 'Human',
       resolve: (_, {}, ctx) => ctx.data.allHumans,
+    })
+
+    t.list.field('droids', {
+      type: 'Droid',
+      resolve: (_, {}, ctx) => ctx.data.allDroids,
+    })
+
+    t.list.field('characters', {
+      type: 'Character',
+      resolve: (_, {}, ctx) => ctx.data.allCharacters,
     })
 
     /* Inputs */
