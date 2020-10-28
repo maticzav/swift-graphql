@@ -1,25 +1,23 @@
 import SwiftGraphQL
 
-enum Objects {}
-
 // MARK: - Operations
+
+enum Operations {}
 
 /* Query */
 
-extension Objects {
+extension Operations {
     struct Query: GraphQLRootQuery, Codable {
-        let human: Human?
-        let humans: [Human]?
-        let droids: [Droid]?
-        let characters: [Character]?
+        let human: Objects.Human?
+        let humans: [Objects.Human]?
+        let droids: [Objects.Droid]?
+        let characters: [Interfaces.Character]?
         let greeting: String?
     }
 }
 
-typealias RootQuery = Objects.Query
-
-extension SelectionSet where TypeLock == RootQuery {
-    func human<Type>(id: String, _ selection: Selection<Type, HumanObject?>) -> Type {
+extension SelectionSet where TypeLock == Operations.Query {
+    func human<Type>(id: String, _ selection: Selection<Type, Objects.Human?>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "human",
@@ -36,7 +34,7 @@ extension SelectionSet where TypeLock == RootQuery {
         }
         return selection.mock()
     }
-    func humans<Type>(_ selection: Selection<Type, [HumanObject]>) -> Type {
+    func humans<Type>(_ selection: Selection<Type, [Objects.Human]>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "humans",
@@ -52,7 +50,7 @@ extension SelectionSet where TypeLock == RootQuery {
         }
         return selection.mock()
     }
-    func droids<Type>(_ selection: Selection<Type, [DroidObject]>) -> Type {
+    func droids<Type>(_ selection: Selection<Type, [Objects.Droid]>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "droids",
@@ -68,7 +66,7 @@ extension SelectionSet where TypeLock == RootQuery {
         }
         return selection.mock()
     }
-    func characters<Type>(_ selection: Selection<Type, [CharacterObject]>) -> Type {
+    func characters<Type>(_ selection: Selection<Type, [Interfaces.Character]>) -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "characters",
@@ -104,10 +102,12 @@ extension SelectionSet where TypeLock == RootQuery {
 
 // MARK: - Objects
 
+enum Objects {}
+
 /* Droid */
 
 extension Objects {
-    struct Droid: CharacterProtocol, Codable {
+    struct Droid: Codable {
         let id: String?
         let name: String?
         let primaryFunction: String?
@@ -115,9 +115,7 @@ extension Objects {
     }
 }
 
-typealias DroidObject = Objects.Droid
-
-extension SelectionSet where TypeLock == DroidObject {
+extension SelectionSet where TypeLock == Objects.Droid {
     func id() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
@@ -184,7 +182,7 @@ extension SelectionSet where TypeLock == DroidObject {
 /* Human */
 
 extension Objects {
-    struct Human: CharacterProtocol, Codable {
+    struct Human: Codable {
         let id: String?
         let name: String?
         let homePlanet: String?
@@ -192,9 +190,7 @@ extension Objects {
     }
 }
 
-typealias HumanObject = Objects.Human
-
-extension SelectionSet where TypeLock == HumanObject {
+extension SelectionSet where TypeLock == Objects.Human {
     func id() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
@@ -258,13 +254,12 @@ extension SelectionSet where TypeLock == HumanObject {
     }
 }
 
-protocol CharacterProtocol {
-    var id: String? { get }
-    var name: String? { get }
-}
+/* Interfaces */
 
-extension Objects {
-    struct Character: CharacterProtocol, Codable {
+enum Interfaces {}
+
+extension Interfaces {
+    struct Character: Codable {
         let __typename: TypeName
         let id: String?
         let name: String?
@@ -280,10 +275,8 @@ extension Objects {
     }
 }
 
-typealias CharacterObject = Objects.Character
-
 /* Fields */
-extension SelectionSet where TypeLock == CharacterObject {
+extension SelectionSet where TypeLock == Interfaces.Character {
     func id() -> String {
         /* Selection */
         let field = GraphQLField.leaf(
@@ -316,10 +309,10 @@ extension SelectionSet where TypeLock == CharacterObject {
     }
 }
 
-extension SelectionSet where TypeLock == CharacterObject {
+extension SelectionSet where TypeLock == Interfaces.Character {
     func on<Type>(
-        droid: Selection<Type, DroidObject>,
-        human: Selection<Type, HumanObject>
+        droid: Selection<Type, Objects.Droid>,
+        human: Selection<Type, Objects.Human>
     ) -> Type {
         /* Selection */
         self.select([

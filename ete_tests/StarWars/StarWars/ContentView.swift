@@ -10,7 +10,7 @@ struct Character: Identifiable {
     let message: String
 }
 
-let character = Selection<Character, CharacterObject> {
+let character = Selection<Character, Interfaces.Character> {
     Character(
         id: $0.id(),
         name: $0.name(),
@@ -21,16 +21,21 @@ let character = Selection<Character, CharacterObject> {
     )
 }
 
-//let query = Selection<[Human?], RootQuery> {
-//    $0.humans(human.nullable.list.nullable) ?? []
-//}
+struct Human {
+    let id: String
+    let name: String
+}
+
+let human = Selection<Human, Objects.Human> {
+    Human(id: $0.id(), name: $0.name())
+}
 
 struct Model {
     let greeting: String
     let characters: [Character]
 }
 
-let query = Selection<Model, RootQuery> {
+let query = Selection<Model, Operations.Query> {
     Model(
         greeting: $0.greeting(input: .init(language: .en, name: "Matic")),
         characters: $0.characters(character.list)
