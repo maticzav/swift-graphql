@@ -9,11 +9,12 @@ enum Operations {}
 extension Operations {
     struct Query: GraphQLRootQuery, Codable {
         let human: Objects.Human?
+        let droid: Objects.Droid?
+        let character: Unions.CharacterUnion?
         let humans: [Objects.Human]?
         let droids: [Objects.Droid]?
         let characters: [Interfaces.Character]?
         let greeting: String?
-        let character: Unions.CharacterUnion?
     }
 }
 
@@ -32,6 +33,40 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         if let data = self.response {
             return data.human.map { selection.decode(data: $0) } ?? selection.mock()
+        }
+        return selection.mock()
+    }
+    func droid<Type>(id: String, _ selection: Selection<Type, Objects.Droid?>) -> Type {
+        /* Selection */
+        let field = GraphQLField.composite(
+            name: "droid",
+            arguments: [
+                Argument(name: "id", type: "ID!", value: id),
+            ],
+            selection: selection.selection
+        )
+        self.select(field)
+    
+        /* Decoder */
+        if let data = self.response {
+            return data.droid.map { selection.decode(data: $0) } ?? selection.mock()
+        }
+        return selection.mock()
+    }
+    func character<Type>(id: String, _ selection: Selection<Type, Unions.CharacterUnion?>) -> Type {
+        /* Selection */
+        let field = GraphQLField.composite(
+            name: "character",
+            arguments: [
+                Argument(name: "id", type: "ID!", value: id),
+            ],
+            selection: selection.selection
+        )
+        self.select(field)
+    
+        /* Decoder */
+        if let data = self.response {
+            return data.character.map { selection.decode(data: $0) } ?? selection.mock()
         }
         return selection.mock()
     }
@@ -98,24 +133,6 @@ extension SelectionSet where TypeLock == Operations.Query {
             return data.greeting!
         }
         return String.mockValue
-    }
-    
-    func character<Type>(id: String, _ selection: Selection<Type, Unions.CharacterUnion?>) -> Type {
-        /* Selection */
-        let field = GraphQLField.composite(
-            name: "character",
-            arguments: [
-                Argument(name: "id", type: "ID!", value: id),
-            ],
-            selection: selection.selection
-        )
-        self.select(field)
-    
-        /* Decoder */
-        if let data = self.response {
-            return data.character.map { selection.decode(data: $0) } ?? selection.mock()
-        }
-        return selection.mock()
     }
 }
 
@@ -370,7 +387,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
 
 enum Unions {}
 
-/* Character */
+/* CharacterUnion */
 
 extension Unions {
     struct CharacterUnion: Codable {
@@ -382,34 +399,24 @@ extension Unions {
         let homePlanet: String?
 
         enum TypeName: String, Codable {
-            case droid = "Droid"
             case human = "Human"
+            case droid = "Droid"
         }
     }
 }
-
 extension SelectionSet where TypeLock == Unions.CharacterUnion {
     func on<Type>(
-        droid: Selection<Type, Objects.Droid>,
-        human: Selection<Type, Objects.Human>
+        human: Selection<Type, Objects.Human>,
+        droid: Selection<Type, Objects.Droid>
     ) -> Type {
         /* Selection */
         self.select([
-            GraphQLField.fragment(type: "Droid", selection: droid.selection),
             GraphQLField.fragment(type: "Human", selection: human.selection),
+            GraphQLField.fragment(type: "Droid", selection: droid.selection),
         ])
-        
         /* Decoder */
         if let data = self.response {
             switch data.__typename {
-            case .droid:
-                let data = Objects.Droid(
-                    id: data.id,
-                    name: data.name,
-                    primaryFunction: data.primaryFunction,
-                    appearsIn: data.appearsIn
-                )
-                return droid.decode(data: data)
             case .human:
                 let data = Objects.Human(
                     id: data.id,
@@ -418,10 +425,18 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
                     appearsIn: data.appearsIn
                 )
                 return human.decode(data: data)
+            case .droid:
+                let data = Objects.Droid(
+                    id: data.id,
+                    name: data.name,
+                    primaryFunction: data.primaryFunction,
+                    appearsIn: data.appearsIn
+                )
+                return droid.decode(data: data)
             }
         }
         
-        return droid.mock()
+        return human.mock()
     }
 }
 

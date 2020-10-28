@@ -45,6 +45,10 @@ extension GraphQLCodegen {
             try generateInterface($0, with: objects).joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
+        let unionsPart = try schema.unions.map {
+            try generateUnion($0, with: objects).joined(separator: "\n")
+        }.joined(separator: "\n\n\n")
+        
         let enumsPart = schema.enums.map {
             generateEnum($0)
                 .indent(by: 4)
@@ -78,6 +82,12 @@ extension GraphQLCodegen {
             "enum Interfaces {}",
             "",
             interfacesPart,
+            "",
+            "// MARK: - Unions",
+            "",
+            "enum Unions {}",
+            "",
+            unionsPart,
             "",
             "// MARK: - Enums",
             "",

@@ -6,14 +6,14 @@ import Foundation
 
 extension GraphQLCodegen {
     /// Generates a function to handle a type.
-    func generateInterface(
-        _ type: GraphQL.InterfaceType,
+    func generateUnion(
+        _ type: GraphQL.UnionType,
         with objects: [GraphQL.ObjectType]
     ) throws -> [String] {
         let name = type.name.pascalCase
         
         /* Collect of all fields of all possible types. */
-        var fields: [GraphQL.Field] = type.fields
+        var fields: [GraphQL.Field] = []
         for object in objects {
             // Skip object if it's not inside possible types.
             guard type.possibleTypes.contains(where: { $0.namedType.name == object.name }) else { continue }
@@ -27,10 +27,11 @@ extension GraphQLCodegen {
         
         /* Code */
         
+        /* Decoders */
         var code: [String] = [
             "/* \(type.name) */",
             "",
-            "extension Interfaces {",
+            "extension Unions {",
             "    struct \(name): Codable {",
             "        let __typename: TypeName",
         ]
@@ -44,15 +45,9 @@ extension GraphQLCodegen {
             "        }",
             "    }",
             "}",
-            "",
-            "extension SelectionSet where TypeLock == Interfaces.\(name) {",
         ])
-        code.append(contentsOf:  try type.fields.flatMap { try generateField($0) }.indent(by: 4))
-        code.append(contentsOf: [
-            "}",
-            "",
-        ])
-        code.append(contentsOf: generateFragmentSelection("Interfaces.\(type.name.pascalCase)", for: type.possibleTypes, with: objects))
+        /* Selection */
+        code.append(contentsOf: generateFragmentSelection("Unions.\(type.name.pascalCase)", for: type.possibleTypes, with: objects))
         
         return code
     }

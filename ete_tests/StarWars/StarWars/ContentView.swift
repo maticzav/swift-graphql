@@ -32,8 +32,8 @@ let human = Selection<Human, Objects.Human> {
 
 let characterUnion = Selection<String, Unions.CharacterUnion> {
     $0.on(
-        droid: .init { $0.primaryFunction() },
-        human: .init { $0.homePlanet() ?? "Unknown" }
+        human: .init { $0.homePlanet() ?? "Unknown" },
+        droid: .init { $0.primaryFunction() }
     )
 }
 
@@ -46,7 +46,7 @@ struct Model {
 let query = Selection<Model, Operations.Query> {
     Model(
         greeting: $0.greeting(input: .init(language: .en, name: "Matic")),
-        character: $0.character(id: "1001", characterUnion.nullable) ?? "No character",
+        character: $0.character(id: "3000", characterUnion.nullable) ?? "No character",
         characters: $0.characters(character.list)
     )
 }

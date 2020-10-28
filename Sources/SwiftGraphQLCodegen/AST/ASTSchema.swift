@@ -56,6 +56,18 @@ extension GraphQL.Schema {
         }
     }
 
+    /// Returns object definitions from schema.
+    var unions: [GraphQL.UnionType] {
+        types.compactMap {
+            switch $0 {
+            case .union(let type) where !type.isInternal:
+                return type
+            default:
+                return nil
+            }
+        }
+    }
+    
     /// Returns enumerator definitions in schema.
     var enums: [GraphQL.EnumType] {
         types.compactMap {
