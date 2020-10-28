@@ -39,6 +39,7 @@ export interface NexusGenRootTypes {
   Human: swapi.Human
   Query: {}
   Character: swapi.Character
+  CharacterUnion: NexusGenRootTypes['Droid'] | NexusGenRootTypes['Human']
 }
 
 export interface NexusGenAllTypes extends NexusGenRootTypes {
@@ -70,7 +71,9 @@ export interface NexusGenFieldTypes {
   }
   Query: {
     // field return type
+    character: NexusGenRootTypes['CharacterUnion'] | null // CharacterUnion
     characters: NexusGenRootTypes['Character'][] // [Character!]!
+    droid: NexusGenRootTypes['Droid'] | null // Droid
     droids: NexusGenRootTypes['Droid'][] // [Droid!]!
     greeting: string // String!
     human: NexusGenRootTypes['Human'] | null // Human
@@ -85,6 +88,14 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenArgTypes {
   Query: {
+    character: {
+      // args
+      id: string // ID!
+    }
+    droid: {
+      // args
+      id: string // ID!
+    }
     greeting: {
       // args
       input: NexusGenInputs['Greeting'] // Greeting!
@@ -97,6 +108,7 @@ export interface NexusGenArgTypes {
 }
 
 export interface NexusGenAbstractResolveReturnTypes {
+  CharacterUnion: 'Droid' | 'Human'
   Character: 'Droid' | 'Human'
 }
 
@@ -112,7 +124,7 @@ export type NexusGenInterfaceNames = 'Character'
 
 export type NexusGenScalarNames = 'Boolean' | 'Float' | 'ID' | 'Int' | 'String'
 
-export type NexusGenUnionNames = never
+export type NexusGenUnionNames = 'CharacterUnion'
 
 export interface NexusGenTypes {
   context: swapi.ContextType

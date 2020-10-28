@@ -19,6 +19,32 @@ export const Query = objectType({
       resolve: (_, { id }, ctx) => ctx.data.getHuman(id),
     })
 
+    t.field('droid', {
+      type: 'Droid',
+      args: {
+        id: idArg({
+          required: true,
+          description: 'id of the character',
+        }),
+      },
+      nullable: true,
+      resolve: (_, { id }, ctx) => ctx.data.getDroid(id),
+    })
+
+    /* Union */
+
+    t.field('character', {
+      type: 'CharacterUnion',
+      args: {
+        id: idArg({
+          required: true,
+          description: 'id of the character',
+        }),
+      },
+      nullable: true,
+      resolve: (_, { id }, ctx) => ctx.data.getCharacter(id),
+    })
+
     /* Collections, Interfaces */
 
     t.list.field('humans', {

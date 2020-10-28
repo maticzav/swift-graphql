@@ -13,6 +13,8 @@ interface Character {
   name: String!
 }
 
+union CharacterUnion = Droid | Human
+
 type Droid implements Character {
   appearsIn: [Episode!]!
   id: ID!
@@ -69,7 +71,19 @@ enum Language {
 }
 
 type Query {
+  character(
+    """
+    id of the character
+    """
+    id: ID!
+  ): CharacterUnion
   characters: [Character!]!
+  droid(
+    """
+    id of the character
+    """
+    id: ID!
+  ): Droid
   droids: [Droid!]!
   greeting(input: Greeting!): String!
   human(

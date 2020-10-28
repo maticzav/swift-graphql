@@ -30,14 +30,23 @@ let human = Selection<Human, Objects.Human> {
     Human(id: $0.id(), name: $0.name())
 }
 
+let characterUnion = Selection<String, Unions.CharacterUnion> {
+    $0.on(
+        droid: .init { $0.primaryFunction() },
+        human: .init { $0.homePlanet() ?? "Unknown" }
+    )
+}
+
 struct Model {
     let greeting: String
+    let character: String
     let characters: [Character]
 }
 
 let query = Selection<Model, Operations.Query> {
     Model(
         greeting: $0.greeting(input: .init(language: .en, name: "Matic")),
+        character: $0.character(id: "1001", characterUnion.nullable) ?? "No character",
         characters: $0.characters(character.list)
     )
 }
@@ -51,6 +60,7 @@ class AppState: ObservableObject {
     
     @Published private(set) var model = Model(
         greeting: "Not greeted yet.",
+        character: "NONE",
         characters: []
     )
 
@@ -88,6 +98,7 @@ struct ContentView: View {
                     Text(state.model.greeting)
                         .font(.headline)
                     Spacer()
+                    Text(state.model.character)
                 }
                 .padding()
                 /* Characters */

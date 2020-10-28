@@ -13,6 +13,7 @@ extension Operations {
         let droids: [Objects.Droid]?
         let characters: [Interfaces.Character]?
         let greeting: String?
+        let character: Unions.CharacterUnion?
     }
 }
 
@@ -97,6 +98,24 @@ extension SelectionSet where TypeLock == Operations.Query {
             return data.greeting!
         }
         return String.mockValue
+    }
+    
+    func character<Type>(id: String, _ selection: Selection<Type, Unions.CharacterUnion?>) -> Type {
+        /* Selection */
+        let field = GraphQLField.composite(
+            name: "character",
+            arguments: [
+                Argument(name: "id", type: "ID!", value: id),
+            ],
+            selection: selection.selection
+        )
+        self.select(field)
+    
+        /* Decoder */
+        if let data = self.response {
+            return data.character.map { selection.decode(data: $0) } ?? selection.mock()
+        }
+        return selection.mock()
     }
 }
 
@@ -321,6 +340,65 @@ extension SelectionSet where TypeLock == Interfaces.Character {
             GraphQLField.fragment(type: "Droid", selection: droid.selection),
             GraphQLField.fragment(type: "Human", selection: human.selection),
         ])
+        /* Decoder */
+        if let data = self.response {
+            switch data.__typename {
+            case .droid:
+                let data = Objects.Droid(
+                    id: data.id,
+                    name: data.name,
+                    primaryFunction: data.primaryFunction,
+                    appearsIn: data.appearsIn
+                )
+                return droid.decode(data: data)
+            case .human:
+                let data = Objects.Human(
+                    id: data.id,
+                    name: data.name,
+                    homePlanet: data.homePlanet,
+                    appearsIn: data.appearsIn
+                )
+                return human.decode(data: data)
+            }
+        }
+        
+        return droid.mock()
+    }
+}
+
+// MARK: - Unions
+
+enum Unions {}
+
+/* Character */
+
+extension Unions {
+    struct CharacterUnion: Codable {
+        let __typename: TypeName
+        let id: String?
+        let name: String?
+        let primaryFunction: String?
+        let appearsIn: [Enums.Episode]?
+        let homePlanet: String?
+
+        enum TypeName: String, Codable {
+            case droid = "Droid"
+            case human = "Human"
+        }
+    }
+}
+
+extension SelectionSet where TypeLock == Unions.CharacterUnion {
+    func on<Type>(
+        droid: Selection<Type, Objects.Droid>,
+        human: Selection<Type, Objects.Human>
+    ) -> Type {
+        /* Selection */
+        self.select([
+            GraphQLField.fragment(type: "Droid", selection: droid.selection),
+            GraphQLField.fragment(type: "Human", selection: human.selection),
+        ])
+        
         /* Decoder */
         if let data = self.response {
             switch data.__typename {
