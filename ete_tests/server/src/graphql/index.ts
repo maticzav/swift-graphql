@@ -1,4 +1,5 @@
 export * from './character'
+export * from './date'
 export * from './droid'
 export * from './episode'
 export * from './greeting'

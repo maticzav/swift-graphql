@@ -15,6 +15,11 @@ interface Character {
 
 union CharacterUnion = Droid | Human
 
+"""
+Date custom scalar type
+"""
+scalar Date
+
 type Droid implements Character {
   appearsIn: [Episode!]!
   id: ID!
@@ -93,4 +98,5 @@ type Query {
     id: ID!
   ): Human
   humans: [Human!]!
+  time: Date!
 }

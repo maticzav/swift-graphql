@@ -38,6 +38,7 @@ let characterUnion = Selection<String, Unions.CharacterUnion> {
 }
 
 struct Model {
+    let time: DateTime?
     let greeting: String
     let character: String
     let characters: [Character]
@@ -45,6 +46,7 @@ struct Model {
 
 let query = Selection<Model, Operations.Query> {
     Model(
+        time: $0.time(),
         greeting: $0.greeting(input: .init(language: .en, name: "Matic")),
         character: $0.character(id: "3000", characterUnion.nullable) ?? "No character",
         characters: $0.characters(character.list)
@@ -59,6 +61,7 @@ class AppState: ObservableObject {
     // MARK: - State
     
     @Published private(set) var model = Model(
+        time: nil,
         greeting: "Not greeted yet.",
         character: "NONE",
         characters: []
@@ -99,6 +102,15 @@ struct ContentView: View {
                         .font(.headline)
                     Spacer()
                     Text(state.model.character)
+                }
+                .padding()
+                /* Time */
+                HStack {
+                    Text(state.model.time?.value ?? "What's the time??")
+                        .font(.headline)
+                    Spacer()
+                    Text("\(state.model.time?.raw ?? 0)")
+                        .font(.headline)
                 }
                 .padding()
                 /* Characters */

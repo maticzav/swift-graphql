@@ -15,6 +15,7 @@ extension Operations {
         let droids: [Objects.Droid]?
         let characters: [Interfaces.Character]?
         let greeting: String?
+        let time: DateTime?
     }
 }
 
@@ -133,6 +134,21 @@ extension SelectionSet where TypeLock == Operations.Query {
             return data.greeting!
         }
         return String.mockValue
+    }
+    func time() -> DateTime {
+        /* Selection */
+        let field = GraphQLField.leaf(
+            name: "time",
+            arguments: [
+            ]
+        )
+        self.select(field)
+    
+        /* Decoder */
+        if let data = self.response {
+            return data.time!
+        }
+        return DateTime.mockValue
     }
 }
 

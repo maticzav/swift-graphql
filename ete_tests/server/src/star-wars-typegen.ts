@@ -4,6 +4,25 @@
  */
 
 import * as swapi from './types/backingTypes'
+import { core } from '@nexus/schema'
+declare global {
+  interface NexusGenCustomInputMethods<TypeName extends string> {
+    date<FieldName extends string>(
+      fieldName: FieldName,
+      opts?: core.ScalarInputFieldConfig<
+        core.GetGen3<'inputTypes', TypeName, FieldName>
+      >,
+    ): void // "Date";
+  }
+}
+declare global {
+  interface NexusGenCustomOutputMethods<TypeName extends string> {
+    date<FieldName extends string>(
+      fieldName: FieldName,
+      ...opts: core.ScalarOutSpread<TypeName, FieldName>
+    ): void // "Date";
+  }
+}
 
 declare global {
   interface NexusGen extends NexusGenTypes {}
@@ -32,6 +51,7 @@ export interface NexusGenScalars {
   Float: number
   Boolean: boolean
   ID: string
+  Date: any
 }
 
 export interface NexusGenRootTypes {
@@ -52,6 +72,7 @@ export interface NexusGenAllTypes extends NexusGenRootTypes {
   Float: NexusGenScalars['Float']
   Boolean: NexusGenScalars['Boolean']
   ID: NexusGenScalars['ID']
+  Date: NexusGenScalars['Date']
 }
 
 export interface NexusGenFieldTypes {
@@ -78,6 +99,7 @@ export interface NexusGenFieldTypes {
     greeting: string // String!
     human: NexusGenRootTypes['Human'] | null // Human
     humans: NexusGenRootTypes['Human'][] // [Human!]!
+    time: NexusGenScalars['Date'] // Date!
   }
   Character: {
     // field return type
@@ -122,7 +144,13 @@ export type NexusGenEnumNames = 'Episode' | 'Language'
 
 export type NexusGenInterfaceNames = 'Character'
 
-export type NexusGenScalarNames = 'Boolean' | 'Float' | 'ID' | 'Int' | 'String'
+export type NexusGenScalarNames =
+  | 'Boolean'
+  | 'Date'
+  | 'Float'
+  | 'ID'
+  | 'Int'
+  | 'String'
 
 export type NexusGenUnionNames = 'CharacterUnion'
 

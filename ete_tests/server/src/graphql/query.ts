@@ -81,5 +81,11 @@ export const Query = objectType({
         }
       },
     })
+
+    /* Custom Scalar */
+
+    t.date('time', {
+      resolve: () => new Date(),
+    })
   },
 })
