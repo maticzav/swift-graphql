@@ -127,7 +127,7 @@ let query = Selection<Int, Operations.Query> {
 }
 ```
 
-> Take a breath. This is it. Pretty neat, huh?!
+> Take a breath. This is it. Pretty neat, huh?! 😄
 
 ## Getting started
 
@@ -209,7 +209,7 @@ cd "${SRCROOT}"/Codegen
 xcrun -sdk macosx swift run
 ```
 
-<div align="center"><img src="media/buildphase.png" width="800" /></div>
+<div align="center"><img src="media/buildphase.png" width="500" /></div>
 
 
 7. 🎉 That's it! You can verify that it's working by building the project and seeing the generated code.
@@ -224,7 +224,7 @@ xcrun -sdk macosx swift run
 
 ### `Client`
 
-> SwiftGraphQL
+- `SwiftGraphQL`
 
 Client lets you execute your queries against your server.
 
@@ -235,7 +235,7 @@ let client = GraphQLClient(endpoint: URL(string: "http://localhost:4000")!)
 
 ### `Selection<Type, Scope>`
 
-> SwiftGraphQL
+- `SwiftGraphQL`
 
 Selection lets you select fields that you want to fetch from the query on a particular type. 
 
@@ -278,7 +278,7 @@ let human = Selection<String, Objects.Human> { select in
 
 ### `Union`
 
-> SwiftGraphQL
+- `SwiftGraphQL`
 
 When fetching a union you should provide selections for each of the union sub-types. Additionally, all of those selections should resolve to the same type.
 
@@ -296,7 +296,7 @@ You'd usually want to create a Swift enumerator and have different selecitons re
 
 ### `Interfaces`
 
-> SwiftGraphQL
+- `SwiftGraphQL`
 
 Interfaces are very similar to unions. The only difference is that you may query for a common field from the intersection.
 
@@ -321,7 +321,7 @@ You'd usually want to create a Swift enumerator and have different selecitons re
 
 ### `OptionalArgument`
 
-> SwiftGraphQL
+- `SwiftGraphQL`
 
 GraphQL's `null` value in an input type may be entirely omitted to represent the absence of a value or supplied as `null` to provide `null` value. This comes in especially handy in mutations.
 
@@ -332,7 +332,7 @@ Because of that, every input object that has an optional property accepts an opt
 
 ### `Codecs` - Custom Scalars
 
-> SwiftGraphQL
+- `SwiftGraphQL`
 
 SwiftGraphQL lets you implement custom scalars that your schema uses. You can do that by conforming to the `Codec` protocol. It doesn't matter where you implement the codec, it should only be visible to the API so that your app compiles.
 
@@ -381,7 +381,7 @@ Additionally, you should add you scalar mapping to code generator options. Other
 
 ### `GraphQLCodegen`
 
-> SwiftGraphQLCodegen
+- `SwiftGraphQLCodegen`
 
 Lets you generate the code based on a remote schema. It accepts an optional argument `options`.
 
@@ -391,7 +391,7 @@ I suggest using John Sundell's Files library for navigation between folders and 
 
 ### `GraphQLCodegen.Options`
 
-> SwiftGraphQLCodegen
+- `SwiftGraphQLCodegen`
 
 Lets you customize code generation. Accepts one property - `scalarMappings` which should be a dictionary of strings that map keys of GraphQL scalars into Swift scalars.
 
