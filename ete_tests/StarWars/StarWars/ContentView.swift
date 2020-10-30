@@ -30,6 +30,20 @@ let human = Selection<Human, Objects.Human> {
     Human(id: $0.id(), name: $0.name())
 }
 
+let characterInteface = Selection<String, Interfaces.Character> {
+    
+    /* Common */
+    let name = $0.name()
+    
+    /* Fragments */
+    let about = $0.on(
+        droid: Selection<String, Objects.Droid> { droid in droid.primaryFunction() },
+        human: Selection<String, Objects.Human> { human in human.homePlanet() ?? "Unknown" }
+    )
+    
+    return "\(name). \(about)"
+}
+
 let characterUnion = Selection<String, Unions.CharacterUnion> {
     $0.on(
         human: .init { $0.homePlanet() ?? "Unknown" },
