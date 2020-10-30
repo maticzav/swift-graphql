@@ -45,9 +45,14 @@ struct Model {
 }
 
 let query = Selection<Model, Operations.Query> {
-    Model(
+    let english = $0.greeting(input: .init(language: .sl, name: "Matic"))
+    let slovene = $0.greeting(input: .init(language: .en, name: "Matic"))
+    
+    let greeting = "\(english); \(slovene)"
+    
+    return Model(
         time: $0.time(),
-        greeting: $0.greeting(input: .init(language: .en, name: "Matic")),
+        greeting: greeting,
         character: $0.character(id: "3000", characterUnion.nullable) ?? "No character",
         characters: $0.characters(character.list)
     )

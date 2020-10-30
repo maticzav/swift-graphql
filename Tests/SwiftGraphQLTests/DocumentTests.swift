@@ -4,36 +4,57 @@ import XCTest
 
 final class DocumentTests: XCTestCase {
     func testSingleField() {
-        let document = [GraphQLField.leaf(name: "fruit")]
+        
+        /* Document */
+        let fruit = GraphQLField.leaf(name: "fruit")
+        let document = [fruit]
         
         /* Test */
         
         let query = """
         query {
-          fruit
+          \(fruit.alias!): fruit
+        }
+        """
+        XCTAssertEqual(document.serialize(for: .query), query)
+    }
+    
+    func testMultipleFields() {
+        
+        /* Document */
+        let apple = GraphQLField.leaf(name: "apple")
+        let banana = GraphQLField.leaf(name: "banana")
+        let document = [apple, banana]
+        
+        /* Test */
+        
+        let query = """
+        query {
+          \(apple.alias!): apple
+          \(banana.alias!): banana
         }
         """
         XCTAssertEqual(document.serialize(for: .query), query)
     }
     
     func testNestedFields() {
-        let document = [
-            GraphQLField.leaf(name: "fruit"),
-            GraphQLField.composite(name: "cart", selection: [
-                GraphQLField.leaf(name: "items"),
-                GraphQLField.leaf(name: "total"),
-            ])
-        ]
+        
+        /* Document */
+        let fruit = GraphQLField.leaf(name: "fruit")
+        let items = GraphQLField.leaf(name: "items")
+        let cart = GraphQLField.composite(
+            name: "cart", selection: [items]
+        )
+        let document = [fruit, cart]
         
         /* Test */
         
         let query = """
         query {
-          fruit
-          cart {
+          \(fruit.alias!): fruit
+          \(cart.alias!): cart {
             __typename
-            items
-            total
+            \(items.alias!): items
           }
         }
         """
@@ -43,48 +64,51 @@ final class DocumentTests: XCTestCase {
     // MARK: - Arguments
     
     func testSingleFieldWithArgument() {
+        
+        /* Document */
         let argument = Argument(name: "name", type: "String!", value: "\"apple\"")
-        let document = [
-            GraphQLField.leaf(
-                name: "fruit",
-                arguments: [argument]
-            )
-        ]
+        let fruit = GraphQLField.leaf(
+            name: "fruit",
+            arguments: [argument]
+        )
+        let document = [fruit]
         
         /* Test */
         
         let query = """
         query($\(argument.hash): String!) {
-          fruit(name: $\(argument.hash))
+          \(fruit.alias!): fruit(name: $\(argument.hash))
         }
         """
         XCTAssertEqual(document.serialize(for: .query), query)
     }
     
     func testNestedFieldWithArgument() {
-        let argument = Argument(name: "name", type: "String!", value: "\"apple\"")
-        let document = [
-            GraphQLField.composite(
-                name: "cart",
-                arguments: [argument],
-                selection: [
-                    GraphQLField.leaf(name: "items"),
-                    GraphQLField.leaf(name: "total"),
-                ]
-            ),
-            GraphQLField.leaf(name: "fruit")
-        ]
+        
+        /* Document */
+        let argument = Argument(
+            name: "name",
+            type: "String!",
+            value: "\"apple\""
+        )
+        let fruit = GraphQLField.leaf(name: "fruit")
+        let items = GraphQLField.leaf(name: "items")
+        let cart = GraphQLField.composite(
+            name: "cart",
+            arguments: [argument],
+            selection: [items]
+        )
+        let document = [fruit, cart]
         
         /* Test */
         
         let query = """
         query($\(argument.hash): String!) {
-          cart(name: $\(argument.hash)) {
+          \(fruit.alias!): fruit
+          \(cart.alias!): cart(name: $\(argument.hash)) {
             __typename
-            items
-            total
+            \(items.alias!): items
           }
-          fruit
         }
         """
         XCTAssertEqual(document.serialize(for: .query), query)
@@ -93,28 +117,30 @@ final class DocumentTests: XCTestCase {
     // MARK: - Fragments
     
     func testFragment() {
-        let document = [
-            GraphQLField.composite(name: "cart", selection: [
-                GraphQLField.leaf(name: "id"),
-                GraphQLField.fragment(type: "Fruit", selection: [
-                    GraphQLField.leaf(name: "name")
-                ])
-            ])
-        ]
+        
+        /* Document */
+        let name = GraphQLField.leaf(name: "name")
+        let cart = GraphQLField.composite(
+            name: "cart",
+            selection: [
+                GraphQLField.fragment(type: "Fruit", selection: [name])
+            ]
+        )
+        let document = [cart]
         
         /* Test */
         
         let query = """
         query {
-          cart {
+          \(cart.alias!): cart {
             __typename
-            id
             ...on Fruit {
-              name
+              \(name.alias!): name
             }
           }
         }
         """
+        
         XCTAssertEqual(document.serialize(for: .query), query)
     }
 }

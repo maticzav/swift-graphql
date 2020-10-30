@@ -5,6 +5,23 @@ extension GraphQL {
         case named(Type)
         case nullable(InvertedTypeRef)
         case list(InvertedTypeRef)
+        
+        // MARK: - Calculated properties
+        
+        /// Returns a nullable instance of self.
+        var nullable: InvertedTypeRef<Type> {
+            self.inverted.nullable.inverted
+        }
+        
+        /// Returns a non nullable instance of self.
+        var nonNullable: InvertedTypeRef<Type> {
+            switch self {
+            case .nullable(let subref):
+                return subref
+            default:
+                return self
+            }
+        }
     }
 }
 

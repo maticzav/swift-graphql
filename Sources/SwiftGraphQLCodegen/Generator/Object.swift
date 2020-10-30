@@ -6,18 +6,32 @@ extension GraphQLCodegen {
         let name = type.name.pascalCase
         
         /* Code */
-        let code = try
-            [ "/* \(name) */",
-              "",
-              "extension Objects {",
-              "    struct \(name): Codable {"
-            ] + type.fields.map { try generateFieldDecoder(for: $0) }.indent(by: 8) +
-            [ "    }",
-              "}",
-              "",
-              "extension SelectionSet where TypeLock == Objects.\(name) {"
-            ] + type.fields.flatMap { try generateField($0) }.indent(by: 4) +
-            [ "}" ]
+        var code = [String]()
+        
+        code.append("/* \(name) */")
+        code.append("")
+        
+        /* Definition*/
+        code.append("extension Objects {")
+        code.append(contentsOf:
+            try generateEncodableStruct(
+                name,
+                fields: type.fields,
+                protocols: ["Encodable"]
+            ).indent(by: 4)
+        )
+        code.append("}")
+        
+        /* Decoder */
+        code.append("extension Objects.\(name): Decodable {")
+        code.append(contentsOf: try generateDecodableExtension(fields: type.fields))
+        code.append("}")
+        
+        code.append("")
+        /* Fields */
+        code.append("extension SelectionSet where TypeLock == Objects.\(name) {")
+        code.append(contentsOf: try type.fields.flatMap { try generateField($0) }.indent(by: 4))
+        code.append("}")
         
         return code
     }

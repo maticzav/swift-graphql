@@ -30,28 +30,31 @@ extension GraphQLCodegen {
         var code: [String] = [
             "/* \(type.name) */",
             "",
-            "extension Interfaces {",
-            "    struct \(name): Codable {",
-            "        let __typename: TypeName",
+            "extension Interfaces {"
         ]
-        code.append(contentsOf: try fields.map { try generateFieldDecoder(for: $0) }.indent(by: 8))
-        code.append(contentsOf: [
-            "",
-            "enum TypeName: String, Codable {".indent(by: 8),
-        ])
-        code.append(contentsOf: type.possibleTypes.map { "case \($0.namedType.name.camelCase) = \"\($0.namedType.name)\"" }.indent(by: 12))
-        code.append(contentsOf: [
-            "        }",
-            "    }",
-            "}",
-            "",
-            "extension SelectionSet where TypeLock == Interfaces.\(name) {",
-        ])
+        code.append(contentsOf:
+            try generateEncodableStruct(
+                name,
+                fields: fields,
+                protocols: ["Encodable"],
+                possibleTypes: type.possibleTypes.map { $0.namedType }
+            ).indent(by: 4)
+        )
+        code.append("}")
+        code.append("")
+        code.append("extension Interfaces.\(name): Decodable {")
+        code.append(contentsOf:
+            try generateDecodableExtension(
+                fields: fields,
+                possibleTypes: type.possibleTypes.map { $0.namedType }
+            )
+        )
+        code.append("}")
+        code.append("")
+        code.append("extension SelectionSet where TypeLock == Interfaces.\(name) {")
         code.append(contentsOf:  try type.fields.flatMap { try generateField($0) }.indent(by: 4))
-        code.append(contentsOf: [
-            "}",
-            "",
-        ])
+        code.append("}")
+        code.append("")
         code.append(contentsOf: generateFragmentSelection("Interfaces.\(type.name.pascalCase)", for: type.possibleTypes, with: objects))
         
         return code

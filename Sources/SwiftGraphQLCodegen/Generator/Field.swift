@@ -1,43 +1,6 @@
 import Foundation
 
 extension GraphQLCodegen {
-    
-    // MARK: - Field Decoders
-    
-    func generateFieldDecoder(for field: GraphQL.Field) throws -> String {
-        // Make the type optional.
-        var nullableType = field.type
-        switch nullableType {
-        case .nonNull(let subref):
-            nullableType = subref
-        default:
-            ()
-        }
-        
-        let name = field.name.normalize
-        
-        // Generate decoder.
-        switch field.type.inverted.namedType {
-        /* Scalar, Enumerator */
-        case .scalar(let scalar):
-            let scalar = try options.scalar(scalar)
-            return "let \(name): \(generateDecoderType(scalar, for: nullableType))"
-        case .enum(let enm):
-            let type = "Enums.\(enm.pascalCase)"
-            return "let \(name): \(generateDecoderType(type, for: nullableType))"
-        /* Selections */
-        case .object(let type):
-            let type = "Objects.\(type.pascalCase)"
-            return "let \(name): \(generateDecoderType(type, for: nullableType))"
-        case .interface(let type):
-            let type = "Interfaces.\(type.pascalCase)"
-            return "let \(name): \(generateDecoderType(type, for: nullableType))"
-        case .union(let type):
-            let type = "Unions.\(type.pascalCase)"
-            return "let \(name): \(generateDecoderType(type, for: nullableType))"
-        }
-    }
-    
     // MARK: - Field Selection
     
     /// Generates a SwiftGraphQL field.
@@ -172,7 +135,7 @@ extension GraphQLCodegen {
     }
     
     // Generates an intermediate type used in custom decoders to cast JSON representation of the data.
-    private func generateDecoderType<Ref>(_ typeName: String, for ref: GraphQL.TypeRef<Ref>) -> String {
+    func generateDecoderType<Ref>(_ typeName: String, for ref: GraphQL.TypeRef<Ref>) -> String {
         generateDecoderType(typeName, for: ref.inverted)
     }
 
@@ -246,17 +209,17 @@ extension GraphQLCodegen {
         case .scalar(_), .enum(_):
             switch field.type.inverted {
             case .nullable(_):
-                return "data.\(field.name)"
+                return "data.\(field.name)[field.alias!]"
             default:
-                return "data.\(field.name)!"
+                return "data.\(field.name)[field.alias!]!"
             }
         /* Selections */
         case .interface(_), .object(_), .union(_):
             switch field.type.inverted {
             case .nullable(_):
-                return "data.\(field.name).map { selection.decode(data: $0) } ?? selection.mock()"
+                return "data.\(field.name)[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()"
             default:
-                return "selection.decode(data: data.\(field.name)!)"
+                return "selection.decode(data: data.\(field.name)[field.alias!]!)"
             }
         }
     }

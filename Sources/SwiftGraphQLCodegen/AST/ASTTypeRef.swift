@@ -21,6 +21,23 @@ extension GraphQL {
         case named(Type)
         case list(TypeRef)
         case nonNull(TypeRef)
+        
+        // MARK: - Calculated properties
+        
+        /// Returns the non nullable self.
+        var nonNullable: TypeRef<Type> {
+            self.inverted.nonNullable.inverted
+        }
+        
+        /// Makes the type optional.
+        var nullable: TypeRef<Type> {
+            switch self {
+            case .nonNull(let subref):
+                return subref
+            default:
+                return self
+            }
+        }
     }
     
     // MARK: - Possible Type References

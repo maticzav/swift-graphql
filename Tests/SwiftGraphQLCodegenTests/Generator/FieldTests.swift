@@ -31,7 +31,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.id
+                return data.id[field.alias]
             }
             return nil
         }
@@ -69,7 +69,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.id!
+                return data.id[field.alias]!
             }
             return String.mockValue
         }
@@ -105,7 +105,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.id
+                return data.id[field.alias]
             }
             return nil
         }
@@ -141,7 +141,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.ids
+                return data.ids[field.alias]
             }
             return nil
         }
@@ -177,7 +177,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.ids!
+                return data.ids[field.alias]!
             }
             return []
         }
@@ -215,7 +215,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.episode!
+                return data.episode[field.alias]!
             }
             return Enums.Episode.allCases.first!
         }
@@ -252,7 +252,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.episode
+                return data.episode[field.alias]
             }
             return nil
         }
@@ -288,7 +288,7 @@ final class FieldTests: XCTestCase {
 
             /* Decoder */
             if let data = self.response {
-                return data.episode!
+                return data.episode[field.alias]!
             }
             return []
         }
@@ -315,7 +315,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero<Type>(_ selection: Selection<Type, HeroObject>) -> Type {
+        func hero<Type>(_ selection: Selection<Type, Objects.Hero>) -> Type {
             /* Selection */
             let field = GraphQLField.composite(
                 name: "hero",
@@ -327,7 +327,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return selection.decode(data: data.hero!)
+                return selection.decode(data: data.hero[field.alias]!)
             }
             return selection.mock()
         }
@@ -352,7 +352,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero<Type>(_ selection: Selection<Type, HeroObject?>) -> Type {
+        func hero<Type>(_ selection: Selection<Type, Objects.Hero?>) -> Type {
             /* Selection */
             let field = GraphQLField.composite(
                 name: "hero",
@@ -364,7 +364,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.hero.map { selection.decode(data: $0) } ?? selection.mock()
+                return data.hero[field.alias].map { selection.decode(data: $0) } ?? selection.mock()
             }
             return selection.mock()
         }
@@ -389,7 +389,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero<Type>(_ selection: Selection<Type, [HeroObject]>) -> Type {
+        func hero<Type>(_ selection: Selection<Type, [Objects.Hero]>) -> Type {
             /* Selection */
             let field = GraphQLField.composite(
                 name: "hero",
@@ -401,7 +401,7 @@ final class FieldTests: XCTestCase {
 
             /* Decoder */
             if let data = self.response {
-                return selection.decode(data: data.hero!)
+                return selection.decode(data: data.hero[field.alias]!)
             }
             return selection.mock()
         }
@@ -446,7 +446,7 @@ final class FieldTests: XCTestCase {
 
             /* Decoder */
             if let data = self.response {
-                return data.hero!
+                return data.hero[field.alias]!
             }
             return String.mockValue
         }
@@ -489,7 +489,7 @@ final class FieldTests: XCTestCase {
         
             /* Decoder */
             if let data = self.response {
-                return data.hero!
+                return data.hero[field.alias]!
             }
             return String.mockValue
         }

@@ -42,6 +42,19 @@ public enum GraphQLField {
         }
     }
     
+    /// Returns the alias of the value based on arguments.
+    ///
+    /// - Note: Fragments don't have alias.
+    public var alias: String? {
+        switch self {
+        case .leaf(let name, let arguments),
+             .composite(let name, let arguments, _):
+            return "\(name.camelCase)_\(arguments.hash)"
+        case .fragment(_, _):
+            return nil
+        }
+    }
+    
     /// Returns the list of all arguments in the selection tree.
     var arguments: [Argument] {
         switch self {
@@ -59,6 +72,14 @@ public enum GraphQLField {
             }
             return arguments
         }
+    }
+    
+    // MARK: - Public Utility Functions
+    
+    /// Returns the type from field alias.
+    public static func getFieldNameFromAlias(_ alias: String) -> String {
+        let parts = alias.split(separator: "_")
+        return String(parts[0])
     }
 }
 

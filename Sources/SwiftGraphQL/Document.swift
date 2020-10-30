@@ -28,10 +28,10 @@ extension GraphQLField {
     fileprivate var serialized: [String] {
         switch self {
         case .leaf(let name, let arguments):
-            return [ "\(name)\(arguments.serializedForArguments)" ]
+            return [ "\(self.alias!): \(name)\(arguments.serializedForArguments)" ]
         case .composite(let name, let arguments, let subselection):
             return
-                [ "\(name)\(arguments.serializedForArguments) {",
+                [ "\(self.alias!): \(name)\(arguments.serializedForArguments) {",
                   "__typename".indent(by: 2)
                 ] +
                 subselection.serialized.indent(by: 2) +

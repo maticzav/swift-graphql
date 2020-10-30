@@ -7,21 +7,35 @@ extension GraphQLCodegen {
         for type: GraphQL.ObjectType,
         operation: Operation? = nil
     ) throws -> [String] {
-        let protocols = generateOperationProtocols(for: operation)
+        let protocols = getOperationProtocols(for: operation)
         
         /* Code */
-        let code = try
-            [ "/* \(identifier) */",
-              "",
-              "extension Operations {",
-              "    struct \(identifier): \(protocols) {"
-            ] + type.fields.map { try generateFieldDecoder(for: $0) }.indent(by: 8) +
-            [ "    }",
-              "}",
-              "",
-              "extension SelectionSet where TypeLock == Operations.\(identifier) {"
-            ] + type.fields.flatMap { try generateField($0) }.indent(by: 4) +
-            [ "}" ]
+        var code = [String]()
+        
+        code.append("/* \(identifier) */")
+        code.append("")
+        
+        /* Definition*/
+        code.append("extension Operations {")
+        code.append(contentsOf:
+            try generateEncodableStruct(
+                identifier,
+                fields: type.fields,
+                protocols: protocols
+            ).indent(by: 4)
+        )
+        code.append("}")
+        
+        /* Decoder */
+        code.append("extension Operations.\(identifier): Decodable {")
+        code.append(contentsOf: try generateDecodableExtension(fields: type.fields))
+        code.append("}")
+        
+        code.append("")
+        /* Fields */
+        code.append("extension SelectionSet where TypeLock == Operations.\(identifier) {")
+        code.append(contentsOf: try type.fields.flatMap { try generateField($0) }.indent(by: 4))
+        code.append("}")
         
         return code
     }
@@ -34,7 +48,7 @@ extension GraphQLCodegen {
     }
     
     /// Generates protocol conformance strings for the object.
-    private func generateOperationProtocols(for operation: Operation?) -> String {
-        [operation?.rawValue, "Codable"].compactMap { $0 }.joined(separator: ", ")
+    private func getOperationProtocols(for operation: Operation?) -> [String] {
+        [operation?.rawValue, "Encodable"].compactMap { $0 }
     }
 }

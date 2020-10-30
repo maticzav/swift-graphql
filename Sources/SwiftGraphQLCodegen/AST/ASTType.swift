@@ -93,6 +93,23 @@ extension GraphQL {
         case union(GraphQL.UnionType)
         case `enum`(GraphQL.EnumType)
         case inputObject(GraphQL.InputObjectType)
+        
+        var name: String {
+            switch self {
+            case .enum(let `enum`):
+                return `enum`.name
+            case .inputObject(let io):
+                return io.name
+            case .interface(let interface):
+                return interface.name
+            case .object(let object):
+                return object.name
+            case .scalar(let scalar):
+                return scalar.name
+            case .union(let union):
+                return union.name
+            }
+        }
     }
 }
 

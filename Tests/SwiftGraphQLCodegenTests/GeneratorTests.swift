@@ -4,7 +4,9 @@ import Files
 
 
 final class GeneratorTests: XCTestCase {
-    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
+    let generator = GraphQLCodegen(
+        options: GraphQLCodegen.Options(scalarMappings: ["Date": "DateTime"])
+    )
     
     // MARK: - Tests
     

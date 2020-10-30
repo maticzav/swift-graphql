@@ -7,15 +7,98 @@ enum Operations {}
 /* Query */
 
 extension Operations {
-    struct Query: GraphQLRootQuery, Codable {
-        let human: Objects.Human?
-        let droid: Objects.Droid?
-        let character: Unions.CharacterUnion?
-        let humans: [Objects.Human]?
-        let droids: [Objects.Droid]?
-        let characters: [Interfaces.Character]?
-        let greeting: String?
-        let time: DateTime?
+    struct Query: GraphQLRootQuery, Encodable {
+    
+        /* Query */
+    
+        /* Properties */
+        let human: [String: Objects.Human]
+        let droid: [String: Objects.Droid]
+        let character: [String: Unions.CharacterUnion]
+        let humans: [String: [Objects.Human]]
+        let droids: [String: [Objects.Droid]]
+        let characters: [String: [Interfaces.Character]]
+        let greeting: [String: String]
+        let time: [String: DateTime]
+    }
+}
+extension Operations.Query: Decodable {
+
+/* Decoder */
+init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+
+
+    var map = HashMap()
+    for codingKey in container.allKeys {
+        if codingKey.isTypenameKey { continue }
+
+        let alias = codingKey.stringValue
+        let field = GraphQLField.getFieldNameFromAlias(alias)
+
+        switch field {
+            case "human":
+                if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "droid":
+                if let value = try container.decode(Objects.Droid?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "character":
+                if let value = try container.decode(Unions.CharacterUnion?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "humans":
+                if let value = try container.decode([Objects.Human]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "droids":
+                if let value = try container.decode([Objects.Droid]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "characters":
+                if let value = try container.decode([Interfaces.Character]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "greeting":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "time":
+                if let value = try container.decode(DateTime?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            default:
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Unknown key \(field)."
+                    )
+                )
+        }
+    }
+
+    self.human = map["human"]
+    self.droid = map["droid"]
+    self.character = map["character"]
+    self.humans = map["humans"]
+    self.droids = map["droids"]
+    self.characters = map["characters"]
+    self.greeting = map["greeting"]
+    self.time = map["time"]
+}
+
+    private struct DynamicCodingKeys: CodingKey {
+        // Use for string-keyed dictionary
+        var stringValue: String
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+    
+        // Use for integer-keyed dictionary
+        var intValue: Int?
+        init?(intValue: Int) { nil }
     }
 }
 
@@ -33,7 +116,7 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         if let data = self.response {
-            return data.human.map { selection.decode(data: $0) } ?? selection.mock()
+            return data.human[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
         }
         return selection.mock()
     }
@@ -50,7 +133,7 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         if let data = self.response {
-            return data.droid.map { selection.decode(data: $0) } ?? selection.mock()
+            return data.droid[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
         }
         return selection.mock()
     }
@@ -67,7 +150,7 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         if let data = self.response {
-            return data.character.map { selection.decode(data: $0) } ?? selection.mock()
+            return data.character[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
         }
         return selection.mock()
     }
@@ -83,7 +166,7 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         if let data = self.response {
-            return selection.decode(data: data.humans!)
+            return selection.decode(data: data.humans[field.alias!]!)
         }
         return selection.mock()
     }
@@ -99,7 +182,7 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         if let data = self.response {
-            return selection.decode(data: data.droids!)
+            return selection.decode(data: data.droids[field.alias!]!)
         }
         return selection.mock()
     }
@@ -115,7 +198,7 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         if let data = self.response {
-            return selection.decode(data: data.characters!)
+            return selection.decode(data: data.characters[field.alias!]!)
         }
         return selection.mock()
     }
@@ -131,7 +214,7 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         if let data = self.response {
-            return data.greeting!
+            return data.greeting[field.alias!]!
         }
         return String.mockValue
     }
@@ -146,7 +229,7 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         if let data = self.response {
-            return data.time!
+            return data.time[field.alias!]!
         }
         return DateTime.mockValue
     }
@@ -159,11 +242,74 @@ enum Objects {}
 /* Droid */
 
 extension Objects {
-    struct Droid: Codable {
-        let id: String?
-        let name: String?
-        let primaryFunction: String?
-        let appearsIn: [Enums.Episode]?
+    struct Droid: Encodable {
+    
+        /* Droid */
+    
+        /* Properties */
+        let id: [String: String]
+        let name: [String: String]
+        let primaryFunction: [String: String]
+        let appearsIn: [String: [Enums.Episode]]
+    }
+}
+extension Objects.Droid: Decodable {
+
+/* Decoder */
+init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+
+
+    var map = HashMap()
+    for codingKey in container.allKeys {
+        if codingKey.isTypenameKey { continue }
+
+        let alias = codingKey.stringValue
+        let field = GraphQLField.getFieldNameFromAlias(alias)
+
+        switch field {
+            case "id":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "name":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "primaryFunction":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            default:
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Unknown key \(field)."
+                    )
+                )
+        }
+    }
+
+    self.id = map["id"]
+    self.name = map["name"]
+    self.primaryFunction = map["primaryFunction"]
+    self.appearsIn = map["appearsIn"]
+}
+
+    private struct DynamicCodingKeys: CodingKey {
+        // Use for string-keyed dictionary
+        var stringValue: String
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+    
+        // Use for integer-keyed dictionary
+        var intValue: Int?
+        init?(intValue: Int) { nil }
     }
 }
 
@@ -179,7 +325,7 @@ extension SelectionSet where TypeLock == Objects.Droid {
     
         /* Decoder */
         if let data = self.response {
-            return data.id!
+            return data.id[field.alias!]!
         }
         return String.mockValue
     }
@@ -194,7 +340,7 @@ extension SelectionSet where TypeLock == Objects.Droid {
     
         /* Decoder */
         if let data = self.response {
-            return data.name!
+            return data.name[field.alias!]!
         }
         return String.mockValue
     }
@@ -209,7 +355,7 @@ extension SelectionSet where TypeLock == Objects.Droid {
     
         /* Decoder */
         if let data = self.response {
-            return data.primaryFunction!
+            return data.primaryFunction[field.alias!]!
         }
         return String.mockValue
     }
@@ -224,7 +370,7 @@ extension SelectionSet where TypeLock == Objects.Droid {
     
         /* Decoder */
         if let data = self.response {
-            return data.appearsIn!
+            return data.appearsIn[field.alias!]!
         }
         return []
     }
@@ -234,11 +380,74 @@ extension SelectionSet where TypeLock == Objects.Droid {
 /* Human */
 
 extension Objects {
-    struct Human: Codable {
-        let id: String?
-        let name: String?
-        let homePlanet: String?
-        let appearsIn: [Enums.Episode]?
+    struct Human: Encodable {
+    
+        /* Human */
+    
+        /* Properties */
+        let id: [String: String]
+        let name: [String: String]
+        let homePlanet: [String: String]
+        let appearsIn: [String: [Enums.Episode]]
+    }
+}
+extension Objects.Human: Decodable {
+
+/* Decoder */
+init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+
+
+    var map = HashMap()
+    for codingKey in container.allKeys {
+        if codingKey.isTypenameKey { continue }
+
+        let alias = codingKey.stringValue
+        let field = GraphQLField.getFieldNameFromAlias(alias)
+
+        switch field {
+            case "id":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "name":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "homePlanet":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            default:
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Unknown key \(field)."
+                    )
+                )
+        }
+    }
+
+    self.id = map["id"]
+    self.name = map["name"]
+    self.homePlanet = map["homePlanet"]
+    self.appearsIn = map["appearsIn"]
+}
+
+    private struct DynamicCodingKeys: CodingKey {
+        // Use for string-keyed dictionary
+        var stringValue: String
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+    
+        // Use for integer-keyed dictionary
+        var intValue: Int?
+        init?(intValue: Int) { nil }
     }
 }
 
@@ -254,7 +463,7 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         if let data = self.response {
-            return data.id!
+            return data.id[field.alias!]!
         }
         return String.mockValue
     }
@@ -269,7 +478,7 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         if let data = self.response {
-            return data.name!
+            return data.name[field.alias!]!
         }
         return String.mockValue
     }
@@ -285,7 +494,7 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         if let data = self.response {
-            return data.homePlanet
+            return data.homePlanet[field.alias!]
         }
         return nil
     }
@@ -300,7 +509,7 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         if let data = self.response {
-            return data.appearsIn!
+            return data.appearsIn[field.alias!]!
         }
         return []
     }
@@ -313,18 +522,87 @@ enum Interfaces {}
 /* Character */
 
 extension Interfaces {
-    struct Character: Codable {
-        let __typename: TypeName
-        let id: String?
-        let name: String?
-        let primaryFunction: String?
-        let appearsIn: [Enums.Episode]?
-        let homePlanet: String?
-
+    struct Character: Encodable {
+    
+        /* Character */
         enum TypeName: String, Codable {
             case droid = "Droid"
             case human = "Human"
         }
+    
+        /* Properties */
+        let __typename: TypeName
+        let id: [String: String]
+        let name: [String: String]
+        let primaryFunction: [String: String]
+        let appearsIn: [String: [Enums.Episode]]
+        let homePlanet: [String: String]
+    }
+}
+
+extension Interfaces.Character: Decodable {
+
+/* Decoder */
+init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+
+
+    var map = HashMap()
+    for codingKey in container.allKeys {
+        if codingKey.isTypenameKey { continue }
+
+        let alias = codingKey.stringValue
+        let field = GraphQLField.getFieldNameFromAlias(alias)
+
+        switch field {
+            case "id":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "name":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "primaryFunction":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "homePlanet":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            default:
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Unknown key \(field)."
+                    )
+                )
+        }
+    }
+
+    self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
+    self.id = map["id"]
+    self.name = map["name"]
+    self.primaryFunction = map["primaryFunction"]
+    self.appearsIn = map["appearsIn"]
+    self.homePlanet = map["homePlanet"]
+}
+
+    private struct DynamicCodingKeys: CodingKey {
+        // Use for string-keyed dictionary
+        var stringValue: String
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+    
+        // Use for integer-keyed dictionary
+        var intValue: Int?
+        init?(intValue: Int) { nil }
     }
 }
 
@@ -341,7 +619,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
     
         /* Decoder */
         if let data = self.response {
-            return data.id!
+            return data.id[field.alias!]!
         }
         return String.mockValue
     }
@@ -357,7 +635,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
     
         /* Decoder */
         if let data = self.response {
-            return data.name!
+            return data.name[field.alias!]!
         }
         return String.mockValue
     }
@@ -406,20 +684,90 @@ enum Unions {}
 /* CharacterUnion */
 
 extension Unions {
-    struct CharacterUnion: Codable {
-        let __typename: TypeName
-        let id: String?
-        let name: String?
-        let primaryFunction: String?
-        let appearsIn: [Enums.Episode]?
-        let homePlanet: String?
-
+    struct CharacterUnion: Encodable {
+    
+        /* CharacterUnion */
         enum TypeName: String, Codable {
             case human = "Human"
             case droid = "Droid"
         }
+    
+        /* Properties */
+        let __typename: TypeName
+        let id: [String: String]
+        let name: [String: String]
+        let primaryFunction: [String: String]
+        let appearsIn: [String: [Enums.Episode]]
+        let homePlanet: [String: String]
     }
 }
+
+extension Unions.CharacterUnion: Decodable {
+    
+    /* Decoder */
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+    
+    
+        var map = HashMap()
+        for codingKey in container.allKeys {
+            if codingKey.isTypenameKey { continue }
+    
+            let alias = codingKey.stringValue
+            let field = GraphQLField.getFieldNameFromAlias(alias)
+    
+            switch field {
+                case "id":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "name":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "primaryFunction":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "appearsIn":
+                    if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "homePlanet":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                default:
+                    throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: decoder.codingPath,
+                            debugDescription: "Unknown key \(field)."
+                        )
+                    )
+            }
+        }
+    
+        self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
+        self.id = map["id"]
+        self.name = map["name"]
+        self.primaryFunction = map["primaryFunction"]
+        self.appearsIn = map["appearsIn"]
+        self.homePlanet = map["homePlanet"]
+    }
+    
+        private struct DynamicCodingKeys: CodingKey {
+            // Use for string-keyed dictionary
+            var stringValue: String
+            init?(stringValue: String) {
+                self.stringValue = stringValue
+            }
+        
+            // Use for integer-keyed dictionary
+            var intValue: Int?
+            init?(intValue: Int) { nil }
+        }
+}
+
 extension SelectionSet where TypeLock == Unions.CharacterUnion {
     func on<Type>(
         human: Selection<Type, Objects.Human>,
