@@ -38,7 +38,7 @@ extension GraphQLCodegen {
         /* Internal fields */
         code.append(contentsOf: try fields.map {
             let type = generateDecoderType(try generateOutputType(ref: $0.type.namedType), for: $0.type.nonNullable)
-            return "let \($0.name.camelCase.normalize): [String: \(type)]"
+            return "let \($0.name.normalize): [String: \(type)]"
         }.indent(by: 4))
         
         code.append("}")

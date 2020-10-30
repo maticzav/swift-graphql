@@ -54,7 +54,7 @@ extension GraphQLCodegen {
         field.description.map { "/// \($0)" }
     }
     
-    private func generatePropertyType(for ref: GraphQL.InputTypeRef) throws -> String {
+    func generatePropertyType(for ref: GraphQL.InputTypeRef) throws -> String {
         try generatePropertyType(for: ref.inverted)
     }
     
@@ -67,7 +67,7 @@ extension GraphQLCodegen {
             case .enum(let enm):
                 return "Enums.\(enm.pascalCase)"
             case .inputObject(let inputObject):
-                return inputObject.pascalCase
+                return "InputObjects.\(inputObject.pascalCase)"
             }
         case .list(let subref):
             let wrappedType = try generatePropertyType(for: subref)

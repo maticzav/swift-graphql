@@ -460,6 +460,49 @@ final class FieldTests: XCTestCase {
         )
     }
     
+    func testFieldWithOptionalArgument() throws {
+        let field = GraphQL.Field(
+            name: "hero",
+            description: nil,
+            args: [
+                GraphQL.InputValue(
+                    name: "id",
+                    description: nil,
+                    type: .named(.scalar("ID"))
+                )
+            ],
+            type: .nonNull(.named(.scalar("ID"))),
+            isDeprecated: false,
+            deprecationReason: nil
+        )
+        
+        let expected = """
+        func hero(id: OptionalArgument<String> = .absent) -> String {
+            /* Selection */
+            let field = GraphQLField.leaf(
+                name: "hero",
+                arguments: [
+                    Argument(name: "id", type: "ID", value: id),
+                ]
+            )
+            self.select(field)
+
+            /* Decoder */
+            if let data = self.response {
+                return data.hero[field.alias!]!
+            }
+            return String.mockValue
+        }
+        """
+        
+        /* Test */
+        
+        XCTAssertEqual(
+            try generator.generateField(field).joined(separator: "\n"),
+            expected
+        )
+    }
+    
     func testFieldWithInputObjectArgument() throws {
         let field = GraphQL.Field(
             name: "hero",

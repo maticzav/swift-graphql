@@ -16,7 +16,17 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable, Hashable {
+        struct InputObjectTest: Encodable, Hashable {
+
+            /* Encoder */
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+            
+            }
+
+            /* CodingKeys */
+            enum CodingKeys: CodingKey {
+            }
         }
         """
         
@@ -44,9 +54,21 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable, Hashable {
+        struct InputObjectTest: Encodable, Hashable {
             /// Field description.
-            var id: OptionalArgument<String> = .none
+            var id: OptionalArgument<String> = .absent
+
+            /* Encoder */
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+            
+                if id.hasValue { try container.encode(id, forKey: .id) }
+            }
+
+            /* CodingKeys */
+            enum CodingKeys: CodingKey {
+                case id
+            }
         }
         """
         
@@ -76,9 +98,21 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable, Hashable {
+        struct InputObjectTest: Encodable, Hashable {
             /// Field description.
-            var id: OptionalArgument<String> = .none
+            var id: OptionalArgument<String> = .absent
+
+            /* Encoder */
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+            
+                if id.hasValue { try container.encode(id, forKey: .id) }
+            }
+
+            /* CodingKeys */
+            enum CodingKeys: CodingKey {
+                case id
+            }
         }
         """
         
@@ -106,9 +140,21 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable, Hashable {
+        struct InputObjectTest: Encodable, Hashable {
             /// Field description.
             var id: String
+
+            /* Encoder */
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+            
+                try container.encode(id, forKey: .id)
+            }
+
+            /* CodingKeys */
+            enum CodingKeys: CodingKey {
+                case id
+            }
         }
         """
         
@@ -136,9 +182,21 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable, Hashable {
+        struct InputObjectTest: Encodable, Hashable {
             /// Field description.
-            var id: AnotherInputObject
+            var id: InputObjects.AnotherInputObject
+
+            /* Encoder */
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+            
+                try container.encode(id, forKey: .id)
+            }
+
+            /* CodingKeys */
+            enum CodingKeys: CodingKey {
+                case id
+            }
         }
         """
         
@@ -166,9 +224,21 @@ final class InputObjectTests: XCTestCase {
         
         /* Tests */
         let expected = """
-        struct InputObjectTest: Codable, Hashable {
+        struct InputObjectTest: Encodable, Hashable {
             /// Field description.
             var id: Enums.Enum
+
+            /* Encoder */
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+            
+                try container.encode(id, forKey: .id)
+            }
+
+            /* CodingKeys */
+            enum CodingKeys: CodingKey {
+                case id
+            }
         }
         """
         

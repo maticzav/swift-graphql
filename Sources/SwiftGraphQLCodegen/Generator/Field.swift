@@ -102,26 +102,26 @@ extension GraphQLCodegen {
     private func generateParameter(for input: GraphQL.InputValue) throws -> String {
         switch input.type.inverted {
         case .nullable(_):
-            return "\(input.name.camelCase.normalize): \(try generateParameterType(for: input.type)) = .absent"
+            return "\(input.name.camelCase.normalize): \(try generatePropertyType(for: input.type)) = .absent"
         default:
-            return "\(input.name.camelCase.normalize): \(try generateParameterType(for: input.type))"
+            return "\(input.name.camelCase.normalize): \(try generatePropertyType(for: input.type))"
         }
     }
     
-    /// Generates a type definition for an argument function parameter.
-    private func generateParameterType(for ref: GraphQL.InputTypeRef) throws -> String {
-        switch ref.namedType {
-        case .scalar(let scalar):
-            let scalar = try options.scalar(scalar)
-            return generateDecoderType(scalar, for: ref)
-        case .enum(let enm):
-            let type = "Enums.\(enm.pascalCase)"
-            return generateDecoderType(type, for: ref)
-        case .inputObject(let inputObject):
-            let type = "InputObjects.\(inputObject.pascalCase)"
-            return generateDecoderType(type, for: ref)
-        }
-    }
+//    /// Generates a type definition for an argument function parameter.
+//    private func generateParameterType(for ref: GraphQL.InputTypeRef) throws -> String {
+//        switch ref.namedType {
+//        case .scalar(let scalar):
+//            let scalar = try options.scalar(scalar)
+//            return generatePropertyType(scalar, for: ref)
+//        case .enum(let enm):
+//            let type = "Enums.\(enm.pascalCase)"
+//            return generatePropertyType(type, for: ref)
+//        case .inputObject(let inputObject):
+//            let type = "InputObjects.\(inputObject.pascalCase)"
+//            return generatePropertyType(type, for: ref)
+//        }
+//    }
 
     /// Recursively generates a return type of a referrable type.
     private func generateReturnType(for ref: GraphQL.OutputTypeRef) throws -> String {

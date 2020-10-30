@@ -53,7 +53,6 @@ extension String {
                 continue
             } else {
                 // There was a range of >1 capital letters. Turn those into a word, stopping at the capital before the lower case character.
-                print("BIG ONE!")
                 words.append(wordStart..<lowerCaseRange.lowerBound)
 
                 // Next word starts at the capital before the lowercase we just found
