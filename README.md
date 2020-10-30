@@ -104,8 +104,33 @@ do {
 
 ## Documentation
 
+### `Selection<Type, Scope>`
+
+### `OptionalArgument`
+
 
 ## F.A.Q
+
+### My queries include strange alias. What is that about?
+
+SwiftGraphQL uses hashes to construct your queries. There are two parts of the query builder that contribute to the hashes; 
+- the first one - _query parameters_ - uses hashes to differentiate between same fields with different parameters. Because of this, you don't have to manually check that your field names don't collide.
+- the second one - _query variables_ - uses hashes to link your input values to the part of the query they belong to. SwiftGraphQL laverages Swift's native JSON serialization as I've found it incredibly difficult to represent enumerator values in GraphQL SDL. This way it's also more performant.
+
+```gql
+query($__rsdpxy7uqurl: Greeting!, $__l9q38fwdev22: Greeting!, $_b2ryvzutf9x2: ID!) {
+  greeting__m9oi5wy5dzot: greeting(input: $__rsdpxy7uqurl)
+  character__16agce2xby25o: character(id: $_b2ryvzutf9x2) {
+    __typename
+    ...on Human {
+      homePlanet___5osgbeo0g455: homePlanet
+    }
+    ...on Droid {
+      primaryFunction___5osgbeo0g455: primaryFunction
+    }
+  }
+}
+```
 
 
 ## Thank you

@@ -45,8 +45,8 @@ struct Model {
 }
 
 let query = Selection<Model, Operations.Query> {
-    let english = $0.greeting(input: .init(language: .sl, name: "Matic"))
-    let slovene = $0.greeting(input: .init(language: .en, name: "Matic"))
+    let english = $0.greeting(input: .init(name: "Matic"))
+    let slovene = $0.greeting(input: .init(language: .present(.en), name: "Matic"))
     
     let greeting = "\(english); \(slovene)"
     

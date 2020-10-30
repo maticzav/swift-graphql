@@ -89,8 +89,8 @@ extension GraphQLCodegen {
             return "\(name)<Type>(_ selection: Selection<Type, \(decoderType)>)"
         }
         /* Function with arguments. */
-        let arguments = try generateFnParameters(for: args)
-        return "\(name)<Type>(\(arguments), _ selection: Selection<Type, \(decoderType)>)"
+        let parameters = try generateFnParameters(for: args)
+        return "\(name)<Type>(\(parameters), _ selection: Selection<Type, \(decoderType)>)"
     }
     
     /// Generates arguments for accessor function.
@@ -100,7 +100,12 @@ extension GraphQLCodegen {
     
     /// Generates a function parameter based on an input value.
     private func generateParameter(for input: GraphQL.InputValue) throws -> String {
-        "\(input.name.camelCase.normalize): \(try generateParameterType(for: input.type))"
+        switch input.type.inverted {
+        case .nullable(_):
+            return "\(input.name.camelCase.normalize): \(try generateParameterType(for: input.type)) = .absent"
+        default:
+            return "\(input.name.camelCase.normalize): \(try generateParameterType(for: input.type))"
+        }
     }
     
     /// Generates a type definition for an argument function parameter.

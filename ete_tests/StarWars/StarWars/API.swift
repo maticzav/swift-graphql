@@ -833,13 +833,39 @@ enum Enums {
 // MARK: - Input Objects
 
 enum InputObjects {
-    struct Greeting: Codable, Hashable {
-        let language: Enums.Language?
-        let name: String
+    struct Greeting: Encodable, Hashable {
+        var language: OptionalArgument<Enums.Language> = .absent
+        var name: String
+    
+        /* Encoder */
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+        
+            if language.hasValue { try container.encode(language, forKey: .language) }
+            try container.encode(name, forKey: .name)
+        }
+    
+        /* CodingKeys */
+        enum CodingKeys: CodingKey {
+            case language
+            case name
+        }
     }
 
 
-    struct GreetingOptions: Codable, Hashable {
-        let prefix: String?
+    struct GreetingOptions: Encodable, Hashable {
+        var prefix: OptionalArgument<String> = .absent
+    
+        /* Encoder */
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+        
+            if prefix.hasValue { try container.encode(prefix, forKey: .prefix) }
+        }
+    
+        /* CodingKeys */
+        enum CodingKeys: CodingKey {
+            case prefix
+        }
     }
 }

@@ -46,7 +46,7 @@ final class InputObjectTests: XCTestCase {
         let expected = """
         struct InputObjectTest: Codable, Hashable {
             /// Field description.
-            let id: String?
+            var id: OptionalArgument<String> = .none
         }
         """
         
@@ -58,7 +58,9 @@ final class InputObjectTests: XCTestCase {
     
     // MARK: - Fields
     
-    func testScalarField() throws {
+    func testOptionalField() throws {
+        
+        /* Type */
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
@@ -76,7 +78,37 @@ final class InputObjectTests: XCTestCase {
         let expected = """
         struct InputObjectTest: Codable, Hashable {
             /// Field description.
-            let id: String?
+            var id: OptionalArgument<String> = .none
+        }
+        """
+        
+        XCTAssertEqual(
+            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
+            expected
+        )
+    }
+    
+    func testScalarField() throws {
+        
+        /* Type */
+        let type = GraphQL.InputObjectType(
+            name: "InputObject",
+            description: nil,
+            inputFields: [
+                /* Scalar, Docs */
+                GraphQL.InputValue(
+                    name: "id",
+                    description: "Field description.",
+                    type: .nonNull(.named(.scalar("ID")))
+                ),
+            ]
+        )
+        
+        /* Tests */
+        let expected = """
+        struct InputObjectTest: Codable, Hashable {
+            /// Field description.
+            var id: String
         }
         """
         
@@ -87,6 +119,8 @@ final class InputObjectTests: XCTestCase {
     }
     
     func testInputObjectField() throws {
+        
+        /* Type */
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
@@ -95,7 +129,7 @@ final class InputObjectTests: XCTestCase {
                 GraphQL.InputValue(
                     name: "id",
                     description: "Field description.",
-                    type: .named(.inputObject("AnotherInputObject"))
+                    type: .nonNull(.named(.inputObject("AnotherInputObject")))
                 ),
             ]
         )
@@ -104,7 +138,7 @@ final class InputObjectTests: XCTestCase {
         let expected = """
         struct InputObjectTest: Codable, Hashable {
             /// Field description.
-            let id: AnotherInputObject?
+            var id: AnotherInputObject
         }
         """
         
@@ -115,6 +149,8 @@ final class InputObjectTests: XCTestCase {
     }
     
     func testEnumField() throws {
+        
+        /* Type */
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
@@ -123,7 +159,7 @@ final class InputObjectTests: XCTestCase {
                 GraphQL.InputValue(
                     name: "id",
                     description: "Field description.",
-                    type: .named(.enum("ENUM"))
+                    type: .nonNull(.named(.enum("ENUM")))
                 ),
             ]
         )
@@ -132,7 +168,7 @@ final class InputObjectTests: XCTestCase {
         let expected = """
         struct InputObjectTest: Codable, Hashable {
             /// Field description.
-            let id: Enums.Enum?
+            var id: Enums.Enum
         }
         """
         

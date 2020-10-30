@@ -4,6 +4,18 @@ public enum OptionalArgument<Type> {
     case present(Type)
     case null
     case absent
+    
+    // MARK: - Calculated Properties
+    
+    /// Tells whether an optional argument has a value.
+    public var hasValue: Bool {
+        switch self {
+        case .absent:
+            return false
+        default:
+            return true
+        }
+    }
 }
 
 // MARK: - Initializers
@@ -53,3 +65,5 @@ extension OptionalArgument: Encodable where Type: Encodable {
         }
     }
 }
+
+extension OptionalArgument: Hashable where Type: Hashable {}
