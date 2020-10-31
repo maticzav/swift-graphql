@@ -4,8 +4,10 @@ public struct Argument: Hashable {
     let name: String
     let type: String
     let hash: String
-    let value: NSObject
+    let value: NSObject?
 }
+
+// MARK: - Initializer
 
 extension Argument {
     public init<T: Encodable & Hashable>(name: String, type: String, value: T) {
@@ -14,7 +16,20 @@ extension Argument {
         self.hash = hashInt(value.hashValue)
         
         /* Encode value */
-        self.value = try! VariableEncoder().encode(value)
+        if let value = value as? OptionalArgumentProtocol, !value.hasValue {
+            self.value = nil
+        } else {
+            self.value = try! VariableEncoder().encode(value)
+        }
+    }
+}
+
+extension OptionalArgument {
+    fileprivate static func hasValue<T>(_ value: T) -> Bool {
+        if let value = value as? OptionalArgument<T>, !value.hasValue {
+            return false
+        }
+        return true
     }
 }
 

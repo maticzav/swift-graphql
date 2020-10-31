@@ -90,7 +90,7 @@ type Query {
     id: ID!
   ): Droid
   droids: [Droid!]!
-  greeting(input: Greeting!): String!
+  greeting(input: Greeting): String!
   human(
     """
     id of the character

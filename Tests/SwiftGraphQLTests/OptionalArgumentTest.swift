@@ -3,7 +3,7 @@ import XCTest
 
 final class OptionalArgumentTests: XCTestCase {
     func testFromMaybe() {
-        XCTAssertEqual(OptionalArgument<String>(optional: nil), .absent)
+        XCTAssertEqual(OptionalArgument<String>(optional: nil), .null)
         XCTAssertEqual(OptionalArgument(optional: "value"), .present("value"))
     }
     

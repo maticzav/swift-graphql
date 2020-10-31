@@ -5,7 +5,7 @@ import Foundation
 /// Codec protocol describes the necessery requirements to make it compatible with SwiftGraphQL.
 ///
 ///
-public protocol Codec: Codable {
+public protocol Codec: Codable & Hashable {
     associatedtype WrappedType
     
     /// Provides a default value used to mock in SwiftGraphQL selection set.

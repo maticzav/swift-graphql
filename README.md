@@ -267,7 +267,7 @@ let human = Selection<String, Objects.Human> { select in
 
     /* Return */
     let message: String
-    if  {
+    if likesStrawberries {
         message = name
     } else {
         message = homePlanet
@@ -337,7 +337,16 @@ Because of that, every input object that has an optional property accepts an opt
 SwiftGraphQL lets you implement custom scalars that your schema uses. You can do that by conforming to the `Codec` protocol. It doesn't matter where you implement the codec, it should only be visible to the API so that your app compiles.
 
 ```swift
-// Example
+public protocol Codec: Codable & Hashable {
+    associatedtype WrappedType
+    static var mockValue: WrappedType { get }
+}
+```
+
+You should provide a codec for every scalar that is not natively supported by GraphQL, or map it to an existing Swift type. You can read more about scalar mappings below, in the generator section of the documentation.
+
+```swift
+// DateTime Example
 struct DateTime: Codec {
     private var data: Date
     
@@ -376,7 +385,7 @@ struct DateTime: Codec {
 }
 ```
 
-Additionally, you should add you scalar mapping to code generator options. Otherwise, generator will fail with _unknown scalar_ error.
+> Don't forget to add your scalar mapping to code generator options. Otherwise, generator will fail with _unknown scalar_ error.
 
 
 ### `GraphQLCodegen`
@@ -409,6 +418,10 @@ let options = GraphQLCodegen.Options(scalarMappings: scalars)
 ### How do I create a fragment?
 
 Just create a new variable with a selection. In a way, every selection is a fragment!
+
+### How do I create an alias?
+
+You can't. SwiftGraphQL aims to use Swift's high level language features in favour of GraphQL. The primary goal of GraphQL alias is to support fetching same fields with different parameters. SwiftGraphQL automatically manages alias based on the values you provide to a particular field. Because of this, you can select the same field as many times as you'd like.
 
 ### My queries include strange alias. What is that about?
 

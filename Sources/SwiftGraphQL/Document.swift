@@ -67,23 +67,33 @@ extension Argument {
 }
 
 extension Collection where Element == Argument {
+    /// Returns the list of all argumetns that have a value.
+    var present: [Argument] {
+        self.compactMap {
+            if $0.value == nil {
+                return nil
+            }
+            return $0
+        }
+    }
+    
     /// Serializes a collection of arguments into a query string.
     var serializedForArguments: String {
         /* Return empty string for no arguments. */
-        if self.isEmpty {
+        if self.present.isEmpty {
             return ""
         }
-        return "(\(self.map { $0.serializedForArgument }.joined(separator: ", ")))"
+        return "(\(self.present.map { $0.serializedForArgument }.joined(separator: ", ")))"
 
     }
     
     /// Returns serialized query variables.
     var serializedForVariables: String {
         // Return empty string if there's no arguments.
-        guard !self.isEmpty else {
+        if self.present.isEmpty {
             return ""
         }
         // Wrap them in parantheses otherwise.
-        return "(\(self.map { $0.serializedForVariable }.joined(separator: ", ")))"
+        return "(\(self.present.map { $0.serializedForVariable }.joined(separator: ", ")))"
     }
 }

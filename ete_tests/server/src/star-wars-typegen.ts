@@ -120,7 +120,7 @@ export interface NexusGenArgTypes {
     }
     greeting: {
       // args
-      input: NexusGenInputs['Greeting'] // Greeting!
+      input?: NexusGenInputs['Greeting'] | null // Greeting
     }
     human: {
       // args

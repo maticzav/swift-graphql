@@ -68,10 +68,12 @@ export const Query = objectType({
       args: {
         input: arg({
           type: 'Greeting',
-          required: true,
+          required: false,
         }),
       },
       resolve: (_, { input }, ctx) => {
+        if (!input) return 'Hello World!'
+
         switch (input.language) {
           case 'EN':
             return `Hello ${input.name}`

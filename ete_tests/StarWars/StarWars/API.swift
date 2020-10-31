@@ -202,12 +202,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         }
         return selection.mock()
     }
-    func greeting(input: InputObjects.Greeting) -> String {
+    func greeting(input: OptionalArgument<InputObjects.Greeting> = .absent) -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "greeting",
             arguments: [
-                Argument(name: "input", type: "Greeting!", value: input),
+                Argument(name: "input", type: "Greeting", value: input),
             ]
         )
         self.select(field)
