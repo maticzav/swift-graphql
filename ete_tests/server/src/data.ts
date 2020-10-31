@@ -26,6 +26,7 @@ const luke: Human = {
   friends: ['1002', '1003'],
   appears_in: [4, 5, 6],
   home_planet: 'Tatooine',
+  info: 'https://en.wikipedia.org/wiki/Luke_Skywalker',
 }
 
 const vader: Human = {

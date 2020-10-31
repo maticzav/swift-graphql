@@ -41,6 +41,7 @@ export type Human = {
   friends: string[]
   appears_in: NexusGenEnums['Episode'][]
   home_planet?: string
+  info?: string
 }
 
 export type Droid = {

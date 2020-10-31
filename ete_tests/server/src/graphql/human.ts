@@ -19,5 +19,12 @@ export const Human = objectType({
       type: 'Episode',
       resolve: ({ appears_in }) => appears_in,
     })
+
+    /* Test casing */
+
+    t.string('infoURL', {
+      nullable: true,
+      resolve: ({ info }) => info || null,
+    })
   },
 })

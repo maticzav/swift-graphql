@@ -24,13 +24,18 @@ let character = Selection<Character, Interfaces.Character> {
 struct Human {
     let id: String
     let name: String
+    let url: String?
 }
 
 let human = Selection<Human, Objects.Human> {
-    Human(id: $0.id(), name: $0.name())
+    Human(
+        id: $0.id(),
+        name: $0.name(),
+        url: $0.infoUrl()
+    )
 }
 
-let characterInteface = Selection<String, Interfaces.Character> {
+let characterInterface = Selection<String, Interfaces.Character> {
     
     /* Common */
     let name = $0.name()
@@ -38,7 +43,7 @@ let characterInteface = Selection<String, Interfaces.Character> {
     /* Fragments */
     let about = $0.on(
         droid: Selection<String, Objects.Droid> { droid in droid.primaryFunction() },
-        human: Selection<String, Objects.Human> { human in human.homePlanet() ?? "Unknown" }
+        human: Selection<String, Objects.Human> { human in human.infoUrl() ?? "Unknown" }
     )
     
     return "\(name). \(about)"
@@ -46,7 +51,7 @@ let characterInteface = Selection<String, Interfaces.Character> {
 
 let characterUnion = Selection<String, Unions.CharacterUnion> {
     $0.on(
-        human: .init { $0.homePlanet() ?? "Unknown" },
+        human: .init { $0.infoUrl() ?? "Unknown" },
         droid: .init { $0.primaryFunction() }
     )
 }

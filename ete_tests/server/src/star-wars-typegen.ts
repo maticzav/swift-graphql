@@ -88,6 +88,7 @@ export interface NexusGenFieldTypes {
     appearsIn: NexusGenEnums['Episode'][] // [Episode!]!
     homePlanet: string | null // String
     id: string // ID!
+    infoURL: string | null // String
     name: string // String!
   }
   Query: {

@@ -67,6 +67,7 @@ type Human implements Character {
   """
   homePlanet: String
   id: ID!
+  infoURL: String
   name: String!
 }
 

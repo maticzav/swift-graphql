@@ -209,22 +209,24 @@ extension GraphQLCodegen {
 
     /// Generates a field decoder.
     private func generateDecoder(for field: GraphQL.Field) -> String {
+        let name = field.name.camelCase
+        
         switch field.type.inverted.namedType {
         /* Scalar, Enumeration */
         case .scalar(_), .enum(_):
             switch field.type.inverted {
             case .nullable(_):
-                return "data.\(field.name)[field.alias!]"
+                return "data.\(name)[field.alias!]"
             default:
-                return "data.\(field.name)[field.alias!]!"
+                return "data.\(name)[field.alias!]!"
             }
         /* Selections */
         case .interface(_), .object(_), .union(_):
             switch field.type.inverted {
             case .nullable(_):
-                return "data.\(field.name)[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()"
+                return "data.\(name)[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()"
             default:
-                return "selection.decode(data: data.\(field.name)[field.alias!]!)"
+                return "selection.decode(data: data.\(name)[field.alias!]!)"
             }
         }
     }

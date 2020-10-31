@@ -389,6 +389,7 @@ extension Objects {
         let name: [String: String]
         let homePlanet: [String: String]
         let appearsIn: [String: [Enums.Episode]]
+        let infoUrl: [String: String]
     }
 }
 extension Objects.Human: Decodable {
@@ -422,6 +423,10 @@ init(from decoder: Decoder) throws {
                 if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
+            case "infoUrl":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
             default:
                 throw DecodingError.dataCorrupted(
                     DecodingError.Context(
@@ -436,6 +441,7 @@ init(from decoder: Decoder) throws {
     self.name = map["name"]
     self.homePlanet = map["homePlanet"]
     self.appearsIn = map["appearsIn"]
+    self.infoUrl = map["infoUrl"]
 }
 
     private struct DynamicCodingKeys: CodingKey {
@@ -513,6 +519,21 @@ extension SelectionSet where TypeLock == Objects.Human {
         }
         return []
     }
+    func infoUrl() -> String? {
+        /* Selection */
+        let field = GraphQLField.leaf(
+            name: "infoURL",
+            arguments: [
+            ]
+        )
+        self.select(field)
+    
+        /* Decoder */
+        if let data = self.response {
+            return data.infoUrl[field.alias!]
+        }
+        return nil
+    }
 }
 
 // MARK: - Interfaces
@@ -537,6 +558,7 @@ extension Interfaces {
         let primaryFunction: [String: String]
         let appearsIn: [String: [Enums.Episode]]
         let homePlanet: [String: String]
+        let infoUrl: [String: String]
     }
 }
 
@@ -575,6 +597,10 @@ init(from decoder: Decoder) throws {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
+            case "infoUrl":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
             default:
                 throw DecodingError.dataCorrupted(
                     DecodingError.Context(
@@ -591,6 +617,7 @@ init(from decoder: Decoder) throws {
     self.primaryFunction = map["primaryFunction"]
     self.appearsIn = map["appearsIn"]
     self.homePlanet = map["homePlanet"]
+    self.infoUrl = map["infoUrl"]
 }
 
     private struct DynamicCodingKeys: CodingKey {
@@ -667,7 +694,8 @@ extension SelectionSet where TypeLock == Interfaces.Character {
                     id: data.id,
                     name: data.name,
                     homePlanet: data.homePlanet,
-                    appearsIn: data.appearsIn
+                    appearsIn: data.appearsIn,
+                    infoUrl: data.infoUrl
                 )
                 return human.decode(data: data)
             }
@@ -699,6 +727,7 @@ extension Unions {
         let primaryFunction: [String: String]
         let appearsIn: [String: [Enums.Episode]]
         let homePlanet: [String: String]
+        let infoUrl: [String: String]
     }
 }
 
@@ -737,6 +766,10 @@ extension Unions.CharacterUnion: Decodable {
                     if let value = try container.decode(String?.self, forKey: codingKey) {
                         map.set(key: field, hash: alias, value: value as Any)
                     }
+                case "infoUrl":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
                 default:
                     throw DecodingError.dataCorrupted(
                         DecodingError.Context(
@@ -753,6 +786,7 @@ extension Unions.CharacterUnion: Decodable {
         self.primaryFunction = map["primaryFunction"]
         self.appearsIn = map["appearsIn"]
         self.homePlanet = map["homePlanet"]
+        self.infoUrl = map["infoUrl"]
     }
     
         private struct DynamicCodingKeys: CodingKey {
@@ -786,7 +820,8 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
                     id: data.id,
                     name: data.name,
                     homePlanet: data.homePlanet,
-                    appearsIn: data.appearsIn
+                    appearsIn: data.appearsIn,
+                    infoUrl: data.infoUrl
                 )
                 return human.decode(data: data)
             case .droid:

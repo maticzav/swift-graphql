@@ -21,7 +21,7 @@ extension GraphQLCodegen {
             /* TypeName enum */
             code.append("enum TypeName: String, Codable {".indent(by: 4))
             code.append(contentsOf: possibleTypes.map {
-                "case \($0.name.camelCase) = \"\($0.name)\"".indent(by: 8)
+                "case \($0.name.camelCase.normalize) = \"\($0.name)\"".indent(by: 8)
             })
             code.append("}".indent(by: 4))
         }
@@ -38,7 +38,7 @@ extension GraphQLCodegen {
         /* Internal fields */
         code.append(contentsOf: try fields.map {
             let type = generateDecoderType(try generateOutputType(ref: $0.type.namedType), for: $0.type.nonNullable)
-            return "let \($0.name.normalize): [String: \(type)]"
+            return "let \($0.name.camelCase.normalize): [String: \(type)]"
         }.indent(by: 4))
         
         code.append("}")
