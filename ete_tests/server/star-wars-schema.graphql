@@ -100,4 +100,5 @@ type Query {
   ): Human
   humans: [Human!]!
   time: Date!
+  whoami: String!
 }

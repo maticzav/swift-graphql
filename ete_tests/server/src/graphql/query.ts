@@ -1,4 +1,5 @@
 import { objectType, idArg, arg } from '@nexus/schema'
+import { getAuthorization } from '../utils'
 
 /* Query */
 
@@ -81,6 +82,15 @@ export const Query = objectType({
           default:
             return `Pozdravljen ${input.name}`
         }
+      },
+    })
+
+    /* Authorization */
+
+    t.string('whoami', {
+      resolve: (_, {}, ctx) => {
+        const user = getAuthorization(ctx)
+        return user
       },
     })
 

@@ -1,8 +1,18 @@
 import Foundation
 
-// MARK: - SelectionSet
+/*
+ SwiftGraphQL uses Selection structure to collect data about the
+ fields a query should fetch. To do that, it passes around a SelectionSet
+ class reference. Generated code later calls `select` method on SelectionSet
+ to add a subfield to the selection.
+ 
+ SelectionSet also holds information about the response that the generated
+ code uses to populate user-defined models.
+ 
+ Generated code extends Select structure using Phantom types. SelectionSet,
+ on the other hand, is final as you can see in the declaration.
+ */
 
-/// Global type used to select query fields.
 public final class SelectionSet<Type, TypeLock> {
     private(set) var fields = [GraphQLField]() // selected fields
     private var data: TypeLock? // response data
@@ -97,6 +107,10 @@ public struct Selection<Type, TypeLock> {
 }
 
 // MARK: - Selection Utility functions
+
+/*
+ Utility functins are used for extending selections to nullable types and lists.
+ */
 
 extension Selection where TypeLock: Decodable {
     /// Lets you convert a type selection into a list selection.

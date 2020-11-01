@@ -1,5 +1,9 @@
 import Foundation
 
+/*
+ We use fragments to support union and interface types.
+ */
+
 extension GraphQLCodegen {
     func generateFragmentSelection(
         _ name: String,

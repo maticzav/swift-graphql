@@ -4,6 +4,7 @@ import * as path from 'path'
 
 import { data } from './data'
 import * as allTypes from './graphql'
+import { ContextType } from './types/backingTypes'
 
 /* Schema */
 
@@ -36,9 +37,14 @@ const schema = makeSchema({
 const server = new ApolloServer({
   schema,
   debug: true,
-  context: () => ({
-    data: data,
-  }),
+  context: ({ req }) => {
+    /* Context */
+    let context: ContextType = {
+      req: req,
+      data: data,
+    }
+    return context
+  },
   plugins: [
     {
       requestDidStart(requestContext) {

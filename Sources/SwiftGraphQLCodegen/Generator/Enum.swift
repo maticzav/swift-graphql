@@ -1,7 +1,8 @@
 import Foundation
 
-/**
- This file contains code used to generate enumerators from schema.
+/*
+ We represent enumerator values as strings. There's nothing
+ special in here, just the generated code.
  */
 
 extension GraphQLCodegen {

@@ -1,10 +1,8 @@
 import Foundation
 
-/**
-    This file contains source code used for encoding and decoding selection.
+/*
+ This file contains source code used for encoding and decoding selection.
  */
-
-
 
 public enum GraphQLOperationType: String, CaseIterable {
     case query = "query"

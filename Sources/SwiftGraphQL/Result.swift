@@ -1,7 +1,5 @@
 import Foundation
 
-public typealias JSONData = [String: Any]
-
 // MARK: - GraphQL Result
 
 public struct GraphQLResult<Type, TypeLock> {

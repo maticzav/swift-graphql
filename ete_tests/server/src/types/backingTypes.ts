@@ -1,6 +1,8 @@
+import { Request } from 'express'
 import { NexusGenEnums } from '../star-wars-typegen'
 
 export interface ContextType {
+  req: Request
   data: Data
 }
 

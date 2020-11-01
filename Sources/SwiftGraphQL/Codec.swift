@@ -3,8 +3,6 @@ import Foundation
 // MARK: - Spec
 
 /// Codec protocol describes the necessery requirements to make it compatible with SwiftGraphQL.
-///
-///
 public protocol Codec: Codable & Hashable {
     associatedtype WrappedType
     

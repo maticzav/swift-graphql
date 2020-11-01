@@ -1,5 +1,12 @@
 import Foundation
 
+/*
+ InputObjects represent the input values that functions accept.
+ 
+ We map the actual keys to more appropriate Swift fields and reference
+ the actual fields using CodingKeys enumerator.
+ */
+
 extension GraphQLCodegen {
     /// Generates struct that is applicable to input object.
     func generateInputObject(_ name: String, for type: GraphQL.InputObjectType) throws -> [String] {
@@ -38,13 +45,13 @@ extension GraphQLCodegen {
         case .nullable(_):
             return [
                 generateDescription(for: field),
-                "var \(field.name.normalize): \(try generatePropertyType(for: field.type)) = .absent"
+                "var \(field.name.camelCase.normalize): \(try generatePropertyType(for: field.type)) = .absent"
             ]
             .compactMap { $0 }
         default:
             return [
                 generateDescription(for: field),
-                "var \(field.name.normalize): \(try generatePropertyType(for: field.type))"
+                "var \(field.name.camelCase.normalize): \(try generatePropertyType(for: field.type))"
             ]
             .compactMap { $0 }
         }
@@ -113,7 +120,7 @@ extension GraphQLCodegen {
         
         code.append("enum CodingKeys: CodingKey {")
         code.append(contentsOf: fields.map {
-            "case \($0.name.camelCase)"
+            "case \($0.name.camelCase.normalize) = \"\($0.name)\""
         }.indent(by: 4))
         code.append("}")
         

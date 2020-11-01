@@ -1,5 +1,15 @@
 import Foundation
 
+/*
+ Coder is responsible for generating an intermediate type that
+ generated code uses to decode the response.
+ 
+ We first decode the key that references a result and use the type
+ engraved in the alias to further decode the result. The result is
+ saved into a HashMap structure that groups fields with the same type
+ and extract a dictionary of results from it.
+ */
+
 extension GraphQLCodegen {
     /// Generates a struct that is used as an intermediate decoder and encoder in generated code.
     func generateEncodableStruct(

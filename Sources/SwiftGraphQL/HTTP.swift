@@ -1,39 +1,30 @@
 import Foundation
 
-//struct GQLRequestBody: Encodable {
-//    let query: String
-//    let variables: [String: Data]
-//}
+/*
+ SwiftGraphQL has no client as it needs no state. Developers
+ should take care of caching and other implementation themselves.
+ 
+ The following code defines a SwiftGraphQL namespace and exposes functions
+ that developers can use to execute queries against their server.
+ */
 
-/* Client */
-
-
-public struct GraphQLClient {
-    private let endpoint: URL
-    
-    // MARK: - Initializers
-    
-    public init(endpoint: URL) {
-        self.endpoint = endpoint
-    }
-    
-    public typealias Response<Type, TypeLock> = Result<GraphQLResult<Type, TypeLock>, NetworkError>
-    
-    public enum NetworkError: Error {
-        case network(Error)
-        case badCode
-    }
-    
-    // MARK: - Methods
+public struct SwiftGraphQL {
+    // MARK: - Public Methods
     
     /// Sends a query request to the server.
     public func send<Type, RootQuery>(
-        selection: Selection<Type, RootQuery>,
-        completionHandler: @escaping (Response<Type, RootQuery>) -> Void
+        _ selection: Selection<Type, RootQuery>,
+        to endpoint: String,
+        with headers: HttpHeaders = [:],
+        method: HttpMethod = .post,
+        onComplete completionHandler: @escaping (Response<Type, RootQuery>) -> Void
     ) -> Void where RootQuery: GraphQLRootQuery & Decodable {
         perform(
-            operation: .query,
             selection: selection,
+            operation: .query,
+            endpoint: endpoint,
+            method: method,
+            headers: headers,
             completionHandler: completionHandler
         )
     }
@@ -41,29 +32,67 @@ public struct GraphQLClient {
     /// Sends a mutation request to the server.
     public func send<Type, RootMutation>(
         selection: Selection<Type, RootMutation>,
-        completionHandler: @escaping (Response<Type, RootMutation>) -> Void
+        to endpoint: String,
+        with headers: HttpHeaders = [:],
+        method: HttpMethod = .post,
+        onComplete completionHandler: @escaping (Response<Type, RootMutation>) -> Void
     ) -> Void where RootMutation: GraphQLRootMutation & Decodable {
         perform(
-            operation: .mutation,
             selection: selection,
+            operation: .mutation,
+            endpoint: endpoint,
+            method: method,
+            headers: headers,
             completionHandler: completionHandler
         )
     }
     
-    /* Internals */
+    /// Represents an error of the actual request.
+    public enum HttpError: Error {
+        case badURL
+        case timeout
+        case network(Error)
+        case badpayload(Error)
+        case badstatus
+    }
+    
+    public enum HttpMethod: String {
+        case get = "GET"
+        case post = "POST"
+    }
+    
+    public typealias Response<Type, TypeLock> = Result<GraphQLResult<Type, TypeLock>, HttpError>
+    
+    public typealias HttpHeaders = [String: String]
+    
+    // MARK: - Private helpers
     
     private func perform<Type, TypeLock>(
-        operation: GraphQLOperationType,
         selection: Selection<Type, TypeLock>,
-        completionHandler: @escaping (Response<Type, TypeLock>
-    ) -> Void) -> Void where TypeLock: Decodable {
-        /* Compose a request. */
-        var request = URLRequest(url: endpoint)
+        operation: GraphQLOperationType,
+        endpoint: String,
+        method: HttpMethod,
+        headers: HttpHeaders,
+        completionHandler: @escaping (Response<Type, TypeLock>) -> Void
+    ) -> Void where TypeLock: Decodable {
+        
+        // Construct a URL from string.
+        guard let url = URL(string: endpoint) else {
+            return completionHandler(.failure(.badURL))
+        }
+        
+        // Construct a request.
+        var request = URLRequest(url: url)
+        
+        for header in headers {
+            request.setValue(header.value, forHTTPHeaderField: header.key)
+        }
         
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpMethod = "POST"
+        request.httpMethod = method.rawValue
         
-        /* Compose body */
+        
+        // Compose a query.
         let query = selection.selection.serialize(for: operation)
         var variables = [String: NSObject]()
         
@@ -71,7 +100,6 @@ public struct GraphQLClient {
             variables[argument.hash] = argument.value
         }
         
-        /* Finish the encoding of the query. */
         let body: Any = [
             "query": query,
             "variables": variables
@@ -83,27 +111,29 @@ public struct GraphQLClient {
         )
         request.httpBody = httpBody
         
-        
-        /* Parse the data and return the result. */
+        // Create a completion handler.
         func onComplete(data: Data?, response: URLResponse?, error: Error?) -> Void {
-            /* Check for errors. */
+            
+            /* Process the response. */
+            // Check for HTTP errors.
             if let error = error {
                 return completionHandler(.failure(.network(error)))
             }
             
-//            guard let httpResponse = response as? HTTPURLResponse,
-//                (200...299).contains(httpResponse.statusCode) else {
-//                return completionHandler(.failure(.badCode))
-//            }
+            guard let httpResponse = response as? HTTPURLResponse,
+                (200...299).contains(httpResponse.statusCode) else {
+                return completionHandler(.failure(.badstatus))
+            }
             
-            /* Serialize received JSON. */
-            if let data = data {
-                let result = try! GraphQLResult(data, with: selection)
+            // Try to serialize the response.
+            if let data = data, let result = try? GraphQLResult(data, with: selection) {
                 return completionHandler(.success(result))
             }
+            
+            
         }
         
-        /* Kick off the request. */
+        // Construct a session.
         URLSession.shared.dataTask(with: request, completionHandler: onComplete).resume()
     }
 }

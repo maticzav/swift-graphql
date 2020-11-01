@@ -42,6 +42,15 @@ public enum GraphQLField {
         }
     }
     
+    /*
+     We calculate alias using a hash value of the argument. Firstly,
+     we have to define a query variable that we use in the query document and
+     reference in variables. Secondly, we have to create a variable reference.
+     
+     `alias` and `arguments` properties are internal utility functions that
+     let the network function collect all the queries in the document tree.
+     */
+    
     /// Returns the alias of the value based on arguments.
     ///
     /// - Note: Fragments don't have alias.

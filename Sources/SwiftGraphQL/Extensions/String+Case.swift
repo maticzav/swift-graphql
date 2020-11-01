@@ -1,5 +1,10 @@
 import Foundation
 
+/*
+ The following algorithm is inspired by JSONEncoder's snake casing
+ internal function. Its main goal is to cleverly convert GraphQL field- and type-
+ names to a Swift format.
+ */
 
 extension String {
     

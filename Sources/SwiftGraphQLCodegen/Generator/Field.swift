@@ -1,5 +1,14 @@
 import Foundation
 
+/*
+ Each field decoder contains a selection part that is responsible for
+ telling the Selection about its existance and a decoder part that
+ checks for the result and returns it as a function value.
+ 
+ The last part of the function is a mock value which we use as a placeholder
+ of the return value on the first run when we collect the selection.
+ */
+
 extension GraphQLCodegen {
     // MARK: - Field Selection
     

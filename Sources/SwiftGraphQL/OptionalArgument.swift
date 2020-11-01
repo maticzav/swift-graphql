@@ -1,6 +1,15 @@
 import Foundation
+import Enumeration
 
-// Used to tell whether an argument is of type in argument encoding.
+/*
+ OptionalArgument is a utility enumerator used to denote a possibly
+ absent value.
+ 
+ To support not-encoding an absent value, I have created a protocol
+ that we use in document parsing to figure out whether we
+ should include or skip the argument.
+ */
+
 protocol OptionalArgumentProtocol {
     /// Tells whether an optional argument has a value.
     var hasValue: Bool { get }
@@ -62,17 +71,19 @@ extension OptionalArgument {
 
 // MARK: - Protocols
 
-// Conforms to Codec spec.
+/* We need the following protocols to conform to the */
+
 extension OptionalArgument: Equatable where Type: Equatable {}
 extension OptionalArgument: Hashable where Type: Hashable {}
-
 extension OptionalArgument: Encodable where Type: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         
         switch self {
         case .absent:
-            ()
+            throw EncodingError
+                
+            )
         case .null:
             try container.encodeNil()
         case .present(let value):

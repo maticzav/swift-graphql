@@ -1,5 +1,11 @@
 import Foundation
 
+/*
+ We use the common introspection Query to construct the library.
+ You can find remaining utility types that represent the result
+ of the schema introspection inside AST folder.
+ */
+
 public enum GraphQL {
     public static let introspectionQuery: String = """
         query IntrospectionQuery($includeDeprecated: Boolean = true) {
