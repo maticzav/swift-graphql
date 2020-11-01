@@ -21,7 +21,7 @@ The library is centered around three core principles:
 - 🦉 Use Swift in favour of GraphQL.
 - 🌳 Your application model should be independant from your schema.
 
-Here's a short preview of the SwiftGraphQL code.
+Here's a short preview of the SwiftGraphQL code
 
 ```swift
 import SwiftGraphQL
@@ -50,7 +50,7 @@ let query = Selection<[Human], Operations.Query> {
 // Perform the query.
 SG.send(query, to: "http://swift-graphql.heroku.com") { result in
     if let data = try? result.get() {
-        print(data)
+        print(data) // [Human]
     }
 }
 ```
