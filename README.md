@@ -4,14 +4,6 @@
 
 > A GraphQL client that lets you forget about GraphQL.
 
-
-## Why?
-
-__Why bother?__ Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link from backend to your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
-
-__Why another GraphQL library?__ There was no other library that would let me fetch my schema, generate the Swift code, build queries in Swift, and easily adapt query results to my model. I was considering using Apollo iOS for my projects, but I couldn't get to the same level of type-safety and their code generation algorithm has some pitfalls.
-
-
 ## Overview
 
 SwiftGraphQL is a Swift code generator and a GraphQL client. It lets you create queries using Swift, and guarantees that every query you create is valid. Using XCode autocompletion features, you can effortlessly explore the API while creating your Swift application.
@@ -56,8 +48,6 @@ SG.send(query, to: "http://swift-graphql.heroku.com") { result in
 }
 ```
 
-What do you think? 😏
-
 ## Features
 
 - ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
@@ -65,6 +55,14 @@ What do you think? 😏
 - 🏖 **Time Saving:** I've built it so you don't have to waste your precous time.
 - 🏔 **High Level:** You don't have to worry about naming collisions, variables, _anything_. Just Swift.
 
+
+## Why?
+
+__Why bother?__ Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link from backend to your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
+
+__Why another GraphQL library?__ There was no other library that would let me fetch my schema, generate the Swift code, build queries in Swift, and easily adapt query results to my model. I was considering using Apollo iOS for my projects, but I couldn't get to the same level of type-safety and their code generation algorithm has some pitfalls.
+
+> This library has been heavily inspired by Dillon Kearns [elm-graphql](http://github.com/dillonkearns/elm-graphql).
 
 ---
 
@@ -238,7 +236,7 @@ SG.send(query, to: "http://localhost:4000") { result in
 }
 ```
 
-> SwiftGraphQL intentionally doesn't implement any caching machanism. This is only a query library and it does that very well. You should implement caching functionality yourself, but you probably don't need it in most cases.
+> SwiftGraphQL intentionally doesn't implement any caching mechanism. This is only a query library and it does that very well. You should implement caching functionality yourself, but you probably don't need it in most cases.
 
 ### `Selection<Type, Scope>`
 
@@ -470,7 +468,7 @@ Feel free to create a pull request, but be respectful of my time. Document your 
 ## Thank you
 
 I want to dedicate this last secion to everyone who helped me along the way. 
-- First, I would like to thank Dillon Kearns, the author of elm-graphql, who inspired me to write the library, and helped me understand the core principles behind his Elm version.
+- First, I would like to thank Dillon Kearns, the author of [elm-graphql](http://github.com/dillonkearns/elm-graphql), who inspired me to write the library, and helped me understand the core principles behind his Elm version.
 - I would like to thank Peter Albert for giving me a chance to build this library, having faith that it's possible, and all the conversations that helped me push through the difficult parts of it.
 - Lastly, I'd like to thank Martijn Walraven and Apollo iOS team, who helped me understand how Apollo GraphQL works, and for the inspiration about the parts of the code I wasn't sure about.
 
