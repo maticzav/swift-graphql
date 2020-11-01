@@ -4,15 +4,22 @@
 
 > A GraphQL client that lets you forget about GraphQL.
 
+## Features
+
+- ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
+- 🦅 **Swift-First:** It lets you use Swift constructs in favour of GraphQL language.
+- 🏖 **Time Saving:** I've built it so you don't have to waste your precous time.
+- 🏔 **High Level:** You don't have to worry about naming collisions, variables, _anything_. Just Swift.
+
 ## Overview
 
-SwiftGraphQL is a Swift code generator and a GraphQL client. It lets you create queries using Swift, and guarantees that every query you create is valid. Using XCode autocompletion features, you can effortlessly explore the API while creating your Swift application.
+SwiftGraphQL is a Swift code generator. It lets you create queries using Swift, and guarantees that every query you create is valid.
 
-I have create this library around three core principles:
+The library is centered around three core principles:
     
-1. If your project compiles, your queries are valid;
-1. Use Swift language constructs in favour of GraphQL for a better developer experience (e.g. we should use variables as fragments, functions as parameters, ...)
-1. Your application model should be independant from your schema.
+- 🚀 If your project compiles, your queries work.
+- 🦉 Use Swift in favour of GraphQL.
+- 🌳 Your application model should be independant from your schema.
 
 Here's a short preview of the SwiftGraphQL code.
 
@@ -48,19 +55,11 @@ SG.send(query, to: "http://swift-graphql.heroku.com") { result in
 }
 ```
 
-## Features
-
-- ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
-- 🦅 **Swift-First:** It lets you use Swift constructs in favour of GraphQL language.
-- 🏖 **Time Saving:** I've built it so you don't have to waste your precous time.
-- 🏔 **High Level:** You don't have to worry about naming collisions, variables, _anything_. Just Swift.
-
-
 ## Why?
 
-__Why bother?__ Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link from backend to your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
+__Why bother?__ Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link between backend and your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
 
-__Why another GraphQL library?__ There was no other library that would let me fetch my schema, generate the Swift code, build queries in Swift, and easily adapt query results to my model. I was considering using Apollo iOS for my projects, but I couldn't get to the same level of type-safety and their code generation algorithm has some pitfalls.
+__Why another GraphQL library?__ There was no other library that would let me fetch my schema, generate the Swift code, build queries in Swift, and easily adapt query results to my model. I was considering using Apollo iOS for my projects, but I couldn't get to the same level of type-safety as with SwiftGraphQL.
 
 > This library has been heavily inspired by Dillon Kearns [elm-graphql](http://github.com/dillonkearns/elm-graphql).
 
@@ -140,9 +139,9 @@ We'll create a code generation build step using SwiftPackage executable and expl
 First, we need to somehow generate the code specific to your GraphQL schema. We can do that by creating SwiftPackage executable.
 
 1. Open your terminal and navigate to your project root.
-1. Create a folder named `Codegen` next to your application folder and `cd` inside.
-1. Run `swift package init --type executable` to initialize your executable.
-1. Run `open Package.swift` to open XCode editor and add SwiftGraphQL to your dependencies. (I also recommend using Files by John Sundell as a file navigator, but you can use a library of your choice.)
+2. Create a folder named `Codegen` next to your application folder and `cd` inside.
+3. Run `swift package init --type executable` to initialize your executable.
+4. Run `open Package.swift` to open XCode editor and add SwiftGraphQL to your dependencies. (I also recommend using Files by John Sundell as a file navigator, but you can use a library of your choice.)
 
 ```swift
 // swift-tools-version:5.3
@@ -458,12 +457,19 @@ I ended up writing lots of boilerplate just to get it working, and would have to
 
 ## Roadmap and Contributing
 
-> 🚧 under construction
+This library is feature complete for our use case. We are actively using it in our production applications and plan to expand it as our needs change. We'll also publish performance updates and bug fixes that we find.
 
-This library is more or less finished. We are actively using it in our production applications.
+I plan to actively maintain it for many upcoming years. Swift seems like a fantastic language and I've only started learning it.
 
-Feel free to create a pull request, but be respectful of my time. Document your contributions well, and clearly outline the benefits of the change.
+Feel free to create a pull request with future improvements. Please, document your contributions well, and clearly outline the benefits of the change. It's also very helpful to include the ideas behind changes.
 
+Here's a rough collection of ideas we might tackle next:
+
+- Networking Layer
+- Subscriptions
+- Caching
+
+> PS.: PRs for the above features will be reviewed a lot more quickly!
 
 ## Thank you
 
