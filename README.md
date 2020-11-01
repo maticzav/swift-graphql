@@ -49,7 +49,7 @@ let query = Selection<[Human], Operations.Query> {
 }
 
 // Perform the query.
-client.send(selection: query) { result in
+SG.send(query, to: "http://swift-graphql.heroku.com") { result in
     if let data = try? result.get() {
         print(data)
     }
@@ -222,16 +222,23 @@ xcrun -sdk macosx swift run
 
 ## Documentation
 
-### `Client`
+### `SwiftGraphQL`
 
 - `SwiftGraphQL`
 
-Client lets you execute your queries against your server.
+SwiftGraphQL exposes only one method - `send` - that lets you send your query to your server. It uses URLRequest internally and shared URLSession to perform the request, and returns Swift's Request type with the data.
 
+You can pass in the `headers` property to implement authorization mechanism.
 
 ```swift
-let client = GraphQLClient(endpoint: URL(string: "http://localhost:4000")!)
+SG.send(query, to: "http://localhost:4000") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
+}
 ```
+
+> SwiftGraphQL intentionally doesn't implement any caching machanism. This is only a query library and it does that very well. You should implement caching functionality yourself, but you probably don't need it in most cases.
 
 ### `Selection<Type, Scope>`
 

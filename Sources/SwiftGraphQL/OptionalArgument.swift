@@ -1,5 +1,4 @@
 import Foundation
-import Enumeration
 
 /*
  OptionalArgument is a utility enumerator used to denote a possibly
@@ -81,8 +80,12 @@ extension OptionalArgument: Encodable where Type: Encodable {
         
         switch self {
         case .absent:
-            throw EncodingError
-                
+            throw EncodingError.invalidValue(
+                self,
+                EncodingError.Context(
+                    codingPath: encoder.codingPath,
+                    debugDescription: "Cannot encode absent value."
+                )
             )
         case .null:
             try container.encodeNil()

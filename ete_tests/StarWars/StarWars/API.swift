@@ -19,6 +19,7 @@ extension Operations {
         let droids: [String: [Objects.Droid]]
         let characters: [String: [Interfaces.Character]]
         let greeting: [String: String]
+        let whoami: [String: String]
         let time: [String: DateTime]
     }
 }
@@ -65,6 +66,10 @@ init(from decoder: Decoder) throws {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
+            case "whoami":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
             case "time":
                 if let value = try container.decode(DateTime?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
@@ -86,6 +91,7 @@ init(from decoder: Decoder) throws {
     self.droids = map["droids"]
     self.characters = map["characters"]
     self.greeting = map["greeting"]
+    self.whoami = map["whoami"]
     self.time = map["time"]
 }
 
@@ -215,6 +221,21 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         if let data = self.response {
             return data.greeting[field.alias!]!
+        }
+        return String.mockValue
+    }
+    func whoami() -> String {
+        /* Selection */
+        let field = GraphQLField.leaf(
+            name: "whoami",
+            arguments: [
+            ]
+        )
+        self.select(field)
+    
+        /* Decoder */
+        if let data = self.response {
+            return data.whoami[field.alias!]!
         }
         return String.mockValue
     }
@@ -881,9 +902,9 @@ enum InputObjects {
         }
     
         /* CodingKeys */
-        enum CodingKeys: CodingKey {
-            case language
-            case name
+        enum CodingKeys: String, CodingKey {
+            case language = "language"
+            case name = "name"
         }
     }
 
@@ -899,8 +920,8 @@ enum InputObjects {
         }
     
         /* CodingKeys */
-        enum CodingKeys: CodingKey {
-            case prefix
+        enum CodingKeys: String, CodingKey {
+            case prefix = "prefix"
         }
     }
 }

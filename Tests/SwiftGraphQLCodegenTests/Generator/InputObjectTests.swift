@@ -25,7 +25,7 @@ final class InputObjectTests: XCTestCase {
             }
 
             /* CodingKeys */
-            enum CodingKeys: CodingKey {
+            enum CodingKeys: String, CodingKey {
             }
         }
         """
@@ -66,8 +66,8 @@ final class InputObjectTests: XCTestCase {
             }
 
             /* CodingKeys */
-            enum CodingKeys: CodingKey {
-                case id
+            enum CodingKeys: String, CodingKey {
+                case id = "id"
             }
         }
         """
@@ -89,7 +89,7 @@ final class InputObjectTests: XCTestCase {
             inputFields: [
                 /* Scalar, Docs */
                 GraphQL.InputValue(
-                    name: "id",
+                    name: "input_value",
                     description: "Field description.",
                     type: .named(.scalar("ID"))
                 ),
@@ -100,18 +100,18 @@ final class InputObjectTests: XCTestCase {
         let expected = """
         struct InputObjectTest: Encodable, Hashable {
             /// Field description.
-            var id: OptionalArgument<String> = .absent
+            var inputValue: OptionalArgument<String> = .absent
 
             /* Encoder */
             func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
             
-                if id.hasValue { try container.encode(id, forKey: .id) }
+                if inputValue.hasValue { try container.encode(inputValue, forKey: .inputValue) }
             }
 
             /* CodingKeys */
-            enum CodingKeys: CodingKey {
-                case id
+            enum CodingKeys: String, CodingKey {
+                case inputValue = "input_value"
             }
         }
         """
@@ -152,8 +152,8 @@ final class InputObjectTests: XCTestCase {
             }
 
             /* CodingKeys */
-            enum CodingKeys: CodingKey {
-                case id
+            enum CodingKeys: String, CodingKey {
+                case id = "id"
             }
         }
         """
@@ -194,8 +194,8 @@ final class InputObjectTests: XCTestCase {
             }
 
             /* CodingKeys */
-            enum CodingKeys: CodingKey {
-                case id
+            enum CodingKeys: String, CodingKey {
+                case id = "id"
             }
         }
         """
@@ -236,8 +236,8 @@ final class InputObjectTests: XCTestCase {
             }
 
             /* CodingKeys */
-            enum CodingKeys: CodingKey {
-                case id
+            enum CodingKeys: String, CodingKey {
+                case id = "id"
             }
         }
         """

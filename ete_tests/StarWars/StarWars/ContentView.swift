@@ -57,6 +57,7 @@ let characterUnion = Selection<String, Unions.CharacterUnion> {
 }
 
 struct Model {
+    let whoami: String
     let time: DateTime?
     let greeting: String
     let character: String
@@ -70,6 +71,7 @@ let query = Selection<Model, Operations.Query> {
     let greeting = "\(english); \(slovene)"
     
     return Model(
+        whoami: $0.whoami(),
         time: $0.time(),
         greeting: greeting,
         character: $0.character(id: "3000", characterUnion.nullable) ?? "No character",
@@ -80,11 +82,10 @@ let query = Selection<Model, Operations.Query> {
 /* View */
 
 class AppState: ObservableObject {
-    let client = GraphQLClient(endpoint: URL(string: "http://localhost:4000")!)
-    
     // MARK: - State
     
     @Published private(set) var model = Model(
+        whoami: "Who knows!?",
         time: nil,
         greeting: "Not greeted yet.",
         character: "NONE",
@@ -95,7 +96,11 @@ class AppState: ObservableObject {
     
     func fetch() {
         print("FETCHING")
-        client.send(selection: query) { result in
+        SG.send(
+            query,
+            to: "http://localhost:4000",
+            headers: ["Authorization": "Bearer Matic"]
+        ) { result in
             do {
                 let data = try result.get()
                 print("DATA")
@@ -135,6 +140,13 @@ struct ContentView: View {
                     Spacer()
                     Text("\(state.model.time?.raw ?? 0)")
                         .font(.headline)
+                }
+                .padding()
+                /* Authorization */
+                HStack {
+                    Text(state.model.whoami)
+                        .font(.headline)
+                    Spacer()
                 }
                 .padding()
                 /* Characters */

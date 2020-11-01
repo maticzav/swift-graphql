@@ -118,7 +118,7 @@ extension GraphQLCodegen {
         /* Code */
         var code = [String]()
         
-        code.append("enum CodingKeys: CodingKey {")
+        code.append("enum CodingKeys: String, CodingKey {")
         code.append(contentsOf: fields.map {
             "case \($0.name.camelCase.normalize) = \"\($0.name)\""
         }.indent(by: 4))
