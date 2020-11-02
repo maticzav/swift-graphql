@@ -18,8 +18,8 @@ SwiftGraphQL is a Swift code generator. It lets you create queries using Swift, 
 The library is centered around three core principles:
     
 - 🚀 If your project compiles, your queries work.
-- 🦉 Use Swift in favour of GraphQL.
-- 🌳 Your application model should be independant from your schema.
+- 🦉 Use Swift in favour of GraphQL wherever possible.
+- 🌳 Your application model should be independent of your schema.
 
 Here's a short preview of the SwiftGraphQL code
 
