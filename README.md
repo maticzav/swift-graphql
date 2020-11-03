@@ -55,6 +55,22 @@ SG.send(query, to: "http://swift-graphql.heroku.com") { result in
 }
 ```
 
+## Installation
+
+To install it using Swift Package Manager, open the following menu item in Xcode:
+
+File > Swift Packages > Add Package Dependency...
+
+In the Choose Package Repository prompt add this url:
+
+```
+https://github.com/maticzav/swift-graphql/
+```
+
+Then press Next and complete the remaining steps.
+
+To learn more about Swift Package Manager, check out the [official documentation](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
+
 ## Why?
 
 __Why bother?__ Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link between backend and your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
