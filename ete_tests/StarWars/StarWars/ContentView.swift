@@ -74,8 +74,8 @@ let query = Selection<Model, Operations.Query> {
         whoami: $0.whoami(),
         time: $0.time(),
         greeting: greeting,
-        character: $0.character(id: "3000", characterUnion.nullable) ?? "No character",
-        characters: $0.characters(character.list)
+        character: $0.character(id: "1000", characterUnion.nonNullOrFail),
+        characters: $0.characters(Selection.list(character))
     )
 }
 

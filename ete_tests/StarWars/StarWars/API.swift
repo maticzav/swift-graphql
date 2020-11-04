@@ -589,74 +589,74 @@ extension Interfaces {
 }
 
 extension Interfaces.Character: Decodable {
-
-/* Decoder */
-init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-        if codingKey.isTypenameKey { continue }
-
-        let alias = codingKey.stringValue
-        let field = GraphQLField.getFieldNameFromAlias(alias)
-
-        switch field {
-            case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "name":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "primaryFunction":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "homePlanet":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "infoUrl":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            default:
-                throw DecodingError.dataCorrupted(
-                    DecodingError.Context(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "Unknown key \(field)."
+    
+    /* Decoder */
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+    
+    
+        var map = HashMap()
+        for codingKey in container.allKeys {
+            if codingKey.isTypenameKey { continue }
+    
+            let alias = codingKey.stringValue
+            let field = GraphQLField.getFieldNameFromAlias(alias)
+    
+            switch field {
+                case "id":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "name":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "primaryFunction":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "appearsIn":
+                    if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "homePlanet":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "infoUrl":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                default:
+                    throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: decoder.codingPath,
+                            debugDescription: "Unknown key \(field)."
+                        )
                     )
-                )
-        }
-    }
-
-    self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
-    self.id = map["id"]
-    self.name = map["name"]
-    self.primaryFunction = map["primaryFunction"]
-    self.appearsIn = map["appearsIn"]
-    self.homePlanet = map["homePlanet"]
-    self.infoUrl = map["infoUrl"]
-}
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
+            }
         }
     
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue: Int) { nil }
+        self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
+        self.id = map["id"]
+        self.name = map["name"]
+        self.primaryFunction = map["primaryFunction"]
+        self.appearsIn = map["appearsIn"]
+        self.homePlanet = map["homePlanet"]
+        self.infoUrl = map["infoUrl"]
     }
+    
+        private struct DynamicCodingKeys: CodingKey {
+            // Use for string-keyed dictionary
+            var stringValue: String
+            init?(stringValue: String) {
+                self.stringValue = stringValue
+            }
+        
+            // Use for integer-keyed dictionary
+            var intValue: Int?
+            init?(intValue: Int) { nil }
+        }
 }
 
 extension SelectionSet where TypeLock == Interfaces.Character {

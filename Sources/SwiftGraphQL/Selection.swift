@@ -141,18 +141,58 @@ extension Selection where TypeLock: Decodable {
         }
     }
     
-    // Lets you leave the selection empty.
-    public var empty: Selection<String, TypeLock> {
-        Selection<String, TypeLock> { selection in
+    /// Lets you decode nullable values into non-null ones.
+    public var nonNullOrFail: Selection<Type, TypeLock?> {
+        Selection<Type, TypeLock?> { selection in
+            /* Selection */
+            self.selection.forEach(selection.select)
+            
+            /* Decoder */
+            if let data = selection.response {
+                return self.decode(data: data!)
+            }
+            return self.mock()
+        }
+    }
+}
+
+extension SelectionSet {
+    /// Lets you leave the selection empty.
+    public var empty: Selection<(), TypeLock> {
+        Selection<(), TypeLock> { selection in
             /* Selection */
             let field = GraphQLField.leaf(name: "__typename", arguments: [])
             selection.select(field)
             
             /* Decoder */
-            if let data = selection.response {
-                return (data as! [String: Any])["__typename"] as! String
-            }
-            return "__typename"
+            return ()
         }
+    }
+}
+
+/*
+ Helper functions that let you make changes upfront.
+ */
+
+extension Selection where TypeLock: Decodable {
+    /// Lets you provide non-list selection for list field.
+    public static func list<NonListType, NonListTypeLock>(
+        _ selection: Selection<NonListType, NonListTypeLock>
+    ) -> Selection<Type, TypeLock> where Type == [NonListType], TypeLock == [NonListTypeLock] {
+        selection.list
+    }
+    
+    /// Lets you provide non-nullable selection for nullable field.
+    public static func nullable<NonNullType, NonNullTypeLock>(
+        _ selection: Selection<NonNullType, NonNullTypeLock>
+    ) -> Selection<Type, TypeLock> where Type == Optional<NonNullType>, TypeLock == Optional<NonNullTypeLock> {
+        selection.nullable
+    }
+    
+    /// Lets you provide non-nullable selection for nullable field and require that it has a value.
+    public static func nonNullOrFail<NonNullTypeLock>(
+        _ selection: Selection<Type, NonNullTypeLock>
+    ) -> Selection<Type, TypeLock> where TypeLock == Optional<NonNullTypeLock> {
+        selection.nonNullOrFail
     }
 }

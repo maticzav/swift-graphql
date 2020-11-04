@@ -261,7 +261,40 @@ Selection lets you select fields that you want to fetch from the query on a part
 
 SwiftGraphQL has generated phantom types for your operations, objects, interfaces and unions. You can find them by typing `Unions.`/`Interfaces.`/`Objects.`/`Operations.` followed by a name from your GraphQL schema. You plug those into the `Scope` parameter.
 
-The other parameter `Type` is what your constructor should return. 
+The other parameter `Type` is what your constructor should return.
+
+
+##### nullable, list, non-nullable fields
+
+Selection packs a collection of utility functions that let you select nullable and list fields using your existing selecitons.
+Each selection comes with three calculated properties that let you do that:
+
+- `list` - to query lists
+- `nullable` - to query nullable fields
+- `nonNullOrFail` - to query nullable fields that should be there
+
+
+```swift
+// Create a non-nullable selection.
+let human = Selection<Human, Objects.Human> {
+    Human(id: $0.id(), name: $0.name())
+}
+
+// Use it with nullable and list fields.
+let query = Selection<Void, Operations.Query> {
+    let list = $0.humans(human.list)
+    let nullable = $0.human(id: "100", human.nullable)
+}
+```
+
+You can achieve the same effect using `Selection` static functions `.list`, `.nullable`, and `.nonNullOrFail`.
+
+```swift
+// Use it with nullable and list fields.
+let query = Selection<Void, Operations.Query> {
+    let list = $0.humans(Selection.list(human))
+}
+```
 
 > ⚠️ Don't make any nested calls to the API. Use the first half of the initializer to fetch all the data and return the calculated result. Just don't make nested requests.
 
