@@ -12,40 +12,19 @@ public struct SwiftGraphQL {
     // MARK: - Public Methods
     
     /// Sends a query request to the server.
-    public static func send<Type, RootQuery>(
-        _ selection: Selection<Type, RootQuery>,
+    public static func send<Type, TypeLock>(
+        _ selection: Selection<Type, TypeLock>,
         /// Server endpoint URL.
         to endpoint: String,
         /// A dictionary of key-value header pairs.
         headers: HttpHeaders = [:],
         /// Method to use. (Default to POST).
         method: HttpMethod = .post,
-        onComplete completionHandler: @escaping (Response<Type, RootQuery>) -> Void
-    ) -> Void where RootQuery: GraphQLRootQuery & Decodable {
+        onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
+    ) -> Void where TypeLock: GraphQLOperation & Decodable {
         perform(
             selection: selection,
-            operation: .query,
-            endpoint: endpoint,
-            method: method,
-            headers: headers,
-            completionHandler: completionHandler
-        )
-    }
-    
-    /// Sends a mutation request to the server.
-    public static func send<Type, RootMutation>(
-        _ selection: Selection<Type, RootMutation>,
-        /// Server endpoint URL.
-        to endpoint: String,
-        /// A dictionary of key-value header pairs.
-        headers: HttpHeaders = [:],
-        /// Method to use. (Default to POST).
-        method: HttpMethod = .post,
-        onComplete completionHandler: @escaping (Response<Type, RootMutation>) -> Void
-    ) -> Void where RootMutation: GraphQLRootMutation & Decodable {
-        perform(
-            selection: selection,
-            operation: .mutation,
+            operation: TypeLock.operation,
             endpoint: endpoint,
             method: method,
             headers: headers,

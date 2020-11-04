@@ -241,7 +241,7 @@ xcrun -sdk macosx swift run
 
 SwiftGraphQL exposes only one method - `send` - that lets you send your query to your server. It uses URLRequest internally and shared URLSession to perform the request, and returns Swift's Request type with the data.
 
-You can pass in the `headers` property to implement authorization mechanism.
+You can pass in the dictionary of  `headers` to implement authorization mechanism.
 
 ```swift
 SG.send(query, to: "http://localhost:4000") { result in

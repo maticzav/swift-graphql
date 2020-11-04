@@ -5,10 +5,8 @@ extension GraphQLCodegen {
     func generateOperation(
         _ identifier: String,
         for type: GraphQL.ObjectType,
-        operation: Operation? = nil
+        operation: Operation
     ) throws -> [String] {
-        let protocols = getOperationProtocols(for: operation)
-        
         /* Code */
         var code = [String]()
         
@@ -21,17 +19,24 @@ extension GraphQLCodegen {
             try generateEncodableStruct(
                 identifier,
                 fields: type.fields,
-                protocols: protocols
+                protocols: ["Encodable"]
             ).indent(by: 4)
         )
         code.append("}")
+        code.append("")
+        
+        /* Operation*/
+        code.append("extension Operations.\(identifier): GraphQLOperation {")
+        code.append("    static var operation: GraphQLOperationType { \(operation.rawValue) }")
+        code.append("}")
+        code.append("")
         
         /* Decoder */
         code.append("extension Operations.\(identifier): Decodable {")
-        code.append(contentsOf: try generateDecodableExtension(fields: type.fields))
+        code.append(contentsOf: try generateDecodableExtension(fields: type.fields).indent(by: 4))
         code.append("}")
-        
         code.append("")
+        
         /* Fields */
         code.append("extension SelectionSet where TypeLock == Operations.\(identifier) {")
         code.append(contentsOf: try type.fields.flatMap { try generateField($0) }.indent(by: 4))
@@ -43,12 +48,7 @@ extension GraphQLCodegen {
     // MARK: - Private helpers
     
     enum Operation: String {
-        case query = "GraphQLRootQuery"
-        case mutation = "GraphQLRootMutation"
-    }
-    
-    /// Generates protocol conformance strings for the object.
-    private func getOperationProtocols(for operation: Operation?) -> [String] {
-        [operation?.rawValue, "Encodable"].compactMap { $0 }
+        case query = ".query"
+        case mutation = ".mutation"
     }
 }

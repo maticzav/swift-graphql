@@ -4,10 +4,10 @@ import Foundation
  This file contains source code used for encoding and decoding selection.
  */
 
-public enum GraphQLOperationType: String, CaseIterable {
+public enum GraphQLOperationType: String, Codable, CaseIterable {
     case query = "query"
     case mutation = "mutation"
-    case subscription = "subscription"
+//    case subscription = "subscription"
 }
 
 extension Collection where Element == GraphQLField {
