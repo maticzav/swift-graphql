@@ -5,7 +5,8 @@ import Foundation
 public struct GraphQLResult<Type, TypeLock> {
     private let selection: Selection<Type, TypeLock>
     private let data: TypeLock?
-    let errors: [GraphQLError]?
+    
+    public let errors: [GraphQLError]?
 }
 
 extension GraphQLResult: Equatable where Type: Equatable, TypeLock: Decodable {
