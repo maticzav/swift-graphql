@@ -10,11 +10,12 @@ final class ParserTests: XCTestCase {
         }
         """.data(using: .utf8)!
         let selection = Selection<String, String> {
-            if let data = $0.response {
+            switch $0.response {
+            case .fetched(let data):
                 return data
+            case .fetching:
+                return "wrong"
             }
-            
-            return "wrong"
         }
         
         let result = try GraphQLResult(data, with: selection)
@@ -40,11 +41,12 @@ final class ParserTests: XCTestCase {
         }
         """.data(using: .utf8)!
         let selection = Selection<String, String> {
-            if let data = $0.response {
+            switch $0.response {
+            case .fetched(let data):
                 return data
+            case .fetching:
+                return "wrong"
             }
-            
-            return "wrong"
         }
         
         let result = try GraphQLResult(response, with: selection)
@@ -82,11 +84,12 @@ final class ParserTests: XCTestCase {
         """.data(using: .utf8)!
         
         let selection = Selection<String, String> {
-            if let data = $0.response {
+            switch $0.response {
+            case .fetched(let data):
                 return data
+            case .fetching:
+                return "wrong"
             }
-            
-            return "wrong"
         }
         
         /* Test */

@@ -14,23 +14,22 @@ import Foundation
  */
 
 public final class SelectionSet<Type, TypeLock> {
-    private(set) var fields = [GraphQLField]() // selected fields
-    private var data: TypeLock? // response data
+    
+    // Internal representation of selection.
+    private(set) var fields = [GraphQLField]()
+    
+    /// Publically accessible response data.
+    ///
+    /// - Note: This function should only be used by the generated code.
+    private(set) var response: Response = .fetching
+    
+    // MARK: - Initializers
     
     init() {}
     
     init(data: TypeLock) {
         /* This initializer is used to decode response into Swift data. */
-        self.data = data
-    }
-    
-    // MARK: - Accessors
-    
-    /// Lets generated code read the data.
-    ///
-    /// - Note: This function should only be used by the generated code.
-    public var response: TypeLock? {
-        data
+        self.response = .fetched(data)
     }
     
     // MARK: - Methods
@@ -47,6 +46,16 @@ public final class SelectionSet<Type, TypeLock> {
     /// - Note: This function should only be used by the generated code.
     public func select(_ fields: [GraphQLField]) {
         self.fields.append(contentsOf: fields)
+    }
+    
+    // MARK: - Response
+    
+    /*
+     Represents a response of the request.
+     */
+    enum Response {
+        case fetching
+        case fetched(TypeLock)
     }
 }
 
@@ -120,10 +129,12 @@ extension Selection where TypeLock: Decodable {
             self.selection.forEach(selection.select)
             
             /* Decoder */
-            if let data = selection.response {
+            switch selection.response {
+            case .fetched(let data):
                 return data.map { self.decode(data: $0) }
+            case .fetching:
+                return []
             }
-            return []
         }
     }
 
@@ -134,10 +145,12 @@ extension Selection where TypeLock: Decodable {
             self.selection.forEach(selection.select)
             
             /* Decoder */
-            if let data = selection.response {
+            switch selection.response {
+            case .fetched(let data):
                 return data.map { self.decode(data: $0) }
+            case .fetching:
+                return nil
             }
-            return nil
         }
     }
     
@@ -148,10 +161,12 @@ extension Selection where TypeLock: Decodable {
             self.selection.forEach(selection.select)
             
             /* Decoder */
-            if let data = selection.response {
+            switch selection.response {
+            case .fetched(let data):
                 return self.decode(data: data!)
+            case .fetching:
+                return self.mock()
             }
-            return self.mock()
         }
     }
 }
