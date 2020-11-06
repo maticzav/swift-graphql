@@ -14,25 +14,34 @@ extension GraphQLCodegen {
     
     /// Generates a SwiftGraphQL field.
     func generateField(_ field: GraphQL.Field) throws -> [String] {
-        let lines: [String?] = [
-            generateFieldDoc(for: field),
-            generateFieldDeprecationDoc(for: field),
-            "func \(try generateFnDefinition(for: field)) -> \(try generateReturnType(for: field.type)) {",
-            "    /* Selection */"
-        ]
-        + generateFieldSelection(for: field).indent(by: 4)
-        + [ "    self.select(field)",
+        var lines = [String]()
+        
+        // Documentation.
+        if let docs = generateFieldDoc(for: field) {
+            lines.append(docs)
+        }
+        if let deprecationDocs = generateFieldDeprecationDoc(for: field) {
+            lines.append(deprecationDocs)
+        }
+        
+        // Field method.
+        lines.append("func \(try generateFnDefinition(for: field)) -> \(try generateReturnType(for: field.type)) {")
+        lines.append("    /* Selection */")
+        lines.append(contentsOf: generateFieldSelection(for: field).indent(by: 4))
+        lines.append(contentsOf: [
+            "    self.select(field)",
             "",
             "    /* Decoder */",
-            "    if let data = self.response {",
+            "    switch self.response {",
+            "    case .fetched(let data):",
             "        return \(generateDecoder(for: field))",
+            "    case .fetching:",
+            "        return \(try generateMockData(for: field.type))",
             "    }",
-            "    return \(try generateMockData(for: field.type))",
             "}"
-        ]
+        ])
         
-        
-        return lines.compactMap { $0 }
+        return lines
     }
     
     // MARK: - Documentation

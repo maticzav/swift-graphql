@@ -99,6 +99,7 @@ type Query {
     id: ID!
   ): Human
   humans: [Human!]!
+  luke: Human
   time: Date!
   whoami: String!
 }

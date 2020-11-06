@@ -46,6 +46,13 @@ export const Query = objectType({
       resolve: (_, { id }, ctx) => ctx.data.getCharacter(id),
     })
 
+    /* Never Null Nulalble */
+    t.field('luke', {
+      type: 'Human',
+      nullable: true,
+      resolve: (_, {}, ctx) => ctx.data.getHuman('1000')!,
+    })
+
     /* Collections, Interfaces */
 
     t.list.field('humans', {

@@ -100,6 +100,7 @@ export interface NexusGenFieldTypes {
     greeting: string // String!
     human: NexusGenRootTypes['Human'] | null // Human
     humans: NexusGenRootTypes['Human'][] // [Human!]!
+    luke: NexusGenRootTypes['Human'] | null // Human
     time: NexusGenScalars['Date'] // Date!
     whoami: string // String!
   }
