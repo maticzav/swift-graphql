@@ -17,11 +17,8 @@ public final class SelectionSet<Type, TypeLock> {
     
     // Internal representation of selection.
     private(set) var fields = [GraphQLField]()
-    
-    /// Publically accessible response data.
-    ///
-    /// - Note: This function should only be used by the generated code.
-    private(set) var response: Response = .fetching
+    // Internal representation of the response.
+    private var _response: Response = .fetching
     
     // MARK: - Initializers
     
@@ -29,7 +26,16 @@ public final class SelectionSet<Type, TypeLock> {
     
     init(data: TypeLock) {
         /* This initializer is used to decode response into Swift data. */
-        self.response = .fetched(data)
+        self._response = .fetched(data)
+    }
+    
+    // MARK: - Accessors
+    
+    /// Publically accessible response data.
+    ///
+    /// - Note: This function should only be used by the generated code.
+    public var response: Response {
+        _response
     }
     
     // MARK: - Methods
@@ -53,7 +59,7 @@ public final class SelectionSet<Type, TypeLock> {
     /*
      Represents a response of the request.
      */
-    enum Response {
+    public enum Response {
         case fetching
         case fetched(TypeLock)
     }

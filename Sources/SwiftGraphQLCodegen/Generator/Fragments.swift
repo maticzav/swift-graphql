@@ -24,14 +24,14 @@ extension GraphQLCodegen {
             [ "])" ]
         let decoder: [String] =
             [ "/* Decoder */",
-              "if let data = self.response {",
-              "    switch data.__typename {"
+              "switch self.response {",
+              "case .fetched(let data):",
+              "    switch data.__typename {",
             ] + possibleTypes.flatMap { generateTypeDecoder(for: $0, with: objects) }.indent(by: 4) +
-            [
-              "    }",
+            [ "    }",
+              "case .fetching:",
+              "    return \(possibleTypes.first!.namedType.name.camelCase).mock()",
               "}",
-              "",
-              "return \(possibleTypes.first!.namedType.name.camelCase).mock()"
             ]
         
         /* Code */

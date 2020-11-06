@@ -30,10 +30,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.id[field.alias!]
+            case .fetching:
+                return nil
             }
-            return nil
         }
         """
         
@@ -68,10 +70,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.id[field.alias!]!
+            case .fetching:
+                return String.mockValue
             }
-            return String.mockValue
         }
         """
         
@@ -104,10 +108,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.id[field.alias!]
+            case .fetching:
+                return nil
             }
-            return nil
         }
         """
         
@@ -140,10 +146,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.ids[field.alias!]
+            case .fetching:
+                return nil
             }
-            return nil
         }
         """
         
@@ -174,12 +182,14 @@ final class FieldTests: XCTestCase {
                 ]
             )
             self.select(field)
-        
+
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.ids[field.alias!]!
+            case .fetching:
+                return []
             }
-            return []
         }
         """
         
@@ -214,10 +224,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.episode[field.alias!]!
+            case .fetching:
+                return Enums.Episode.allCases.first!
             }
-            return Enums.Episode.allCases.first!
         }
         """
         
@@ -251,10 +263,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.episode[field.alias!]
+            case .fetching:
+                return nil
             }
-            return nil
         }
         """
         
@@ -287,10 +301,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
 
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.episode[field.alias!]!
+            case .fetching:
+                return []
             }
-            return []
         }
         """
         
@@ -326,10 +342,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return selection.decode(data: data.hero[field.alias!]!)
+            case .fetching:
+                return selection.mock()
             }
-            return selection.mock()
         }
         """
         
@@ -363,10 +381,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.hero[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+            case .fetching:
+                return selection.mock()
             }
-            return selection.mock()
         }
         """
         
@@ -400,10 +420,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
 
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return selection.decode(data: data.hero[field.alias!]!)
+            case .fetching:
+                return selection.mock()
             }
-            return selection.mock()
         }
         """
         
@@ -445,10 +467,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
 
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.hero[field.alias!]!
+            case .fetching:
+                return String.mockValue
             }
-            return String.mockValue
         }
         """
         
@@ -488,10 +512,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
 
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.hero[field.alias!]!
+            case .fetching:
+                return String.mockValue
             }
-            return String.mockValue
         }
         """
         
@@ -531,10 +557,12 @@ final class FieldTests: XCTestCase {
             self.select(field)
         
             /* Decoder */
-            if let data = self.response {
+            switch self.response {
+            case .fetched(let data):
                 return data.hero[field.alias!]!
+            case .fetching:
+                return String.mockValue
             }
-            return String.mockValue
         }
         """
         

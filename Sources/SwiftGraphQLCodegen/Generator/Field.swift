@@ -32,11 +32,12 @@ extension GraphQLCodegen {
             "    self.select(field)",
             "",
             "    /* Decoder */",
-            "    switch selection.response {",
+            "    switch self.response {",
             "    case .fetched(let data):",
             "        return \(generateDecoder(for: field))",
             "    case .fetching:",
             "        return \(try generateMockData(for: field.type))",
+            "    }",
             "}"
         ])
         

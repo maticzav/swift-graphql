@@ -15,6 +15,7 @@ extension Operations {
         let human: [String: Objects.Human]
         let droid: [String: Objects.Droid]
         let character: [String: Unions.CharacterUnion]
+        let luke: [String: Objects.Human]
         let humans: [String: [Objects.Human]]
         let droids: [String: [Objects.Droid]]
         let characters: [String: [Interfaces.Character]]
@@ -55,6 +56,10 @@ extension Operations.Query: Decodable {
                     if let value = try container.decode(Unions.CharacterUnion?.self, forKey: codingKey) {
                         map.set(key: field, hash: alias, value: value as Any)
                     }
+                case "luke":
+                    if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
                 case "humans":
                     if let value = try container.decode([Objects.Human]?.self, forKey: codingKey) {
                         map.set(key: field, hash: alias, value: value as Any)
@@ -92,6 +97,7 @@ extension Operations.Query: Decodable {
         self.human = map["human"]
         self.droid = map["droid"]
         self.character = map["character"]
+        self.luke = map["luke"]
         self.humans = map["humans"]
         self.droids = map["droids"]
         self.characters = map["characters"]
@@ -126,10 +132,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.human[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+        case .fetching:
+            return selection.mock()
         }
-        return selection.mock()
     }
     func droid<Type>(id: String, _ selection: Selection<Type, Objects.Droid?>) -> Type {
         /* Selection */
@@ -143,10 +151,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.droid[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+        case .fetching:
+            return selection.mock()
         }
-        return selection.mock()
     }
     func character<Type>(id: String, _ selection: Selection<Type, Unions.CharacterUnion?>) -> Type {
         /* Selection */
@@ -160,10 +170,30 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.character[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+        case .fetching:
+            return selection.mock()
         }
-        return selection.mock()
+    }
+    func luke<Type>(_ selection: Selection<Type, Objects.Human?>) -> Type {
+        /* Selection */
+        let field = GraphQLField.composite(
+            name: "luke",
+            arguments: [
+            ],
+            selection: selection.selection
+        )
+        self.select(field)
+    
+        /* Decoder */
+        switch self.response {
+        case .fetched(let data):
+            return data.luke[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+        case .fetching:
+            return selection.mock()
+        }
     }
     func humans<Type>(_ selection: Selection<Type, [Objects.Human]>) -> Type {
         /* Selection */
@@ -176,10 +206,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return selection.decode(data: data.humans[field.alias!]!)
+        case .fetching:
+            return selection.mock()
         }
-        return selection.mock()
     }
     func droids<Type>(_ selection: Selection<Type, [Objects.Droid]>) -> Type {
         /* Selection */
@@ -192,10 +224,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return selection.decode(data: data.droids[field.alias!]!)
+        case .fetching:
+            return selection.mock()
         }
-        return selection.mock()
     }
     func characters<Type>(_ selection: Selection<Type, [Interfaces.Character]>) -> Type {
         /* Selection */
@@ -208,10 +242,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return selection.decode(data: data.characters[field.alias!]!)
+        case .fetching:
+            return selection.mock()
         }
-        return selection.mock()
     }
     func greeting(input: OptionalArgument<InputObjects.Greeting> = .absent) -> String {
         /* Selection */
@@ -224,10 +260,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.greeting[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
     func whoami() -> String {
         /* Selection */
@@ -239,10 +277,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.whoami[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
     func time() -> DateTime {
         /* Selection */
@@ -254,10 +294,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.time[field.alias!]!
+        case .fetching:
+            return DateTime.mockValue
         }
-        return DateTime.mockValue
     }
 }
 
@@ -280,63 +322,63 @@ extension Objects {
     }
 }
 extension Objects.Droid: Decodable {
-
-/* Decoder */
-init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-        if codingKey.isTypenameKey { continue }
-
-        let alias = codingKey.stringValue
-        let field = GraphQLField.getFieldNameFromAlias(alias)
-
-        switch field {
-            case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "name":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "primaryFunction":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            default:
-                throw DecodingError.dataCorrupted(
-                    DecodingError.Context(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "Unknown key \(field)."
+    
+    /* Decoder */
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+    
+    
+        var map = HashMap()
+        for codingKey in container.allKeys {
+            if codingKey.isTypenameKey { continue }
+    
+            let alias = codingKey.stringValue
+            let field = GraphQLField.getFieldNameFromAlias(alias)
+    
+            switch field {
+                case "id":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "name":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "primaryFunction":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "appearsIn":
+                    if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                default:
+                    throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: decoder.codingPath,
+                            debugDescription: "Unknown key \(field)."
+                        )
                     )
-                )
-        }
-    }
-
-    self.id = map["id"]
-    self.name = map["name"]
-    self.primaryFunction = map["primaryFunction"]
-    self.appearsIn = map["appearsIn"]
-}
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
+            }
         }
     
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue: Int) { nil }
+        self.id = map["id"]
+        self.name = map["name"]
+        self.primaryFunction = map["primaryFunction"]
+        self.appearsIn = map["appearsIn"]
     }
+    
+        private struct DynamicCodingKeys: CodingKey {
+            // Use for string-keyed dictionary
+            var stringValue: String
+            init?(stringValue: String) {
+                self.stringValue = stringValue
+            }
+        
+            // Use for integer-keyed dictionary
+            var intValue: Int?
+            init?(intValue: Int) { nil }
+        }
 }
 
 extension SelectionSet where TypeLock == Objects.Droid {
@@ -350,10 +392,12 @@ extension SelectionSet where TypeLock == Objects.Droid {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.id[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
     func name() -> String {
         /* Selection */
@@ -365,10 +409,12 @@ extension SelectionSet where TypeLock == Objects.Droid {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.name[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
     func primaryFunction() -> String {
         /* Selection */
@@ -380,10 +426,12 @@ extension SelectionSet where TypeLock == Objects.Droid {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.primaryFunction[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
     func appearsIn() -> [Enums.Episode] {
         /* Selection */
@@ -395,10 +443,12 @@ extension SelectionSet where TypeLock == Objects.Droid {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.appearsIn[field.alias!]!
+        case .fetching:
+            return []
         }
-        return []
     }
 }
 
@@ -419,68 +469,68 @@ extension Objects {
     }
 }
 extension Objects.Human: Decodable {
-
-/* Decoder */
-init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-        if codingKey.isTypenameKey { continue }
-
-        let alias = codingKey.stringValue
-        let field = GraphQLField.getFieldNameFromAlias(alias)
-
-        switch field {
-            case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "name":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "homePlanet":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "infoUrl":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            default:
-                throw DecodingError.dataCorrupted(
-                    DecodingError.Context(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "Unknown key \(field)."
+    
+    /* Decoder */
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+    
+    
+        var map = HashMap()
+        for codingKey in container.allKeys {
+            if codingKey.isTypenameKey { continue }
+    
+            let alias = codingKey.stringValue
+            let field = GraphQLField.getFieldNameFromAlias(alias)
+    
+            switch field {
+                case "id":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "name":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "homePlanet":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "appearsIn":
+                    if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                case "infoUrl":
+                    if let value = try container.decode(String?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                default:
+                    throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: decoder.codingPath,
+                            debugDescription: "Unknown key \(field)."
+                        )
                     )
-                )
-        }
-    }
-
-    self.id = map["id"]
-    self.name = map["name"]
-    self.homePlanet = map["homePlanet"]
-    self.appearsIn = map["appearsIn"]
-    self.infoUrl = map["infoUrl"]
-}
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
+            }
         }
     
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue: Int) { nil }
+        self.id = map["id"]
+        self.name = map["name"]
+        self.homePlanet = map["homePlanet"]
+        self.appearsIn = map["appearsIn"]
+        self.infoUrl = map["infoUrl"]
     }
+    
+        private struct DynamicCodingKeys: CodingKey {
+            // Use for string-keyed dictionary
+            var stringValue: String
+            init?(stringValue: String) {
+                self.stringValue = stringValue
+            }
+        
+            // Use for integer-keyed dictionary
+            var intValue: Int?
+            init?(intValue: Int) { nil }
+        }
 }
 
 extension SelectionSet where TypeLock == Objects.Human {
@@ -494,10 +544,12 @@ extension SelectionSet where TypeLock == Objects.Human {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.id[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
     func name() -> String {
         /* Selection */
@@ -509,10 +561,12 @@ extension SelectionSet where TypeLock == Objects.Human {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.name[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
     /// The home planet of the human, or null if unknown.
     func homePlanet() -> String? {
@@ -525,10 +579,12 @@ extension SelectionSet where TypeLock == Objects.Human {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.homePlanet[field.alias!]
+        case .fetching:
+            return nil
         }
-        return nil
     }
     func appearsIn() -> [Enums.Episode] {
         /* Selection */
@@ -540,10 +596,12 @@ extension SelectionSet where TypeLock == Objects.Human {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.appearsIn[field.alias!]!
+        case .fetching:
+            return []
         }
-        return []
     }
     func infoUrl() -> String? {
         /* Selection */
@@ -555,10 +613,12 @@ extension SelectionSet where TypeLock == Objects.Human {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.infoUrl[field.alias!]
+        case .fetching:
+            return nil
         }
-        return nil
     }
 }
 
@@ -671,10 +731,12 @@ extension SelectionSet where TypeLock == Interfaces.Character {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.id[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
     /// The name of the character
     func name() -> String {
@@ -687,10 +749,12 @@ extension SelectionSet where TypeLock == Interfaces.Character {
         self.select(field)
     
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             return data.name[field.alias!]!
+        case .fetching:
+            return String.mockValue
         }
-        return String.mockValue
     }
 }
 
@@ -705,7 +769,8 @@ extension SelectionSet where TypeLock == Interfaces.Character {
             GraphQLField.fragment(type: "Human", selection: human.selection),
         ])
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             switch data.__typename {
             case .droid:
                 let data = Objects.Droid(
@@ -725,9 +790,9 @@ extension SelectionSet where TypeLock == Interfaces.Character {
                 )
                 return human.decode(data: data)
             }
+        case .fetching:
+            return droid.mock()
         }
-        
-        return droid.mock()
     }
 }
 
@@ -839,7 +904,8 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
             GraphQLField.fragment(type: "Droid", selection: droid.selection),
         ])
         /* Decoder */
-        if let data = self.response {
+        switch self.response {
+        case .fetched(let data):
             switch data.__typename {
             case .human:
                 let data = Objects.Human(
@@ -859,9 +925,9 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
                 )
                 return droid.decode(data: data)
             }
+        case .fetching:
+            return human.mock()
         }
-        
-        return human.mock()
     }
 }
 

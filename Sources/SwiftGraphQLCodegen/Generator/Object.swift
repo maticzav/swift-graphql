@@ -24,7 +24,7 @@ extension GraphQLCodegen {
         
         /* Decoder */
         code.append("extension Objects.\(name): Decodable {")
-        code.append(contentsOf: try generateDecodableExtension(fields: type.fields))
+        code.append(contentsOf: try generateDecodableExtension(fields: type.fields).indent(by: 4))
         code.append("}")
         
         code.append("")
