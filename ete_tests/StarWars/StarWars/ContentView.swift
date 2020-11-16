@@ -12,11 +12,11 @@ struct Character: Identifiable {
 
 let character = Selection<Character, Interfaces.Character> {
     Character(
-        id: $0.id(),
-        name: $0.name(),
-        message: $0.on(
-            droid: .init { $0.primaryFunction() },
-            human: .init { $0.homePlanet() ?? "Unknown" }
+        id: try $0.id(),
+        name: try $0.name(),
+        message: try $0.on(
+            droid: .init { try $0.primaryFunction() },
+            human: .init { try $0.homePlanet() ?? "Unknown" }
         )
     )
 }
@@ -29,30 +29,32 @@ struct Human {
 
 let human = Selection<Human, Objects.Human> {
     Human(
-        id: $0.id(),
-        name: $0.name(),
-        url: $0.infoUrl()
+        id: try $0.id(),
+        name: try $0.name(),
+        url: try $0.infoUrl()
     )
 }
+
+let foo: Selection<Human?, Objects.Human> = human.map { $0 }
 
 let characterInterface = Selection<String, Interfaces.Character> {
     
     /* Common */
-    let name = $0.name()
+    let name = try $0.name()
     
     /* Fragments */
-    let about = $0.on(
-        droid: Selection<String, Objects.Droid> { droid in droid.primaryFunction() },
-        human: Selection<String, Objects.Human> { human in human.infoUrl() ?? "Unknown" }
+    let about = try $0.on(
+        droid: Selection<String, Objects.Droid> { droid in try droid.primaryFunction() },
+        human: Selection<String, Objects.Human> { human in try human.infoUrl() ?? "Unknown" }
     )
     
     return "\(name). \(about)"
 }
 
 let characterUnion = Selection<String, Unions.CharacterUnion> {
-    $0.on(
-        human: .init { $0.infoUrl() ?? "Unknown" },
-        droid: .init { $0.primaryFunction() }
+    try $0.on(
+        human: .init { try $0.infoUrl() ?? "Unknown" },
+        droid: .init { try $0.primaryFunction() }
     )
 }
 
@@ -65,17 +67,17 @@ struct Model {
 }
 
 let query = Selection<Model, Operations.Query> {
-    let english = $0.greeting()
-    let slovene = $0.greeting(input: .present(.init(name: "Matic")))
+    let english = try $0.greeting()
+    let slovene = try $0.greeting(input: .present(.init(name: "Matic")))
     
     let greeting = "\(english); \(slovene)"
     
     return Model(
-        whoami: $0.whoami(),
-        time: $0.time(),
+        whoami: try $0.whoami(),
+        time: try $0.time(),
         greeting: greeting,
-        character: $0.character(id: "1000", characterUnion.nonNullOrFail),
-        characters: $0.characters(Selection.list(character))
+        character: try $0.character(id: "1000", characterUnion.nonNullOrFail),
+        characters: try $0.characters(Selection.list(character))
     )
 }
 
@@ -106,9 +108,7 @@ class AppState: ObservableObject {
                 print("DATA")
                 print(data)
                 DispatchQueue.main.async {
-                    if let data = data.data {
-                        self.model = data
-                    }
+                    self.model = data.data
                 }
             } catch let error {
                 print("ERROR")

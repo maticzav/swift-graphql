@@ -18,6 +18,8 @@ public final class SelectionSet<Type, TypeLock> {
     // Internal representation of selection.
     private(set) var fields = [GraphQLField]()
     // Internal representation of the response.
+    //
+    // We use internal definition to prevent public setting.
     private var _response: Response = .fetching
     
     // MARK: - Initializers
@@ -65,7 +67,7 @@ public final class SelectionSet<Type, TypeLock> {
     }
 }
 
-// MARK: - SelectionSet decoder
+// MARK: - SelectionSet Decoder
 
 extension SelectionSet: Decodable where TypeLock: Decodable {
     public convenience init(from decoder: Decoder) throws {
@@ -78,26 +80,28 @@ extension SelectionSet: Decodable where TypeLock: Decodable {
 
 /// Global type used to wrap the selection.
 public struct Selection<Type, TypeLock> {
-    public typealias SelectionDecoder = (SelectionSet<Type, TypeLock>) -> Type
     
     /* Data */
 
     private let selectionSet = SelectionSet<Type, TypeLock>()
-    private var decoder: SelectionDecoder // function used to decode data and populate selection
+    // function used to decode data and populate selection
+    private var decoder: (SelectionSet<Type, TypeLock>) throws -> Type
     private var mocked: Type // mock data
     
     
     // MARK: - Initializer
     
-    public init(decoder: @escaping SelectionDecoder) {
+    public init(decoder: @escaping (SelectionSet<Type, TypeLock>) throws -> Type) {
         /* This initializer populates fields (selection set) and grabs a copy of mocked value. */
         self.decoder = decoder
-        self.mocked = decoder(selectionSet)
+        self.mocked = try! decoder(selectionSet)
     }
     
     // MARK: - Accessors
     
     /// Returns a list of selected fields.
+    ///
+    /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
     public var selection: [GraphQLField] {
         self.selectionSet.fields
     }
@@ -107,10 +111,11 @@ public struct Selection<Type, TypeLock> {
     /// Decodes JSON response into a return type of the selection set.
     ///
     /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
-    public func decode(data: TypeLock) -> Type {
+    public func decode(data: TypeLock) throws -> Type {
         /* Construct a copy of the selection set, and use the new selection set to decode data. */
         let selectionSet = SelectionSet<Type, TypeLock>(data: data)
-        return self.decoder(selectionSet)
+        let data = try self.decoder(selectionSet)
+        return data
     }
     
     /// Mocks the data of a selection.
@@ -130,14 +135,16 @@ public struct Selection<Type, TypeLock> {
 extension Selection where TypeLock: Decodable {
     /// Lets you convert a type selection into a list selection.
     public var list: Selection<[Type], [TypeLock]> {
-        return Selection<[Type], [TypeLock]> { selection in
+        Selection<[Type], [TypeLock]> { selection in
             /* Selection */
-            self.selection.forEach(selection.select)
+            selection.select(self.selection)
             
             /* Decoder */
             switch selection.response {
             case .fetched(let data):
-                return data.map { self.decode(data: $0) }
+                return try data.map {
+                    try self.decode(data: $0)
+                }
             case .fetching:
                 return []
             }
@@ -148,12 +155,12 @@ extension Selection where TypeLock: Decodable {
     public var nullable: Selection<Type?, TypeLock?> {
         Selection<Type?, TypeLock?> { selection in
             /* Selection */
-            self.selection.forEach(selection.select)
+            selection.select(self.selection)
             
             /* Decoder */
             switch selection.response {
             case .fetched(let data):
-                return data.map { self.decode(data: $0) }
+                return try data.map { try self.decode(data: $0) }
             case .fetching:
                 return nil
             }
@@ -164,12 +171,15 @@ extension Selection where TypeLock: Decodable {
     public var nonNullOrFail: Selection<Type, TypeLock?> {
         Selection<Type, TypeLock?> { selection in
             /* Selection */
-            self.selection.forEach(selection.select)
+            selection.select(self.selection)
             
             /* Decoder */
             switch selection.response {
             case .fetched(let data):
-                return self.decode(data: data!)
+                if let data = data {
+                    return try self.decode(data: data)
+                }
+                throw SwiftGraphQL.HttpError.badpayload
             case .fetching:
                 return self.mock()
             }
@@ -215,5 +225,27 @@ extension Selection where TypeLock: Decodable {
         _ selection: Selection<Type, NonNullTypeLock>
     ) -> Selection<Type, TypeLock> where TypeLock == Optional<NonNullTypeLock> {
         selection.nonNullOrFail
+    }
+}
+
+/*
+ Selection mapping functions.
+ */
+
+extension Selection where TypeLock: Decodable {
+    /// Maps selection's return value into a new value using provided mapping function.
+    public func map<MappedType>(_ fn: @escaping (Type) -> MappedType) -> Selection<MappedType, TypeLock> {
+        Selection<MappedType, TypeLock> { selection in
+            /* Selection */
+            selection.select(self.selection)
+            
+            /* Decoder */
+            switch selection.response {
+            case .fetched(let data):
+                return fn(try self.decode(data: data))
+            case .fetching:
+                return fn(self.mock())
+            }
+        }
     }
 }

@@ -907,7 +907,7 @@ private extension __JSONEncoder {
             // JSONSerialization can natively handle NSDecimalNumber.
             return (value as! NSDecimalNumber)
         } else if value is _JSONStringDictionaryEncodableMarker {
-            return try self.box(value as! [String : Encodable])
+            return try self.box(value as Any as! [String : Encodable])
         }
 
         // The value should request a container from the __JSONEncoder.

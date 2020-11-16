@@ -20,7 +20,7 @@ final class FieldTests: XCTestCase {
         let expected = """
         /// Object identifier.
         @available(*, deprecated, message: "Use ID instead.")
-        func id() -> String? {
+        func id() throws -> String? {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "id",
@@ -28,7 +28,7 @@ final class FieldTests: XCTestCase {
                 ]
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
@@ -60,7 +60,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func id() -> String {
+        func id() throws -> String {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "id",
@@ -68,11 +68,14 @@ final class FieldTests: XCTestCase {
                 ]
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return data.id[field.alias!]!
+                if let data = data.id[field.alias!] {
+                    return data
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return String.mockValue
             }
@@ -98,7 +101,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func id() -> String? {
+        func id() throws -> String? {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "id",
@@ -106,7 +109,7 @@ final class FieldTests: XCTestCase {
                 ]
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
@@ -136,7 +139,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func ids() -> [String]? {
+        func ids() throws -> [String]? {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "ids",
@@ -144,7 +147,7 @@ final class FieldTests: XCTestCase {
                 ]
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
@@ -174,7 +177,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func ids() -> [String] {
+        func ids() throws -> [String] {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "ids",
@@ -186,7 +189,10 @@ final class FieldTests: XCTestCase {
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return data.ids[field.alias!]!
+                if let data = data.ids[field.alias!] {
+                    return data
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return []
             }
@@ -214,7 +220,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func episode() -> Enums.Episode {
+        func episode() throws -> Enums.Episode {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "episode",
@@ -222,11 +228,14 @@ final class FieldTests: XCTestCase {
                 ]
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return data.episode[field.alias!]!
+                if let data = data.episode[field.alias!] {
+                    return data
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return Enums.Episode.allCases.first!
             }
@@ -253,7 +262,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func episode() -> Enums.Episode? {
+        func episode() throws -> Enums.Episode? {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "episode",
@@ -261,7 +270,7 @@ final class FieldTests: XCTestCase {
                 ]
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
@@ -291,7 +300,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func episode() -> [Enums.Episode?] {
+        func episode() throws -> [Enums.Episode?] {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "episode",
@@ -303,7 +312,10 @@ final class FieldTests: XCTestCase {
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return data.episode[field.alias!]!
+                if let data = data.episode[field.alias!] {
+                    return data
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return []
             }
@@ -331,7 +343,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero<Type>(_ selection: Selection<Type, Objects.Hero>) -> Type {
+        func hero<Type>(_ selection: Selection<Type, Objects.Hero>) throws -> Type {
             /* Selection */
             let field = GraphQLField.composite(
                 name: "hero",
@@ -340,11 +352,14 @@ final class FieldTests: XCTestCase {
                 selection: selection.selection
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return selection.decode(data: data.hero[field.alias!]!)
+                if let data = data.hero[field.alias!] {
+                    return try selection.decode(data: data)
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return selection.mock()
             }
@@ -370,7 +385,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero<Type>(_ selection: Selection<Type, Objects.Hero?>) -> Type {
+        func hero<Type>(_ selection: Selection<Type, Objects.Hero?>) throws -> Type {
             /* Selection */
             let field = GraphQLField.composite(
                 name: "hero",
@@ -379,11 +394,11 @@ final class FieldTests: XCTestCase {
                 selection: selection.selection
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return data.hero[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+                return try selection.decode(data: data.hero[field.alias!])
             case .fetching:
                 return selection.mock()
             }
@@ -409,7 +424,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero<Type>(_ selection: Selection<Type, [Objects.Hero]>) -> Type {
+        func hero<Type>(_ selection: Selection<Type, [Objects.Hero]>) throws -> Type {
             /* Selection */
             let field = GraphQLField.composite(
                 name: "hero",
@@ -422,7 +437,10 @@ final class FieldTests: XCTestCase {
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return selection.decode(data: data.hero[field.alias!]!)
+                if let data = data.hero[field.alias!] {
+                    return try selection.decode(data: data)
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return selection.mock()
             }
@@ -456,7 +474,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero(id: String) -> String {
+        func hero(id: String) throws -> String {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "hero",
@@ -469,7 +487,10 @@ final class FieldTests: XCTestCase {
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return data.hero[field.alias!]!
+                if let data = data.hero[field.alias!] {
+                    return data
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return String.mockValue
             }
@@ -501,7 +522,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero(id: OptionalArgument<String> = .absent) -> String {
+        func hero(id: OptionalArgument<String> = .absent) throws -> String {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "hero",
@@ -514,7 +535,10 @@ final class FieldTests: XCTestCase {
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return data.hero[field.alias!]!
+                if let data = data.hero[field.alias!] {
+                    return data
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return String.mockValue
             }
@@ -546,7 +570,7 @@ final class FieldTests: XCTestCase {
         )
         
         let expected = """
-        func hero(id: InputObjects.Input) -> String {
+        func hero(id: InputObjects.Input) throws -> String {
             /* Selection */
             let field = GraphQLField.leaf(
                 name: "hero",
@@ -555,11 +579,14 @@ final class FieldTests: XCTestCase {
                 ]
             )
             self.select(field)
-        
+
             /* Decoder */
             switch self.response {
             case .fetched(let data):
-                return data.hero[field.alias!]!
+                if let data = data.hero[field.alias!] {
+                    return data
+                }
+                throw SG.HttpError.badpayload
             case .fetching:
                 return String.mockValue
             }

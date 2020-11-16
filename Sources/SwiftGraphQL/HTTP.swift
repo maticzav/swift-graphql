@@ -13,7 +13,7 @@ public struct SwiftGraphQL {
     
     /// Sends a query request to the server.
     public static func send<Type, TypeLock>(
-        _ selection: Selection<Type, TypeLock>,
+        _ selection: Selection<Type, TypeLock?>,
         /// Server endpoint URL.
         to endpoint: String,
         /// A dictionary of key-value header pairs.
@@ -32,16 +32,41 @@ public struct SwiftGraphQL {
         )
     }
     
+    /// Sends a query request to the server.
+    ///
+    /// - Note: This is a shortcut function for when you are expecting the result.
+    ///         The only difference between this one and the other one is that you may select
+    ///         on non-nullable TypeLock instead of a nullable one.
+    public static func send<Type, TypeLock>(
+        _ selection: Selection<Type, TypeLock>,
+        /// Server endpoint URL.
+        to endpoint: String,
+        /// A dictionary of key-value header pairs.
+        headers: HttpHeaders = [:],
+        /// Method to use. (Default to POST).
+        method: HttpMethod = .post,
+        onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
+    ) -> Void where TypeLock: GraphQLOperation & Decodable {
+        perform(
+            selection: selection.nonNullOrFail,
+            operation: TypeLock.operation,
+            endpoint: endpoint,
+            method: method,
+            headers: headers,
+            completionHandler: completionHandler
+        )
+    }
+    
     /// Represents an error of the actual request.
     public enum HttpError: Error {
         case badURL
         case timeout
         case network(Error)
-        case badpayload(Error)
+        case badpayload
         case badstatus
     }
     
-    public enum HttpMethod: String {
+    public enum HttpMethod: String, Equatable {
         case get = "GET"
         case post = "POST"
     }
@@ -53,7 +78,7 @@ public struct SwiftGraphQL {
     // MARK: - Private helpers
     
     private static func perform<Type, TypeLock>(
-        selection: Selection<Type, TypeLock>,
+        selection: Selection<Type, TypeLock?>,
         operation: GraphQLOperationType,
         endpoint: String,
         method: HttpMethod,
@@ -115,7 +140,7 @@ public struct SwiftGraphQL {
                 return completionHandler(.success(result))
             }
             
-            
+            return completionHandler(.failure(.badpayload))
         }
         
         // Construct a session.
@@ -123,3 +148,18 @@ public struct SwiftGraphQL {
     }
 }
 
+extension SwiftGraphQL.HttpError: Equatable {
+    public static func == (lhs: SwiftGraphQL.HttpError, rhs: SwiftGraphQL.HttpError) -> Bool {
+        
+        // Equals if they are of the same type, different otherwise.
+        switch (lhs, rhs) {
+        case (.badURL, badURL),
+             (.timeout, .timeout),
+             (.badpayload, .badpayload),
+             (.badstatus, .badstatus):
+            return true
+        default:
+            return false
+        }
+    }
+}

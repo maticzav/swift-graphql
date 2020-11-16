@@ -36,15 +36,15 @@ struct Human: Identifiable {
 // Create a selection.
 let human = Selection<Human, Objects.Human> {
     Human(
-        id: $0.id(), 
-        name: $0.name(),
-        homePlanet: $0.homePlanet()
+        id: try $0.id(), 
+        name: try $0.name(),
+        homePlanet: try $0.homePlanet()
     )
 }
 
 // Construct a query.
 let query = Selection<[Human], Operations.Query> {
-    $0.humans(human.list)
+    try $0.humans(human.list)
 }
 
 // Perform the query.
@@ -86,7 +86,7 @@ __Why another GraphQL library?__ There was no other library that would let me fe
 
 It seems like the best way to learn how to use SwiftGraphQL is by understanding how it works behind the scenes.
 
-The first concept that you should know about is `Selection`. Selection lets you select which fields you want to query from a certain GraphQL object. The interesting part about Selection is that there's actually only one `Selection` type, but it has generic extensions . Those generic extensions are using _phantom types_ to differentiate which fields you may select in particular object. 
+The first concept that you should know about is `Selection`. Selection lets you select which fields you want to query from a certain GraphQL object. The interesting part about Selection is that there's actually only one `Selection` type, but it has generic extensions. Those generic extensions are using _phantom types_ to differentiate which fields you may select in particular object. 
 
 TLDR; Phantom types let you use Generics to constrain methods to specific types. You can see them at work in the funny looking `Selection<Type, Scope>` parts of the code that let you select what you want to query. You can read more about phantom types [here](https://www.swiftbysundell.com/articles/phantom-types-in-swift/), but for now it suffice to understand that we use `Scope` to limit what you may or may not select in a query.
 
@@ -109,9 +109,9 @@ For example:
 ```swift
 let human = Selection<Human, Objects.Human> { select in
     Human(
-        id: select.id(), // String
-        name: select.name(), // String
-        homePlanet: select.homePlanet() // String?
+        id: try select.id(), // String
+        name: try select.name(), // String
+        homePlanet: try select.homePlanet() // String?
     )
 }
 ```
@@ -126,7 +126,7 @@ We construct a query in a very similar fashion to making a human selection.
 
 ```swift
 let query = Selection<[Human], Operations.Query> {
-    $0.humans(human.list)
+    try $0.humans(human.list)
 }
 ```
 
@@ -136,7 +136,7 @@ _NOTE:_ We could also simply count the number of humans in the database. We woul
 
 ```swift
 let query = Selection<Int, Operations.Query> {
-    $0.humans(human.list).count
+    try $0.humans(human.list).count
 }
 ```
 
@@ -277,13 +277,16 @@ Each selection comes with three calculated properties that let you do that:
 ```swift
 // Create a non-nullable selection.
 let human = Selection<Human, Objects.Human> {
-    Human(id: $0.id(), name: $0.name())
+    Human(
+        id: try $0.id(), 
+        name: try $0.name()
+    )
 }
 
 // Use it with nullable and list fields.
 let query = Selection<Void, Operations.Query> {
-    let list = $0.humans(human.list)
-    let nullable = $0.human(id: "100", human.nullable)
+    let list = try $0.humans(human.list)
+    let nullable = try $0.human(id: "100", human.nullable)
 }
 ```
 
@@ -292,7 +295,7 @@ You can achieve the same effect using `Selection` static functions `.list`, `.nu
 ```swift
 // Use it with nullable and list fields.
 let query = Selection<Void, Operations.Query> {
-    let list = $0.humans(Selection.list(human))
+    let list = try $0.humans(Selection.list(human))
 }
 ```
 
@@ -302,10 +305,10 @@ let query = Selection<Void, Operations.Query> {
 // WRONG!
 let human = Selection<String, Objects.Human> { select in
     let message: String
-    if select.likesStrawberries() {
-        message = select.name()
+    if try select.likesStrawberries() {
+        message = try select.name()
     } else {
-        message = select.homePlanet()
+        message = try select.homePlanet()
     }
     return message
 }
@@ -314,9 +317,9 @@ let human = Selection<String, Objects.Human> { select in
 let human = Selection<String, Objects.Human> { select in
 
     /* Data */
-    let likesStrawberries = select.likesStrawberries()
-    let name = select.name()
-    let homePlanet = select.homePlanet()
+    let likesStrawberries = try select.likesStrawberries()
+    let name = try select.name()
+    let homePlanet = try select.homePlanet()
 
     /* Return */
     let message: String
@@ -337,14 +340,37 @@ When fetching a union you should provide selections for each of the union sub-ty
 
 ```swift
 let characterUnion = Selection<String, Unions.CharacterUnion> {
-    $0.on(
-        human: .init { $0.funFact() /* String */ },
-        droid: .init { $0.primaryFunction() /* String */ }
+    try $0.on(
+        human: .init { try $0.funFact() /* String */ },
+        droid: .init { try $0.primaryFunction() /* String */ }
     )
 }
 ```
 
 You'd usually want to create a Swift enumerator and have different selecitons return different cases.
+
+##### Mapping Selection
+
+You might want to map the result of your selection to a new type and get a selection for that new type.
+You can do that by calling a `map` function on selection and provide a mapping.
+
+```swift
+struct Human {
+    let id: String
+    let name: String
+}
+
+// Create a selection.
+let human = Selection<Human, Objects.Human> {
+    Human(
+        id: try $0.id(),
+        name: try $0.name(),
+    )
+}
+
+// Map the original selection on Human to return String.
+let humanName: Selection<String, Objects.Human> = human.map { $0.name }
+```
 
 
 ### `Interfaces`
@@ -357,12 +383,12 @@ Interfaces are very similar to unions. The only difference is that you may query
 let characterInteface = Selection<String, Interfaces.Character> {
     
     /* Common */
-    let name = $0.name()
+    let name = try $0.name()
     
     /* Fragments */
-    let about = $0.on(
-        droid: Selection<String, Objects.Droid> { droid in droid.primaryFunction() /* String */ },
-        human: Selection<String, Objects.Human> { human in human.homePlanet() /* String */ }
+    let about = try $0.on(
+        droid: Selection<String, Objects.Droid> { droid in try droid.primaryFunction() /* String */ },
+        human: Selection<String, Objects.Human> { human in try human.homePlanet() /* String */ }
     )
     
     return "\(name). \(about)"
@@ -496,6 +522,11 @@ query($__rsdpxy7uqurl: Greeting!, $__l9q38fwdev22: Greeting!, $_b2ryvzutf9x2: ID
   }
 }
 ```
+
+### Why do I have to include try whenever I select something?
+
+Swift handles errors in a very upfront way. Since we are trying to decode nested values, the decoder might fail
+at various different depths. Because of that, we have to write `try`.
 
 ### What are the pitfalls in Apollo iOS that you were referring to at the top?
 
