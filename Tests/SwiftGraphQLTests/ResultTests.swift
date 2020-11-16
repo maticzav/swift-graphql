@@ -18,7 +18,7 @@ final class ParserTests: XCTestCase {
             }
         }
         
-        let result = try GraphQLResult(data, with: selection)
+        let result = try GraphQLResult(data, with: selection.nonNullOrFail)
         
         /* Test */
         
@@ -49,7 +49,7 @@ final class ParserTests: XCTestCase {
             }
         }
         
-        let result = try GraphQLResult(response, with: selection)
+        let result = try GraphQLResult(response, with: selection.nonNullOrFail)
         
         /* Test */
         
@@ -95,13 +95,13 @@ final class ParserTests: XCTestCase {
         /* Test */
         
         XCTAssertEqual(
-            try GraphQLResult(data, with: selection),
-            try GraphQLResult(data, with: selection)
+            try GraphQLResult(data, with: selection.nonNullOrFail),
+            try GraphQLResult(data, with: selection.nonNullOrFail)
         )
         
         XCTAssertNotEqual(
-            try GraphQLResult(dataWithErrors, with: selection),
-            try GraphQLResult(data, with: selection)
+            try GraphQLResult(dataWithErrors, with: selection.nonNullOrFail),
+            try GraphQLResult(data, with: selection.nonNullOrFail)
         )
     }
 }

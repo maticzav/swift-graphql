@@ -3,33 +3,27 @@ import Foundation
 // MARK: - GraphQL Result
 
 public struct GraphQLResult<Type, TypeLock> {
-    private let selection: Selection<Type, TypeLock>
-    private let data: TypeLock?
-    
+    public let data: Type
     public let errors: [GraphQLError]?
 }
 
-extension GraphQLResult: Equatable where Type: Equatable, TypeLock: Decodable {
-    public static func == (lhs: GraphQLResult<Type, TypeLock>, rhs: GraphQLResult<Type, TypeLock>) -> Bool {
-        return lhs.data == rhs.data && lhs.errors == rhs.errors
-    }
-}
+extension GraphQLResult: Equatable where Type: Equatable, TypeLock: Decodable {}
 
 extension GraphQLResult where TypeLock: Decodable {
-    init(_ response: Data, with selection: Selection<Type, TypeLock>) throws {
-        self.selection = selection
+    init(_ response: Data, with selection: Selection<Type, TypeLock?>) throws {
         
-        /* Decode data. */
-        let decoder = JSONDecoder()
-        let response = try decoder.decode(GraphQLResponse.self, from: response)
-        
-        self.data = response.data
-        self.errors = response.errors
-    }
-    
-    // MARK: - Calculated properties
-    public var data: Type? {
-        return self.data.map { selection.decode(data: $0) }
+        // Decodes the data using provided selection.
+        do {
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(GraphQLResponse.self, from: response)
+            let data = try selection.decode(data: response.data)
+            
+            self.data = data
+            self.errors = response.errors
+        } catch {
+            // Catches all errors and turns them into a bad payload SwiftGraphQL error.
+            throw SG.HttpError.badpayload
+        }
     }
     
     // MARK: - Response

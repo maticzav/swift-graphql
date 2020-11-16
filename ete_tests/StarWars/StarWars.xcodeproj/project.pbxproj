@@ -68,8 +68,8 @@
 			children = (
 				0243193D254AADF200094333 /* Scalars */,
 				02CA03ED253CA05B00B05BD1 /* API.swift */,
-				02208E76253C596D00014850 /* Main.swift */,
 				02208E78253C596D00014850 /* ContentView.swift */,
+				02208E76253C596D00014850 /* Main.swift */,
 				02208E7A253C596E00014850 /* Assets.xcassets */,
 				02208E7F253C596E00014850 /* Info.plist */,
 				02208E7C253C596E00014850 /* Preview Content */,

@@ -25,21 +25,19 @@ extension GraphQLCodegen {
         }
         
         // Field method.
-        lines.append("func \(try generateFnDefinition(for: field)) -> \(try generateReturnType(for: field.type)) {")
+        lines.append("func \(try generateFnDefinition(for: field)) throws -> \(try generateReturnType(for: field.type)) {")
         lines.append("    /* Selection */")
         lines.append(contentsOf: generateFieldSelection(for: field).indent(by: 4))
-        lines.append(contentsOf: [
-            "    self.select(field)",
-            "",
-            "    /* Decoder */",
-            "    switch self.response {",
-            "    case .fetched(let data):",
-            "        return \(generateDecoder(for: field))",
-            "    case .fetching:",
-            "        return \(try generateMockData(for: field.type))",
-            "    }",
-            "}"
-        ])
+        lines.append("    self.select(field)")
+        lines.append("")
+        lines.append("    /* Decoder */")
+        lines.append("    switch self.response {")
+        lines.append("    case .fetched(let data):")
+        lines.append(contentsOf: generateDecoder(for: field).indent(by: 8))
+        lines.append("    case .fetching:")
+        lines.append("        return \(try generateMockData(for: field.type))")
+        lines.append("    }")
+        lines.append("}")
         
         return lines
     }
@@ -226,7 +224,7 @@ extension GraphQLCodegen {
     // MARK: - Accessors
 
     /// Generates a field decoder.
-    private func generateDecoder(for field: GraphQL.Field) -> String {
+    private func generateDecoder(for field: GraphQL.Field) -> [String] {
         let name = field.name.camelCase
         
         switch field.type.inverted.namedType {
@@ -234,17 +232,39 @@ extension GraphQLCodegen {
         case .scalar(_), .enum(_):
             switch field.type.inverted {
             case .nullable(_):
-                return "data.\(name)[field.alias!]"
+                /*
+                 When decoding a nullable scalar, we just return the value.
+                 */
+                return [ "return data.\(name)[field.alias!]" ]
             default:
-                return "data.\(name)[field.alias!]!"
+                /*
+                 In list value and non-optional scalars we want to make sure that value is present.
+                 */
+                return [
+                    "if let data = data.\(name)[field.alias!] {",
+                    "    return data",
+                    "}",
+                    "throw SG.HttpError.badpayload"
+                ]
             }
         /* Selections */
         case .interface(_), .object(_), .union(_):
             switch field.type.inverted {
             case .nullable(_):
-                return "data.\(name)[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()"
+                /*
+                 When decoding a nullable field we simply pass it down to the decoder.
+                 */
+                return [ "return try selection.decode(data: data.\(name)[field.alias!])" ]
             default:
-                return "selection.decode(data: data.\(name)[field.alias!]!)"
+                /*
+                 When decoding a non-nullable field, we want to make sure that field is present.
+                 */
+                return [
+                    "if let data = data.\(name)[field.alias!] {",
+                    "    return try selection.decode(data: data)",
+                    "}",
+                    "throw SG.HttpError.badpayload"
+                ]
             }
         }
     }

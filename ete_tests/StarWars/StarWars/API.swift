@@ -120,7 +120,7 @@ extension Operations.Query: Decodable {
 }
 
 extension SelectionSet where TypeLock == Operations.Query {
-    func human<Type>(id: String, _ selection: Selection<Type, Objects.Human?>) -> Type {
+    func human<Type>(id: String, _ selection: Selection<Type, Objects.Human?>) throws -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "human",
@@ -134,12 +134,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.human[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+            return try selection.decode(data: data.human[field.alias!])
         case .fetching:
             return selection.mock()
         }
     }
-    func droid<Type>(id: String, _ selection: Selection<Type, Objects.Droid?>) -> Type {
+    func droid<Type>(id: String, _ selection: Selection<Type, Objects.Droid?>) throws -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "droid",
@@ -153,12 +153,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.droid[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+            return try selection.decode(data: data.droid[field.alias!])
         case .fetching:
             return selection.mock()
         }
     }
-    func character<Type>(id: String, _ selection: Selection<Type, Unions.CharacterUnion?>) -> Type {
+    func character<Type>(id: String, _ selection: Selection<Type, Unions.CharacterUnion?>) throws -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "character",
@@ -172,12 +172,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.character[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+            return try selection.decode(data: data.character[field.alias!])
         case .fetching:
             return selection.mock()
         }
     }
-    func luke<Type>(_ selection: Selection<Type, Objects.Human?>) -> Type {
+    func luke<Type>(_ selection: Selection<Type, Objects.Human?>) throws -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "luke",
@@ -190,12 +190,12 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.luke[field.alias!].map { selection.decode(data: $0) } ?? selection.mock()
+            return try selection.decode(data: data.luke[field.alias!])
         case .fetching:
             return selection.mock()
         }
     }
-    func humans<Type>(_ selection: Selection<Type, [Objects.Human]>) -> Type {
+    func humans<Type>(_ selection: Selection<Type, [Objects.Human]>) throws -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "humans",
@@ -208,12 +208,15 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return selection.decode(data: data.humans[field.alias!]!)
+            if let data = data.humans[field.alias!] {
+                return try selection.decode(data: data)
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return selection.mock()
         }
     }
-    func droids<Type>(_ selection: Selection<Type, [Objects.Droid]>) -> Type {
+    func droids<Type>(_ selection: Selection<Type, [Objects.Droid]>) throws -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "droids",
@@ -226,12 +229,15 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return selection.decode(data: data.droids[field.alias!]!)
+            if let data = data.droids[field.alias!] {
+                return try selection.decode(data: data)
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return selection.mock()
         }
     }
-    func characters<Type>(_ selection: Selection<Type, [Interfaces.Character]>) -> Type {
+    func characters<Type>(_ selection: Selection<Type, [Interfaces.Character]>) throws -> Type {
         /* Selection */
         let field = GraphQLField.composite(
             name: "characters",
@@ -244,12 +250,15 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return selection.decode(data: data.characters[field.alias!]!)
+            if let data = data.characters[field.alias!] {
+                return try selection.decode(data: data)
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return selection.mock()
         }
     }
-    func greeting(input: OptionalArgument<InputObjects.Greeting> = .absent) -> String {
+    func greeting(input: OptionalArgument<InputObjects.Greeting> = .absent) throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "greeting",
@@ -262,12 +271,15 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.greeting[field.alias!]!
+            if let data = data.greeting[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
     }
-    func whoami() -> String {
+    func whoami() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "whoami",
@@ -279,12 +291,15 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.whoami[field.alias!]!
+            if let data = data.whoami[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
     }
-    func time() -> DateTime {
+    func time() throws -> DateTime {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "time",
@@ -296,7 +311,10 @@ extension SelectionSet where TypeLock == Operations.Query {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.time[field.alias!]!
+            if let data = data.time[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return DateTime.mockValue
         }
@@ -382,7 +400,7 @@ extension Objects.Droid: Decodable {
 }
 
 extension SelectionSet where TypeLock == Objects.Droid {
-    func id() -> String {
+    func id() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "id",
@@ -394,12 +412,15 @@ extension SelectionSet where TypeLock == Objects.Droid {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.id[field.alias!]!
+            if let data = data.id[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
     }
-    func name() -> String {
+    func name() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "name",
@@ -411,12 +432,15 @@ extension SelectionSet where TypeLock == Objects.Droid {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.name[field.alias!]!
+            if let data = data.name[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
     }
-    func primaryFunction() -> String {
+    func primaryFunction() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "primaryFunction",
@@ -428,12 +452,15 @@ extension SelectionSet where TypeLock == Objects.Droid {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.primaryFunction[field.alias!]!
+            if let data = data.primaryFunction[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
     }
-    func appearsIn() -> [Enums.Episode] {
+    func appearsIn() throws -> [Enums.Episode] {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "appearsIn",
@@ -445,7 +472,10 @@ extension SelectionSet where TypeLock == Objects.Droid {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.appearsIn[field.alias!]!
+            if let data = data.appearsIn[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return []
         }
@@ -534,7 +564,7 @@ extension Objects.Human: Decodable {
 }
 
 extension SelectionSet where TypeLock == Objects.Human {
-    func id() -> String {
+    func id() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "id",
@@ -546,12 +576,15 @@ extension SelectionSet where TypeLock == Objects.Human {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.id[field.alias!]!
+            if let data = data.id[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
     }
-    func name() -> String {
+    func name() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "name",
@@ -563,13 +596,16 @@ extension SelectionSet where TypeLock == Objects.Human {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.name[field.alias!]!
+            if let data = data.name[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
     }
     /// The home planet of the human, or null if unknown.
-    func homePlanet() -> String? {
+    func homePlanet() throws -> String? {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "homePlanet",
@@ -586,7 +622,7 @@ extension SelectionSet where TypeLock == Objects.Human {
             return nil
         }
     }
-    func appearsIn() -> [Enums.Episode] {
+    func appearsIn() throws -> [Enums.Episode] {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "appearsIn",
@@ -598,12 +634,15 @@ extension SelectionSet where TypeLock == Objects.Human {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.appearsIn[field.alias!]!
+            if let data = data.appearsIn[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return []
         }
     }
-    func infoUrl() -> String? {
+    func infoUrl() throws -> String? {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "infoURL",
@@ -721,7 +760,7 @@ extension Interfaces.Character: Decodable {
 
 extension SelectionSet where TypeLock == Interfaces.Character {
     /// The id of the character
-    func id() -> String {
+    func id() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "id",
@@ -733,13 +772,16 @@ extension SelectionSet where TypeLock == Interfaces.Character {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.id[field.alias!]!
+            if let data = data.id[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
     }
     /// The name of the character
-    func name() -> String {
+    func name() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "name",
@@ -751,7 +793,10 @@ extension SelectionSet where TypeLock == Interfaces.Character {
         /* Decoder */
         switch self.response {
         case .fetched(let data):
-            return data.name[field.alias!]!
+            if let data = data.name[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
         case .fetching:
             return String.mockValue
         }
@@ -762,7 +807,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
     func on<Type>(
         droid: Selection<Type, Objects.Droid>,
         human: Selection<Type, Objects.Human>
-    ) -> Type {
+    ) throws -> Type {
         /* Selection */
         self.select([
             GraphQLField.fragment(type: "Droid", selection: droid.selection),
@@ -779,7 +824,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
                     primaryFunction: data.primaryFunction,
                     appearsIn: data.appearsIn
                 )
-                return droid.decode(data: data)
+                return try droid.decode(data: data)
             case .human:
                 let data = Objects.Human(
                     id: data.id,
@@ -788,7 +833,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
                     appearsIn: data.appearsIn,
                     infoUrl: data.infoUrl
                 )
-                return human.decode(data: data)
+                return try human.decode(data: data)
             }
         case .fetching:
             return droid.mock()
@@ -897,7 +942,7 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
     func on<Type>(
         human: Selection<Type, Objects.Human>,
         droid: Selection<Type, Objects.Droid>
-    ) -> Type {
+    ) throws -> Type {
         /* Selection */
         self.select([
             GraphQLField.fragment(type: "Human", selection: human.selection),
@@ -915,7 +960,7 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
                     appearsIn: data.appearsIn,
                     infoUrl: data.infoUrl
                 )
-                return human.decode(data: data)
+                return try human.decode(data: data)
             case .droid:
                 let data = Objects.Droid(
                     id: data.id,
@@ -923,7 +968,7 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
                     primaryFunction: data.primaryFunction,
                     appearsIn: data.appearsIn
                 )
-                return droid.decode(data: data)
+                return try droid.decode(data: data)
             }
         case .fetching:
             return human.mock()

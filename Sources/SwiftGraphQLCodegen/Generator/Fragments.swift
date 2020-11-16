@@ -40,7 +40,7 @@ extension GraphQLCodegen {
             "    func on<Type>(",
         ]
         code.append(contentsOf: parameters.indent(by: 8))
-        code.append("    ) -> Type {")
+        code.append("    ) throws -> Type {")
         code.append(contentsOf: selection.indent(by: 8))
         code.append(contentsOf: decoder.indent(by: 8))
         code.append("    }")
@@ -71,10 +71,8 @@ extension GraphQLCodegen {
             // The last parameter shouldn't have a comma.
             return "\(name): data.\(name)\(isLast ? "" : ",")"
         }.indent(by: 8))
-        code.append(contentsOf: [
-            "    )",
-            "    return \(name.camelCase).decode(data: data)"
-        ])
+        code.append("    )")
+        code.append("    return try \(name.camelCase).decode(data: data)")
         
         return code
     }
