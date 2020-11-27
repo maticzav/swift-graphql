@@ -10,9 +10,13 @@ struct Character: Identifiable {
     let message: String
 }
 
+let characterId = Selection<String, Interfaces.Character> {
+    try $0.id()
+}
+
 let character = Selection<Character, Interfaces.Character> {
     Character(
-        id: try $0.id(),
+        id: try $0.selection(characterId),
         name: try $0.name(),
         message: try $0.on(
             droid: .init { try $0.primaryFunction() },
@@ -150,14 +154,21 @@ struct ContentView: View {
                 }
                 .padding()
                 /* Characters */
+                HStack {
+                    Text("Characters")
+                        .font(Font.title)
+                    Spacer()
+                }
+                .padding()
                 List {
                     ForEach(state.model.characters, id: \.id) { character in
-                        VStack {
+                        VStack(alignment: .leading, spacing: 2) {
                             Text(character.name)
                             Text(character.message)
                         }
                     }
                 }
+                .listStyle(PlainListStyle())
             }
             .navigationTitle("StarWars 🌌")
         }

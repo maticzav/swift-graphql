@@ -264,7 +264,7 @@ SwiftGraphQL has generated phantom types for your operations, objects, interface
 The other parameter `Type` is what your constructor should return.
 
 
-##### nullable, list, non-nullable fields
+##### Nullable, list, and non-nullable fields
 
 Selection packs a collection of utility functions that let you select nullable and list fields using your existing selecitons.
 Each selection comes with three calculated properties that let you do that:
@@ -297,6 +297,70 @@ You can achieve the same effect using `Selection` static functions `.list`, `.nu
 let query = Selection<Void, Operations.Query> {
     let list = try $0.humans(Selection.list(human))
 }
+```
+
+##### Making selection on the entire type
+
+You might want to write a selection on the entire type from the selection composer itself. This usually happens if you have a distinct identifier reused in many types. 
+
+Consider the following scenario where we have an `id` field in `Human` type. There are many cases where we only query `id` field from the `Human` that's why we create a human id selection.
+
+```swift
+let humanId = Selection<HumanID, Objects.Human> {
+    HumanID.fromString(try $0.id())
+}
+```
+
+Now, we want to reuse that same selection when query a detailed human type. To do that, we can use `selection` helper method that lets you make a selection on the whole `TypeLock` from inside the selection.
+
+```swift
+struct Human {
+    let id: HumanID
+    let name: String
+}
+
+let human = Selection<Human, Objects.Human> {
+    Human(
+        id: try $0.selection(humanId),
+        name: try $0.name()
+    )
+}
+```
+
+An alternative approach would be to manually rewrite the selection inside `Human` again.
+
+```swift
+let human = Selection<Human, Objects.Human> {
+    Human(
+        id: HumanID.fromString(try $0.id()),
+        name: try $0.name()
+    )
+}
+```
+
+Having distinct types for ids of different object types is particularly useful in large projects as it gives you verification that you are not using a wrong identifier for a particular type of field. At first, this might seem useless and cumbersome, but it makes your code more robust once you get used to it.
+
+##### Mapping Selection
+
+You might want to map the result of your selection to a new type and get a selection for that new type.
+You can do that by calling a `map` function on selection and provide a mapping.
+
+```swift
+struct Human {
+    let id: String
+    let name: String
+}
+
+// Create a selection.
+let human = Selection<Human, Objects.Human> {
+    Human(
+        id: try $0.id(),
+        name: try $0.name(),
+    )
+}
+
+// Map the original selection on Human to return String.
+let humanName: Selection<String, Objects.Human> = human.map { $0.name }
 ```
 
 > ⚠️ Don't make any nested calls to the API. Use the first half of the initializer to fetch all the data and return the calculated result. Just don't make nested requests.
@@ -348,30 +412,6 @@ let characterUnion = Selection<String, Unions.CharacterUnion> {
 ```
 
 You'd usually want to create a Swift enumerator and have different selecitons return different cases.
-
-##### Mapping Selection
-
-You might want to map the result of your selection to a new type and get a selection for that new type.
-You can do that by calling a `map` function on selection and provide a mapping.
-
-```swift
-struct Human {
-    let id: String
-    let name: String
-}
-
-// Create a selection.
-let human = Selection<Human, Objects.Human> {
-    Human(
-        id: try $0.id(),
-        name: try $0.name(),
-    )
-}
-
-// Map the original selection on Human to return String.
-let humanName: Selection<String, Objects.Human> = human.map { $0.name }
-```
-
 
 ### `Interfaces`
 

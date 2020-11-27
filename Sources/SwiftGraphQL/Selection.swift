@@ -199,6 +199,20 @@ extension SelectionSet {
             return ()
         }
     }
+    
+    /// Lets you make a selection inside selection set on the entire field.
+    public func selection<T>(_ selection: Selection<T, TypeLock>) throws -> T {
+        /* Selection */
+        self.select(selection.selection)
+        
+        /* Decoder */
+        switch self.response {
+        case .fetched(let data):
+            return try selection.decode(data: data)
+        case .fetching:
+            return selection.mock()
+        }
+    }
 }
 
 /*
