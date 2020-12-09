@@ -39,9 +39,13 @@ public struct Argument: Hashable {
     
     /// Returns a new argument with the given value.
     public init<T: Encodable & Hashable>(name: String, type: String, value: T) {
+        // Argument information
         self.name = name
         self.type = type
-        self.hash = hashInt(value.hashValue)
+        
+        // Argument hash identifier.
+        let hashableValue = HashableValue(value: value, type: type)
+        self.hash = hashInt(hashableValue.hashValue)
         
         /* Encode value */
         if let value = value as? OptionalArgumentProtocol, !value.hasValue {
@@ -49,6 +53,17 @@ public struct Argument: Hashable {
         } else {
             self.value = try! VariableEncoder().encode(value)
         }
+    }
+    
+    // MARK: Hashable Value
+    
+    /*
+     We use hashable value struct to make sure that fields with same values
+     but different type annotations don't collide in the variables.
+     */
+    struct HashableValue<Value: Hashable>: Hashable {
+        let value: Value
+        let type: String
     }
 }
 

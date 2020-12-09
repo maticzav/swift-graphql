@@ -13,10 +13,26 @@ public enum GraphQLOperationType: String, Codable, CaseIterable {
 extension Collection where Element == GraphQLField {
     /// Returns a GraphQL query for the current selection set.
     func serialize(for operationType: GraphQLOperationType) -> String {
-        [ "\(operationType.rawValue)\(self.arguments.serializedForVariables) {",
-          self.serialized.indent(by: 2).joined(separator: "\n"),
-          "}"
+        serialize(for: operationType, operationName: nil)
+    }
+    
+    /// Returns a GraphQL query for the current selection set.
+    func serialize(for operationType: GraphQLOperationType, operationName: String?) -> String {
+        // http://spec.graphql.org/June2018/#sec-Language.Operations
+        let operationDefinition: String = [
+            operationType.rawValue,
+            operationName,
+            self.arguments.serializedForVariables,
+        ].compactMap { $0 }.joined(separator: " ")
+        
+        // http://spec.graphql.org/June2018/#sec-Selection-Sets
+        let query = [
+            "\(operationDefinition) {",
+            self.serialized.indent(by: 2).joined(separator: "\n"),
+            "}"
         ].joined(separator: "\n")
+        
+        return query
     }
 }
     
@@ -86,10 +102,10 @@ extension Collection where Element == Argument {
     }
     
     /// Returns serialized query variables.
-    var serializedForVariables: String {
+    var serializedForVariables: String? {
         // Return empty string if there's no arguments.
         if self.present.isEmpty {
-            return ""
+            return nil
         }
         // Wrap them in parantheses otherwise.
         return "(\(self.present.map { $0.serializedForVariable }.joined(separator: ", ")))"

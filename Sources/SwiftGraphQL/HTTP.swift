@@ -16,6 +16,8 @@ public struct SwiftGraphQL {
         _ selection: Selection<Type, TypeLock?>,
         /// Server endpoint URL.
         to endpoint: String,
+        /// The name of the GraphQL query.
+        operationName: String? = nil,
         /// A dictionary of key-value header pairs.
         headers: HttpHeaders = [:],
         /// Method to use. (Default to POST).
@@ -25,6 +27,7 @@ public struct SwiftGraphQL {
         perform(
             selection: selection,
             operation: TypeLock.operation,
+            operationName: operationName,
             endpoint: endpoint,
             method: method,
             headers: headers,
@@ -41,15 +44,19 @@ public struct SwiftGraphQL {
         _ selection: Selection<Type, TypeLock>,
         /// Server endpoint URL.
         to endpoint: String,
+        /// The name of the GraphQL query.
+        operationName: String? = nil,
         /// A dictionary of key-value header pairs.
         headers: HttpHeaders = [:],
         /// Method to use. (Default to POST).
         method: HttpMethod = .post,
+        /// Response handler function.
         onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Void where TypeLock: GraphQLOperation & Decodable {
         perform(
             selection: selection.nonNullOrFail,
             operation: TypeLock.operation,
+            operationName: operationName,
             endpoint: endpoint,
             method: method,
             headers: headers,
@@ -80,6 +87,7 @@ public struct SwiftGraphQL {
     private static func perform<Type, TypeLock>(
         selection: Selection<Type, TypeLock?>,
         operation: GraphQLOperationType,
+        operationName: String?,
         endpoint: String,
         method: HttpMethod,
         headers: HttpHeaders,
@@ -103,7 +111,7 @@ public struct SwiftGraphQL {
         
         
         // Compose a query.
-        let query = selection.selection.serialize(for: operation)
+        let query = selection.selection.serialize(for: operation, operationName: operationName)
         var variables = [String: NSObject]()
         
         for argument in selection.selection.arguments {

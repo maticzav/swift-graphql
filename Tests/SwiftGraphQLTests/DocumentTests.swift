@@ -76,7 +76,7 @@ final class DocumentTests: XCTestCase {
         /* Test */
         
         let query = """
-        query($\(argument.hash): String!) {
+        query ($\(argument.hash): String!) {
           \(fruit.alias!): fruit(name: $\(argument.hash))
         }
         """
@@ -103,7 +103,7 @@ final class DocumentTests: XCTestCase {
         /* Test */
         
         let query = """
-        query($\(argument.hash): String!) {
+        query ($\(argument.hash): String!) {
           \(fruit.alias!): fruit
           \(cart.alias!): cart(name: $\(argument.hash)) {
             __typename
@@ -142,5 +142,23 @@ final class DocumentTests: XCTestCase {
         """
         
         XCTAssertEqual(document.serialize(for: .query), query)
+    }
+    
+    // MARK: - Operation Names
+    
+    func testOperationName() {
+        
+        /* Document */
+        let fruit = GraphQLField.leaf(name: "fruit")
+        let document = [fruit]
+        
+        /* Test */
+        
+        let query = """
+        query Fruit {
+          \(fruit.alias!): fruit
+        }
+        """
+        XCTAssertEqual(document.serialize(for: .query, operationName: "Fruit"), query)
     }
 }
