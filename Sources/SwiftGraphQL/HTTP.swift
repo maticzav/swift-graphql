@@ -118,11 +118,18 @@ public struct SwiftGraphQL {
             variables[argument.hash] = argument.value
         }
         
-        let body: Any = [
+        // Construct a request body.
+        var body: [String: Any] = [
             "query": query,
-            "variables": variables
+            "variables": variables,
         ]
         
+        if let operationName = operationName {
+            // Add the operation name to the request body if needed.
+            body["operationName"] = operationName
+        }
+        
+        // Construct a HTTP request.
         let httpBody = try! JSONSerialization.data(
             withJSONObject: body,
             options: JSONSerialization.WritingOptions()
