@@ -8,7 +8,7 @@
 
 - ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
 - 🦅 **Swift-First:** It lets you use Swift constructs in favour of GraphQL language.
-- 🏖 **Time Saving:** I've built it so you don't have to waste your precous time.
+- 🏖 **Time Saving:** I've built it so you don't have to waste your precious time.
 - 🏔 **High Level:** You don't have to worry about naming collisions, variables, _anything_. Just Swift.
 
 ## Overview
