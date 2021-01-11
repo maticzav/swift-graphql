@@ -20,9 +20,10 @@ extension GraphQLCodegen {
         /* Data */
         
         // ObjectTypes for operations
-        let operations: [(name: String, type: GraphQL.ObjectType, operation: GraphQLCodegen.Operation)] = [
-            ("Query", schema.queryType.name.pascalCase, .query),
-            ("Mutation", schema.mutationType?.name.pascalCase,  .mutation),
+        let operations: [(name: String, type: GraphQL.ObjectType, availability: String?)] = [
+            ("Query", schema.queryType.name.pascalCase, nil),
+            ("Mutation", schema.mutationType?.name.pascalCase, nil),
+            ("Subscription", schema.subscriptionType?.name.pascalCase, "@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)"),
 //            ("RootSubscription",schema.subscriptionType?.name.pascalCase, .subscription)
         ].compactMap { (name, type, operation) in
             schema.objects.first(where: { $0.name == type }).map { (name, $0, operation) }
@@ -40,7 +41,7 @@ extension GraphQLCodegen {
         /* Code parts. */
         
         let operationsPart = try operations.map {
-            try generateOperation($0.name, for: $0.type, operation: $0.operation).joined(separator: "\n")
+            try generateOperation($0.name, for: $0.type, availability: $0.availability).joined(separator: "\n")
         }.joined(separator: "\n\n\n")
         
         let objectsPart = try objects.map {

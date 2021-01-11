@@ -5,7 +5,7 @@ extension GraphQLCodegen {
     func generateOperation(
         _ identifier: String,
         for type: GraphQL.ObjectType,
-        operation: Operation
+        availability: String?
     ) throws -> [String] {
         /* Code */
         var code = [String]()
@@ -14,6 +14,7 @@ extension GraphQLCodegen {
         code.append("")
         
         /* Definition*/
+        availability.map { code.append($0) }
         code.append("extension Operations {")
         code.append(contentsOf:
             try generateEncodableStruct(
@@ -26,29 +27,24 @@ extension GraphQLCodegen {
         code.append("")
         
         /* Operation*/
-        code.append("extension Operations.\(identifier): GraphQLOperation {")
-        code.append("    static var operation: GraphQLOperationType { \(operation.rawValue) }")
+        availability.map { code.append($0) }
+        code.append("extension Operations.\(identifier): GraphQL\(identifier) {")
         code.append("}")
         code.append("")
         
         /* Decoder */
+        availability.map { code.append($0) }
         code.append("extension Operations.\(identifier): Decodable {")
         code.append(contentsOf: try generateDecodableExtension(fields: type.fields).indent(by: 4))
         code.append("}")
         code.append("")
         
         /* Fields */
+        availability.map { code.append($0) }
         code.append("extension Fields where TypeLock == Operations.\(identifier) {")
         code.append(contentsOf: try type.fields.flatMap { try generateField($0) }.indent(by: 4))
         code.append("}")
         
         return code
-    }
-    
-    // MARK: - Private helpers
-    
-    enum Operation: String {
-        case query = ".query"
-        case mutation = ".mutation"
     }
 }

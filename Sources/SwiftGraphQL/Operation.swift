@@ -6,5 +6,19 @@
 */
 
 public protocol GraphQLOperation {
-    static var operation: GraphQLOperationType { get }
+    static var operation: String { get }
 }
+public protocol GraphQLQuery: GraphQLOperation {}
+public protocol GraphQLMutation: GraphQLOperation {}
+public protocol GraphQLSubscription: GraphQLOperation {}
+
+extension GraphQLQuery {
+    public static var operation: String { "query" }
+}
+extension GraphQLMutation {
+    public static var operation: String { "mutation" }
+}
+extension GraphQLSubscription {
+    public static var operation: String { "subscription" }
+}
+
