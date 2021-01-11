@@ -46,6 +46,7 @@ struct Character: Identifiable {
     let id: String
     let name: String
     let message: String
+//    let friend: [Character]
 }
 
 struct Human {

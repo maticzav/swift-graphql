@@ -29,7 +29,7 @@ extension GraphQLCodegen {
         
         code.append("")
         /* Fields */
-        code.append("extension SelectionSet where TypeLock == Objects.\(name) {")
+        code.append("extension Fields where TypeLock == Objects.\(name) {")
         code.append(contentsOf: try type.fields.flatMap { try generateField($0) }.indent(by: 4))
         code.append("}")
         

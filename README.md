@@ -146,7 +146,7 @@ let query = Selection<Int, Operations.Query> {
 
 In the following few sections I want to show you how to set up SwiftGraphQL and create your first query. 
 
-> You can try connecting to your API right away or use `https://swift-graphql.heroku.com` as a playground.
+> You can try connecting to your API right away or use `https://swapi-ql.herokuapp.com/graphql` as a playground.
 
 We'll create a code generation build step using SwiftPackage executable and explore the API using XCode autocompletion.
 
@@ -562,6 +562,10 @@ query($__rsdpxy7uqurl: Greeting!, $__l9q38fwdev22: Greeting!, $_b2ryvzutf9x2: ID
   }
 }
 ```
+
+### How do we populate the values?
+
+We use the limitation of Swift's types that you cannot recursively reference a nullable type, but can reference a list type. To prevent cycles in value mocking, we always return empty lists and fill all scalars and referenced objects with values. If you were to create a cycle, Swift wouldn't let you compile your app.
 
 ### Why do I have to include try whenever I select something?
 

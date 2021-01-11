@@ -16,9 +16,9 @@ final class SelectionTests: XCTestCase {
         /* Selection */
         let selection = Selection<String, String> {
             switch $0.response {
-            case .fetched(let data):
+            case .decoding(let data):
                 return data
-            case .fetching:
+            case .mocking:
                 return "wrong"
             }
         }
@@ -43,9 +43,9 @@ final class SelectionTests: XCTestCase {
         """.data(using: .utf8)!
         let selection = Selection<Int, Int> {
             switch $0.response {
-            case .fetched(let data):
+            case .decoding(let data):
                 return data
-            case .fetching:
+            case .mocking:
                 return 0
             }
         }
@@ -70,10 +70,10 @@ final class SelectionTests: XCTestCase {
         """.data(using: .utf8)!
         let selection = Selection<String, String> {
             switch $0.response {
-            case .fetched(let data):
+            case .decoding(let data):
                 print(data)
                 return data
-            case .fetching:
+            case .mocking:
                 return "wrong"
             }
         }
@@ -103,9 +103,9 @@ final class SelectionTests: XCTestCase {
         """.data(using: .utf8)!
         let selection = Selection<String, String> {
             switch $0.response {
-            case .fetched(let data):
+            case .decoding(let data):
                 return data
-            case .fetching:
+            case .mocking:
                 return "wrong"
             }
         }

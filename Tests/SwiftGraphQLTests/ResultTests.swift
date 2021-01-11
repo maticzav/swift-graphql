@@ -11,9 +11,9 @@ final class ParserTests: XCTestCase {
         """.data(using: .utf8)!
         let selection = Selection<String, String> {
             switch $0.response {
-            case .fetched(let data):
+            case .decoding(let data):
                 return data
-            case .fetching:
+            case .mocking:
                 return "wrong"
             }
         }
@@ -42,9 +42,9 @@ final class ParserTests: XCTestCase {
         """.data(using: .utf8)!
         let selection = Selection<String, String> {
             switch $0.response {
-            case .fetched(let data):
+            case .decoding(let data):
                 return data
-            case .fetching:
+            case .mocking:
                 return "wrong"
             }
         }
@@ -85,9 +85,9 @@ final class ParserTests: XCTestCase {
         
         let selection = Selection<String, String> {
             switch $0.response {
-            case .fetched(let data):
+            case .decoding(let data):
                 return data
-            case .fetching:
+            case .mocking:
                 return "wrong"
             }
         }

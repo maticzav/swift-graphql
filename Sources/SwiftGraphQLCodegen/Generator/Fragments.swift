@@ -25,18 +25,18 @@ extension GraphQLCodegen {
         let decoder: [String] =
             [ "/* Decoder */",
               "switch self.response {",
-              "case .fetched(let data):",
+              "case .decoding(let data):",
               "    switch data.__typename {",
             ] + possibleTypes.flatMap { generateTypeDecoder(for: $0, with: objects) }.indent(by: 4) +
             [ "    }",
-              "case .fetching:",
+              "case .mocking:",
               "    return \(possibleTypes.first!.namedType.name.camelCase).mock()",
               "}",
             ]
         
         /* Code */
         var code = [
-            "extension SelectionSet where TypeLock == \(name) {",
+            "extension Fields where TypeLock == \(name) {",
             "    func on<Type>(",
         ]
         code.append(contentsOf: parameters.indent(by: 8))

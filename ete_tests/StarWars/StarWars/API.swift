@@ -119,7 +119,7 @@ extension Operations.Query: Decodable {
         }
 }
 
-extension SelectionSet where TypeLock == Operations.Query {
+extension Fields where TypeLock == Operations.Query {
     func human<Type>(id: String, _ selection: Selection<Type, Objects.Human?>) throws -> Type {
         /* Selection */
         let field = GraphQLField.composite(
@@ -133,9 +133,9 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             return try selection.decode(data: data.human[field.alias!])
-        case .fetching:
+        case .mocking:
             return selection.mock()
         }
     }
@@ -152,9 +152,9 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             return try selection.decode(data: data.droid[field.alias!])
-        case .fetching:
+        case .mocking:
             return selection.mock()
         }
     }
@@ -171,9 +171,9 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             return try selection.decode(data: data.character[field.alias!])
-        case .fetching:
+        case .mocking:
             return selection.mock()
         }
     }
@@ -189,9 +189,9 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             return try selection.decode(data: data.luke[field.alias!])
-        case .fetching:
+        case .mocking:
             return selection.mock()
         }
     }
@@ -207,12 +207,12 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.humans[field.alias!] {
                 return try selection.decode(data: data)
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return selection.mock()
         }
     }
@@ -228,12 +228,12 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.droids[field.alias!] {
                 return try selection.decode(data: data)
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return selection.mock()
         }
     }
@@ -249,12 +249,12 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.characters[field.alias!] {
                 return try selection.decode(data: data)
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return selection.mock()
         }
     }
@@ -270,12 +270,12 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.greeting[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
@@ -290,12 +290,12 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.whoami[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
@@ -310,12 +310,12 @@ extension SelectionSet where TypeLock == Operations.Query {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.time[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return DateTime.mockValue
         }
     }
@@ -399,7 +399,7 @@ extension Objects.Droid: Decodable {
         }
 }
 
-extension SelectionSet where TypeLock == Objects.Droid {
+extension Fields where TypeLock == Objects.Droid {
     func id() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
@@ -411,12 +411,12 @@ extension SelectionSet where TypeLock == Objects.Droid {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.id[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
@@ -431,12 +431,12 @@ extension SelectionSet where TypeLock == Objects.Droid {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.name[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
@@ -451,12 +451,12 @@ extension SelectionSet where TypeLock == Objects.Droid {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.primaryFunction[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
@@ -471,12 +471,12 @@ extension SelectionSet where TypeLock == Objects.Droid {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.appearsIn[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return []
         }
     }
@@ -563,7 +563,7 @@ extension Objects.Human: Decodable {
         }
 }
 
-extension SelectionSet where TypeLock == Objects.Human {
+extension Fields where TypeLock == Objects.Human {
     func id() throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
@@ -575,12 +575,12 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.id[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
@@ -595,12 +595,12 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.name[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
@@ -616,9 +616,9 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             return data.homePlanet[field.alias!]
-        case .fetching:
+        case .mocking:
             return nil
         }
     }
@@ -633,12 +633,12 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.appearsIn[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return []
         }
     }
@@ -653,9 +653,9 @@ extension SelectionSet where TypeLock == Objects.Human {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             return data.infoUrl[field.alias!]
-        case .fetching:
+        case .mocking:
             return nil
         }
     }
@@ -758,7 +758,7 @@ extension Interfaces.Character: Decodable {
         }
 }
 
-extension SelectionSet where TypeLock == Interfaces.Character {
+extension Fields where TypeLock == Interfaces.Character {
     /// The id of the character
     func id() throws -> String {
         /* Selection */
@@ -771,12 +771,12 @@ extension SelectionSet where TypeLock == Interfaces.Character {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.id[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
@@ -792,18 +792,18 @@ extension SelectionSet where TypeLock == Interfaces.Character {
     
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             if let data = data.name[field.alias!] {
                 return data
             }
             throw SG.HttpError.badpayload
-        case .fetching:
+        case .mocking:
             return String.mockValue
         }
     }
 }
 
-extension SelectionSet where TypeLock == Interfaces.Character {
+extension Fields where TypeLock == Interfaces.Character {
     func on<Type>(
         droid: Selection<Type, Objects.Droid>,
         human: Selection<Type, Objects.Human>
@@ -815,7 +815,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
         ])
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             switch data.__typename {
             case .droid:
                 let data = Objects.Droid(
@@ -835,7 +835,7 @@ extension SelectionSet where TypeLock == Interfaces.Character {
                 )
                 return try human.decode(data: data)
             }
-        case .fetching:
+        case .mocking:
             return droid.mock()
         }
     }
@@ -938,7 +938,7 @@ extension Unions.CharacterUnion: Decodable {
         }
 }
 
-extension SelectionSet where TypeLock == Unions.CharacterUnion {
+extension Fields where TypeLock == Unions.CharacterUnion {
     func on<Type>(
         human: Selection<Type, Objects.Human>,
         droid: Selection<Type, Objects.Droid>
@@ -950,7 +950,7 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
         ])
         /* Decoder */
         switch self.response {
-        case .fetched(let data):
+        case .decoding(let data):
             switch data.__typename {
             case .human:
                 let data = Objects.Human(
@@ -970,7 +970,7 @@ extension SelectionSet where TypeLock == Unions.CharacterUnion {
                 )
                 return try droid.decode(data: data)
             }
-        case .fetching:
+        case .mocking:
             return human.mock()
         }
     }

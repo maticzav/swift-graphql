@@ -26,6 +26,11 @@ let human = Selection<Human, Objects.Human> {
 
 let foo: Selection<Human?, Objects.Human> = human.map { $0 }
 
+let luke = Selection<String?, Interfaces.Character> { _ in
+    return nil
+}
+
+let nullableLuke: Selection<String?, Interfaces.Character?> = luke.optional()
 
 
 let characterInterface = Selection<String, Interfaces.Character> {
@@ -48,6 +53,8 @@ let characterUnion = Selection<String, Unions.CharacterUnion> {
         droid: .init { try $0.primaryFunction() }
     )
 }
+
+// MARK: - Query
 
 let query = Selection<Data, Operations.Query> {
     let english = try $0.greeting()

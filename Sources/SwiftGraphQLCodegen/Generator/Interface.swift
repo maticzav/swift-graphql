@@ -51,7 +51,7 @@ extension GraphQLCodegen {
         )
         code.append("}")
         code.append("")
-        code.append("extension SelectionSet where TypeLock == Interfaces.\(name) {")
+        code.append("extension Fields where TypeLock == Interfaces.\(name) {")
         code.append(contentsOf:  try type.fields.flatMap { try generateField($0) }.indent(by: 4))
         code.append("}")
         code.append("")
