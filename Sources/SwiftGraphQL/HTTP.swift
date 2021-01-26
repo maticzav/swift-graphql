@@ -23,7 +23,7 @@ public struct SwiftGraphQL {
         /// Method to use. (Default to POST).
         method: HttpMethod = .post,
         onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Void where TypeLock: GraphQLOperation & Decodable {
+    ) -> Void where TypeLock: GraphQLHttpOperation & Decodable {
         perform(
             selection: selection,
             operationName: operationName,
@@ -51,7 +51,7 @@ public struct SwiftGraphQL {
         method: HttpMethod = .post,
         /// Response handler function.
         onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Void where TypeLock: GraphQLOperation & Decodable {
+    ) -> Void where TypeLock: GraphQLHttpOperation & Decodable {
         perform(
             selection: selection.nonNullOrFail,
             operationName: operationName,
@@ -62,66 +62,9 @@ public struct SwiftGraphQL {
         )
     }
     
-    // MARK: Subscriptions
-    
-    /// Sends a subscription **once**. Use `observe` to listen to changes
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    public static func send<Type, TypeLock>(
-        _ selection: Selection<Type, TypeLock?>,
-        /// Server endpoint URL.
-        to endpoint: String,
-        /// The name of the GraphQL query.
-        operationName: String? = nil,
-        /// A dictionary of key-value header pairs.
-        headers: HttpHeaders = ["Sec-WebSocket-Protocol": "graphql-subscriptions"],
-        /// Method to use. Doesn't change anything for Subscriptions
-        method: HttpMethod = .get,
-        onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Void where TypeLock: GraphQLSubscription & Decodable {
-        var token: Token?
-        _ = token // Removes warning: variable 'token' was written to, but never read
-        token = listen(
-            selection: selection,
-            operationName: operationName,
-            endpoint: endpoint,
-            headers: headers,
-            eventHandler: {
-                guard token != nil else { return } // Don't call completionHandler for the HttpError.cancelled changeHandler
-                completionHandler($0)
-                token = nil
-            }
-        )
-    }
-    
-    /// Sends a subscription **once**. Use `observe` to listen to changes
-    ///
-    /// - Note: This is a shortcut function for when you are expecting the result.
-    ///         The only difference between this one and the other one is that you may select
-    ///         on non-nullable TypeLock instead of a nullable one.
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    public static func send<Type, TypeLock>(
-        _ selection: Selection<Type, TypeLock>,
-        /// Server endpoint URL.
-        to endpoint: String,
-        /// The name of the GraphQL query.
-        operationName: String? = nil,
-        /// A dictionary of key-value header pairs.
-        headers: HttpHeaders = ["Sec-WebSocket-Protocol": "graphql-subscriptions"],
-        /// Method to use. Doesn't change anything for Subscriptions
-        method: HttpMethod = .get,
-        onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Void where TypeLock: GraphQLSubscription & Decodable {
-        send(selection.nonNullOrFail,
-             to: endpoint,
-             operationName: operationName,
-             headers: headers,
-             method: method,
-             onComplete: completionHandler)
-    }
-    
     /// Observe a subscription for as long as you keep Token in memory
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    public static func observe<Type, TypeLock>(
+    public static func listen<Type, TypeLock>(
         _ selection: Selection<Type, TypeLock?>,
         /// Server endpoint URL.
         to endpoint: String,
@@ -130,7 +73,7 @@ public struct SwiftGraphQL {
         /// A dictionary of key-value header pairs.
         headers: HttpHeaders = ["Sec-WebSocket-Protocol": "graphql-subscriptions"],
         onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Token where TypeLock: GraphQLSubscription & Decodable {
+    ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
         listen(
             selection: selection,
             operationName: operationName,
@@ -146,7 +89,7 @@ public struct SwiftGraphQL {
     ///         The only difference between this one and the other one is that you may select
     ///         on non-nullable TypeLock instead of a nullable one.
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    public static func observe<Type, TypeLock>(
+    public static func listen<Type, TypeLock>(
         _ selection: Selection<Type, TypeLock>,
         /// Server endpoint URL.
         to endpoint: String,
@@ -155,7 +98,7 @@ public struct SwiftGraphQL {
         /// A dictionary of key-value header pairs.
         headers: HttpHeaders = ["Sec-WebSocket-Protocol": "graphql-subscriptions"],
         onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Token where TypeLock: GraphQLSubscription & Decodable {
+    ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
         listen(
             selection: selection.nonNullOrFail,
             operationName: operationName,
@@ -284,7 +227,7 @@ public struct SwiftGraphQL {
         endpoint: String,
         headers: HttpHeaders,
         eventHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Token where TypeLock: GraphQLSubscription & Decodable {
+    ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
         
         var endpoint = endpoint
         if endpoint.hasPrefix("http") {
@@ -302,7 +245,7 @@ public struct SwiftGraphQL {
             let message: [String: Any] = [
                 "payload": try! JSONSerialization.jsonObject(with: request.httpBody!, options: []),
                 "type": "start"
-    //            "id": UUID().uuidString
+                //"id": UUID().uuidString
             ]
             request.httpBody = nil
             

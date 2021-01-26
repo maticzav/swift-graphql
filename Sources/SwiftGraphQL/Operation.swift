@@ -8,17 +8,8 @@
 public protocol GraphQLOperation {
     static var operation: String { get }
 }
-public protocol GraphQLQuery: GraphQLOperation {}
-public protocol GraphQLMutation: GraphQLOperation {}
-public protocol GraphQLSubscription: GraphQLOperation {}
 
-extension GraphQLQuery {
-    public static var operation: String { "query" }
-}
-extension GraphQLMutation {
-    public static var operation: String { "mutation" }
-}
-extension GraphQLSubscription {
-    public static var operation: String { "subscription" }
-}
+public protocol GraphQLHttpOperation: GraphQLOperation {}
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+public protocol GraphQLWebSocketOperation: GraphQLOperation {}
