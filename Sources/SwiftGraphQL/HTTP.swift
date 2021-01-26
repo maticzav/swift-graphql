@@ -12,15 +12,18 @@ public struct SwiftGraphQL {
     // MARK: - Public Methods
     
     /// Sends a query request to the server.
+    ///
+    /// - parameter endpoint: Server endpoint URL.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter headers: A dictionary of key-value header pairs.
+    /// - parameter onEvent: Closure that is called each subscription event.
+    /// - parameter method: Method to use. (Default to POST).
+    ///
     public static func send<Type, TypeLock>(
         _ selection: Selection<Type, TypeLock?>,
-        /// Server endpoint URL.
         to endpoint: String,
-        /// The name of the GraphQL query.
         operationName: String? = nil,
-        /// A dictionary of key-value header pairs.
         headers: HttpHeaders = [:],
-        /// Method to use. (Default to POST).
         method: HttpMethod = .post,
         onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Void where TypeLock: GraphQLHttpOperation & Decodable {
@@ -39,17 +42,19 @@ public struct SwiftGraphQL {
     /// - Note: This is a shortcut function for when you are expecting the result.
     ///         The only difference between this one and the other one is that you may select
     ///         on non-nullable TypeLock instead of a nullable one.
+    ///
+    /// - parameter endpoint: Server endpoint URL.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter headers: A dictionary of key-value header pairs.
+    /// - parameter onEvent: Closure that is called each subscription event.
+    /// - parameter method: Method to use. (Default to POST).
+    ///
     public static func send<Type, TypeLock>(
         _ selection: Selection<Type, TypeLock>,
-        /// Server endpoint URL.
         to endpoint: String,
-        /// The name of the GraphQL query.
         operationName: String? = nil,
-        /// A dictionary of key-value header pairs.
         headers: HttpHeaders = [:],
-        /// Method to use. (Default to POST).
         method: HttpMethod = .post,
-        /// Response handler function.
         onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Void where TypeLock: GraphQLHttpOperation & Decodable {
         perform(
@@ -63,14 +68,17 @@ public struct SwiftGraphQL {
     }
     
     /// Observe a subscription for as long as you keep Token in memory
+    ///
+    /// - parameter endpoint: Server endpoint URL.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter headers: A dictionary of key-value header pairs.
+    /// - parameter onEvent: Closure that is called each subscription event.
+    ///
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     public static func listen<Type, TypeLock>(
         _ selection: Selection<Type, TypeLock?>,
-        /// Server endpoint URL.
         to endpoint: String,
-        /// The name of the GraphQL query.
         operationName: String? = nil,
-        /// A dictionary of key-value header pairs.
         headers: HttpHeaders = ["Sec-WebSocket-Protocol": "graphql-subscriptions"],
         onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
@@ -88,14 +96,17 @@ public struct SwiftGraphQL {
     /// - Note: This is a shortcut function for when you are expecting the result.
     ///         The only difference between this one and the other one is that you may select
     ///         on non-nullable TypeLock instead of a nullable one.
+    ///
+    /// - parameter endpoint: Server endpoint URL.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter headers: A dictionary of key-value header pairs.
+    /// - parameter onEvent: Closure that is called each subscription event.
+    ///
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     public static func listen<Type, TypeLock>(
         _ selection: Selection<Type, TypeLock>,
-        /// Server endpoint URL.
         to endpoint: String,
-        /// The name of the GraphQL query.
         operationName: String? = nil,
-        /// A dictionary of key-value header pairs.
         headers: HttpHeaders = ["Sec-WebSocket-Protocol": "graphql-subscriptions"],
         onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
