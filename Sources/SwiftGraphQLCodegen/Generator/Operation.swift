@@ -29,7 +29,7 @@ extension GraphQLCodegen {
         /* Operation*/
         operation.availability.map { code.append($0) }
         code.append("extension Operations.\(identifier): \(operation.type) {")
-        code.append("    static var operation: String = \"\(operation.rawValue)\" ")
+        code.append("    static var operation: String { \"\(operation.rawValue)\" } ")
         code.append("}")
         code.append("")
         
