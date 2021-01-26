@@ -1,7 +1,6 @@
 import { makeSchema } from 'nexus'
-import { ApolloServer } from 'apollo-server'
+import { ApolloServer } from 'apollo-server-express'
 import * as path from 'path'
-import * as fs from 'fs'
 
 import { data } from './data'
 import * as allTypes from './graphql'
@@ -60,7 +59,11 @@ const server = new ApolloServer({
     {
       requestDidStart(requestContext) {
         console.log(requestContext.request.query)
-        return {}
+        return {
+          willSendResponse(res) {
+            console.log(res.response.data)
+          },
+        }
       },
     },
   ],

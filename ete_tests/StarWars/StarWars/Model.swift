@@ -14,23 +14,23 @@ class Model: ObservableObject {
         print("FETCHING")
         
         // Perform query.
-        SG.send(
-            query,
-            to: "http://localhost:4000",
-            operationName: "Query",
-            headers: ["Authorization": "Bearer Matic"]
-        ) { result in
-            do {
-                let data = try result.get()
-                print("DATA")
-                print(data)
-                DispatchQueue.main.async {
-                    self.data = data.data
-                }
-            } catch let error {
-                print(error)
-            }
-        }
+//        SG.send(
+//            query,
+//            to: "http://localhost:4000",
+//            operationName: "Query",
+//            headers: ["Authorization": "Bearer Matic"]
+//        ) { result in
+//            do {
+//                let data = try result.get()
+//                print("DATA")
+//                print(data)
+//                DispatchQueue.main.async {
+//                    self.data = data.data
+//                }
+//            } catch let error {
+//                print(error)
+//            }
+//        }
     }
     
     func startListening() {
@@ -42,10 +42,7 @@ class Model: ObservableObject {
         
         token = SG.listen(
             subscription,
-            to: "http://localhost:4000",
-            headers: [
-                "Authorization": "Bearer Matic"
-            ]
+            to: "ws://localhost:4000"
         ) { [weak self] result in
             do {
                 let resultValue = try result.get()
@@ -53,7 +50,7 @@ class Model: ObservableObject {
                     self?.subscriptionData = resultValue.data
                 }
             } catch let error {
-                print(error)
+//                print("SUBS", error)
             }
         }
     }

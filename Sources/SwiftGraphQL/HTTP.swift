@@ -245,12 +245,6 @@ public struct SwiftGraphQL {
         eventHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
         
-        var endpoint = endpoint
-        if endpoint.hasPrefix("http") {
-            endpoint = "ws" + endpoint.dropFirst("http".count)
-            print("Modified endpoint scheme to work with web sockets:", endpoint)
-        }
-        
         switch request(selection: selection, operationName: operationName, endpoint: endpoint, headers: headers, method: .get) {
         case .failure(let error):
             eventHandler(.failure(error))
@@ -285,10 +279,13 @@ public struct SwiftGraphQL {
                             return eventHandler(.failure(.network(error)))
                         }
                     case .success(let message):
+                        print("MSG", message)
                         // Try to serialize the response.
-                        if let data = message.data,
-                           let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
-                            eventHandler(.success(result))
+                        if let data = message.data {
+                            print("DATA", data)
+                            if let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
+                                eventHandler(.success(result))
+                            }
                         } else {
                             eventHandler(.failure(.badpayload))
                         }
@@ -307,6 +304,7 @@ public struct SwiftGraphQL {
         
             // Send message
             socket.send(.data(messageData)) { error in
+                print(error)
                 if error != nil {
                     eventHandler(.failure(.badpayload))
                 }
