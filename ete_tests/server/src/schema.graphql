@@ -48,12 +48,12 @@ enum Episode {
 }
 
 input Greeting {
-  language: Language!
+  language: Language
   name: String!
 }
 
 input GreetingOptions {
-  prefix: String!
+  prefix: String
 }
 
 """
@@ -95,7 +95,7 @@ type Query {
     id: ID!
   ): Droid
   droids: [Droid!]!
-  greeting(input: Greeting!): String!
+  greeting(input: Greeting): String!
   human(
     """
     id of the character

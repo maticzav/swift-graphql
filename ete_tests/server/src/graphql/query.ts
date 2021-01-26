@@ -1,4 +1,4 @@
-import { idArg, arg, queryType, nonNull } from 'nexus'
+import { idArg, arg, queryType, nonNull, nullable } from 'nexus'
 import { getAuthorization } from '../utils'
 
 /* Query */
@@ -76,7 +76,7 @@ export const Query = queryType({
 
     t.string('greeting', {
       args: {
-        input: nonNull(
+        input: nullable(
           arg({
             type: 'Greeting',
           }),
