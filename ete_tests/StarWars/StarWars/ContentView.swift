@@ -54,7 +54,7 @@ struct ContentView: View {
                     Text("Subscription number")
                     Text("\(model.subscriptionData)")
                     Spacer()
-                }
+                }.padding([.horizontal, .bottom])
             }
             .navigationTitle("StarWars 🌌")
         }

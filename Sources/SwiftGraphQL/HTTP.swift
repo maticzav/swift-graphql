@@ -79,7 +79,8 @@ public struct SwiftGraphQL {
         _ selection: Selection<Type, TypeLock?>,
         to endpoint: String,
         operationName: String? = nil,
-        headers: HttpHeaders = ["Sec-WebSocket-Protocol": "graphql-subscriptions"],
+        headers: HttpHeaders = [:],
+        protocol webSocketProtocol: String = "graphql-subscriptions",
         onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
         listen(
@@ -87,6 +88,7 @@ public struct SwiftGraphQL {
             operationName: operationName,
             endpoint: endpoint,
             headers: headers,
+            webSocketProtocol: webSocketProtocol,
             eventHandler: eventHandler
         )
     }
@@ -107,7 +109,8 @@ public struct SwiftGraphQL {
         _ selection: Selection<Type, TypeLock>,
         to endpoint: String,
         operationName: String? = nil,
-        headers: HttpHeaders = ["Sec-WebSocket-Protocol": "graphql-subscriptions"],
+        headers: HttpHeaders = [:],
+        protocol webSocketProtocol: String = "graphql-subscriptions",
         onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
         listen(
@@ -115,6 +118,7 @@ public struct SwiftGraphQL {
             operationName: operationName,
             endpoint: endpoint,
             headers: headers,
+            webSocketProtocol: webSocketProtocol,
             eventHandler: eventHandler
         )
     }
@@ -237,6 +241,7 @@ public struct SwiftGraphQL {
         operationName: String?,
         endpoint: String,
         headers: HttpHeaders,
+        webSocketProtocol: String,
         eventHandler: @escaping (Response<Type, TypeLock>) -> Void
     ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
         
@@ -251,7 +256,10 @@ public struct SwiftGraphQL {
             eventHandler(.failure(error))
             return Token.empty
         case .success(var request):
-
+            if request.value(forHTTPHeaderField: "Sec-WebSocket-Protocol") == nil {
+                request.setValue(webSocketProtocol, forHTTPHeaderField: "Sec-WebSocket-Protocol")
+            }
+            
             // Construct a message.
             let message: [String: Any] = [
                 "payload": try! JSONSerialization.jsonObject(with: request.httpBody!, options: []),

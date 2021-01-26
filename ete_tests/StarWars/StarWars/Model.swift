@@ -44,8 +44,7 @@ class Model: ObservableObject {
             subscription,
             to: "http://localhost:4000",
             headers: [
-                "Authorization": "Bearer Matic",
-                "Sec-WebSocket-Protocol": "graphql-subscriptions"
+                "Authorization": "Bearer Matic"
             ]
         ) { [weak self] result in
             do {
