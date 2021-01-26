@@ -50,11 +50,17 @@ struct ContentView: View {
                     }
                 }
                 .listStyle(PlainListStyle())
+                HStack {
+                    Text("Subscription number")
+                    Text("\(model.subscriptionData)")
+                    Spacer()
+                }
             }
             .navigationTitle("StarWars 🌌")
         }
         .onAppear(perform: {
             model.fetch()
+            model.startListening()
         })
     }
 }

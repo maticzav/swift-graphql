@@ -5,6 +5,8 @@ class Model: ObservableObject {
     // MARK: - State
     
     @Published private(set) var data = Data()
+    @Published private(set) var subscriptionData: Int = 0
+    private var token: Token?
 
     // MARK: - Intentions
     
@@ -24,6 +26,32 @@ class Model: ObservableObject {
                 print(data)
                 DispatchQueue.main.async {
                     self.data = data.data
+                }
+            } catch let error {
+                print(error)
+            }
+        }
+    }
+    
+    func startListening() {
+        print("STARTED LISTENING")
+        
+        let subscription = Selection<Int, Operations.Subscription> {
+            return try $0.number()
+        }
+        
+        token = SG.listen(
+            subscription,
+            to: "http://localhost:4000",
+            headers: [
+                "Authorization": "Bearer Matic",
+                "Sec-WebSocket-Protocol": "graphql-subscriptions"
+            ]
+        ) { [weak self] result in
+            do {
+                let resultValue = try result.get()
+                DispatchQueue.main.async {
+                    self?.subscriptionData = resultValue.data
                 }
             } catch let error {
                 print(error)
