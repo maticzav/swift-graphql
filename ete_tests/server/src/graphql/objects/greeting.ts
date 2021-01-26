@@ -1,14 +1,11 @@
-import { inputObjectType } from '@nexus/schema'
+import { inputObjectType } from 'nexus'
 
 export const Greeting = inputObjectType({
   name: 'Greeting',
   definition(t) {
     /* Fields */
-    t.field('language', {
-      type: 'Language',
-      required: false,
-    })
-    t.string('name', { required: true })
+    t.field('language', { type: 'Language' })
+    t.string('name')
     // t.field('options', { type: 'GreetingOptions' })
   },
 })

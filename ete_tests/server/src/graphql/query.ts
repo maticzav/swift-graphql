@@ -1,55 +1,57 @@
-import { objectType, idArg, arg } from '@nexus/schema'
+import { idArg, arg, queryType, nonNull } from 'nexus'
 import { getAuthorization } from '../utils'
 
 /* Query */
 
-export const Query = objectType({
-  name: 'Query',
+export const Query = queryType({
   definition(t) {
     /* Singles */
 
-    t.field('human', {
+    t.nullable.field('human', {
       type: 'Human',
       args: {
-        id: idArg({
-          required: true,
-          description: 'id of the character',
-        }),
+        id: nonNull(
+          idArg({
+            description: 'id of the character',
+          }),
+        ),
       },
-      nullable: true,
+
       resolve: (_, { id }, ctx) => ctx.data.getHuman(id),
     })
 
-    t.field('droid', {
+    t.nullable.field('droid', {
       type: 'Droid',
       args: {
-        id: idArg({
-          required: true,
-          description: 'id of the character',
-        }),
+        id: nonNull(
+          idArg({
+            description: 'id of the character',
+          }),
+        ),
       },
-      nullable: true,
+
       resolve: (_, { id }, ctx) => ctx.data.getDroid(id),
     })
 
     /* Union */
 
-    t.field('character', {
+    t.nullable.field('character', {
       type: 'CharacterUnion',
       args: {
-        id: idArg({
-          required: true,
-          description: 'id of the character',
-        }),
+        id: nonNull(
+          idArg({
+            description: 'id of the character',
+          }),
+        ),
       },
-      nullable: true,
+
       resolve: (_, { id }, ctx) => ctx.data.getCharacter(id),
     })
 
     /* Never Null Nulalble */
-    t.field('luke', {
+    t.nullable.field('luke', {
       type: 'Human',
-      nullable: true,
+
       resolve: (_, {}, ctx) => ctx.data.getHuman('1000')!,
     })
 
@@ -74,10 +76,11 @@ export const Query = objectType({
 
     t.string('greeting', {
       args: {
-        input: arg({
-          type: 'Greeting',
-          required: false,
-        }),
+        input: nonNull(
+          arg({
+            type: 'Greeting',
+          }),
+        ),
       },
       resolve: (_, { input }, ctx) => {
         if (!input) return 'Hello World!'
@@ -103,7 +106,8 @@ export const Query = objectType({
 
     /* Custom Scalar */
 
-    t.date('time', {
+    t.field('time', {
+      type: 'Date',
       resolve: () => new Date(),
     })
   },

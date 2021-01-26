@@ -1,4 +1,4 @@
-import { makeSchema } from '@nexus/schema'
+import { makeSchema } from 'nexus'
 import { ApolloServer } from 'apollo-server'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -11,24 +11,31 @@ import { ContextType } from './types/backingTypes'
 
 const schema = makeSchema({
   types: allTypes,
-  outputs: {
-    schema: path.join(__dirname, '../star-wars-schema.graphql'),
-    typegen: path.join(
-      __dirname.replace(/\/dist$/, '/src'),
-      './star-wars-typegen.ts',
-    ),
+  nonNullDefaults: {
+    input: true,
+    output: true,
   },
-  typegenAutoConfig: {
-    sources: [
+  outputs: {
+    typegen: path.join(__dirname, 'nexus.types.ts'),
+    schema: path.join(__dirname, './schema.graphql'),
+  },
+  sourceTypes: {
+    modules: [
       {
-        source: path.join(
+        module: path.join(
           __dirname.replace(/\/dist$/, '/src'),
           './types/backingTypes.ts',
         ),
         alias: 'swapi',
       },
     ],
-    contextType: 'swapi.ContextType',
+  },
+  contextType: {
+    module: path.join(
+      __dirname.replace(/\/dist$/, '/src'),
+      './types/backingTypes.ts',
+    ),
+    export: 'ContextType',
   },
   prettierConfig: require.resolve('../prettier.config.js'),
 })
@@ -54,36 +61,6 @@ const server = new ApolloServer({
       requestDidStart(requestContext) {
         console.log(requestContext.request.query)
         return {}
-      },
-    },
-    /**
-     * Saves responses for debuging purposes.
-     */
-    {
-      requestDidStart(ctx) {
-        const operation = ctx.request.operationName
-
-        if (!operation) return {}
-
-        console.log(`Incoming request ${operation}`)
-
-        const filename = `${operation}.json`
-        const filepath = path.resolve(__dirname, '../responses', filename)
-
-        return {
-          willSendResponse(resp) {
-            // Save the response to a file.
-
-            try {
-              const data = JSON.stringify(resp.response, null, 2)
-              fs.writeFileSync(filepath, data)
-            } catch (err) {
-              console.log(err)
-            }
-
-            return resp
-          },
-        }
       },
     },
   ],

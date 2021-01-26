@@ -1,4 +1,4 @@
-import { enumType } from '@nexus/schema'
+import { enumType } from 'nexus'
 
 export const Episode = enumType({
   name: 'Episode',
@@ -9,4 +9,3 @@ export const Episode = enumType({
     { name: 'JEDI', value: 6, description: 'Released in 1983' },
   ],
 })
-

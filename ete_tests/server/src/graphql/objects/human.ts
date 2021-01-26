@@ -1,4 +1,4 @@
-import { objectType } from '@nexus/schema'
+import { objectType } from 'nexus'
 
 export const Human = objectType({
   name: 'Human',
@@ -9,8 +9,7 @@ export const Human = objectType({
     t.id('id')
     t.string('name')
 
-    t.string('homePlanet', {
-      nullable: true,
+    t.nullable.string('homePlanet', {
       description: 'The home planet of the human, or null if unknown.',
       resolve: ({ home_planet }, _, ctx) => home_planet || null,
     })
@@ -22,8 +21,7 @@ export const Human = objectType({
 
     /* Test casing */
 
-    t.string('infoURL', {
-      nullable: true,
+    t.nullable.string('infoURL', {
       resolve: ({ info }) => info || null,
     })
   },
