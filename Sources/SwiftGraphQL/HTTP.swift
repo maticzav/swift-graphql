@@ -348,6 +348,8 @@ extension URLSessionWebSocketTask.Message {
             return data
         case .string(let string):
             return string.data(using: .utf8)
+        @unknown default:
+            return nil
         }
     }
 }
