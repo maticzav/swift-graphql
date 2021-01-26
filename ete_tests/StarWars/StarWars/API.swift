@@ -25,8 +25,8 @@ extension Operations {
     }
 }
 
-extension Operations.Query: GraphQLOperation {
-    static var operation: GraphQLOperationType { .query }
+extension Operations.Query: GraphQLHttpOperation {
+    static var operation: String { "query" } 
 }
 
 extension Operations.Query: Decodable {
