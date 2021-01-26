@@ -36,12 +36,12 @@ declare global {
 export interface NexusGenInputs {
   Greeting: {
     // input type
-    language: NexusGenEnums['Language'] // Language!
+    language?: NexusGenEnums['Language'] | null // Language
     name: string // String!
   }
   GreetingOptions: {
     // input type
-    prefix: string // String!
+    prefix?: string | null // String
   }
 }
 
@@ -183,7 +183,7 @@ export interface NexusGenArgTypes {
     }
     greeting: {
       // args
-      input: NexusGenInputs['Greeting'] // Greeting!
+      input?: NexusGenInputs['Greeting'] | null // Greeting
     }
     human: {
       // args

@@ -4,7 +4,7 @@ export const Greeting = inputObjectType({
   name: 'Greeting',
   definition(t) {
     /* Fields */
-    t.field('language', { type: 'Language' })
+    t.nullable.field('language', { type: 'Language' })
     t.string('name')
     // t.field('options', { type: 'GreetingOptions' })
   },
@@ -13,6 +13,6 @@ export const Greeting = inputObjectType({
 export const GreetingOptions = inputObjectType({
   name: 'GreetingOptions',
   definition(t) {
-    t.string('prefix')
+    t.nullable.string('prefix')
   },
 })
