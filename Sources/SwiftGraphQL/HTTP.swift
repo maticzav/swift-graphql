@@ -304,8 +304,8 @@ public struct SwiftGraphQL {
         
             // Send message
             socket.send(.data(messageData)) { error in
-                print(error)
-                if error != nil {
+                if let error = error {
+                    print(error)
                     eventHandler(.failure(.badpayload))
                 }
             }
