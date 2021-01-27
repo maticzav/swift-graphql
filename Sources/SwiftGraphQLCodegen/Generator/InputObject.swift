@@ -96,7 +96,7 @@ extension GraphQLCodegen {
         code.append("")
         
         code.append(contentsOf: fields.map {
-            let key = $0.name.camelCase
+            let key = $0.name.camelCase.normalize
             
             switch $0.type.inverted {
             case .nullable(_):
