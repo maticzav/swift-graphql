@@ -12,25 +12,27 @@ public struct SwiftGraphQL {
     // MARK: - Public Methods
     
     /// Sends a query request to the server.
+    ///
+    /// - parameter endpoint: Server endpoint URL.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter headers: A dictionary of key-value header pairs.
+    /// - parameter onEvent: Closure that is called each subscription event.
+    /// - parameter method: Method to use. (Default to POST).
+    ///
     public static func send<Type, TypeLock>(
         _ selection: Selection<Type, TypeLock?>,
-        /// Server endpoint URL.
         to endpoint: String,
-        /// The name of the GraphQL query.
         operationName: String? = nil,
-        /// A dictionary of key-value header pairs.
         headers: HttpHeaders = [:],
-        /// Method to use. (Default to POST).
         method: HttpMethod = .post,
         onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Void where TypeLock: GraphQLOperation & Decodable {
+    ) -> Void where TypeLock: GraphQLHttpOperation & Decodable {
         perform(
             selection: selection,
-            operation: TypeLock.operation,
             operationName: operationName,
             endpoint: endpoint,
-            method: method,
             headers: headers,
+            method: method,
             completionHandler: completionHandler
         )
     }
@@ -40,27 +42,84 @@ public struct SwiftGraphQL {
     /// - Note: This is a shortcut function for when you are expecting the result.
     ///         The only difference between this one and the other one is that you may select
     ///         on non-nullable TypeLock instead of a nullable one.
+    ///
+    /// - parameter endpoint: Server endpoint URL.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter headers: A dictionary of key-value header pairs.
+    /// - parameter onEvent: Closure that is called each subscription event.
+    /// - parameter method: Method to use. (Default to POST).
+    ///
     public static func send<Type, TypeLock>(
         _ selection: Selection<Type, TypeLock>,
-        /// Server endpoint URL.
         to endpoint: String,
-        /// The name of the GraphQL query.
         operationName: String? = nil,
-        /// A dictionary of key-value header pairs.
         headers: HttpHeaders = [:],
-        /// Method to use. (Default to POST).
         method: HttpMethod = .post,
-        /// Response handler function.
         onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Void where TypeLock: GraphQLOperation & Decodable {
+    ) -> Void where TypeLock: GraphQLHttpOperation & Decodable {
         perform(
             selection: selection.nonNullOrFail,
-            operation: TypeLock.operation,
             operationName: operationName,
             endpoint: endpoint,
-            method: method,
             headers: headers,
+            method: method,
             completionHandler: completionHandler
+        )
+    }
+    
+    /// Observe a subscription for as long as you keep Token in memory
+    ///
+    /// - parameter endpoint: Server endpoint URL.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter headers: A dictionary of key-value header pairs.
+    /// - parameter onEvent: Closure that is called each subscription event.
+    ///
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    public static func listen<Type, TypeLock>(
+        _ selection: Selection<Type, TypeLock?>,
+        to endpoint: String,
+        operationName: String? = nil,
+        headers: HttpHeaders = [:],
+        protocol webSocketProtocol: String = "graphql-subscriptions",
+        onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
+    ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
+        listen(
+            selection: selection,
+            operationName: operationName,
+            endpoint: endpoint,
+            headers: headers,
+            webSocketProtocol: webSocketProtocol,
+            eventHandler: eventHandler
+        )
+    }
+    
+    /// Observe a subscription for as long as you keep Token in memory
+    ///
+    /// - Note: This is a shortcut function for when you are expecting the result.
+    ///         The only difference between this one and the other one is that you may select
+    ///         on non-nullable TypeLock instead of a nullable one.
+    ///
+    /// - parameter endpoint: Server endpoint URL.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter headers: A dictionary of key-value header pairs.
+    /// - parameter onEvent: Closure that is called each subscription event.
+    ///
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    public static func listen<Type, TypeLock>(
+        _ selection: Selection<Type, TypeLock>,
+        to endpoint: String,
+        operationName: String? = nil,
+        headers: HttpHeaders = [:],
+        protocol webSocketProtocol: String = "graphql-subscriptions",
+        onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
+    ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
+        listen(
+            selection: selection.nonNullOrFail,
+            operationName: operationName,
+            endpoint: endpoint,
+            headers: headers,
+            webSocketProtocol: webSocketProtocol,
+            eventHandler: eventHandler
         )
     }
     
@@ -71,6 +130,7 @@ public struct SwiftGraphQL {
         case network(Error)
         case badpayload
         case badstatus
+        case cancelled
     }
     
     public enum HttpMethod: String, Equatable {
@@ -84,19 +144,16 @@ public struct SwiftGraphQL {
     
     // MARK: - Private helpers
     
-    private static func perform<Type, TypeLock>(
+    private static func request<Type, TypeLock>(
         selection: Selection<Type, TypeLock?>,
-        operation: GraphQLOperationType,
         operationName: String?,
         endpoint: String,
-        method: HttpMethod,
         headers: HttpHeaders,
-        completionHandler: @escaping (Response<Type, TypeLock>) -> Void
-    ) -> Void where TypeLock: Decodable {
-        
+        method: HttpMethod
+    ) -> Result<URLRequest, HttpError> where TypeLock: GraphQLOperation & Decodable {
         // Construct a URL from string.
         guard let url = URL(string: endpoint) else {
-            return completionHandler(.failure(.badURL))
+            return .failure(.badURL)
         }
         
         // Construct a request.
@@ -111,7 +168,7 @@ public struct SwiftGraphQL {
         
         
         // Compose a query.
-        let query = selection.selection.serialize(for: operation, operationName: operationName)
+        let query = selection.selection.serialize(for: TypeLock.operation, operationName: operationName)
         var variables = [String: NSObject]()
         
         for argument in selection.selection.arguments {
@@ -130,36 +187,134 @@ public struct SwiftGraphQL {
         }
         
         // Construct a HTTP request.
-        let httpBody = try! JSONSerialization.data(
+        request.httpBody = try! JSONSerialization.data(
             withJSONObject: body,
-            options: JSONSerialization.WritingOptions()
+            options: []
         )
-        request.httpBody = httpBody
         
-        // Create a completion handler.
-        func onComplete(data: Data?, response: URLResponse?, error: Error?) -> Void {
-            
-            /* Process the response. */
-            // Check for HTTP errors.
-            if let error = error {
-                return completionHandler(.failure(.network(error)))
+        return .success(request)
+    }
+    
+    private static func perform<Type, TypeLock>(
+        selection: Selection<Type, TypeLock?>,
+        operationName: String?,
+        endpoint: String,
+        headers: HttpHeaders,
+        method: HttpMethod,
+        completionHandler: @escaping (Response<Type, TypeLock>) -> Void
+    ) -> Void where TypeLock: GraphQLOperation & Decodable {
+        
+        switch request(selection: selection, operationName: operationName, endpoint: endpoint, headers: headers, method: method) {
+        case .failure(let error):
+            return completionHandler(.failure(error))
+        case .success(let request):
+            // Create a completion handler.
+            func onComplete(data: Data?, response: URLResponse?, error: Error?) -> Void {
+                
+                /* Process the response. */
+                // Check for HTTP errors.
+                if let error = error {
+                    return completionHandler(.failure(.network(error)))
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse,
+                    (200...299).contains(httpResponse.statusCode) else {
+                    return completionHandler(.failure(.badstatus))
+                }
+                
+                // Try to serialize the response.
+                if let data = data, let result = try? GraphQLResult(data, with: selection) {
+                    return completionHandler(.success(result))
+                }
+                
+                return completionHandler(.failure(.badpayload))
             }
             
-            guard let httpResponse = response as? HTTPURLResponse,
-                (200...299).contains(httpResponse.statusCode) else {
-                return completionHandler(.failure(.badstatus))
-            }
-            
-            // Try to serialize the response.
-            if let data = data, let result = try? GraphQLResult(data, with: selection) {
-                return completionHandler(.success(result))
-            }
-            
-            return completionHandler(.failure(.badpayload))
+            // Construct a session.
+            URLSession.shared.dataTask(with: request, completionHandler: onComplete).resume()
         }
+    }
+    
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    private static func listen<Type, TypeLock>(
+        selection: Selection<Type, TypeLock?>,
+        operationName: String?,
+        endpoint: String,
+        headers: HttpHeaders,
+        webSocketProtocol: String,
+        eventHandler: @escaping (Response<Type, TypeLock>) -> Void
+    ) -> Token where TypeLock: GraphQLWebSocketOperation & Decodable {
         
-        // Construct a session.
-        URLSession.shared.dataTask(with: request, completionHandler: onComplete).resume()
+        switch request(selection: selection, operationName: operationName, endpoint: endpoint, headers: headers, method: .get) {
+        case .failure(let error):
+            eventHandler(.failure(error))
+            return Token.empty
+        case .success(var request):
+            if request.value(forHTTPHeaderField: "Sec-WebSocket-Protocol") == nil {
+                request.setValue(webSocketProtocol, forHTTPHeaderField: "Sec-WebSocket-Protocol")
+            }
+            
+            // Construct a message.
+            let message: [String: Any] = [
+                "payload": try! JSONSerialization.jsonObject(with: request.httpBody!, options: []),
+                "type": "start"
+                //"id": UUID().uuidString
+            ]
+            request.httpBody = nil
+            
+            let messageData = try! JSONSerialization.data(
+                withJSONObject: message,
+                options: []
+            )
+            
+            // Create an event handler.
+            func receiveNext(on socket: URLSessionWebSocketTask?) {
+                socket?.receive { [weak socket] result in
+                    /* Process the response. */
+                    switch result {
+                    case .failure(let error):
+                        if socket?.closeReason == WebSocketCloseReason.tokenDeinit {
+                            return eventHandler(.failure(.cancelled))
+                        } else {
+                            return eventHandler(.failure(.network(error)))
+                        }
+                    case .success(let message):
+                        print("MSG", message)
+                        // Try to serialize the response.
+                        if let data = message.data {
+                            print("DATA", data)
+                            if let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
+                                eventHandler(.success(result))
+                            }
+                        } else {
+                            eventHandler(.failure(.badpayload))
+                        }
+                    }
+                    
+                    // Receive next message
+                    receiveNext(on: socket)
+                }
+            }
+                
+            // Construct a session.
+            let socket: URLSessionWebSocketTask = URLSession.shared.webSocketTask(with: request)
+
+            // Attach receiver
+            receiveNext(on: socket)
+        
+            // Send message
+            socket.send(.data(messageData)) { error in
+                if let error = error {
+                    print(error)
+                    eventHandler(.failure(.badpayload))
+                }
+            }
+            socket.resume()
+
+            return Token {
+                socket.cancel(with: .goingAway, reason: WebSocketCloseReason.tokenDeinit)
+            }
+        }
     }
 }
 
@@ -177,4 +332,34 @@ extension SwiftGraphQL.HttpError: Equatable {
             return false
         }
     }
+}
+
+public class Token {
+    private var onDeinit: () -> Void
+    internal init(onDeinit: @escaping () -> Void) {
+        self.onDeinit = onDeinit
+    }
+    deinit {
+        onDeinit()
+    }
+    
+    static var empty = Token(onDeinit: {})
+}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension URLSessionWebSocketTask.Message {
+    var data: Data? {
+        switch self {
+        case .data(let data):
+            return data
+        case .string(let string):
+            return string.data(using: .utf8)
+        @unknown default:
+            return nil
+        }
+    }
+}
+
+internal enum WebSocketCloseReason {
+    static var tokenDeinit = "Token deinit".data(using: .utf8)
 }

@@ -26,11 +26,31 @@ extension GraphQLResult where TypeLock: Decodable {
         }
     }
     
+    init(webSocketResponse: Data, with selection: Selection<Type, TypeLock?>) throws {
+        
+        // Decodes the data using provided selection.
+        do {
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(GraphQLWebSocketResponse.self, from: webSocketResponse)
+            let data = try selection.decode(data: response.payload.data)
+            
+            self.data = data
+            self.errors = response.payload.errors
+        } catch {
+            // Catches all errors and turns them into a bad payload SwiftGraphQL error.
+            throw SG.HttpError.badpayload
+        }
+    }
+    
     // MARK: - Response
     
     struct GraphQLResponse: Decodable {
         let data: TypeLock?
         let errors: [GraphQLError]?
+    }
+    
+    struct GraphQLWebSocketResponse: Decodable {
+        let payload: GraphQLResponse
     }
 }
 

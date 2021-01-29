@@ -11,6 +11,19 @@ extension GraphQLCodegen {
     /// Generates struct that is applicable to input object.
     func generateInputObject(_ name: String, for type: GraphQL.InputObjectType) throws -> [String] {
         
+        /* Filter recursive fields */
+        let inputFields = type.inputFields.filter {
+            switch $0.type.inverted {
+            case .named(.inputObject(let fieldTypeName)), .nullable(.named(.inputObject(let fieldTypeName))):
+                if fieldTypeName.pascalCase == name {
+                    print("warning: Field '\(name).\($0.name)' has recursive type and is not supported by SwiftGraphQL")
+                    return false
+                }
+            default: break
+            }
+            return true
+        }
+        
         /* Code */
         var code = [String]()
         
@@ -18,19 +31,18 @@ extension GraphQLCodegen {
         
         /* Fields */
         code.append(contentsOf:
-            try type.inputFields.flatMap { try generateInputField($0) }
-                        .indent(by: 4)
+            try inputFields.flatMap { try generateInputField($0) }.indent(by: 4)
         )
         code.append("")
         
         /* Encoder */
         code.append("/* Encoder */".indent(by: 4))
-        code.append(contentsOf: generateEncoder(for: type.inputFields).indent(by: 4))
+        code.append(contentsOf: generateEncoder(for: inputFields).indent(by: 4))
         code.append("")
         
         /* Coding keys */
         code.append("/* CodingKeys */".indent(by: 4))
-        code.append(contentsOf: generateCodingKeys(for: type.inputFields).indent(by: 4))
+        code.append(contentsOf: generateCodingKeys(for: inputFields).indent(by: 4))
         
         code.append("}")
         
@@ -96,7 +108,7 @@ extension GraphQLCodegen {
         code.append("")
         
         code.append(contentsOf: fields.map {
-            let key = $0.name.camelCase
+            let key = $0.name.camelCase.normalize
             
             switch $0.type.inverted {
             case .nullable(_):

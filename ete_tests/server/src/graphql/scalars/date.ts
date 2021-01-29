@@ -1,4 +1,4 @@
-import { scalarType } from '@nexus/schema'
+import { scalarType } from 'nexus'
 import { Kind } from 'graphql'
 
 export const DateScalar = scalarType({

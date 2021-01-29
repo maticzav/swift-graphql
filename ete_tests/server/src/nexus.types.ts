@@ -4,19 +4,24 @@
  */
 
 import * as swapi from './types/backingTypes'
-import { core } from '@nexus/schema'
+import { ContextType } from './types/backingTypes'
+import { core } from 'nexus'
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
+    /**
+     * Date custom scalar type
+     */
     date<FieldName extends string>(
       fieldName: FieldName,
-      opts?: core.ScalarInputFieldConfig<
-        core.GetGen3<'inputTypes', TypeName, FieldName>
-      >,
+      opts?: core.CommonInputFieldConfig<TypeName, FieldName>,
     ): void // "Date";
   }
 }
 declare global {
   interface NexusGenCustomOutputMethods<TypeName extends string> {
+    /**
+     * Date custom scalar type
+     */
     date<FieldName extends string>(
       fieldName: FieldName,
       ...opts: core.ScalarOutSpread<TypeName, FieldName>
@@ -54,26 +59,29 @@ export interface NexusGenScalars {
   Date: any
 }
 
-export interface NexusGenRootTypes {
+export interface NexusGenObjects {
   Droid: swapi.Droid
   Human: swapi.Human
+  Mutation: {}
   Query: {}
+  Subscription: {}
+}
+
+export interface NexusGenInterfaces {
   Character: swapi.Character
+}
+
+export interface NexusGenUnions {
   CharacterUnion: NexusGenRootTypes['Droid'] | NexusGenRootTypes['Human']
 }
 
-export interface NexusGenAllTypes extends NexusGenRootTypes {
-  Greeting: NexusGenInputs['Greeting']
-  GreetingOptions: NexusGenInputs['GreetingOptions']
-  Episode: NexusGenEnums['Episode']
-  Language: NexusGenEnums['Language']
-  String: NexusGenScalars['String']
-  Int: NexusGenScalars['Int']
-  Float: NexusGenScalars['Float']
-  Boolean: NexusGenScalars['Boolean']
-  ID: NexusGenScalars['ID']
-  Date: NexusGenScalars['Date']
-}
+export type NexusGenRootTypes = NexusGenInterfaces &
+  NexusGenObjects &
+  NexusGenUnions
+
+export type NexusGenAllTypes = NexusGenRootTypes &
+  NexusGenScalars &
+  NexusGenEnums
 
 export interface NexusGenFieldTypes {
   Droid: {
@@ -91,6 +99,10 @@ export interface NexusGenFieldTypes {
     infoURL: string | null // String
     name: string // String!
   }
+  Mutation: {
+    // field return type
+    mutate: boolean // Boolean!
+  }
   Query: {
     // field return type
     character: NexusGenRootTypes['CharacterUnion'] | null // CharacterUnion
@@ -104,10 +116,58 @@ export interface NexusGenFieldTypes {
     time: NexusGenScalars['Date'] // Date!
     whoami: string // String!
   }
+  Subscription: {
+    // field return type
+    number: number // Int!
+  }
   Character: {
     // field return type
     id: string // ID!
     name: string // String!
+  }
+}
+
+export interface NexusGenFieldTypeNames {
+  Droid: {
+    // field return type name
+    appearsIn: 'Episode'
+    id: 'ID'
+    name: 'String'
+    primaryFunction: 'String'
+  }
+  Human: {
+    // field return type name
+    appearsIn: 'Episode'
+    homePlanet: 'String'
+    id: 'ID'
+    infoURL: 'String'
+    name: 'String'
+  }
+  Mutation: {
+    // field return type name
+    mutate: 'Boolean'
+  }
+  Query: {
+    // field return type name
+    character: 'CharacterUnion'
+    characters: 'Character'
+    droid: 'Droid'
+    droids: 'Droid'
+    greeting: 'String'
+    human: 'Human'
+    humans: 'Human'
+    luke: 'Human'
+    time: 'Date'
+    whoami: 'String'
+  }
+  Subscription: {
+    // field return type name
+    number: 'Int'
+  }
+  Character: {
+    // field return type name
+    id: 'ID'
+    name: 'String'
   }
 }
 
@@ -132,39 +192,52 @@ export interface NexusGenArgTypes {
   }
 }
 
-export interface NexusGenAbstractResolveReturnTypes {
+export interface NexusGenAbstractTypeMembers {
   CharacterUnion: 'Droid' | 'Human'
   Character: 'Droid' | 'Human'
 }
 
-export interface NexusGenInheritedFields {}
+export interface NexusGenTypeInterfaces {
+  Droid: 'Character'
+  Human: 'Character'
+}
 
-export type NexusGenObjectNames = 'Droid' | 'Human' | 'Query'
+export type NexusGenObjectNames = keyof NexusGenObjects
 
-export type NexusGenInputNames = 'Greeting' | 'GreetingOptions'
+export type NexusGenInputNames = keyof NexusGenInputs
 
-export type NexusGenEnumNames = 'Episode' | 'Language'
+export type NexusGenEnumNames = keyof NexusGenEnums
 
-export type NexusGenInterfaceNames = 'Character'
+export type NexusGenInterfaceNames = keyof NexusGenInterfaces
 
-export type NexusGenScalarNames =
-  | 'Boolean'
-  | 'Date'
-  | 'Float'
-  | 'ID'
-  | 'Int'
-  | 'String'
+export type NexusGenScalarNames = keyof NexusGenScalars
 
-export type NexusGenUnionNames = 'CharacterUnion'
+export type NexusGenUnionNames = keyof NexusGenUnions
+
+export type NexusGenObjectsUsingAbstractStrategyIsTypeOf = never
+
+export type NexusGenAbstractsUsingStrategyResolveType =
+  | 'Character'
+  | 'CharacterUnion'
+
+export type NexusGenFeaturesConfig = {
+  abstractTypeStrategies: {
+    isTypeOf: false
+    resolveType: true
+    __typename: false
+  }
+}
 
 export interface NexusGenTypes {
-  context: swapi.ContextType
+  context: ContextType
   inputTypes: NexusGenInputs
   rootTypes: NexusGenRootTypes
+  inputTypeShapes: NexusGenInputs & NexusGenEnums & NexusGenScalars
   argTypes: NexusGenArgTypes
   fieldTypes: NexusGenFieldTypes
+  fieldTypeNames: NexusGenFieldTypeNames
   allTypes: NexusGenAllTypes
-  inheritedFields: NexusGenInheritedFields
+  typeInterfaces: NexusGenTypeInterfaces
   objectNames: NexusGenObjectNames
   inputNames: NexusGenInputNames
   enumNames: NexusGenEnumNames
@@ -185,7 +258,10 @@ export interface NexusGenTypes {
     | NexusGenTypes['allInputTypes']
     | NexusGenTypes['allOutputTypes']
   abstractTypes: NexusGenTypes['interfaceNames'] | NexusGenTypes['unionNames']
-  abstractResolveReturn: NexusGenAbstractResolveReturnTypes
+  abstractTypeMembers: NexusGenAbstractTypeMembers
+  objectsUsingAbstractStrategyIsTypeOf: NexusGenObjectsUsingAbstractStrategyIsTypeOf
+  abstractsUsingStrategyResolveType: NexusGenAbstractsUsingStrategyResolveType
+  features: NexusGenFeaturesConfig
 }
 
 declare global {
@@ -194,5 +270,10 @@ declare global {
     TypeName extends string,
     FieldName extends string
   > {}
+  interface NexusGenPluginInputFieldConfig<
+    TypeName extends string,
+    FieldName extends string
+  > {}
   interface NexusGenPluginSchemaConfig {}
+  interface NexusGenPluginArgConfig {}
 }

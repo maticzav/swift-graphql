@@ -5,6 +5,8 @@ class Model: ObservableObject {
     // MARK: - State
     
     @Published private(set) var data = Data()
+    @Published private(set) var subscriptionData: Int = 0
+    private var token: Token?
 
     // MARK: - Intentions
     
@@ -12,21 +14,43 @@ class Model: ObservableObject {
         print("FETCHING")
         
         // Perform query.
-        SG.send(
-            query,
-            to: "http://localhost:4000",
-            operationName: "Query",
-            headers: ["Authorization": "Bearer Matic"]
-        ) { result in
+//        SG.send(
+//            query,
+//            to: "http://localhost:4000",
+//            operationName: "Query",
+//            headers: ["Authorization": "Bearer Matic"]
+//        ) { result in
+//            do {
+//                let data = try result.get()
+//                print("DATA")
+//                print(data)
+//                DispatchQueue.main.async {
+//                    self.data = data.data
+//                }
+//            } catch let error {
+//                print(error)
+//            }
+//        }
+    }
+    
+    func startListening() {
+        print("STARTED LISTENING")
+        
+        let subscription = Selection<Int, Operations.Subscription> {
+            return try $0.number()
+        }
+        
+        token = SG.listen(
+            subscription,
+            to: "ws://localhost:4000"
+        ) { [weak self] result in
             do {
-                let data = try result.get()
-                print("DATA")
-                print(data)
+                let resultValue = try result.get()
                 DispatchQueue.main.async {
-                    self.data = data.data
+                    self?.subscriptionData = resultValue.data
                 }
             } catch let error {
-                print(error)
+//                print("SUBS", error)
             }
         }
     }

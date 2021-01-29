@@ -6,5 +6,10 @@
 */
 
 public protocol GraphQLOperation {
-    static var operation: GraphQLOperationType { get }
+    static var operation: String { get }
 }
+
+public protocol GraphQLHttpOperation: GraphQLOperation {}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+public protocol GraphQLWebSocketOperation: GraphQLOperation {}

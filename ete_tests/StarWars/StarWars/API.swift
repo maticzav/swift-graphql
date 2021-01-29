@@ -25,8 +25,8 @@ extension Operations {
     }
 }
 
-extension Operations.Query: GraphQLOperation {
-    static var operation: GraphQLOperationType { .query }
+extension Operations.Query: GraphQLHttpOperation {
+    static var operation: String { "query" } 
 }
 
 extension Operations.Query: Decodable {
@@ -317,6 +317,181 @@ extension Fields where TypeLock == Operations.Query {
             throw SG.HttpError.badpayload
         case .mocking:
             return DateTime.mockValue
+        }
+    }
+}
+
+
+/* Mutation */
+
+extension Operations {
+    struct Mutation: Encodable {
+    
+        /* Mutation */
+    
+        /* Properties */
+        let mutate: [String: Bool]
+    }
+}
+
+extension Operations.Mutation: GraphQLHttpOperation {
+    static var operation: String { "mutation" } 
+}
+
+extension Operations.Mutation: Decodable {
+    
+    /* Decoder */
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+    
+    
+        var map = HashMap()
+        for codingKey in container.allKeys {
+            if codingKey.isTypenameKey { continue }
+    
+            let alias = codingKey.stringValue
+            let field = GraphQLField.getFieldNameFromAlias(alias)
+    
+            switch field {
+                case "mutate":
+                    if let value = try container.decode(Bool?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                default:
+                    throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: decoder.codingPath,
+                            debugDescription: "Unknown key \(field)."
+                        )
+                    )
+            }
+        }
+    
+        self.mutate = map["mutate"]
+    }
+    
+        private struct DynamicCodingKeys: CodingKey {
+            // Use for string-keyed dictionary
+            var stringValue: String
+            init?(stringValue: String) {
+                self.stringValue = stringValue
+            }
+        
+            // Use for integer-keyed dictionary
+            var intValue: Int?
+            init?(intValue: Int) { nil }
+        }
+}
+
+extension Fields where TypeLock == Operations.Mutation {
+    func mutate() throws -> Bool {
+        /* Selection */
+        let field = GraphQLField.leaf(
+            name: "mutate",
+            arguments: [
+            ]
+        )
+        self.select(field)
+    
+        /* Decoder */
+        switch self.response {
+        case .decoding(let data):
+            if let data = data.mutate[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
+        case .mocking:
+            return Bool.mockValue
+        }
+    }
+}
+
+
+/* Subscription */
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension Operations {
+    struct Subscription: Encodable {
+    
+        /* Subscription */
+    
+        /* Properties */
+        let number: [String: Int]
+    }
+}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension Operations.Subscription: GraphQLWebSocketOperation {
+    static var operation: String { "subscription" } 
+}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension Operations.Subscription: Decodable {
+    
+    /* Decoder */
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
+    
+    
+        var map = HashMap()
+        for codingKey in container.allKeys {
+            if codingKey.isTypenameKey { continue }
+    
+            let alias = codingKey.stringValue
+            let field = GraphQLField.getFieldNameFromAlias(alias)
+    
+            switch field {
+                case "number":
+                    if let value = try container.decode(Int?.self, forKey: codingKey) {
+                        map.set(key: field, hash: alias, value: value as Any)
+                    }
+                default:
+                    throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: decoder.codingPath,
+                            debugDescription: "Unknown key \(field)."
+                        )
+                    )
+            }
+        }
+    
+        self.number = map["number"]
+    }
+    
+        private struct DynamicCodingKeys: CodingKey {
+            // Use for string-keyed dictionary
+            var stringValue: String
+            init?(stringValue: String) {
+                self.stringValue = stringValue
+            }
+        
+            // Use for integer-keyed dictionary
+            var intValue: Int?
+            init?(intValue: Int) { nil }
+        }
+}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension Fields where TypeLock == Operations.Subscription {
+    /// Returns a random number every second. You should see it changing if your subscriptions work right.
+    func number() throws -> Int {
+        /* Selection */
+        let field = GraphQLField.leaf(
+            name: "number",
+            arguments: [
+            ]
+        )
+        self.select(field)
+    
+        /* Decoder */
+        switch self.response {
+        case .decoding(let data):
+            if let data = data.number[field.alias!] {
+                return data
+            }
+            throw SG.HttpError.badpayload
+        case .mocking:
+            return Int.mockValue
         }
     }
 }

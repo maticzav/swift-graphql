@@ -4,23 +4,17 @@ import Foundation
  This file contains source code used for encoding and decoding selection.
  */
 
-public enum GraphQLOperationType: String, Codable, CaseIterable {
-    case query = "query"
-    case mutation = "mutation"
-//    case subscription = "subscription"
-}
-
 extension Collection where Element == GraphQLField {
     /// Returns a GraphQL query for the current selection set.
-    func serialize(for operationType: GraphQLOperationType) -> String {
+    func serialize(for operationType: String) -> String {
         serialize(for: operationType, operationName: nil)
     }
     
     /// Returns a GraphQL query for the current selection set.
-    func serialize(for operationType: GraphQLOperationType, operationName: String?) -> String {
+    func serialize(for operationType: String, operationName: String?) -> String {
         // http://spec.graphql.org/June2018/#sec-Language.Operations
         let operationDefinition: String = [
-            operationType.rawValue,
+            operationType,
             operationName,
             self.arguments.serializedForVariables,
         ].compactMap { $0 }.joined(separator: " ")

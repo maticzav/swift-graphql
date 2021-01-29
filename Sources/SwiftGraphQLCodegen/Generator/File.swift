@@ -20,9 +20,10 @@ extension GraphQLCodegen {
         /* Data */
         
         // ObjectTypes for operations
-        let operations: [(name: String, type: GraphQL.ObjectType, operation: GraphQLCodegen.Operation)] = [
+        let operations: [(name: String, type: GraphQL.ObjectType, operation: Operation)] = [
             ("Query", schema.queryType.name.pascalCase, .query),
-            ("Mutation", schema.mutationType?.name.pascalCase,  .mutation),
+            ("Mutation", schema.mutationType?.name.pascalCase, .mutation),
+            ("Subscription", schema.subscriptionType?.name.pascalCase, .subscription),
 //            ("RootSubscription",schema.subscriptionType?.name.pascalCase, .subscription)
         ].compactMap { (name, type, operation) in
             schema.objects.first(where: { $0.name == type }).map { (name, $0, operation) }
