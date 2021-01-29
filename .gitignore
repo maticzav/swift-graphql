@@ -1,4 +1,17 @@
 .DS_Store
+*.log*
+
+# Swift
+
 /.build
 /Packages
 xcuserdata/
+
+.swiftpm
+
+# Server
+
+node_modules
+
+responses/*
+!responses/.gitkeep

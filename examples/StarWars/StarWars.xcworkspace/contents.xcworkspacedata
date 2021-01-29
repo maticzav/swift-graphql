@@ -5,6 +5,6 @@
       location = "container:StarWars.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:../..">
+      location = "container:../../src">
    </FileRef>
 </Workspace>
