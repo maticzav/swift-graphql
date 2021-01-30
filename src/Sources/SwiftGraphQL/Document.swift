@@ -101,7 +101,13 @@ extension Collection where Element == Argument {
         if self.present.isEmpty {
             return nil
         }
+        
+        let args = self.present
+            .unique(by: { $0.hash })
+            .map { $0.serializedForVariable }
+            .joined(separator: ", ")
+        
         // Wrap them in parantheses otherwise.
-        return "(\(self.present.map { $0.serializedForVariable }.joined(separator: ", ")))"
+        return "(\(args))"
     }
 }

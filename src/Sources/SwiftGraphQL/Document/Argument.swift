@@ -45,7 +45,7 @@ public struct Argument: Hashable {
         
         // Argument hash identifier.
         let hashableValue = HashableValue(value: value, type: type)
-        self.hash = hashInt(hashableValue.hashValue)
+        self.hash = hashableValue.hashValue.hash
         
         /* Encode value */
         if let value = value as? OptionalArgumentProtocol, !value.hasValue {
@@ -60,6 +60,10 @@ public struct Argument: Hashable {
     /*
      We use hashable value struct to make sure that fields with same values
      but different type annotations don't collide in the variables.
+     
+     Hash takes into account the type of the parameter and its value. It may
+     happen that two unrelated fields with same values share a value, even
+     though they are completely unrelated in business logic.
      */
     struct HashableValue<Value: Hashable>: Hashable {
         let value: Value
@@ -71,17 +75,6 @@ public struct Argument: Hashable {
 
 extension Array where Element == Argument {
     /// Returns the hash of the collection of arguments.
-    var hash: String { hashInt(self.hashValue) }
+    var hash: String { self.hashValue.hash }
 }
 
-/**
- Returns the condensed representation of a string that only contains alpha-numeric characters.
- 
- - Note: We convert the integer hash value to a higher number system to shorten the hash, and replace the sign (i.e. negation)
-         with an underscore so that it conforms to alpha-numeric restriction.
- */
-private func hashInt(_ value: Int) -> String {
-    let hash = String(value, radix: 36)
-    let normalized = hash.replacingOccurrences(of: "-", with: "_")
-    return "_\(normalized)"
-}

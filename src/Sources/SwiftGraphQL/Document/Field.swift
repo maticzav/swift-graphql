@@ -97,9 +97,6 @@ public enum GraphQLField {
 extension Collection where Element == GraphQLField {
     /// Returns a collection of all arguments in subselection.
     var arguments: [Argument] {
-        var arguments = [Argument]()
-        self.forEach { arguments.append(contentsOf: $0.arguments) }
-        
-        return arguments
+        self.flatMap { $0.arguments }
     }
 }

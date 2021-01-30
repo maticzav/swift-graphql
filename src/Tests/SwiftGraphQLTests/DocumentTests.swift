@@ -16,7 +16,7 @@ final class DocumentTests: XCTestCase {
           \(fruit.alias!): fruit
         }
         """
-        XCTAssertEqual(document.serialize(for: .query), query)
+        XCTAssertEqual(document.serialize(for: "query"), query)
     }
     
     func testMultipleFields() {
@@ -34,7 +34,7 @@ final class DocumentTests: XCTestCase {
           \(banana.alias!): banana
         }
         """
-        XCTAssertEqual(document.serialize(for: .query), query)
+        XCTAssertEqual(document.serialize(for: "query"), query)
     }
     
     func testNestedFields() {
@@ -58,7 +58,7 @@ final class DocumentTests: XCTestCase {
           }
         }
         """
-        XCTAssertEqual(document.serialize(for: .query), query)
+        XCTAssertEqual(document.serialize(for: "query"), query)
     }
     
     // MARK: - Arguments
@@ -80,7 +80,28 @@ final class DocumentTests: XCTestCase {
           \(fruit.alias!): fruit(name: $\(argument.hash))
         }
         """
-        XCTAssertEqual(document.serialize(for: .query), query)
+        XCTAssertEqual(document.serialize(for: "query"), query)
+    }
+    
+    func testMultipleSameValueArguments() {
+        
+        /* Document */
+        let argumentOne = Argument(name: "one", type: "String!", value: "\"apple\"")
+        let argumentTwo = Argument(name: "two", type: "String!", value: "\"apple\"")
+        let fruit = GraphQLField.leaf(
+            name: "fruit",
+            arguments: [argumentOne, argumentTwo]
+        )
+        let document = [fruit]
+        
+        /* Test */
+        
+        let query = """
+        query ($\(argumentOne.hash): String!) {
+          \(fruit.alias!): fruit(one: $\(argumentOne.hash), two: $\(argumentTwo.hash))
+        }
+        """
+        XCTAssertEqual(document.serialize(for: "query"), query)
     }
     
     func testNestedFieldWithArgument() {
@@ -111,7 +132,7 @@ final class DocumentTests: XCTestCase {
           }
         }
         """
-        XCTAssertEqual(document.serialize(for: .query), query)
+        XCTAssertEqual(document.serialize(for: "query"), query)
     }
     
     // MARK: - Fragments
@@ -141,7 +162,7 @@ final class DocumentTests: XCTestCase {
         }
         """
         
-        XCTAssertEqual(document.serialize(for: .query), query)
+        XCTAssertEqual(document.serialize(for: "query"), query)
     }
     
     // MARK: - Operation Names
@@ -159,6 +180,6 @@ final class DocumentTests: XCTestCase {
           \(fruit.alias!): fruit
         }
         """
-        XCTAssertEqual(document.serialize(for: .query, operationName: "Fruit"), query)
+        XCTAssertEqual(document.serialize(for: "query", operationName: "Fruit"), query)
     }
 }

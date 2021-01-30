@@ -76,8 +76,8 @@ public struct SwiftGraphQL {
     ///
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     public static func listen<Type, TypeLock>(
-        _ selection: Selection<Type, TypeLock?>,
-        to endpoint: String,
+        for selection: Selection<Type, TypeLock?>,
+        on endpoint: String,
         operationName: String? = nil,
         headers: HttpHeaders = [:],
         protocol webSocketProtocol: String = "graphql-subscriptions",
@@ -142,7 +142,16 @@ public struct SwiftGraphQL {
     
     public typealias HttpHeaders = [String: String]
     
-    // MARK: - Private helpers
+    // MARK: - Private Helpers
+    
+    /*
+     Each of the exposed functions has a backing private helper.
+     We use `perform` method to send queries and mutations,
+     `listen` to listen for subscriptions, and there's an overarching utility
+     `request` method that composes a request and send it.
+     
+     We use `request` in both `perform` and `listen` methods.
+     */
     
     private static func request<Type, TypeLock>(
         selection: Selection<Type, TypeLock?>,
@@ -151,7 +160,6 @@ public struct SwiftGraphQL {
         headers: HttpHeaders,
         method: HttpMethod
     ) -> Result<URLRequest, HttpError> where TypeLock: GraphQLOperation & Decodable {
-        // Construct a URL from string.
         guard let url = URL(string: endpoint) else {
             return .failure(.badURL)
         }
@@ -195,6 +203,7 @@ public struct SwiftGraphQL {
         return .success(request)
     }
     
+    /// Sends a query to the server using given parameters.
     private static func perform<Type, TypeLock>(
         selection: Selection<Type, TypeLock?>,
         operationName: String?,
@@ -236,6 +245,7 @@ public struct SwiftGraphQL {
     }
     
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    /// Starts a webhook listener.
     private static func listen<Type, TypeLock>(
         selection: Selection<Type, TypeLock?>,
         operationName: String?,
