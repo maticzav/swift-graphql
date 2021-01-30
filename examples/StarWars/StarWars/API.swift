@@ -258,7 +258,7 @@ extension Fields where TypeLock == Operations.Query {
             return selection.mock()
         }
     }
-    func greeting(input: OptionalArgument<InputObjects.Greeting> = .absent) throws -> String {
+    func greeting(input: OptionalArgument<InputObjects.Greeting> = .absent()) throws -> String {
         /* Selection */
         let field = GraphQLField.leaf(
             name: "greeting",

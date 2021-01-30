@@ -11,9 +11,9 @@
 		02208E79253C596D00014850 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02208E78253C596D00014850 /* ContentView.swift */; };
 		02208E7B253C596E00014850 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02208E7A253C596E00014850 /* Assets.xcassets */; };
 		02208E7E253C596E00014850 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02208E7D253C596E00014850 /* Preview Assets.xcassets */; };
+		023B598525C5C99C00292965 /* SwiftGraphQL in Frameworks */ = {isa = PBXBuildFile; productRef = 023B598425C5C99C00292965 /* SwiftGraphQL */; };
 		027E2B81258172D500B903EF /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 027E2B80258172D500B903EF /* Commands.swift */; };
 		027E2B842581732800B903EF /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 027E2B832581732800B903EF /* Model.swift */; };
-		028E0F45253DA859007A3A1F /* SwiftGraphQL in Frameworks */ = {isa = PBXBuildFile; productRef = 028E0F44253DA859007A3A1F /* SwiftGraphQL */; };
 		02CA03EE253CA05C00B05BD1 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02CA03ED253CA05B00B05BD1 /* API.swift */; };
 		02EBAE3D254579CE009B2554 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02EBAE3C254579CE009B2554 /* DateTime.swift */; };
 /* End PBXBuildFile section */
@@ -36,7 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				028E0F45253DA859007A3A1F /* SwiftGraphQL in Frameworks */,
+				023B598525C5C99C00292965 /* SwiftGraphQL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -117,7 +117,7 @@
 			);
 			name = StarWars;
 			packageProductDependencies = (
-				028E0F44253DA859007A3A1F /* SwiftGraphQL */,
+				023B598425C5C99C00292965 /* SwiftGraphQL */,
 			);
 			productName = StarWars;
 			productReference = 02208E73253C596D00014850 /* StarWars.app */;
@@ -389,7 +389,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		028E0F44253DA859007A3A1F /* SwiftGraphQL */ = {
+		023B598425C5C99C00292965 /* SwiftGraphQL */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SwiftGraphQL;
 		};

@@ -6,12 +6,16 @@ import PackageDescription
 let package = Package(
     name: "Codegen",
     dependencies: [
-        .package(name: "SwiftGraphQL", path: "../../../"),
-        .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0")
+        .package(name: "swift-graphql", path: "../../.."),
+        .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
     ],
     targets: [
         .target(
             name: "Codegen",
-            dependencies: ["SwiftGraphQL", "Files"]),
+            dependencies: [
+                .product(name: "SwiftGraphQLCodegen", package: "swift-graphql"),
+                "Files"
+            ]
+        ),
     ]
 )

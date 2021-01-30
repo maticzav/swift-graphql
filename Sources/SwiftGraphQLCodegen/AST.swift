@@ -4,9 +4,39 @@ import Foundation
  We use the common introspection Query to construct the library.
  You can find remaining utility types that represent the result
  of the schema introspection inside AST folder.
+ 
+ I've namespaced every GraphQL and GraphQL schema related values
+ and functions to GraphQL enum.
  */
 
 public enum GraphQL {
+    
+    // MARK: - Methods
+     
+     /// Decodes the received schema representation into Swift abstract type.
+     static func parse(_ data: Data) throws -> Schema {
+         let decoder = JSONDecoder()
+         let result = try decoder.decode(Reponse<IntrospectionQuery>.self, from: data)
+         
+         return result.data.schema
+     }
+    
+    // MARK: - Intermediate decodables
+    
+    struct Reponse<T: Decodable>: Decodable {
+        public let data: T
+    }
+    
+    struct IntrospectionQuery: Decodable, Equatable {
+        public let schema: Schema
+        
+        enum CodingKeys: String, CodingKey {
+            case schema = "__schema"
+        }
+    }
+    
+    // MARK: - Introspection Query
+    
     public static let introspectionQuery: String = """
         query IntrospectionQuery($includeDeprecated: Boolean = true) {
             __schema {
@@ -104,33 +134,6 @@ public enum GraphQL {
             }
         }
         """
-    
-    // MARK: - Methods
-     
-     /// Decodes the received schema representation into Swift abstract type.
-     static func parse(_ data: Data) throws -> Schema {
-         let decoder = JSONDecoder()
-         let result = try decoder.decode(Reponse<IntrospectionQuery>.self, from: data)
-         
-         return result.data.schema
-     }
-    
-    // MARK: - Intermediate decodables
-    
-    /* General response format. */
-    struct Reponse<T: Decodable>: Decodable {
-        public let data: T
-    }
-    
-    /* Introspection query decoders. */
-    
-    struct IntrospectionQuery: Decodable, Equatable {
-        public let schema: Schema
-        
-        enum CodingKeys: String, CodingKey {
-            case schema = "__schema"
-        }
-    }
 }
 
 // MARK: - Extensions

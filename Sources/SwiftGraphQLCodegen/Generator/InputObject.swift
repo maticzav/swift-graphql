@@ -57,7 +57,7 @@ extension GraphQLCodegen {
         case .nullable(_):
             return [
                 generateDescription(for: field),
-                "var \(field.name.camelCase.normalize): \(try generatePropertyType(for: field.type)) = .absent"
+                "var \(field.name.camelCase.normalize): \(try generatePropertyType(for: field.type)) = .absent()"
             ]
             .compactMap { $0 }
         default:

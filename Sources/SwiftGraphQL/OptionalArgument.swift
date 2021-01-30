@@ -100,17 +100,17 @@ extension OptionalArgument {
     }
     
     /// Returns an OptionalArgument with a given value.
-    static func present(_ value: Type) -> OptionalArgument<Type> {
+    public static func present(_ value: Type) -> OptionalArgument<Type> {
         self.init(value)
     }
     
     /// Returns an OptionalArgument with null value.
-    static func null() -> OptionalArgument<Type> {
+    public static func null() -> OptionalArgument<Type> {
         self.init(.null)
     }
     
     /// Returns an OptionalArgument with absent value.
-    static func absent() -> OptionalArgument<Type> {
+    public static func absent() -> OptionalArgument<Type> {
         self.init(.absent)
     }
 }

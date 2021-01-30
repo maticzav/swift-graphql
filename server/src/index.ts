@@ -1,5 +1,5 @@
 import { makeSchema } from 'nexus'
-import { ApolloServer } from 'apollo-server-express'
+import { ApolloServer } from 'apollo-server'
 import * as path from 'path'
 
 import { data } from './data'

@@ -4,24 +4,29 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftGraphQL",
+    name: "swift-graphql",
     products: [
         .library(
             name: "SwiftGraphQL",
-            targets: ["SwiftGraphQL", "SwiftGraphQLCodegen"]),
+            targets: ["SwiftGraphQL"]),
+        .library(
+            name: "SwiftGraphQLCodegen",
+            targets: ["SwiftGraphQLCodegen"]),
     ],
     dependencies: [
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
-        .package(url: "https://github.com/apple/swift-format", .branch("main")),
+        .package(url: "https://github.com/apple/swift-format", .branch("swift-5.3-branch")),
         .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50300.0")),
     ],
     targets: [
         .target(
             name: "SwiftGraphQL",
-            dependencies: []),
+            dependencies: [],
+            path: "Sources/SwiftGraphQL"),
         .target(
             name: "SwiftGraphQLCodegen",
-            dependencies: []),
+            dependencies: ["swift-format", "SwiftSyntax"],
+            path: "Sources/SwiftGraphQLCodegen"),
         .testTarget(
             name: "SwiftGraphQLTests",
             dependencies: ["SwiftGraphQL"]),
