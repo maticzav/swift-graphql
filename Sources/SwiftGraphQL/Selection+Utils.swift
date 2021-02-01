@@ -9,16 +9,16 @@ import Foundation
  List modifier makes a selection list-complaint.
  */
 
-extension Selection where TypeLock: Decodable {
+public extension Selection where TypeLock: Decodable {
     /// Lets you convert a type selection into a list selection.
-    public var list: Selection<[Type], [TypeLock]> {
+    var list: Selection<[Type], [TypeLock]> {
         Selection<[Type], [TypeLock]> { selection in
             /* Selection */
             selection.select(self.selection)
-            
+
             /* Decoder */
             switch selection.response {
-            case .decoding(let data):
+            case let .decoding(data):
                 return try data.map {
                     try self.decode(data: $0)
                 }
@@ -34,16 +34,16 @@ extension Selection where TypeLock: Decodable {
  nullable response from the server.
  */
 
-extension Selection where TypeLock: Decodable {
+public extension Selection where TypeLock: Decodable {
     /// Lets you decode nullable values.
-    public var nullable: Selection<Type?, TypeLock?> {
+    var nullable: Selection<Type?, TypeLock?> {
         Selection<Type?, TypeLock?> { selection in
             /* Selection */
             selection.select(self.selection)
-            
+
             /* Decoder */
             switch selection.response {
-            case .decoding(let data):
+            case let .decoding(data):
                 return try data.map { try self.decode(data: $0) }
             case .mocking:
                 return self.mock()
@@ -57,16 +57,16 @@ extension Selection where TypeLock: Decodable {
  return null - accept null values.
  */
 
-extension Selection where TypeLock: Decodable {
+public extension Selection where TypeLock: Decodable {
     /// Lets you make a failable (nullable) decoder comply accept nullable values.
-    public func optional<T>() -> Selection<Type, TypeLock?> where Type == Optional<T> {
+    func optional<T>() -> Selection<Type, TypeLock?> where Type == T? {
         Selection<Type, TypeLock?> { selection in
             /* Selection */
             selection.select(self.selection)
-            
+
             /* Decoder */
             switch selection.response {
-            case .decoding(let data):
+            case let .decoding(data):
                 return try data.map { try self.decode(data: $0) }.flatMap { $0 }
             case .mocking:
                 return self.mock()
@@ -79,17 +79,16 @@ extension Selection where TypeLock: Decodable {
  Selection nullability modifier. It makes values nullable, but doesn't let them be null.
  */
 
-extension Selection where TypeLock: Decodable {
-    
+public extension Selection where TypeLock: Decodable {
     /// Lets you decode nullable values into non-null ones.
-    public var nonNullOrFail: Selection<Type, TypeLock?> {
+    var nonNullOrFail: Selection<Type, TypeLock?> {
         Selection<Type, TypeLock?> { selection in
             /* Selection */
             selection.select(self.selection)
-            
+
             /* Decoder */
             switch selection.response {
-            case .decoding(let data):
+            case let .decoding(data):
                 if let data = data {
                     return try self.decode(data: data)
                 }
@@ -105,16 +104,16 @@ extension Selection where TypeLock: Decodable {
  Selection mapping functions.
  */
 
-extension Selection where TypeLock: Decodable {
+public extension Selection where TypeLock: Decodable {
     /// Maps selection's return value into a new value using provided mapping function.
-    public func map<MappedType>(_ fn: @escaping (Type) -> MappedType) -> Selection<MappedType, TypeLock> {
+    func map<MappedType>(_ fn: @escaping (Type) -> MappedType) -> Selection<MappedType, TypeLock> {
         Selection<MappedType, TypeLock> { selection in
             /* Selection */
             selection.select(self.selection)
-            
+
             /* Decoder */
             switch selection.response {
-            case .decoding(let data):
+            case let .decoding(data):
                 return fn(try self.decode(data: data))
             case .mocking:
                 return fn(self.mock())
@@ -125,28 +124,27 @@ extension Selection where TypeLock: Decodable {
 
 // MARK: - Fields Extensions
 
-
-extension Fields {
+public extension Fields {
     /// Lets you leave the selection empty.
-    public var empty: Selection<(), TypeLock> {
-        Selection<(), TypeLock> { selection in
+    var empty: Selection<Void, TypeLock> {
+        Selection<Void, TypeLock> { selection in
             /* Selection */
             let field = GraphQLField.leaf(name: "__typename", arguments: [])
             selection.select(field)
-            
+
             /* Decoder */
             return ()
         }
     }
-    
+
     /// Lets you make a selection inside selection set on the entire field.
-    public func selection<T>(_ selection: Selection<T, TypeLock>) throws -> T {
+    func selection<T>(_ selection: Selection<T, TypeLock>) throws -> T {
         /* Selection */
-        self.select(selection.selection)
-        
+        select(selection.selection)
+
         /* Decoder */
-        switch self.response {
-        case .decoding(let data):
+        switch response {
+        case let .decoding(data):
             return try selection.decode(data: data)
         case .mocking:
             return selection.mock()
@@ -158,27 +156,25 @@ extension Fields {
  Helper functions that let you make changes upfront.
  */
 
-extension Selection where TypeLock: Decodable {
+public extension Selection where TypeLock: Decodable {
     /// Lets you provide non-list selection for list field.
-    public static func list<NonListType, NonListTypeLock>(
+    static func list<NonListType, NonListTypeLock>(
         _ selection: Selection<NonListType, NonListTypeLock>
     ) -> Selection<Type, TypeLock> where Type == [NonListType], TypeLock == [NonListTypeLock] {
         selection.list
     }
-    
+
     /// Lets you provide non-nullable selection for nullable field.
-    public static func nullable<NonNullType, NonNullTypeLock>(
+    static func nullable<NonNullType, NonNullTypeLock>(
         _ selection: Selection<NonNullType, NonNullTypeLock>
-    ) -> Selection<Type, TypeLock> where Type == Optional<NonNullType>, TypeLock == Optional<NonNullTypeLock> {
+    ) -> Selection<Type, TypeLock> where Type == NonNullType?, TypeLock == NonNullTypeLock? {
         selection.nullable
     }
-    
+
     /// Lets you provide non-nullable selection for nullable field and require that it has a value.
-    public static func nonNullOrFail<NonNullTypeLock>(
+    static func nonNullOrFail<NonNullTypeLock>(
         _ selection: Selection<Type, NonNullTypeLock>
-    ) -> Selection<Type, TypeLock> where TypeLock == Optional<NonNullTypeLock> {
+    ) -> Selection<Type, TypeLock> where TypeLock == NonNullTypeLock? {
         selection.nonNullOrFail
     }
 }
-
-

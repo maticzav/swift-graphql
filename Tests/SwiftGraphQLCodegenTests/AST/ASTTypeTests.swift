@@ -1,8 +1,9 @@
-import XCTest
 @testable import SwiftGraphQLCodegen
+import XCTest
 
 final class ASTTypeTests: XCTestCase {
     // MARK: - Scalar
+
     func testScalarType() {
         let json = """
         {
@@ -16,7 +17,7 @@ final class ASTTypeTests: XCTestCase {
           "possibleTypes": null
         }
         """
-        
+
         /* Tests */
         let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
         let expected = GraphQL.NamedType.scalar(
@@ -25,11 +26,12 @@ final class ASTTypeTests: XCTestCase {
                 description: "It's string!"
             )
         )
-        
+
         XCTAssertEqual(value, expected)
     }
-    
+
     // MARK: - Object
+
     func testObjectType() {
         let json = """
         {
@@ -43,7 +45,7 @@ final class ASTTypeTests: XCTestCase {
           "possibleTypes": null
         }
         """
-        
+
         /* Tests */
         let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
         let expected = GraphQL.NamedType.object(
@@ -54,11 +56,12 @@ final class ASTTypeTests: XCTestCase {
                 interfaces: []
             )
         )
-        
+
         XCTAssertEqual(value, expected)
     }
-    
+
     // MARK: - Interface
+
     func testInterfaceType() {
         let json = """
         {
@@ -83,7 +86,7 @@ final class ASTTypeTests: XCTestCase {
           ]
         }
         """
-        
+
         /* Tests */
         let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
         let expected = GraphQL.NamedType.interface(
@@ -98,11 +101,12 @@ final class ASTTypeTests: XCTestCase {
                 ]
             )
         )
-        
+
         XCTAssertEqual(value, expected)
     }
-    
+
     // MARK: - Union
+
     func testUnionType() {
         let json = """
         {
@@ -127,7 +131,7 @@ final class ASTTypeTests: XCTestCase {
           ]
         }
         """
-        
+
         /* Tests */
         let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
         let expected = GraphQL.NamedType.union(
@@ -136,15 +140,16 @@ final class ASTTypeTests: XCTestCase {
                 description: nil,
                 possibleTypes: [
                     .named(.object("TypeOne")),
-                    .named(.object("TypeTwo"))
+                    .named(.object("TypeTwo")),
                 ]
             )
         )
-        
+
         XCTAssertEqual(value, expected)
     }
-    
+
     // MARK: - Enum
+
     func testEnumType() {
         let json = """
         {
@@ -166,7 +171,7 @@ final class ASTTypeTests: XCTestCase {
         }
 
         """
-        
+
         /* Tests */
         let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
         let expected = GraphQL.NamedType.enum(
@@ -174,15 +179,16 @@ final class ASTTypeTests: XCTestCase {
                 name: "Enum",
                 description: "It's an ENUM!",
                 enumValues: [
-                    .init(name: "enumValue", description: nil, isDeprecated: false, deprecationReason: nil)
+                    .init(name: "enumValue", description: nil, isDeprecated: false, deprecationReason: nil),
                 ]
             )
         )
-        
+
         XCTAssertEqual(value, expected)
     }
-    
+
     // MARK: - Input Object
+
     func testInputObjectType() {
         let json = """
         {
@@ -207,7 +213,7 @@ final class ASTTypeTests: XCTestCase {
           "possibleTypes": null
         }
         """
-        
+
         /* Tests */
         let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
         let expected = GraphQL.NamedType.inputObject(
@@ -219,14 +225,11 @@ final class ASTTypeTests: XCTestCase {
                         name: "inputField",
                         description: "",
                         type: .named(.enum("order_by"))
-                    )
+                    ),
                 ]
             )
         )
-        
+
         XCTAssertEqual(value, expected)
     }
 }
-
-
-

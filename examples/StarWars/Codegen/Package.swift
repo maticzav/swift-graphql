@@ -14,7 +14,7 @@ let package = Package(
             name: "Codegen",
             dependencies: [
                 .product(name: "SwiftGraphQLCodegen", package: "swift-graphql"),
-                "Files"
+                "Files",
             ]
         ),
     ]

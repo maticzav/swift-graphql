@@ -1,19 +1,18 @@
-import XCTest
 @testable import SwiftGraphQLCodegen
-
+import XCTest
 
 final class InputObjectTests: XCTestCase {
     let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
-    
+
     // MARK: - Tests
-    
+
     func testEmptyInputObject() throws {
         let type = GraphQL.InputObjectType(
             name: "InputObject",
             description: nil,
             inputFields: []
         )
-        
+
         /* Tests */
         let expected = """
         struct InputObjectTest: Encodable, Hashable {
@@ -21,7 +20,7 @@ final class InputObjectTests: XCTestCase {
             /* Encoder */
             func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
-            
+
             }
 
             /* CodingKeys */
@@ -29,15 +28,15 @@ final class InputObjectTests: XCTestCase {
             }
         }
         """
-        
+
         XCTAssertEqual(
             try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
-    
+
     // MARK: - Docs
-    
+
     func testFieldDocs() throws {
         let type = GraphQL.InputObjectType(
             name: "InputObject",
@@ -51,7 +50,7 @@ final class InputObjectTests: XCTestCase {
                 ),
             ]
         )
-        
+
         /* Tests */
         let expected = """
         struct InputObjectTest: Encodable, Hashable {
@@ -61,7 +60,7 @@ final class InputObjectTests: XCTestCase {
             /* Encoder */
             func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
-            
+
                 if id.hasValue { try container.encode(id, forKey: .id) }
             }
 
@@ -71,17 +70,16 @@ final class InputObjectTests: XCTestCase {
             }
         }
         """
-        
+
         XCTAssertEqual(
             try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
-    
+
     // MARK: - Fields
-    
+
     func testOptionalField() throws {
-        
         /* Type */
         let type = GraphQL.InputObjectType(
             name: "InputObject",
@@ -95,7 +93,7 @@ final class InputObjectTests: XCTestCase {
                 ),
             ]
         )
-        
+
         /* Tests */
         let expected = """
         struct InputObjectTest: Encodable, Hashable {
@@ -105,7 +103,7 @@ final class InputObjectTests: XCTestCase {
             /* Encoder */
             func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
-            
+
                 if inputValue.hasValue { try container.encode(inputValue, forKey: .inputValue) }
             }
 
@@ -115,15 +113,14 @@ final class InputObjectTests: XCTestCase {
             }
         }
         """
-        
+
         XCTAssertEqual(
             try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testScalarField() throws {
-        
         /* Type */
         let type = GraphQL.InputObjectType(
             name: "InputObject",
@@ -137,7 +134,7 @@ final class InputObjectTests: XCTestCase {
                 ),
             ]
         )
-        
+
         /* Tests */
         let expected = """
         struct InputObjectTest: Encodable, Hashable {
@@ -147,7 +144,7 @@ final class InputObjectTests: XCTestCase {
             /* Encoder */
             func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
-            
+
                 try container.encode(id, forKey: .id)
             }
 
@@ -157,15 +154,14 @@ final class InputObjectTests: XCTestCase {
             }
         }
         """
-        
+
         XCTAssertEqual(
             try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testInputObjectField() throws {
-        
         /* Type */
         let type = GraphQL.InputObjectType(
             name: "InputObject",
@@ -179,7 +175,7 @@ final class InputObjectTests: XCTestCase {
                 ),
             ]
         )
-        
+
         /* Tests */
         let expected = """
         struct InputObjectTest: Encodable, Hashable {
@@ -189,7 +185,7 @@ final class InputObjectTests: XCTestCase {
             /* Encoder */
             func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
-            
+
                 try container.encode(id, forKey: .id)
             }
 
@@ -199,15 +195,14 @@ final class InputObjectTests: XCTestCase {
             }
         }
         """
-        
+
         XCTAssertEqual(
             try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testEnumField() throws {
-        
         /* Type */
         let type = GraphQL.InputObjectType(
             name: "InputObject",
@@ -221,7 +216,7 @@ final class InputObjectTests: XCTestCase {
                 ),
             ]
         )
-        
+
         /* Tests */
         let expected = """
         struct InputObjectTest: Encodable, Hashable {
@@ -231,7 +226,7 @@ final class InputObjectTests: XCTestCase {
             /* Encoder */
             func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
-            
+
                 try container.encode(id, forKey: .id)
             }
 
@@ -241,7 +236,7 @@ final class InputObjectTests: XCTestCase {
             }
         }
         """
-        
+
         XCTAssertEqual(
             try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
             expected

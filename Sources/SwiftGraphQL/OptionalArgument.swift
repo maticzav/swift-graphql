@@ -3,7 +3,7 @@ import Foundation
 /*
  OptionalArgument is a utility structure used to denote a possibly
  absent value.
- 
+
  To support not-encoding an absent value, I have created a protocol
  that we use in document parsing to figure out whether we
  should include or skip the argument.
@@ -16,28 +16,28 @@ protocol OptionalArgumentProtocol {
 
 public struct OptionalArgument<Type>: OptionalArgumentProtocol {
     private var _value: InternalValue
-    
+
     // MARK: - Initializer
-    
+
     public enum Value {
         case present(Type)
         case absent
         case null
     }
-    
+
     fileprivate init(_ value: Value) {
         switch value {
-        case .present(let value):
-            self._value = .value([value])
+        case let .present(value):
+            _value = .value([value])
         case .absent:
-            self._value = .value([])
+            _value = .value([])
         case .null:
-            self._value = .null
+            _value = .null
         }
     }
-    
+
     // MARK: - Internal
-    
+
     fileprivate enum InternalValue {
         /*
          There are three states a value can be in:
@@ -48,13 +48,13 @@ public struct OptionalArgument<Type>: OptionalArgumentProtocol {
         case value([Type])
         case null
     }
-    
+
     // MARK: - Calculated Properties
-    
+
     /// Returns the value of an optional argument.
     public var value: Value {
-        switch self._value {
-        case .value(let value):
+        switch _value {
+        case let .value(value):
             if let value = value.first {
                 return .present(value)
             }
@@ -63,10 +63,10 @@ public struct OptionalArgument<Type>: OptionalArgumentProtocol {
             return .null
         }
     }
-    
+
     /// Tells whether an optional argument has a value.
     public var hasValue: Bool {
-        switch self._value {
+        switch _value {
         case let .value(value) where value.isEmpty:
             return false
         default:
@@ -77,51 +77,50 @@ public struct OptionalArgument<Type>: OptionalArgumentProtocol {
 
 // MARK: - Initializers
 
-extension OptionalArgument {
-    
+public extension OptionalArgument {
     /// Returns a null argument in null and present otherwise.
-    public init(_ optional: Optional<Type>) {
+    init(_ optional: Type?) {
         switch optional {
-        case .some(let value):
+        case let .some(value):
             self.init(.present(value))
         case .none:
             self.init(.null)
         }
     }
-    
+
     /// Returns an optional with present value.
-    public init(_ value: Type) {
+    init(_ value: Type) {
         self.init(.present(value))
     }
-    
+
     /// Returns an optional with an absent value.
-    public init() {
+    init() {
         self.init(.absent)
     }
-    
+
     /// Returns an OptionalArgument with a given value.
-    public static func present(_ value: Type) -> OptionalArgument<Type> {
+    static func present(_ value: Type) -> OptionalArgument<Type> {
         self.init(value)
     }
-    
+
     /// Returns an OptionalArgument with null value.
-    public static func null() -> OptionalArgument<Type> {
+    static func null() -> OptionalArgument<Type> {
         self.init(.null)
     }
-    
+
     /// Returns an OptionalArgument with absent value.
-    public static func absent() -> OptionalArgument<Type> {
+    static func absent() -> OptionalArgument<Type> {
         self.init(.absent)
     }
 }
 
 // MARK: - Modifier Methods
 
-extension OptionalArgument {
+public extension OptionalArgument {
     /// Maps a value using provided function when present.
-    public func map<A>(_ fn: (Type) -> A) -> OptionalArgument<A> {
-        switch self.value {
-        case .present(let value):
+    func map<A>(_ fn: (Type) -> A) -> OptionalArgument<A> {
+        switch value {
+        case let .present(value):
             return OptionalArgument<A>(.present(fn(value)))
         case .absent:
             return OptionalArgument<A>(.absent)
@@ -129,7 +128,7 @@ extension OptionalArgument {
             return OptionalArgument<A>(.null)
         }
     }
-    
+
     /// Lets you bind the value and convert it.
 //    public func andThen<T, V>(_ fn: (Type) -> V) -> OptionalArgument<V> where Type == Optional<T> {
 //        switch self.value {
@@ -160,8 +159,8 @@ extension OptionalArgument: Encodable where Type: Encodable {
     ///
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
-        switch self.value {
+
+        switch value {
         case .absent:
             throw EncodingError.invalidValue(
                 self,
@@ -172,7 +171,7 @@ extension OptionalArgument: Encodable where Type: Encodable {
             )
         case .null:
             try container.encodeNil()
-        case .present(let value):
+        case let .present(value):
             try container.encode(value)
         }
     }

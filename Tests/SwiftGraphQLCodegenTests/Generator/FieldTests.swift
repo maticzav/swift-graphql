@@ -1,12 +1,11 @@
-import XCTest
 @testable import SwiftGraphQLCodegen
-
+import XCTest
 
 final class FieldTests: XCTestCase {
     let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
-    
+
     // MARK: - Tests
-    
+
     func testFieldDocs() throws {
         let field = GraphQL.Field(
             name: "id",
@@ -16,7 +15,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: true,
             deprecationReason: "Use ID instead."
         )
-        
+
         let expected = """
         /// Object identifier.
         @available(*, deprecated, message: "Use ID instead.")
@@ -38,17 +37,17 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     // MARK: - Scalar
-    
+
     func testScalarField() throws {
         let field = GraphQL.Field(
             name: "id",
@@ -58,7 +57,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func id() throws -> String {
             /* Selection */
@@ -81,15 +80,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-  
+
     func testNullableScalarField() throws {
         let field = GraphQL.Field(
             name: "id",
@@ -99,7 +98,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func id() throws -> String? {
             /* Selection */
@@ -119,15 +118,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testListScalarField() throws {
         let field = GraphQL.Field(
             name: "ids",
@@ -137,7 +136,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func ids() throws -> [String]? {
             /* Selection */
@@ -157,15 +156,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testGenearateNonNullableListScalarField() throws {
         let field = GraphQL.Field(
             name: "ids",
@@ -175,7 +174,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func ids() throws -> [String] {
             /* Selection */
@@ -198,17 +197,17 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     // MARK: - Enumerators
-    
+
     func testEnumField() throws {
         let field = GraphQL.Field(
             name: "episode",
@@ -218,7 +217,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func episode() throws -> Enums.Episode {
             /* Selection */
@@ -241,16 +240,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
-    
+
     func testNullableEnumField() throws {
         let field = GraphQL.Field(
             name: "episode",
@@ -260,7 +258,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func episode() throws -> Enums.Episode? {
             /* Selection */
@@ -280,15 +278,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testNullableListEnumField() throws {
         let field = GraphQL.Field(
             name: "episode",
@@ -298,7 +296,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func episode() throws -> [Enums.Episode?] {
             /* Selection */
@@ -321,15 +319,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     // MARK: - Selections
 
     func testSelectionField() throws {
@@ -341,7 +339,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func hero<Type>(_ selection: Selection<Type, Objects.Hero>) throws -> Type {
             /* Selection */
@@ -365,15 +363,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testNullableSelectionField() throws {
         let field = GraphQL.Field(
             name: "hero",
@@ -383,7 +381,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func hero<Type>(_ selection: Selection<Type, Objects.Hero?>) throws -> Type {
             /* Selection */
@@ -404,9 +402,9 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
@@ -422,7 +420,7 @@ final class FieldTests: XCTestCase {
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func hero<Type>(_ selection: Selection<Type, [Objects.Hero]>) throws -> Type {
             /* Selection */
@@ -446,17 +444,17 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     // MARK: - Arguments
-    
+
     func testFieldWithScalarArgument() throws {
         let field = GraphQL.Field(
             name: "hero",
@@ -466,13 +464,13 @@ final class FieldTests: XCTestCase {
                     name: "id",
                     description: nil,
                     type: .nonNull(.named(.scalar("ID")))
-                )
+                ),
             ],
             type: .nonNull(.named(.scalar("ID"))),
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func hero(id: String) throws -> String {
             /* Selection */
@@ -496,15 +494,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testFieldWithOptionalArgument() throws {
         let field = GraphQL.Field(
             name: "hero",
@@ -514,13 +512,13 @@ final class FieldTests: XCTestCase {
                     name: "id",
                     description: nil,
                     type: .named(.scalar("ID"))
-                )
+                ),
             ],
             type: .nonNull(.named(.scalar("ID"))),
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func hero(id: OptionalArgument<String> = .absent) throws -> String {
             /* Selection */
@@ -544,15 +542,15 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testFieldWithInputObjectArgument() throws {
         let field = GraphQL.Field(
             name: "hero",
@@ -562,13 +560,13 @@ final class FieldTests: XCTestCase {
                     name: "id",
                     description: nil,
                     type: .nonNull(.named(.inputObject("Input")))
-                )
+                ),
             ],
             type: .nonNull(.named(.scalar("ID"))),
             isDeprecated: false,
             deprecationReason: nil
         )
-        
+
         let expected = """
         func hero(id: InputObjects.Input) throws -> String {
             /* Selection */
@@ -592,14 +590,12 @@ final class FieldTests: XCTestCase {
             }
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try generator.generateField(field).joined(separator: "\n"),
             expected
         )
     }
 }
-
-

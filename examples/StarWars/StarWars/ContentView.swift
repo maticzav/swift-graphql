@@ -1,12 +1,11 @@
-import SwiftUI
 import SwiftGraphQL
-
+import SwiftUI
 
 /* View */
 
 struct ContentView: View {
     @ObservedObject private var model = Model()
-    
+
     var body: some View {
         NavigationView {
             VStack {

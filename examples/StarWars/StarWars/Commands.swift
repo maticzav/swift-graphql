@@ -27,23 +27,21 @@ let human = Selection<Human, Objects.Human> {
 let foo: Selection<Human?, Objects.Human> = human.map { $0 }
 
 let luke = Selection<String?, Interfaces.Character> { _ in
-    return nil
+    nil
 }
 
 let nullableLuke: Selection<String?, Interfaces.Character?> = luke.optional()
 
-
 let characterInterface = Selection<String, Interfaces.Character> {
-    
     /* Common */
     let name = try $0.name()
-    
+
     /* Fragments */
     let about = try $0.on(
         droid: Selection<String, Objects.Droid> { droid in try droid.primaryFunction() },
         human: Selection<String, Objects.Human> { human in try human.infoUrl() ?? "Unknown" }
     )
-    
+
     return "\(name). \(about)"
 }
 
@@ -59,9 +57,9 @@ let characterUnion = Selection<String, Unions.CharacterUnion> {
 let query = Selection<Data, Operations.Query> {
     let english = try $0.greeting()
     let slovene = try $0.greeting(input: .present(.init(name: "Matic")))
-    
+
     let greeting = "\(english); \(slovene)"
-    
+
     return Data(
         whoami: try $0.whoami(),
         time: try $0.time(),

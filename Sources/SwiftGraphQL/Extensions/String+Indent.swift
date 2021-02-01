@@ -5,13 +5,13 @@
 extension String {
     /// Returns an indented string by n spaces in front.
     func indent(by level: Int) -> String {
-        "\(String.init(repeating: " ", count: level))\(self)"
+        "\(String(repeating: " ", count: level))\(self)"
     }
 }
 
 extension Collection where Element == String {
     /// Indents every element of the list by level.
     func indent(by level: Int) -> [String] {
-        self.map { $0.indent(by: level) }
+        map { $0.indent(by: level) }
     }
 }

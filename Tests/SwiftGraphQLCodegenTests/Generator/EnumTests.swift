@@ -1,33 +1,32 @@
-import XCTest
 @testable import SwiftGraphQLCodegen
-
+import XCTest
 
 final class EnumTests: XCTestCase {
     let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
-    
+
     // MARK: - Tests
-    
+
     func testGenerateEmptyEnum() {
         let type = GraphQL.EnumType(
             name: "Episodes",
             description: "Collection of all StarWars episodes.",
             enumValues: []
         )
-        
+
         let expected = """
         /// Collection of all StarWars episodes.
         enum Episodes: String, CaseIterable, Codable {
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             generator.generateEnum(type).joined(separator: "\n"),
             expected
         )
     }
-    
+
     func testGenerateEnumWithoutDescription() {
         let type = GraphQL.EnumType(
             name: "Episodes",
@@ -41,29 +40,27 @@ final class EnumTests: XCTestCase {
                 ),
             ]
         )
-        
+
         let expected = """
         /// Collection of all StarWars episodes.
         enum Episodes: String, CaseIterable, Codable {
             /// Released in 1977.
             case newhope = "NEWHOPE"
-            
+
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             generator.generateEnum(type).joined(separator: "\n"),
             expected
         )
     }
-    
-    
-    
+
     func testGenerateEnumWithDescription() {
         /* Declaration */
-        
+
         let type = GraphQL.EnumType(
             name: "Episodes",
             description: "Collection of all StarWars episodes.",
@@ -94,32 +91,30 @@ final class EnumTests: XCTestCase {
                 ),
             ]
         )
-        
+
         let expected = """
         /// Collection of all StarWars episodes.
         enum Episodes: String, CaseIterable, Codable {
             /// Released in 1977.
             case newhope = "NEWHOPE"
-            
+
             case empire = "EMPIRE"
-            
+
             /// Released in 1983.
             @available(*, deprecated, message: "Was too good.")
             case jedi = "JEDI"
-            
+
             @available(*, deprecated, message: "")
             case skywalker = "SKYWALKER"
-            
+
         }
         """
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             generator.generateEnum(type).joined(separator: "\n"),
             expected
         )
     }
 }
-
-

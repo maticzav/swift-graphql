@@ -1,10 +1,9 @@
-import XCTest
 @testable import SwiftGraphQLCodegen
-
+import XCTest
 
 final class ASTTests: XCTestCase {
     /* Schema */
-    
+
     func testDecodeSchema() throws {
         let json = """
         {
@@ -50,9 +49,9 @@ final class ASTTests: XCTestCase {
           }
         }
         """
-        
+
         /* Decode */
-        
+
         let value = try GraphQL.parse(json.data(using: .utf8)!)
         let expected = GraphQL.Schema(
             description: nil,
@@ -68,20 +67,20 @@ final class ASTTests: XCTestCase {
                             type: .named(.scalar("String")),
                             isDeprecated: false,
                             deprecationReason: nil
-                        )
+                        ),
                     ],
                     interfaces: [
-                        .named(.interface("Character"))
+                        .named(.interface("Character")),
                     ]
-                ))
+                )),
             ],
             queryType: GraphQL.Operation(name: "Query"),
             mutationType: nil,
             subscriptionType: nil
         )
-        
+
         /* Tests */
-        
+
         XCTAssertEqual(value, expected)
     }
 }

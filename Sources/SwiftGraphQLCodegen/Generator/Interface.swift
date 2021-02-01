@@ -11,7 +11,7 @@ extension GraphQLCodegen {
         with objects: [GraphQL.ObjectType]
     ) throws -> [String] {
         let name = type.name.pascalCase
-        
+
         /* Collect of all fields of all possible types. */
         var fields: [GraphQL.Field] = type.fields
         for object in objects {
@@ -24,13 +24,13 @@ extension GraphQLCodegen {
                 fields.append(field)
             }
         }
-        
+
         /* Code */
-        
+
         var code: [String] = [
             "/* \(type.name) */",
             "",
-            "extension Interfaces {"
+            "extension Interfaces {",
         ]
         code.append(contentsOf:
             try generateEncodableStruct(
@@ -52,7 +52,7 @@ extension GraphQLCodegen {
         code.append("}")
         code.append("")
         code.append("extension Fields where TypeLock == Interfaces.\(name) {")
-        code.append(contentsOf:  try type.fields.flatMap { try generateField($0) }.indent(by: 4))
+        code.append(contentsOf: try type.fields.flatMap { try generateField($0) }.indent(by: 4))
         code.append("}")
         code.append("")
         code.append(contentsOf:
@@ -62,7 +62,7 @@ extension GraphQLCodegen {
                 with: objects
             )
         )
-        
+
         return code
     }
 }
