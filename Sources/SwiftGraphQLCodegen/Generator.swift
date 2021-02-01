@@ -133,13 +133,11 @@ public struct GraphQLCodegen {
 
         let enumsPart = schema.enums.map {
             generateEnum($0)
-                .indent(by: 4)
                 .joined(separator: "\n")
         }.joined(separator: "\n\n\n")
 
         let inputObjectsPart = try schema.inputObjects.map {
             try generateInputObject($0.name.pascalCase, for: $0)
-                .indent(by: 4)
                 .joined(separator: "\n")
         }.joined(separator: "\n\n\n")
 

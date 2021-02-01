@@ -9,7 +9,7 @@ extension GraphQLCodegen {
     /// Generates an enumeration code.
     func generateEnum(_ type: GraphQL.EnumType) -> [String] {
         [generateEnumDoc(for: type),
-         "enum \(type.name.pascalCase): String, CaseIterable, Codable {"] + type.enumValues.flatMap { generateEnumCase(for: $0).indent(by: 4) } +
+         "enum \(type.name.pascalCase): String, CaseIterable, Codable {"] + type.enumValues.flatMap { generateEnumCase(for: $0) } +
             ["}"]
     }
 

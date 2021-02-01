@@ -30,18 +30,18 @@ extension GraphQLCodegen {
 
         /* Fields */
         code.append(contentsOf:
-            try inputFields.flatMap { try generateInputField($0) }.indent(by: 4)
+            try inputFields.flatMap { try generateInputField($0) }
         )
         code.append("")
 
         /* Encoder */
-        code.append("/* Encoder */".indent(by: 4))
-        code.append(contentsOf: generateEncoder(for: inputFields).indent(by: 4))
+        code.append("/* Encoder */")
+        code.append(contentsOf: generateEncoder(for: inputFields))
         code.append("")
 
         /* Coding keys */
-        code.append("/* CodingKeys */".indent(by: 4))
-        code.append(contentsOf: generateCodingKeys(for: inputFields).indent(by: 4))
+        code.append("/* CodingKeys */")
+        code.append(contentsOf: generateCodingKeys(for: inputFields))
 
         code.append("}")
 
@@ -102,7 +102,7 @@ extension GraphQLCodegen {
         var code = [String]()
 
         code.append("func encode(to encoder: Encoder) throws {")
-        code.append("var container = encoder.container(keyedBy: CodingKeys.self)".indent(by: 4))
+        code.append("var container = encoder.container(keyedBy: CodingKeys.self)")
         code.append("")
 
         code.append(contentsOf: fields.map {
@@ -116,7 +116,7 @@ extension GraphQLCodegen {
                 // Always encode keys that are not optional.
                 return "try container.encode(\(key), forKey: .\(key))"
             }
-        }.indent(by: 4))
+        })
         code.append("}")
 
         return code
@@ -130,7 +130,7 @@ extension GraphQLCodegen {
         code.append("enum CodingKeys: String, CodingKey {")
         code.append(contentsOf: fields.map {
             "case \($0.name.camelCase.normalize) = \"\($0.name)\""
-        }.indent(by: 4))
+        })
         code.append("}")
 
         return code

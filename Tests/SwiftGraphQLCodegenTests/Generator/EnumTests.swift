@@ -6,59 +6,7 @@ final class EnumTests: XCTestCase {
 
     // MARK: - Tests
 
-    func testGenerateEmptyEnum() {
-        let type = GraphQL.EnumType(
-            name: "Episodes",
-            description: "Collection of all StarWars episodes.",
-            enumValues: []
-        )
-
-        let expected = """
-        /// Collection of all StarWars episodes.
-        enum Episodes: String, CaseIterable, Codable {
-        }
-        """
-
-        /* Test */
-
-        XCTAssertEqual(
-            generator.generateEnum(type).joined(separator: "\n"),
-            expected
-        )
-    }
-
-    func testGenerateEnumWithoutDescription() {
-        let type = GraphQL.EnumType(
-            name: "Episodes",
-            description: "Collection of all StarWars episodes.",
-            enumValues: [
-                GraphQL.EnumValue(
-                    name: "NEWHOPE",
-                    description: "Released in 1977.",
-                    isDeprecated: false,
-                    deprecationReason: nil
-                ),
-            ]
-        )
-
-        let expected = """
-        /// Collection of all StarWars episodes.
-        enum Episodes: String, CaseIterable, Codable {
-            /// Released in 1977.
-            case newhope = "NEWHOPE"
-
-        }
-        """
-
-        /* Test */
-
-        XCTAssertEqual(
-            generator.generateEnum(type).joined(separator: "\n"),
-            expected
-        )
-    }
-
-    func testGenerateEnumWithDescription() {
+    func testGenerateEnum() throws {
         /* Declaration */
 
         let type = GraphQL.EnumType(
@@ -92,7 +40,9 @@ final class EnumTests: XCTestCase {
             ]
         )
 
-        let expected = """
+        let generated = try generator.generateEnum(type).joined(separator: "\n").format()
+
+        let expected = try """
         /// Collection of all StarWars episodes.
         enum Episodes: String, CaseIterable, Codable {
             /// Released in 1977.
@@ -108,13 +58,10 @@ final class EnumTests: XCTestCase {
             case skywalker = "SKYWALKER"
 
         }
-        """
+        """.format()
 
         /* Test */
 
-        XCTAssertEqual(
-            generator.generateEnum(type).joined(separator: "\n"),
-            expected
-        )
+        XCTAssertEqual(generated, expected)
     }
 }

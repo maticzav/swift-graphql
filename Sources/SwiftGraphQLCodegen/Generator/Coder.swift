@@ -23,32 +23,32 @@ extension GraphQLCodegen {
 
         code.append("struct \(name): \(protocols.joined(separator: ", ")) {")
         code.append("")
-        code.append("/* \(name) */".indent(by: 4))
+        code.append("/* \(name) */")
 
         /* TypeName */
         if let possibleTypes = possibleTypes {
             /* TypeName enum */
-            code.append("enum TypeName: String, Codable {".indent(by: 4))
+            code.append("enum TypeName: String, Codable {")
             code.append(contentsOf: possibleTypes.map {
-                "case \($0.name.camelCase.normalize) = \"\($0.name)\"".indent(by: 8)
+                "case \($0.name.camelCase.normalize) = \"\($0.name)\""
             })
-            code.append("}".indent(by: 4))
+            code.append("}")
         }
 
         /* Properties */
         code.append("")
-        code.append("/* Properties */".indent(by: 4))
+        code.append("/* Properties */")
 
         if possibleTypes != nil {
             /* Typename field decoder */
-            code.append("let __typename: TypeName".indent(by: 4))
+            code.append("let __typename: TypeName")
         }
 
         /* Internal fields */
         code.append(contentsOf: try fields.map {
             let type = generateDecoderType(try generateOutputType(ref: $0.type.namedType), for: $0.type.nonNullable)
             return "let \($0.name.camelCase.normalize): [String: \(type)]"
-        }.indent(by: 4))
+        })
 
         code.append("}")
 
@@ -66,7 +66,7 @@ extension GraphQLCodegen {
         code.append("/* Decoder */")
         code.append(contentsOf: try generateDecoder(for: fields, initTypename: possibleTypes != nil))
         code.append("")
-        code.append(contentsOf: dynamicCodingKeysStruct.indent(by: 4))
+        code.append(contentsOf: dynamicCodingKeysStruct)
 
         return code
     }
@@ -89,7 +89,7 @@ extension GraphQLCodegen {
             "",
             "        switch field {",
         ])
-        code.append(contentsOf: try fields.flatMap { try generateDecoderForField($0) }.indent(by: 12))
+        code.append(contentsOf: try fields.flatMap { try generateDecoderForField($0) })
         code.append(contentsOf: [
             "            default:",
             "                throw DecodingError.dataCorrupted(",
@@ -105,11 +105,11 @@ extension GraphQLCodegen {
 
         /* Property setters */
         if initTypename {
-            code.append("self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: \"__typename\")!)".indent(by: 4))
+            code.append("self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: \"__typename\")!)")
         }
         code.append(contentsOf: fields.map {
             "self.\($0.name.camelCase) = map[\"\($0.name.camelCase)\"]"
-        }.indent(by: 4))
+        })
         code.append("}")
 
         return code

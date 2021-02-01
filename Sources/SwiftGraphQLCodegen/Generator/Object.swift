@@ -18,19 +18,19 @@ extension GraphQLCodegen {
                 name,
                 fields: type.fields,
                 protocols: ["Encodable"]
-            ).indent(by: 4)
+            )
         )
         code.append("}")
 
         /* Decoder */
         code.append("extension Objects.\(name): Decodable {")
-        code.append(contentsOf: try generateDecodableExtension(fields: type.fields).indent(by: 4))
+        code.append(contentsOf: try generateDecodableExtension(fields: type.fields))
         code.append("}")
 
         code.append("")
         /* Fields */
         code.append("extension Fields where TypeLock == Objects.\(name) {")
-        code.append(contentsOf: try type.fields.flatMap { try generateField($0) }.indent(by: 4))
+        code.append(contentsOf: try type.fields.flatMap { try generateField($0) })
         code.append("}")
 
         return code

@@ -14,7 +14,7 @@ final class InputObjectTests: XCTestCase {
         )
 
         /* Tests */
-        let expected = """
+        let expected = try """
         struct InputObjectTest: Encodable, Hashable {
 
             /* Encoder */
@@ -27,12 +27,11 @@ final class InputObjectTests: XCTestCase {
             enum CodingKeys: String, CodingKey {
             }
         }
-        """
+        """.format()
 
-        XCTAssertEqual(
-            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
-            expected
-        )
+        let generated = try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n").format()
+
+        XCTAssertEqual(generated, expected)
     }
 
     // MARK: - Docs
@@ -52,10 +51,10 @@ final class InputObjectTests: XCTestCase {
         )
 
         /* Tests */
-        let expected = """
+        let expected = try """
         struct InputObjectTest: Encodable, Hashable {
             /// Field description.
-            var id: OptionalArgument<String> = .absent
+            var id: OptionalArgument<String> = .absent()
 
             /* Encoder */
             func encode(to encoder: Encoder) throws {
@@ -69,12 +68,11 @@ final class InputObjectTests: XCTestCase {
                 case id = "id"
             }
         }
-        """
+        """.format()
 
-        XCTAssertEqual(
-            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
-            expected
-        )
+        let generated = try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n").format()
+
+        XCTAssertEqual(generated, expected)
     }
 
     // MARK: - Fields
@@ -95,10 +93,10 @@ final class InputObjectTests: XCTestCase {
         )
 
         /* Tests */
-        let expected = """
+        let expected = try """
         struct InputObjectTest: Encodable, Hashable {
             /// Field description.
-            var inputValue: OptionalArgument<String> = .absent
+            var inputValue: OptionalArgument<String> = .absent()
 
             /* Encoder */
             func encode(to encoder: Encoder) throws {
@@ -112,12 +110,11 @@ final class InputObjectTests: XCTestCase {
                 case inputValue = "input_value"
             }
         }
-        """
+        """.format()
 
-        XCTAssertEqual(
-            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
-            expected
-        )
+        let generated = try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n").format()
+
+        XCTAssertEqual(generated, expected)
     }
 
     func testScalarField() throws {
@@ -136,7 +133,7 @@ final class InputObjectTests: XCTestCase {
         )
 
         /* Tests */
-        let expected = """
+        let expected = try """
         struct InputObjectTest: Encodable, Hashable {
             /// Field description.
             var id: String
@@ -153,12 +150,11 @@ final class InputObjectTests: XCTestCase {
                 case id = "id"
             }
         }
-        """
+        """.format()
 
-        XCTAssertEqual(
-            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
-            expected
-        )
+        let generated = try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n").format()
+
+        XCTAssertEqual(generated, expected)
     }
 
     func testInputObjectField() throws {
@@ -177,7 +173,7 @@ final class InputObjectTests: XCTestCase {
         )
 
         /* Tests */
-        let expected = """
+        let expected = try """
         struct InputObjectTest: Encodable, Hashable {
             /// Field description.
             var id: InputObjects.AnotherInputObject
@@ -194,12 +190,11 @@ final class InputObjectTests: XCTestCase {
                 case id = "id"
             }
         }
-        """
+        """.format()
 
-        XCTAssertEqual(
-            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
-            expected
-        )
+        let generated = try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n").format()
+
+        XCTAssertEqual(generated, expected)
     }
 
     func testEnumField() throws {
@@ -218,7 +213,8 @@ final class InputObjectTests: XCTestCase {
         )
 
         /* Tests */
-        let expected = """
+
+        let expected = try """
         struct InputObjectTest: Encodable, Hashable {
             /// Field description.
             var id: Enums.Enum
@@ -235,11 +231,10 @@ final class InputObjectTests: XCTestCase {
                 case id = "id"
             }
         }
-        """
+        """.format()
 
-        XCTAssertEqual(
-            try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n"),
-            expected
-        )
+        let generated = try generator.generateInputObject("InputObjectTest", for: type).joined(separator: "\n").format()
+
+        XCTAssertEqual(generated, expected)
     }
 }

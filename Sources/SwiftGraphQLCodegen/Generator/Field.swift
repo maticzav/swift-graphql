@@ -27,13 +27,13 @@ extension GraphQLCodegen {
         // Field method.
         lines.append("func \(try generateFnDefinition(for: field)) throws -> \(try generateReturnType(for: field.type)) {")
         lines.append("    /* Selection */")
-        lines.append(contentsOf: generateFieldSelection(for: field).indent(by: 4))
+        lines.append(contentsOf: generateFieldSelection(for: field))
         lines.append("    self.select(field)")
         lines.append("")
         lines.append("    /* Decoder */")
         lines.append("    switch self.response {")
         lines.append("    case .decoding(let data):")
-        lines.append(contentsOf: generateDecoder(for: field).indent(by: 8))
+        lines.append(contentsOf: generateDecoder(for: field))
         lines.append("    case .mocking:")
         lines.append("        return \(try generateMockData(for: field.type))")
         lines.append("    }")
@@ -181,14 +181,14 @@ extension GraphQLCodegen {
             return
                 ["let field = GraphQLField.leaf(",
                  "    name: \"\(field.name)\",",
-                 "    arguments: ["] + generateSelectionArguments(for: field.args).indent(by: 8) +
+                 "    arguments: ["] + generateSelectionArguments(for: field.args) +
                 ["    ]",
                  ")"]
         case .interface(_), .object(_), .union:
             return
                 ["let field = GraphQLField.composite(",
                  "    name: \"\(field.name)\",",
-                 "    arguments: ["] + generateSelectionArguments(for: field.args).indent(by: 8) +
+                 "    arguments: ["] + generateSelectionArguments(for: field.args) +
                 ["    ],",
                  "    selection: selection.selection",
                  ")"]

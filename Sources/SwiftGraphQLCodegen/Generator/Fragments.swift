@@ -19,13 +19,13 @@ extension GraphQLCodegen {
         }
         let selection: [String] =
             ["/* Selection */",
-             "self.select(["] + possibleTypes.map { generateFragmentSelection(for: $0) }.indent(by: 4) +
+             "self.select(["] + possibleTypes.map { generateFragmentSelection(for: $0) } +
             ["])"]
         let decoder: [String] =
             ["/* Decoder */",
              "switch self.response {",
              "case .decoding(let data):",
-             "    switch data.__typename {"] + possibleTypes.flatMap { generateTypeDecoder(for: $0, with: objects) }.indent(by: 4) +
+             "    switch data.__typename {"] + possibleTypes.flatMap { generateTypeDecoder(for: $0, with: objects) } +
             ["    }",
              "case .mocking:",
              "    return \(possibleTypes.first!.namedType.name.camelCase).mock()",
@@ -36,10 +36,10 @@ extension GraphQLCodegen {
             "extension Fields where TypeLock == \(name) {",
             "    func on<Type>(",
         ]
-        code.append(contentsOf: parameters.indent(by: 8))
+        code.append(contentsOf: parameters)
         code.append("    ) throws -> Type {")
-        code.append(contentsOf: selection.indent(by: 8))
-        code.append(contentsOf: decoder.indent(by: 8))
+        code.append(contentsOf: selection)
+        code.append(contentsOf: decoder)
         code.append("    }")
         code.append("}")
 
@@ -67,7 +67,7 @@ extension GraphQLCodegen {
             let isLast = index == object.fields.count - 1
             // The last parameter shouldn't have a comma.
             return "\(name): data.\(name)\(isLast ? "" : ",")"
-        }.indent(by: 8))
+        })
         code.append("    )")
         code.append("    return try \(name.camelCase).decode(data: data)")
 

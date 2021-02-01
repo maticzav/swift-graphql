@@ -21,7 +21,7 @@ extension GraphQLCodegen {
                 identifier,
                 fields: type.fields,
                 protocols: ["Encodable"]
-            ).indent(by: 4)
+            )
         )
         code.append("}")
         code.append("")
@@ -36,14 +36,14 @@ extension GraphQLCodegen {
         /* Decoder */
         operation.availability.map { code.append($0) }
         code.append("extension Operations.\(identifier): Decodable {")
-        code.append(contentsOf: try generateDecodableExtension(fields: type.fields).indent(by: 4))
+        code.append(contentsOf: try generateDecodableExtension(fields: type.fields))
         code.append("}")
         code.append("")
 
         /* Fields */
         operation.availability.map { code.append($0) }
         code.append("extension Fields where TypeLock == Operations.\(identifier) {")
-        code.append(contentsOf: try type.fields.flatMap { try generateField($0) }.indent(by: 4))
+        code.append(contentsOf: try type.fields.flatMap { try generateField($0) })
         code.append("}")
 
         return code
