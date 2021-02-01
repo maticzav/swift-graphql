@@ -10,6 +10,6 @@ final class IntrospectionTests: XCTestCase {
         /* Tests */
 
         XCTAssertNotNil(schema)
-        XCTAssertTrue(schema.objects.map { $0.name }.count > 0)
+        XCTAssertTrue(!schema.objects.map { $0.name }.isEmpty)
     }
 }
