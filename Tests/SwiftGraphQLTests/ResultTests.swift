@@ -1,5 +1,5 @@
-import XCTest
 @testable import SwiftGraphQL
+import XCTest
 
 final class ParserTests: XCTestCase {
     func testSuccessfulResponse() throws {
@@ -11,21 +11,21 @@ final class ParserTests: XCTestCase {
         """.data(using: .utf8)!
         let selection = Selection<String, String> {
             switch $0.response {
-            case .decoding(let data):
+            case let .decoding(data):
                 return data
             case .mocking:
                 return "wrong"
             }
         }
-        
+
         let result = try GraphQLResult(data, with: selection.nonNullOrFail)
-        
+
         /* Test */
-        
+
         XCTAssertEqual(result.data, "World!")
         XCTAssertEqual(result.errors, nil)
     }
-    
+
     func testFailingResponse() throws {
         /* Data */
         let response: Data = """
@@ -42,26 +42,26 @@ final class ParserTests: XCTestCase {
         """.data(using: .utf8)!
         let selection = Selection<String, String> {
             switch $0.response {
-            case .decoding(let data):
+            case let .decoding(data):
                 return data
             case .mocking:
                 return "wrong"
             }
         }
-        
+
         let result = try GraphQLResult(response, with: selection.nonNullOrFail)
-        
+
         /* Test */
-        
+
         XCTAssertEqual(result.data, "data")
         XCTAssertEqual(result.errors, [
             GraphQLError(
                 message: "Message.",
                 locations: [GraphQLError.Location(line: 6, column: 7)]
-            )
+            ),
         ])
     }
-    
+
     func testGraphQLResultEquality() throws {
         /* Data */
         let data: Data = """
@@ -69,7 +69,7 @@ final class ParserTests: XCTestCase {
           "data": "World!"
         }
         """.data(using: .utf8)!
-        
+
         let dataWithErrors: Data = """
         {
           "data": "World!",
@@ -82,23 +82,23 @@ final class ParserTests: XCTestCase {
           ],
         }
         """.data(using: .utf8)!
-        
+
         let selection = Selection<String, String> {
             switch $0.response {
-            case .decoding(let data):
+            case let .decoding(data):
                 return data
             case .mocking:
                 return "wrong"
             }
         }
-        
+
         /* Test */
-        
+
         XCTAssertEqual(
             try GraphQLResult(data, with: selection.nonNullOrFail),
             try GraphQLResult(data, with: selection.nonNullOrFail)
         )
-        
+
         XCTAssertNotEqual(
             try GraphQLResult(dataWithErrors, with: selection.nonNullOrFail),
             try GraphQLResult(data, with: selection.nonNullOrFail)

@@ -4,11 +4,10 @@ enum NamedTypeKind: String, Codable, Equatable {
     case scalar = "SCALAR"
     case object = "OBJECT"
     case interface = "INTERFACE"
-    case union  = "UNION"
+    case union = "UNION"
     case enumeration = "ENUM"
     case inputObject = "INPUT_OBJECT"
 }
-
 
 protocol NamedTypeProtocol {
     var kind: NamedTypeKind { get }
@@ -33,52 +32,52 @@ extension GraphQL {
         let name: String
         let description: String?
     }
-    
+
     /* Object */
     struct ObjectType: NamedTypeProtocol, Decodable, Equatable {
         var kind: NamedTypeKind = .object
         let name: String
         let description: String?
-        
+
         let fields: [Field]
         let interfaces: [InterfaceTypeRef]
     }
-    
+
     /* Interface */
     struct InterfaceType: NamedTypeProtocol, Decodable, Equatable {
         var kind: NamedTypeKind = .interface
         let name: String
         let description: String?
-        
+
         let fields: [Field]
         let interfaces: [InterfaceTypeRef]
         let possibleTypes: [ObjectTypeRef]
     }
-    
+
     /* Union */
     struct UnionType: NamedTypeProtocol, Decodable, Equatable {
         var kind: NamedTypeKind = .union
         let name: String
         let description: String?
-        
+
         let possibleTypes: [ObjectTypeRef]
     }
-    
+
     /* Enum */
     struct EnumType: NamedTypeProtocol, Decodable, Equatable {
         var kind: NamedTypeKind = .enumeration
         let name: String
         let description: String?
-        
+
         let enumValues: [EnumValue]
     }
-    
+
     /* Input Object */
     struct InputObjectType: NamedTypeProtocol, Decodable, Equatable {
         var kind: NamedTypeKind = .inputObject
         let name: String
         let description: String?
-        
+
         let inputFields: [InputValue]
     }
 }
@@ -93,20 +92,20 @@ extension GraphQL {
         case union(GraphQL.UnionType)
         case `enum`(GraphQL.EnumType)
         case inputObject(GraphQL.InputObjectType)
-        
+
         var name: String {
             switch self {
-            case .enum(let `enum`):
+            case let .enum(`enum`):
                 return `enum`.name
-            case .inputObject(let io):
+            case let .inputObject(io):
                 return io.name
-            case .interface(let interface):
+            case let .interface(interface):
                 return interface.name
-            case .object(let object):
+            case let .object(object):
                 return object.name
-            case .scalar(let scalar):
+            case let .scalar(scalar):
                 return scalar.name
-            case .union(let union):
+            case let .union(union):
                 return union.name
             }
         }
@@ -119,31 +118,30 @@ extension GraphQL.NamedType: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let kind = try container.decode(NamedTypeKind.self, forKey: .kind)
-        
+
         switch kind {
         case .scalar:
-            let value = try GraphQL.ScalarType.init(from: decoder)
+            let value = try GraphQL.ScalarType(from: decoder)
             self = .scalar(value)
         case .object:
-            let value = try GraphQL.ObjectType.init(from: decoder)
+            let value = try GraphQL.ObjectType(from: decoder)
             self = .object(value)
         case .interface:
-            let value = try GraphQL.InterfaceType.init(from: decoder)
+            let value = try GraphQL.InterfaceType(from: decoder)
             self = .interface(value)
         case .union:
-            let value = try GraphQL.UnionType.init(from: decoder)
+            let value = try GraphQL.UnionType(from: decoder)
             self = .union(value)
         case .enumeration:
-            let value = try GraphQL.EnumType.init(from: decoder)
+            let value = try GraphQL.EnumType(from: decoder)
             self = .enum(value)
         case .inputObject:
-            let value = try GraphQL.InputObjectType.init(from: decoder)
+            let value = try GraphQL.InputObjectType(from: decoder)
             self = .inputObject(value)
         }
     }
-    
+
     private enum CodingKeys: String, CodingKey {
-        case kind = "kind"
+        case kind
     }
 }
-

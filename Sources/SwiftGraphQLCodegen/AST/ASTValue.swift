@@ -10,14 +10,14 @@ extension GraphQL {
         let isDeprecated: Bool
         let deprecationReason: String?
     }
-    
+
     /* Input value */
     struct InputValue: Decodable, Equatable {
         let name: String
         let description: String?
         let type: InputTypeRef
     }
-    
+
     /* Enum */
     struct EnumValue: Codable, Equatable {
         let name: String

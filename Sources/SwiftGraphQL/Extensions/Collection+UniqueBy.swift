@@ -8,11 +8,11 @@ extension Collection {
     ///
     func unique<T>(by: (Element) -> T) -> [Element] where T: Hashable {
         var dict = [T: Element]()
-        
+
         for item in self {
             dict[by(item)] = item
         }
-        
+
         return [Element](dict.values)
     }
 }

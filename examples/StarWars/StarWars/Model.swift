@@ -3,16 +3,16 @@ import SwiftGraphQL
 
 class Model: ObservableObject {
     // MARK: - State
-    
+
     @Published private(set) var data = Data()
     @Published private(set) var subscriptionData: Int = 0
     private var token: Token?
 
     // MARK: - Intentions
-    
+
     func fetch() {
         print("FETCHING")
-        
+
         // Perform query.
 //        SG.send(
 //            query,
@@ -32,14 +32,14 @@ class Model: ObservableObject {
 //            }
 //        }
     }
-    
+
     func startListening() {
         print("STARTED LISTENING")
-        
+
         let subscription = Selection<Int, Operations.Subscription> {
             return try $0.number()
         }
-        
+
         token = SG.listen(
             subscription,
             to: "ws://localhost:4000"
@@ -49,7 +49,7 @@ class Model: ObservableObject {
                 DispatchQueue.main.async {
                     self?.subscriptionData = resultValue.data
                 }
-            } catch let error {
+            } catch {
 //                print("SUBS", error)
             }
         }

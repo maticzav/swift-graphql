@@ -11,7 +11,7 @@ extension GraphQLCodegen {
         with objects: [GraphQL.ObjectType]
     ) throws -> [String] {
         let name = type.name.pascalCase
-        
+
         /* Collect of all fields of all possible types. */
         var fields: [GraphQL.Field] = []
         for object in objects {
@@ -24,14 +24,14 @@ extension GraphQLCodegen {
                 fields.append(field)
             }
         }
-        
+
         /* Code */
-        
+
         /* Decoders */
         var code: [String] = [
             "/* \(type.name) */",
             "",
-            "extension Unions {"
+            "extension Unions {",
         ]
         code.append(contentsOf:
             try generateEncodableStruct(
@@ -39,7 +39,7 @@ extension GraphQLCodegen {
                 fields: fields,
                 protocols: ["Encodable"],
                 possibleTypes: type.possibleTypes.map { $0.namedType }
-            ).indent(by: 4)
+            )
         )
         code.append("}")
         code.append("")
@@ -48,7 +48,7 @@ extension GraphQLCodegen {
             try generateDecodableExtension(
                 fields: fields,
                 possibleTypes: type.possibleTypes.map { $0.namedType }
-            ).indent(by: 4)
+            )
         )
         code.append("}")
         code.append("")
@@ -59,7 +59,7 @@ extension GraphQLCodegen {
                 with: objects
             )
         )
-        
+
         return code
     }
 }
