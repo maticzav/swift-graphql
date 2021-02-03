@@ -106,8 +106,8 @@ public enum SwiftGraphQL {
     ///
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     public static func listen<Type, TypeLock>(
-        _ selection: Selection<Type, TypeLock>,
-        to endpoint: String,
+        for selection: Selection<Type, TypeLock>,
+        on endpoint: String,
         operationName: String? = nil,
         headers: HttpHeaders = [:],
         protocol webSocketProtocol: String = "graphql-subscriptions",
@@ -242,8 +242,8 @@ public enum SwiftGraphQL {
         }
     }
 
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     /// Starts a webhook listener.
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     private static func listen<Type, TypeLock>(
         selection: Selection<Type, TypeLock?>,
         operationName: String?,

@@ -41,8 +41,8 @@ class Model: ObservableObject {
         }
 
         token = SG.listen(
-            subscription,
-            to: "ws://localhost:4000"
+            for: subscription.nonNullOrFail,
+            on: "ws://localhost:4000/graphql"
         ) { [weak self] result in
             do {
                 let resultValue = try result.get()

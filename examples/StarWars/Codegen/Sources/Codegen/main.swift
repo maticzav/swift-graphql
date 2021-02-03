@@ -7,7 +7,11 @@ let endpoint = URL(string: "http://localhost:4000")!
 // let endpoint = URL(string: "https://api.react-finland.fi/graphql")!
 
 do {
-    let target = try Folder.current.parent!
+    let target = try File(path: #file)
+        .parent! // Codegen
+        .parent! // Sources
+        .parent! // Codegen
+        .parent! // StarWars
         .subfolder(at: "StarWars")
         .createFile(at: "API.swift").url
 
