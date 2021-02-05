@@ -33,16 +33,20 @@ extension GraphQLCodegen {
             "",
             "extension Interfaces {",
         ]
+        
+        // Encoder
         code.append(contentsOf:
             try generateEncodableStruct(
                 name,
                 fields: fields,
-                protocols: ["Encodable"],
                 possibleTypes: type.possibleTypes.map { $0.namedType }
             )
         )
         code.append("}")
         code.append("")
+        
+        // Decoder
+        
         code.append("extension Interfaces.\(name): Decodable {")
         code.append(contentsOf:
             try generateDecodableExtension(

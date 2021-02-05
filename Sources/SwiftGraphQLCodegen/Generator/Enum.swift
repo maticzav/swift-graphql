@@ -6,33 +6,45 @@ import GraphQLAST
  special in here, just the generated code.
  */
 
-extension GraphQLCodegen {
-    /// Generates an enumeration code.
-    func generateEnum(_ type: EnumType) -> [String] {
-        [generateEnumDoc(for: type),
-         "enum \(type.name.pascalCase): String, CaseIterable, Codable {"] + type.enumValues.flatMap { generateEnumCase(for: $0) } +
-            ["}"]
+extension EnumType {
+    var declaration: String {
+        """
+        \(docs)
+        enum \(name.pascalCase): String, CaseIterable, Codable {
+        \(values)
+        }
+        """
     }
-
-    // MARK: - Private helpers
-
-    private func generateEnumDoc(for type: EnumType) -> String {
-        "/// \(type.description ?? "\(type.name)")"
+    
+    private var values: String {
+        enumValues.map { $0.declaration }.joined(separator: "\n")
     }
-
-    private func generateEnumCase(for env: EnumValue) -> [String] {
-        [generateEnumCaseDoc(for: env),
-         generateEnumCaseDeprecationDoc(for: env),
-         #"case \#(env.name.camelCase.normalize) = "\#(env.name)""#,
-         ""]
-            .compactMap { $0 }
+    
+    private var docs: String {
+        ""
     }
+}
 
-    private func generateEnumCaseDoc(for env: EnumValue) -> String? {
-        env.description.map { "/// \($0)" }
+extension EnumValue {
+    
+    var declaration: String {
+        """
+        \(docs)
+        \(availability)
+        case \(name.camelCase.normalize) = "\(name)"
+        """
     }
+    
+    private var docs: String {
+        description.map { "/// \($0)" } ?? ""
+    }
+    
 
-    private func generateEnumCaseDeprecationDoc(for env: EnumValue) -> String? {
-        env.isDeprecated ? "@available(*, deprecated, message: \"\(env.deprecationReason ?? "")\")" : nil
+    private var availability: String {
+        if isDeprecated {
+            let message = deprecationReason ?? ""
+            return "@available(*, deprecated, message: \"\(message)\")"
+        }
+        return ""
     }
 }

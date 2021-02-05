@@ -34,16 +34,17 @@ extension GraphQLCodegen {
             "",
             "extension Unions {",
         ]
+        // Definition
         code.append(contentsOf:
             try generateEncodableStruct(
                 name,
                 fields: fields,
-                protocols: ["Encodable"],
                 possibleTypes: type.possibleTypes.map { $0.namedType }
             )
         )
         code.append("}")
         code.append("")
+        // Decoder
         code.append("extension Unions.\(name): Decodable {")
         code.append(contentsOf:
             try generateDecodableExtension(
@@ -53,6 +54,7 @@ extension GraphQLCodegen {
         )
         code.append("}")
         code.append("")
+        // 
         code.append(contentsOf:
             generateFragmentSelection(
                 "Unions.\(type.name.pascalCase)",

@@ -47,3 +47,22 @@ public struct HashMap {
         return map
     }
 }
+
+
+/*
+ We use DynamicCodingKeys to allow response decoder to look up
+ for arbitrary key in the response. Otherwise, we would have to
+ hardcode field alias which is impossible because of aliasing.
+ */
+
+public struct DynamicCodingKeys: CodingKey {
+    // Use for string-keyed dictionary
+    public var stringValue: String
+    public init?(stringValue: String) {
+        self.stringValue = stringValue
+    }
+
+    // Use for integer-keyed dictionary
+    public var intValue: Int?
+    public init?(intValue _: Int) { nil }
+}

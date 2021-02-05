@@ -67,18 +67,6 @@ extension Objects.Mutation: Decodable {
 
         mutate = map["mutate"]
     }
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue _: Int) { nil }
-    }
 }
 
 extension Fields where TypeLock == Objects.Mutation {
@@ -161,18 +149,6 @@ extension Objects.Droid: Decodable {
         name = map["name"]
         primaryFunction = map["primaryFunction"]
         appearsIn = map["appearsIn"]
-    }
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue _: Int) { nil }
     }
 }
 
@@ -325,18 +301,6 @@ extension Objects.Human: Decodable {
         homePlanet = map["homePlanet"]
         appearsIn = map["appearsIn"]
         infoUrl = map["infoUrl"]
-    }
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue _: Int) { nil }
     }
 }
 
@@ -535,18 +499,6 @@ extension Objects.Query: Decodable {
         greeting = map["greeting"]
         whoami = map["whoami"]
         time = map["time"]
-    }
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue _: Int) { nil }
     }
 }
 
@@ -801,18 +753,6 @@ extension Objects.Subscription: Decodable {
 
         number = map["number"]
     }
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue _: Int) { nil }
-    }
 }
 
 extension Fields where TypeLock == Objects.Subscription {
@@ -918,18 +858,6 @@ extension Interfaces.Character: Decodable {
         appearsIn = map["appearsIn"]
         homePlanet = map["homePlanet"]
         infoUrl = map["infoUrl"]
-    }
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue _: Int) { nil }
     }
 }
 
@@ -1096,18 +1024,6 @@ extension Unions.CharacterUnion: Decodable {
         appearsIn = map["appearsIn"]
         homePlanet = map["homePlanet"]
         infoUrl = map["infoUrl"]
-    }
-
-    private struct DynamicCodingKeys: CodingKey {
-        // Use for string-keyed dictionary
-        var stringValue: String
-        init?(stringValue: String) {
-            self.stringValue = stringValue
-        }
-
-        // Use for integer-keyed dictionary
-        var intValue: Int?
-        init?(intValue _: Int) { nil }
     }
 }
 

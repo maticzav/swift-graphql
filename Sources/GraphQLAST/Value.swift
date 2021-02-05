@@ -1,6 +1,5 @@
 import Foundation
 
-/* Field */
 public struct Field: Decodable, Equatable {
     public let name: String
     public let description: String?
@@ -10,14 +9,12 @@ public struct Field: Decodable, Equatable {
     public let deprecationReason: String?
 }
 
-/* Input value */
 public struct InputValue: Decodable, Equatable {
     public let name: String
     public let description: String?
     public let type: InputTypeRef
 }
 
-/* Enum */
 public struct EnumValue: Codable, Equatable {
     public let name: String
     public let description: String?

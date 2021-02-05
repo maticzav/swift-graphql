@@ -1,53 +1,36 @@
 import Foundation
 import GraphQLAST
+import SwiftAST
 
-extension GraphQLCodegen {
-    /// Generates a function to handle a type.
-    func generateOperation(
-        type: ObjectType,
-        operation: Operation
-    ) throws -> [String] {
-        let name = type.name.pascalCase
-
-        /* Code */
+extension GraphQLAST.Operation: BlockProtocol {
+    public var block: Block {
         var code = [String]()
 
-        code.append("/* \(name) */")
-        code.append("")
-
-        /* Operation*/
-        operation.availability.map { code.append($0) }
-        code.append("extension Objects.\(name): \(operation.type) {")
-        code.append("    static var operation: String { \"\(operation.rawValue)\" } ")
+        code.append("extension Objects.\(type.name.pascalCase): \(self.protocol) {")
+        code.append("    static var operation: String { \"\(self.operation)\" } ")
         code.append("}")
-        code.append("")
 
-        return code
+        
+        return .blocks([])
+    }
+    
+    private var operation: String {
+        switch self {
+        case .query:
+            return "query"
+        case .mutation:
+            return "mutation"
+        case .subscription:
+            return "subscription"
+        }
     }
 
-    // MARK: - Private helpers
-
-    enum Operation: String {
-        case query
-        case mutation
-        case subscription
-
-        var availability: String? {
-            switch self {
-            case .query, .mutation:
-                return nil
-            case .subscription:
-                return "@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)"
-            }
-        }
-
-        var type: String {
-            switch self {
-            case .query, .mutation:
-                return "GraphQLHttpOperation"
-            case .subscription:
-                return "GraphQLWebSocketOperation"
-            }
+    private var `protocol`: String {
+        switch self {
+        case .query, .mutation:
+            return "GraphQLHttpOperation"
+        case .subscription:
+            return "GraphQLWebSocketOperation"
         }
     }
 }

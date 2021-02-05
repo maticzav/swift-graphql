@@ -4,29 +4,56 @@ import Foundation
 
 public struct Schema: Decodable, Equatable {
     public let description: String?
+    
+    /// Collection of all types in the schema.
     public let types: [NamedType]
-    /* Root Types */
-    public let queryType: Operation
-    public let mutationType: Operation?
-    public let subscriptionType: Operation?
+
+    /**
+     Internal information about the types of root operations.
+     */
+    private let queryTypeName: String
+    private let mutationTypeName: String?
+    private let subscriptionTypeName: String?
 }
 
-// MARK: - Operations
-
-public struct Operation: Codable, Equatable {
-    public let name: String
-}
-
-// MARK: - Methods
+// MARK: - Accessors
 
 public extension Schema {
-    /// Returns names of the operations in schema.
-    var operations: [String] {
-        [
-            queryType.name,
-            mutationType?.name,
-            subscriptionType?.name,
-        ].compactMap { $0 }
+    
+    /// Searches for a type with a given name.
+    func type(name: String) -> NamedType? {
+        types.first(where: { $0.name == name })
+    }
+    
+    /// Searches for an object with a given name.
+    func object(name: String) -> ObjectType? {
+        objects.first(where: { $0.name == name })
+    }
+    
+    // MARK: - Operations
+    
+    /// Query operation type in the schema.
+    var query: Operation {
+        .query(object(name: queryTypeName)!)
+    }
+    
+    /// Mutation operation type in the schema.
+    var mutation: Operation? {
+        mutationTypeName
+            .flatMap { object(name: $0) }
+            .flatMap { .mutation($0) }
+    }
+    
+    /// Subscription operation type in the schema.
+    var subscription: Operation? {
+        subscriptionTypeName
+            .flatMap { object(name: $0) }
+            .flatMap { .subscription($0) }
+    }
+    
+    /// Returns operation types in the schema.
+    var operations: [Operation] {
+        [query, mutation, subscription].compactMap { $0 }
     }
 
     // MARK: - Named types

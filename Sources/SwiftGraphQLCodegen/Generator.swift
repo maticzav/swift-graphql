@@ -4,9 +4,6 @@ import GraphQLAST
 /*
  This file contains publicly accessible functions used to
  generate SwiftGraphQL code.
-
- Every function related to the codegeneration should be created under
- GraphQLCodegen namespace.
  */
 
 public struct GraphQLCodegen {
@@ -75,24 +72,14 @@ public struct GraphQLCodegen {
     }
 
     /// Generates the API and returns it to handler.
-    public func generate(from schemaURL: URL) throws -> String {
-        let schema: Schema = try GraphQLCodegen.downloadFrom(schemaURL)
+    public func generate(from endpoint: URL) throws -> String {
+        let schema = try Schema(from: endpoint)
         let code = try generate(from: schema)
         return code
     }
 
     /// Generates the code that can be used to define selections.
     func generate(from schema: Schema) throws -> String {
-        /*
-         We generate all of the code into a single file. The main goal
-         is that developers don't have to worry about the generated code - it
-         just works.
-
-         Having multiple files in Swift source code serves no benefit. We do,
-         however, implement namespaces to make it easier to identify parts of the code,
-         and prevent naming collisions.
-         */
-
         /* Data */
 
         // ObjectTypes for operations
@@ -115,30 +102,28 @@ public struct GraphQLCodegen {
         /* Code parts. */
 
         let operationsPart = try operations.map {
-            try generateOperation(type: $0.type, operation: $0.operation).joined(separator: "\n")
-        }.joined(separator: "\n\n\n")
+            try generateOperation(type: $0.type, operation: $0.operation)
+        }
 
         let objectsPart = try objects.map {
-            try generateObject($0).joined(separator: "\n")
-        }.joined(separator: "\n\n\n")
+            try generateObject($0)
+        }
 
         let interfacesPart = try schema.interfaces.map {
-            try generateInterface($0, with: objects).joined(separator: "\n")
-        }.joined(separator: "\n\n\n")
+            try generateInterface($0, with: objects)
+        }
 
         let unionsPart = try schema.unions.map {
-            try generateUnion($0, with: objects).joined(separator: "\n")
-        }.joined(separator: "\n\n\n")
+            try generateUnion($0, with: objects)
+        }
 
         let enumsPart = schema.enums.map {
             generateEnum($0)
-                .joined(separator: "\n")
-        }.joined(separator: "\n\n\n")
+        }
 
         let inputObjectsPart = try schema.inputObjects.map {
             try generateInputObject($0.name.pascalCase, for: $0)
-                .joined(separator: "\n")
-        }.joined(separator: "\n\n\n")
+        }
 
         /* File. */
         let code = [

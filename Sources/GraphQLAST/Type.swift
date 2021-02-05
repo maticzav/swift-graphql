@@ -1,5 +1,20 @@
 import Foundation
 
+public enum Operation {
+    case query(ObjectType)
+    case mutation(ObjectType)
+    case subscription(ObjectType)
+    
+    public var type: ObjectType {
+        switch self {
+        case .query(let type), .mutation(let type), .subscription(let type):
+            return type
+        }
+    }
+}
+
+// MARK: - Named Type Protocol
+
 public enum NamedTypeKind: String, Codable, Equatable {
     case scalar = "SCALAR"
     case object = "OBJECT"
@@ -15,8 +30,6 @@ public protocol NamedTypeProtocol {
     var description: String? { get }
 }
 
-// MARK: - Type Extensions
-
 public extension NamedTypeProtocol {
     var isInternal: Bool {
         name.starts(with: "__")
@@ -25,14 +38,12 @@ public extension NamedTypeProtocol {
 
 // MARK: - Named Types
 
-/* Scalar */
 public struct ScalarType: NamedTypeProtocol, Decodable, Equatable {
     public var kind: NamedTypeKind = .scalar
     public let name: String
     public let description: String?
 }
 
-/* Object */
 public struct ObjectType: NamedTypeProtocol, Decodable, Equatable {
     public var kind: NamedTypeKind = .object
     public let name: String
@@ -42,7 +53,6 @@ public struct ObjectType: NamedTypeProtocol, Decodable, Equatable {
     public let interfaces: [InterfaceTypeRef]
 }
 
-/* Interface */
 public struct InterfaceType: NamedTypeProtocol, Decodable, Equatable {
     public var kind: NamedTypeKind = .interface
     public let name: String
@@ -53,7 +63,6 @@ public struct InterfaceType: NamedTypeProtocol, Decodable, Equatable {
     public let possibleTypes: [ObjectTypeRef]
 }
 
-/* Union */
 public struct UnionType: NamedTypeProtocol, Decodable, Equatable {
     public var kind: NamedTypeKind = .union
     public let name: String
@@ -62,7 +71,6 @@ public struct UnionType: NamedTypeProtocol, Decodable, Equatable {
     public let possibleTypes: [ObjectTypeRef]
 }
 
-/* Enum */
 public struct EnumType: NamedTypeProtocol, Decodable, Equatable {
     public var kind: NamedTypeKind = .enumeration
     public let name: String
@@ -71,7 +79,6 @@ public struct EnumType: NamedTypeProtocol, Decodable, Equatable {
     public let enumValues: [EnumValue]
 }
 
-/* Input Object */
 public struct InputObjectType: NamedTypeProtocol, Decodable, Equatable {
     public var kind: NamedTypeKind = .inputObject
     public let name: String
@@ -107,8 +114,6 @@ public enum NamedType: Equatable {
         }
     }
 }
-
-// MARK: - Decoder Initializer
 
 extension NamedType: Decodable {
     public init(from decoder: Decoder) throws {
