@@ -36,7 +36,7 @@ class Model: ObservableObject {
     func startListening() {
         print("STARTED LISTENING")
 
-        let subscription = Selection<Int, Operations.Subscription> {
+        let subscription = Selection<Int, Objects.Subscription> {
             return try $0.number()
         }
 

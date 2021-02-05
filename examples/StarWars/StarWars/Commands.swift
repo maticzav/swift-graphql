@@ -54,7 +54,7 @@ let characterUnion = Selection<String, Unions.CharacterUnion> {
 
 // MARK: - Query
 
-let query = Selection<Data, Operations.Query> {
+let query = Selection<Data, Objects.Query> {
     let english = try $0.greeting()
     let slovene = try $0.greeting(input: .present(.init(name: "Matic")))
 

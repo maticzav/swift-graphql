@@ -1,4 +1,5 @@
 import Foundation
+import GraphQLAST
 
 /*
  Each field decoder contains a selection part that is responsible for
@@ -13,7 +14,7 @@ extension GraphQLCodegen {
     // MARK: - Field Selection
 
     /// Generates a SwiftGraphQL field.
-    func generateField(_ field: GraphQL.Field) throws -> [String] {
+    func generateField(_ field: Field) throws -> [String] {
         var lines = [String]()
 
         // Documentation.
@@ -45,19 +46,19 @@ extension GraphQLCodegen {
     // MARK: - Documentation
 
     /// Generates field documentation.
-    private func generateFieldDoc(for field: GraphQL.Field) -> String? {
+    private func generateFieldDoc(for field: Field) -> String? {
         field.description.map { "/// \($0)" }
     }
 
     /// Generates deprecation documentation.
-    private func generateFieldDeprecationDoc(for field: GraphQL.Field) -> String? {
+    private func generateFieldDeprecationDoc(for field: Field) -> String? {
         field.isDeprecated ? "@available(*, deprecated, message: \"\(field.deprecationReason ?? "")\")" : nil
     }
 
     // MARK: - Function definition
 
     /// Generates a function definition for a field.
-    private func generateFnDefinition(for field: GraphQL.Field) throws -> String {
+    private func generateFnDefinition(for field: Field) throws -> String {
         let fnName = field.name.camelCase.normalize
 
         /* Kinds of fields. */
@@ -97,7 +98,7 @@ extension GraphQLCodegen {
     /// Returns a string representation of function defenition that has selection and might have arguments.
     private func generateFnDefinitionWithSelection(
         name: String,
-        args: [GraphQL.InputValue],
+        args: [InputValue],
         decoderType: String
     ) throws -> String {
         /* Function without arguments. */
@@ -110,22 +111,22 @@ extension GraphQLCodegen {
     }
 
     /// Generates arguments for accessor function.
-    private func generateFnParameters(for args: [GraphQL.InputValue]) throws -> String {
+    private func generateFnParameters(for args: [InputValue]) throws -> String {
         try args.map { try generateParameter(for: $0) }.joined(separator: ", ")
     }
 
     /// Generates a function parameter based on an input value.
-    private func generateParameter(for input: GraphQL.InputValue) throws -> String {
+    private func generateParameter(for input: InputValue) throws -> String {
         switch input.type.inverted {
         case .nullable:
-            return "\(input.name.camelCase.normalize): \(try generatePropertyType(for: input.type)) = .absent"
+            return "\(input.name.camelCase.normalize): \(try generatePropertyType(for: input.type)) = .absent()"
         default:
             return "\(input.name.camelCase.normalize): \(try generatePropertyType(for: input.type))"
         }
     }
 
 //    /// Generates a type definition for an argument function parameter.
-//    private func generateParameterType(for ref: GraphQL.InputTypeRef) throws -> String {
+//    private func generateParameterType(for ref: InputTypeRef) throws -> String {
 //        switch ref.namedType {
 //        case .scalar(let scalar):
 //            let scalar = try options.scalar(scalar)
@@ -140,7 +141,7 @@ extension GraphQLCodegen {
 //    }
 
     /// Recursively generates a return type of a referrable type.
-    private func generateReturnType(for ref: GraphQL.OutputTypeRef) throws -> String {
+    private func generateReturnType(for ref: OutputTypeRef) throws -> String {
         switch ref.namedType {
         case let .scalar(scalar):
             let scalar = try options.scalar(scalar)
@@ -156,12 +157,12 @@ extension GraphQLCodegen {
     }
 
     // Generates an intermediate type used in custom decoders to cast JSON representation of the data.
-    func generateDecoderType<Ref>(_ typeName: String, for ref: GraphQL.TypeRef<Ref>) -> String {
+    func generateDecoderType<Ref>(_ typeName: String, for ref: TypeRef<Ref>) -> String {
         generateDecoderType(typeName, for: ref.inverted)
     }
 
     /// Generates an intermediate type used in custom decoders to cast JSON representation of the data.
-    private func generateDecoderType<Ref>(_ typeName: String, for ref: GraphQL.InvertedTypeRef<Ref>) -> String {
+    private func generateDecoderType<Ref>(_ typeName: String, for ref: InvertedTypeRef<Ref>) -> String {
         switch ref {
         case .named:
             return typeName
@@ -175,7 +176,7 @@ extension GraphQLCodegen {
     // MARK: - Selection
 
     /// Generates an internal leaf definition used for composing selection set.
-    private func generateFieldSelection(for field: GraphQL.Field) -> [String] {
+    private func generateFieldSelection(for field: Field) -> [String] {
         switch field.type.namedType {
         case .scalar(_), .enum:
             return
@@ -196,12 +197,12 @@ extension GraphQLCodegen {
     }
 
     /// Generates a dictionary of argument builders.
-    private func generateSelectionArguments(for args: [GraphQL.InputValue]) -> [String] {
+    private func generateSelectionArguments(for args: [InputValue]) -> [String] {
         args.map { #"Argument(name: "\#($0.name.camelCase)", type: "\#(generateArgumentType(for: $0.type))", value: \#($0.name.camelCase.normalize)),"# }
     }
 
     /// Generates a GraphQL acceptable type of an argument.
-    private func generateArgumentType(for ref: GraphQL.InputTypeRef) -> String {
+    private func generateArgumentType(for ref: InputTypeRef) -> String {
         switch ref {
         /* Named Type */
         case let .named(named):
@@ -220,7 +221,7 @@ extension GraphQLCodegen {
     // MARK: - Accessors
 
     /// Generates a field decoder.
-    private func generateDecoder(for field: GraphQL.Field) -> [String] {
+    private func generateDecoder(for field: Field) -> [String] {
         let name = field.name.camelCase
 
         switch field.type.inverted.namedType {
@@ -268,7 +269,7 @@ extension GraphQLCodegen {
     // MARK: - Mocking
 
     /// Generates value placeholders for the API.
-    private func generateMockData(for ref: GraphQL.OutputTypeRef) throws -> String {
+    private func generateMockData(for ref: OutputTypeRef) throws -> String {
         switch ref.namedType {
         /* Scalars */
         case let .scalar(scalar):
@@ -284,12 +285,12 @@ extension GraphQLCodegen {
     }
 
     /// Generates the mock value for wrapped type.
-    private func generateMockWrapper(_ value: String, for ref: GraphQL.OutputTypeRef) -> String {
+    private func generateMockWrapper(_ value: String, for ref: OutputTypeRef) -> String {
         generateMockWrapper(value, for: ref.inverted)
     }
 
     /// Generates the mock value for wrapped type.
-    private func generateMockWrapper(_ value: String, for ref: GraphQL.InvertedOutputTypeRef) -> String {
+    private func generateMockWrapper(_ value: String, for ref: InvertedOutputTypeRef) -> String {
         switch ref {
         case .named:
             return value

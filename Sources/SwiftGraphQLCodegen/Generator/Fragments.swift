@@ -1,4 +1,5 @@
 import Foundation
+import GraphQLAST
 
 /*
  We use fragments to support union and interface types.
@@ -7,8 +8,8 @@ import Foundation
 extension GraphQLCodegen {
     func generateFragmentSelection(
         _ name: String,
-        for possibleTypes: [GraphQL.ObjectTypeRef],
-        with objects: [GraphQL.ObjectType]
+        for possibleTypes: [ObjectTypeRef],
+        with objects: [ObjectType]
     ) -> [String] {
         /* Code parts */
 
@@ -46,13 +47,13 @@ extension GraphQLCodegen {
         return code
     }
 
-    private func generateFnParameter(for ref: GraphQL.ObjectTypeRef) -> String {
+    private func generateFnParameter(for ref: ObjectTypeRef) -> String {
         "\(ref.namedType.name.camelCase): Selection<Type, Objects.\(ref.namedType.name.pascalCase)>"
     }
 
     private func generateTypeDecoder(
-        for ref: GraphQL.ObjectTypeRef,
-        with objects: [GraphQL.ObjectType]
+        for ref: ObjectTypeRef,
+        with objects: [ObjectType]
     ) -> [String] {
         let name = ref.namedType.name
         let object = objects.first { $0.name == name }!
@@ -74,7 +75,7 @@ extension GraphQLCodegen {
         return code
     }
 
-    private func generateFragmentSelection(for ref: GraphQL.ObjectTypeRef) -> String {
+    private func generateFragmentSelection(for ref: ObjectTypeRef) -> String {
         "GraphQLField.fragment(type: \"\(ref.namedType.name)\", selection: \(ref.namedType.name.camelCase).selection),"
     }
 }

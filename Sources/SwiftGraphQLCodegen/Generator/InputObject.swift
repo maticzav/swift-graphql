@@ -1,4 +1,5 @@
 import Foundation
+import GraphQLAST
 
 /*
  InputObjects represent the input values that functions accept.
@@ -9,7 +10,7 @@ import Foundation
 
 extension GraphQLCodegen {
     /// Generates struct that is applicable to input object.
-    func generateInputObject(_ name: String, for type: GraphQL.InputObjectType) throws -> [String] {
+    func generateInputObject(_ name: String, for type: InputObjectType) throws -> [String] {
         /* Filter recursive fields */
         let inputFields = type.inputFields.filter {
             switch $0.type.inverted {
@@ -51,7 +52,7 @@ extension GraphQLCodegen {
     // MARK: - Private helpers
 
     /// Generates a single fileld.
-    private func generateInputField(_ field: GraphQL.InputValue) throws -> [String] {
+    private func generateInputField(_ field: InputValue) throws -> [String] {
         switch field.type.inverted {
         case .nullable:
             return [
@@ -68,15 +69,15 @@ extension GraphQLCodegen {
         }
     }
 
-    private func generateDescription(for field: GraphQL.InputValue) -> String? {
+    private func generateDescription(for field: InputValue) -> String? {
         field.description.map { "/// \($0)" }
     }
 
-    func generatePropertyType(for ref: GraphQL.InputTypeRef) throws -> String {
+    func generatePropertyType(for ref: InputTypeRef) throws -> String {
         try generatePropertyType(for: ref.inverted)
     }
 
-    private func generatePropertyType(for ref: GraphQL.InvertedInputTypeRef) throws -> String {
+    private func generatePropertyType(for ref: InvertedInputTypeRef) throws -> String {
         switch ref {
         case let .named(named):
             switch named {
@@ -97,7 +98,7 @@ extension GraphQLCodegen {
     }
 
     /// Generates encoder function for an input object.
-    private func generateEncoder(for fields: [GraphQL.InputValue]) -> [String] {
+    private func generateEncoder(for fields: [InputValue]) -> [String] {
         /* Code */
         var code = [String]()
 
@@ -123,7 +124,7 @@ extension GraphQLCodegen {
     }
 
     /// Generates coding keys enumerator for a particular input object.
-    private func generateCodingKeys(for fields: [GraphQL.InputValue]) -> [String] {
+    private func generateCodingKeys(for fields: [InputValue]) -> [String] {
         /* Code */
         var code = [String]()
 

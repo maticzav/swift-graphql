@@ -1,31 +1,29 @@
 import Foundation
 
-public extension GraphQL {
-    indirect enum InvertedTypeRef<Type> {
-        case named(Type)
-        case nullable(InvertedTypeRef)
-        case list(InvertedTypeRef)
+public indirect enum InvertedTypeRef<Type> {
+    case named(Type)
+    case nullable(InvertedTypeRef)
+    case list(InvertedTypeRef)
 
-        // MARK: - Calculated properties
+    // MARK: - Calculated properties
 
-        /// Returns a nullable instance of self.
-        var nullable: InvertedTypeRef<Type> {
-            inverted.nullable.inverted
-        }
+    /// Returns a nullable instance of self.
+    public var nullable: InvertedTypeRef<Type> {
+        inverted.nullable.inverted
+    }
 
-        /// Returns a non nullable instance of self.
-        var nonNullable: InvertedTypeRef<Type> {
-            switch self {
-            case let .nullable(subref):
-                return subref
-            default:
-                return self
-            }
+    /// Returns a non nullable instance of self.
+    public var nonNullable: InvertedTypeRef<Type> {
+        switch self {
+        case let .nullable(subref):
+            return subref
+        default:
+            return self
         }
     }
 }
 
-extension GraphQL.InvertedTypeRef {
+public extension InvertedTypeRef {
     /// Returns the bottom most named type in reference.
     var namedType: Type {
         switch self {
@@ -37,12 +35,12 @@ extension GraphQL.InvertedTypeRef {
     }
 }
 
-extension GraphQL.InvertedTypeRef: Equatable where Type: Equatable {}
+extension InvertedTypeRef: Equatable where Type: Equatable {}
 
 // MARK: - Conversion
 
-extension GraphQL.TypeRef {
-    var inverted: GraphQL.InvertedTypeRef<Type> {
+public extension TypeRef {
+    var inverted: InvertedTypeRef<Type> {
         switch self {
         case let .named(named):
             return .nullable(.named(named))
@@ -60,8 +58,8 @@ extension GraphQL.TypeRef {
     }
 }
 
-extension GraphQL.InvertedTypeRef {
-    var inverted: GraphQL.TypeRef<Type> {
+public extension InvertedTypeRef {
+    var inverted: TypeRef<Type> {
         switch self {
         case let .named(named):
             return .nonNull(.named(named))
@@ -81,8 +79,6 @@ extension GraphQL.InvertedTypeRef {
 
 // MARK: - Type Alias
 
-extension GraphQL {
-    typealias InvertedNamedTypeRef = InvertedTypeRef<NamedRef>
-    typealias InvertedOutputTypeRef = InvertedTypeRef<OutputRef>
-    typealias InvertedInputTypeRef = InvertedTypeRef<InputRef>
-}
+public typealias InvertedNamedTypeRef = InvertedTypeRef<NamedRef>
+public typealias InvertedOutputTypeRef = InvertedTypeRef<OutputRef>
+public typealias InvertedInputTypeRef = InvertedTypeRef<InputRef>

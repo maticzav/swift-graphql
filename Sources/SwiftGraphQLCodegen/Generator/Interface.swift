@@ -1,4 +1,5 @@
 import Foundation
+import GraphQLAST
 
 /**
  Interfaces generates an object type as well as possible type extensions.
@@ -7,13 +8,13 @@ import Foundation
 extension GraphQLCodegen {
     /// Generates a function to handle a type.
     func generateInterface(
-        _ type: GraphQL.InterfaceType,
-        with objects: [GraphQL.ObjectType]
+        _ type: InterfaceType,
+        with objects: [ObjectType]
     ) throws -> [String] {
         let name = type.name.pascalCase
 
         /* Collect of all fields of all possible types. */
-        var fields: [GraphQL.Field] = type.fields
+        var fields: [Field] = type.fields
         for object in objects {
             // Skip object if it's not inside possible types.
             guard type.possibleTypes.contains(where: { $0.namedType.name == object.name }) else { continue }

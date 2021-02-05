@@ -1,4 +1,4 @@
-@testable import SwiftGraphQLCodegen
+@testable import GraphQLAST
 import XCTest
 
 final class ASTTypeRefTests: XCTestCase {
@@ -43,18 +43,18 @@ final class ASTTypeRefTests: XCTestCase {
 
         /* Decoder */
 
-        let values = try! JSONDecoder().decode([GraphQL.NamedTypeRef].self, from: json.data(using: .utf8)!)
+        let values = try! JSONDecoder().decode([NamedTypeRef].self, from: json.data(using: .utf8)!)
 
         /* Tests */
 
         XCTAssertEqual(values,
                        [
-                           GraphQL.NamedTypeRef.named(.scalar("String")),
-                           GraphQL.NamedTypeRef.named(.object("Human")),
-                           GraphQL.NamedTypeRef.named(.interface("Node")),
-                           GraphQL.NamedTypeRef.named(.union("Character")),
-                           GraphQL.NamedTypeRef.named(.enum("Episode")),
-                           GraphQL.NamedTypeRef.named(.inputObject("HumanParams")),
+                           NamedTypeRef.named(.scalar("String")),
+                           NamedTypeRef.named(.object("Human")),
+                           NamedTypeRef.named(.interface("Node")),
+                           NamedTypeRef.named(.union("Character")),
+                           NamedTypeRef.named(.enum("Episode")),
+                           NamedTypeRef.named(.inputObject("HumanParams")),
                        ])
     }
 
@@ -94,17 +94,17 @@ final class ASTTypeRefTests: XCTestCase {
 
         /* Decoder */
 
-        let values = try! JSONDecoder().decode([GraphQL.OutputTypeRef].self, from: json.data(using: .utf8)!)
+        let values = try! JSONDecoder().decode([OutputTypeRef].self, from: json.data(using: .utf8)!)
 
         /* Tests */
 
         XCTAssertEqual(values,
                        [
-                           GraphQL.OutputTypeRef.named(.scalar("String")),
-                           GraphQL.OutputTypeRef.named(.object("Human")),
-                           GraphQL.OutputTypeRef.named(.interface("Node")),
-                           GraphQL.OutputTypeRef.named(.union("Character")),
-                           GraphQL.OutputTypeRef.named(.enum("Episode")),
+                           OutputTypeRef.named(.scalar("String")),
+                           OutputTypeRef.named(.object("Human")),
+                           OutputTypeRef.named(.interface("Node")),
+                           OutputTypeRef.named(.union("Character")),
+                           OutputTypeRef.named(.enum("Episode")),
                        ])
     }
 
@@ -134,15 +134,15 @@ final class ASTTypeRefTests: XCTestCase {
 
         /* Decoder */
 
-        let values = try! JSONDecoder().decode([GraphQL.InputTypeRef].self, from: json.data(using: .utf8)!)
+        let values = try! JSONDecoder().decode([InputTypeRef].self, from: json.data(using: .utf8)!)
 
         /* Tests */
 
         XCTAssertEqual(values,
                        [
-                           GraphQL.InputTypeRef.named(.scalar("String")),
-                           GraphQL.InputTypeRef.named(.enum("Episode")),
-                           GraphQL.InputTypeRef.named(.inputObject("HumanParams")),
+                           InputTypeRef.named(.scalar("String")),
+                           InputTypeRef.named(.enum("Episode")),
+                           InputTypeRef.named(.inputObject("HumanParams")),
                        ])
     }
 }

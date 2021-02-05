@@ -1,4 +1,4 @@
-@testable import SwiftGraphQLCodegen
+@testable import GraphQLAST
 import XCTest
 
 final class ASTTests: XCTestCase {
@@ -52,15 +52,15 @@ final class ASTTests: XCTestCase {
 
         /* Decode */
 
-        let value = try GraphQL.parse(json.data(using: .utf8)!)
-        let expected = GraphQL.Schema(
+        let value = try parse(json.data(using: .utf8)!)
+        let expected = Schema(
             description: nil,
             types: [
-                .object(GraphQL.ObjectType(
+                .object(ObjectType(
                     name: "Human",
                     description: "A humanoid creature in the Star Wars universe.",
                     fields: [
-                        GraphQL.Field(
+                        Field(
                             name: "name",
                             description: "The name of the character",
                             args: [],
@@ -74,7 +74,7 @@ final class ASTTests: XCTestCase {
                     ]
                 )),
             ],
-            queryType: GraphQL.Operation(name: "Query"),
+            queryType: Operation(name: "Query"),
             mutationType: nil,
             subscriptionType: nil
         )

@@ -1,4 +1,4 @@
-@testable import SwiftGraphQLCodegen
+@testable import GraphQLAST
 import XCTest
 
 final class ASTValueTests: XCTestCase {
@@ -34,15 +34,15 @@ final class ASTValueTests: XCTestCase {
 
         /* Decoder */
 
-        let value = try! JSONDecoder().decode(GraphQL.Field.self, from: data)
+        let value = try! JSONDecoder().decode(Field.self, from: data)
 
         /* Tests */
 
-        let expected = GraphQL.Field(
+        let expected = Field(
             name: "hero",
             description: "The character",
             args: [
-                GraphQL.InputValue(
+                InputValue(
                     name: "id",
                     description: nil,
                     type: .named(.scalar("ID"))
@@ -75,8 +75,8 @@ final class ASTValueTests: XCTestCase {
         """.data(using: .utf8)!
 
         /* Tests */
-        let value = try! JSONDecoder().decode(GraphQL.InputValue.self, from: data)
-        let expected = GraphQL.InputValue(
+        let value = try! JSONDecoder().decode(InputValue.self, from: data)
+        let expected = InputValue(
             name: "id",
             description: nil,
             type: .named(.enum("order_by"))
@@ -100,11 +100,11 @@ final class ASTValueTests: XCTestCase {
 
         /* Decoder */
 
-        let value = try! JSONDecoder().decode(GraphQL.EnumValue.self, from: data)
+        let value = try! JSONDecoder().decode(EnumValue.self, from: data)
 
         /* Tests */
 
-        let expected = GraphQL.EnumValue(
+        let expected = EnumValue(
             name: "NEWHOPE",
             description: "Released in 1977.",
             isDeprecated: false,

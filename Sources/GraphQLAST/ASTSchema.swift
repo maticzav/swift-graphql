@@ -1,27 +1,25 @@
 import Foundation
 
-extension GraphQL {
-    // MARK: - Schema
+// MARK: - Schema
 
-    struct Schema: Decodable, Equatable {
-        let description: String?
-        let types: [NamedType]
-        /* Root Types */
-        let queryType: Operation
-        let mutationType: Operation?
-        let subscriptionType: Operation?
-    }
+public struct Schema: Decodable, Equatable {
+    public let description: String?
+    public let types: [NamedType]
+    /* Root Types */
+    public let queryType: Operation
+    public let mutationType: Operation?
+    public let subscriptionType: Operation?
+}
 
-    // MARK: - Operations
+// MARK: - Operations
 
-    struct Operation: Codable, Equatable {
-        let name: String
-    }
+public struct Operation: Codable, Equatable {
+    public let name: String
 }
 
 // MARK: - Methods
 
-extension GraphQL.Schema {
+public extension Schema {
     /// Returns names of the operations in schema.
     var operations: [String] {
         [
@@ -34,7 +32,7 @@ extension GraphQL.Schema {
     // MARK: - Named types
 
     /// Returns object definitions from schema.
-    var objects: [GraphQL.ObjectType] {
+    var objects: [ObjectType] {
         types.compactMap {
             switch $0 {
             case let .object(type) where !type.isInternal:
@@ -46,7 +44,7 @@ extension GraphQL.Schema {
     }
 
     /// Returns object definitions from schema.
-    var interfaces: [GraphQL.InterfaceType] {
+    var interfaces: [InterfaceType] {
         types.compactMap {
             switch $0 {
             case let .interface(type) where !type.isInternal:
@@ -58,7 +56,7 @@ extension GraphQL.Schema {
     }
 
     /// Returns object definitions from schema.
-    var unions: [GraphQL.UnionType] {
+    var unions: [UnionType] {
         types.compactMap {
             switch $0 {
             case let .union(type) where !type.isInternal:
@@ -70,7 +68,7 @@ extension GraphQL.Schema {
     }
 
     /// Returns enumerator definitions in schema.
-    var enums: [GraphQL.EnumType] {
+    var enums: [EnumType] {
         types.compactMap {
             switch $0 {
             case let .enum(type) where !type.isInternal:
@@ -82,7 +80,7 @@ extension GraphQL.Schema {
     }
 
     /// Returns input object definitions from schema.
-    var inputObjects: [GraphQL.InputObjectType] {
+    var inputObjects: [InputObjectType] {
         types.compactMap {
             switch $0 {
             case let .inputObject(type) where !type.isInternal:

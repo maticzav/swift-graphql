@@ -1,4 +1,5 @@
 import Foundation
+import GraphQLAST
 
 /**
  This file contains code used to download schema from a remote server.
@@ -10,9 +11,9 @@ extension GraphQLCodegen {
     /// - Parameters:
     ///     - endpoint: The URL of your GraphQL server.
     ///     - handler: Introspection schema handler.
-    static func downloadFrom(_ endpoint: URL) throws -> GraphQL.Schema {
+    static func downloadFrom(_ endpoint: URL) throws -> Schema {
         let introspection: Data = try downloadFrom(endpoint)
-        let schema = try GraphQL.parse(introspection)
+        let schema = try parse(introspection)
         return schema
     }
 
@@ -29,7 +30,7 @@ extension GraphQLCodegen {
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
 
-        let query: [String: Any] = ["query": GraphQL.introspectionQuery]
+        let query: [String: Any] = ["query": introspectionQuery]
 
         request.httpBody = try! JSONSerialization.data(
             withJSONObject: query,

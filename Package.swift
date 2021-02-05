@@ -6,6 +6,7 @@ import PackageDescription
 let package = Package(
     name: "swift-graphql",
     products: [
+        /* SwiftGraphQL */
         .library(
             name: "SwiftGraphQL",
             targets: ["SwiftGraphQL"]
@@ -18,6 +19,11 @@ let package = Package(
             name: "SwiftGraphQLCLI",
             targets: ["SwiftGraphQLCLI"]
         ),
+        /* Utilities */
+        .library(
+            name: "GraphQLAST",
+            targets: ["GraphQLAST"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
@@ -26,6 +32,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.4"),
     ],
     targets: [
+        /* SwiftGraphQL */
         .target(
             name: "SwiftGraphQL",
             dependencies: [],
@@ -33,7 +40,7 @@ let package = Package(
         ),
         .target(
             name: "SwiftGraphQLCodegen",
-            dependencies: ["SwiftFormat"],
+            dependencies: ["SwiftFormat", "GraphQLAST"],
             path: "Sources/SwiftGraphQLCodegen"
         ),
         .target(
@@ -45,6 +52,12 @@ let package = Package(
             ],
             path: "Sources/SwiftGraphQLCLI"
         ),
+        /* Utilities */
+        .target(
+            name: "GraphQLAST",
+            dependencies: [],
+            path: "Sources/GraphQLAST"
+        ),
         /* Tests */
         .testTarget(
             name: "SwiftGraphQLTests",
@@ -53,6 +66,10 @@ let package = Package(
         .testTarget(
             name: "SwiftGraphQLCodegenTests",
             dependencies: ["Files", "SwiftGraphQLCodegen"]
+        ),
+        .testTarget(
+            name: "GraphQLASTTests",
+            dependencies: ["GraphQLAST"]
         ),
     ]
 )

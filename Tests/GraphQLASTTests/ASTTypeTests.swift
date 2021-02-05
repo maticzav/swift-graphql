@@ -1,4 +1,4 @@
-@testable import SwiftGraphQLCodegen
+@testable import GraphQLAST
 import XCTest
 
 final class ASTTypeTests: XCTestCase {
@@ -19,9 +19,9 @@ final class ASTTypeTests: XCTestCase {
         """
 
         /* Tests */
-        let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
-        let expected = GraphQL.NamedType.scalar(
-            GraphQL.ScalarType(
+        let value = try! JSONDecoder().decode(NamedType.self, from: json.data(using: .utf8)!)
+        let expected = NamedType.scalar(
+            ScalarType(
                 name: "String",
                 description: "It's string!"
             )
@@ -47,9 +47,9 @@ final class ASTTypeTests: XCTestCase {
         """
 
         /* Tests */
-        let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
-        let expected = GraphQL.NamedType.object(
-            GraphQL.ObjectType(
+        let value = try! JSONDecoder().decode(NamedType.self, from: json.data(using: .utf8)!)
+        let expected = NamedType.object(
+            ObjectType(
                 name: "Query",
                 description: nil,
                 fields: [],
@@ -88,9 +88,9 @@ final class ASTTypeTests: XCTestCase {
         """
 
         /* Tests */
-        let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
-        let expected = GraphQL.NamedType.interface(
-            GraphQL.InterfaceType(
+        let value = try! JSONDecoder().decode(NamedType.self, from: json.data(using: .utf8)!)
+        let expected = NamedType.interface(
+            InterfaceType(
                 name: "Character",
                 description: nil,
                 fields: [],
@@ -133,9 +133,9 @@ final class ASTTypeTests: XCTestCase {
         """
 
         /* Tests */
-        let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
-        let expected = GraphQL.NamedType.union(
-            GraphQL.UnionType(
+        let value = try! JSONDecoder().decode(NamedType.self, from: json.data(using: .utf8)!)
+        let expected = NamedType.union(
+            UnionType(
                 name: "Union",
                 description: nil,
                 possibleTypes: [
@@ -173,9 +173,9 @@ final class ASTTypeTests: XCTestCase {
         """
 
         /* Tests */
-        let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
-        let expected = GraphQL.NamedType.enum(
-            GraphQL.EnumType(
+        let value = try! JSONDecoder().decode(NamedType.self, from: json.data(using: .utf8)!)
+        let expected = NamedType.enum(
+            EnumType(
                 name: "Enum",
                 description: "It's an ENUM!",
                 enumValues: [
@@ -215,9 +215,9 @@ final class ASTTypeTests: XCTestCase {
         """
 
         /* Tests */
-        let value = try! JSONDecoder().decode(GraphQL.NamedType.self, from: json.data(using: .utf8)!)
-        let expected = GraphQL.NamedType.inputObject(
-            GraphQL.InputObjectType(
+        let value = try! JSONDecoder().decode(NamedType.self, from: json.data(using: .utf8)!)
+        let expected = NamedType.inputObject(
+            InputObjectType(
                 name: "InputObject",
                 description: nil,
                 inputFields: [

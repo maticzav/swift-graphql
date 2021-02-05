@@ -1,8 +1,9 @@
 import Foundation
+import GraphQLAST
 
 extension GraphQLCodegen {
     /// Generates a function to handle a type.
-    func generateObject(_ type: GraphQL.ObjectType) throws -> [String] {
+    func generateObject(_ type: ObjectType) throws -> [String] {
         let name = type.name.pascalCase
 
         /* Code */

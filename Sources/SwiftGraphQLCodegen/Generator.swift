@@ -1,4 +1,5 @@
 import Foundation
+import GraphQLAST
 
 /*
  This file contains publicly accessible functions used to
@@ -75,13 +76,13 @@ public struct GraphQLCodegen {
 
     /// Generates the API and returns it to handler.
     public func generate(from schemaURL: URL) throws -> String {
-        let schema: GraphQL.Schema = try GraphQLCodegen.downloadFrom(schemaURL)
+        let schema: Schema = try GraphQLCodegen.downloadFrom(schemaURL)
         let code = try generate(from: schema)
         return code
     }
 
     /// Generates the code that can be used to define selections.
-    func generate(from schema: GraphQL.Schema) throws -> String {
+    func generate(from schema: Schema) throws -> String {
         /*
          We generate all of the code into a single file. The main goal
          is that developers don't have to worry about the generated code - it
@@ -95,28 +96,26 @@ public struct GraphQLCodegen {
         /* Data */
 
         // ObjectTypes for operations
-        let operations: [(name: String, type: GraphQL.ObjectType, operation: Operation)] = [
-            ("Query", schema.queryType.name.pascalCase, .query),
-            ("Mutation", schema.mutationType?.name.pascalCase, .mutation),
-            ("Subscription", schema.subscriptionType?.name.pascalCase, .subscription),
-//            ("RootSubscription",schema.subscriptionType?.name.pascalCase, .subscription)
-        ].compactMap { name, type, operation in
-            schema.objects.first(where: { $0.name == type }).map { (name, $0, operation) }
+        let operations: [(type: ObjectType, operation: Operation)] = [
+            (schema.queryType.name.pascalCase, .query),
+            (schema.mutationType?.name.pascalCase, .mutation),
+            (schema.subscriptionType?.name.pascalCase, .subscription),
+        ].compactMap { type, operation in
+            schema.objects.first(where: { $0.name == type }).map { ($0, operation) }
         }
 
         // Object types for all other objects.
-        let objects: [GraphQL.ObjectType] = schema.objects
-            .filter { !schema.operations.contains($0.name) }
+        let objects: [ObjectType] = schema.objects
 
         // Phantom type references
-        var types = [GraphQL.NamedType]()
+        var types = [NamedType]()
         types.append(contentsOf: schema.objects.map { .object($0) })
         types.append(contentsOf: schema.inputObjects.map { .inputObject($0) })
 
         /* Code parts. */
 
         let operationsPart = try operations.map {
-            try generateOperation($0.name, for: $0.type, operation: $0.operation).joined(separator: "\n")
+            try generateOperation(type: $0.type, operation: $0.operation).joined(separator: "\n")
         }.joined(separator: "\n\n\n")
 
         let objectsPart = try objects.map {

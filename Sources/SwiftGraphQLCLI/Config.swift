@@ -1,5 +1,3 @@
 import Foundation
 
-struct Config: Codable {
-    
-}
+struct Config: Codable {}

@@ -1,6 +1,9 @@
+import Foundation
+import GraphQLAST
+
 extension GraphQLCodegen {
     /// Returns the type as accessible from the generated file.
-    func generateOutputType(ref: GraphQL.OutputRef) throws -> String {
+    func generateOutputType(ref: OutputRef) throws -> String {
         switch ref {
         /* Scalar, Enumerator */
         case let .scalar(scalar):

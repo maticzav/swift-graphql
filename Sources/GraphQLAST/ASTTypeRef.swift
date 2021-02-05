@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Types
 
-enum IntrospectionTypeKind: String, Codable, Equatable {
+public enum IntrospectionTypeKind: String, Codable, Equatable {
     case scalar = "SCALAR"
     case object = "OBJECT"
     case interface = "INTERFACE"
@@ -15,99 +15,98 @@ enum IntrospectionTypeKind: String, Codable, Equatable {
 
 // MARK: - Reference Type
 
-extension GraphQL {
-    /// Represents a GraphQL type reference.
-    indirect enum TypeRef<Type> {
-        case named(Type)
-        case list(TypeRef)
-        case nonNull(TypeRef)
+/// Represents a GraphQL type reference.
+public indirect enum TypeRef<Type> {
+    case named(Type)
+    case list(TypeRef)
+    case nonNull(TypeRef)
 
-        // MARK: - Calculated properties
+    // MARK: - Calculated properties
 
-        /// Returns the non nullable self.
-        var nonNullable: TypeRef<Type> {
-            inverted.nonNullable.inverted
-        }
-
-        /// Makes the type optional.
-        var nullable: TypeRef<Type> {
-            switch self {
-            case let .nonNull(subref):
-                return subref
-            default:
-                return self
-            }
-        }
+    /// Returns the non nullable self.
+    public var nonNullable: TypeRef<Type> {
+        inverted.nonNullable.inverted
     }
 
-    // MARK: - Possible Type References
-
-    enum NamedRef: Equatable {
-        case scalar(String)
-        case object(String)
-        case interface(String)
-        case union(String)
-        case `enum`(String)
-        case inputObject(String)
-
-        var name: String {
-            switch self {
-            case let .scalar(name), let
-                .object(name), let
-                .interface(name), let
-                .union(name), let
-                .enum(name), let
-                .inputObject(name):
-                return name
-            }
+    /// Makes the type optional.
+    public var nullable: TypeRef<Type> {
+        switch self {
+        case let .nonNull(subref):
+            return subref
+        default:
+            return self
         }
     }
+}
 
-    enum ObjectRef: Equatable {
-        case object(String)
+// MARK: - Possible Type References
 
-        var name: String {
-            switch self {
-            case let .object(name):
-                return name
-            }
+public enum NamedRef: Equatable {
+    case scalar(String)
+    case object(String)
+    case interface(String)
+    case union(String)
+    case `enum`(String)
+    case inputObject(String)
+
+    public var name: String {
+        switch self {
+        case let .scalar(name), let
+            .object(name), let
+            .interface(name), let
+            .union(name), let
+            .enum(name), let
+            .inputObject(name):
+            return name
         }
     }
+}
 
-    enum InterfaceRef: Equatable {
-        case interface(String)
+public enum ObjectRef: Equatable {
+    case object(String)
 
-        var name: String {
-            switch self {
-            case let .interface(name):
-                return name
-            }
+    public var name: String {
+        switch self {
+        case let .object(name):
+            return name
         }
     }
+}
 
-    enum OutputRef: Equatable {
-        case scalar(String)
-        case object(String)
-        case interface(String)
-        case union(String)
-        case `enum`(String)
+public enum InterfaceRef: Equatable {
+    case interface(String)
 
-        var name: String {
-            switch self {
-            case let .scalar(name), let
-                .object(name), let
-                .interface(name), let
-                .union(name), let
-                .enum(name):
-                return name
-            }
+    public var name: String {
+        switch self {
+        case let .interface(name):
+            return name
         }
     }
+}
 
-    enum InputRef: Equatable {
-        case scalar(String)
-        case `enum`(String)
-        case inputObject(String)
+public enum OutputRef: Equatable {
+    case scalar(String)
+    case object(String)
+    case interface(String)
+    case union(String)
+    case `enum`(String)
+
+    public var name: String {
+        switch self {
+        case let .scalar(name), let
+            .object(name), let
+            .interface(name), let
+            .union(name), let
+            .enum(name):
+            return name
+        }
+    }
+}
+
+public enum InputRef: Equatable {
+    case scalar(String)
+    case `enum`(String)
+    case inputObject(String)
 
 //        var name: String {
 //            switch self {
@@ -117,22 +116,21 @@ extension GraphQL {
 //                return name
 //            }
 //        }
-    }
 }
 
 // MARK: - Extensions
 
-extension GraphQL.TypeRef: Decodable where Type: Decodable {
-    init(from decoder: Decoder) throws {
+extension TypeRef: Decodable where Type: Decodable {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let kind = try container.decode(IntrospectionTypeKind.self, forKey: .kind)
 
         switch kind {
         case .list:
-            let ref = try container.decode(GraphQL.TypeRef<Type>.self, forKey: .ofType)
+            let ref = try container.decode(TypeRef<Type>.self, forKey: .ofType)
             self = .list(ref)
         case .nonNull:
-            let ref = try container.decode(GraphQL.TypeRef<Type>.self, forKey: .ofType)
+            let ref = try container.decode(TypeRef<Type>.self, forKey: .ofType)
             self = .nonNull(ref)
         case .scalar, .object, .interface, .union, .enumeration, .inputObject:
             let named = try Type(from: decoder)
@@ -146,9 +144,9 @@ extension GraphQL.TypeRef: Decodable where Type: Decodable {
     }
 }
 
-extension GraphQL.TypeRef: Equatable where Type: Equatable {}
+extension TypeRef: Equatable where Type: Equatable {}
 
-extension GraphQL.TypeRef {
+public extension TypeRef {
     /// Returns the bottom most named type in reference.
     var namedType: Type {
         switch self {
@@ -160,8 +158,8 @@ extension GraphQL.TypeRef {
     }
 }
 
-extension GraphQL.NamedRef: Decodable {
-    init(from decoder: Decoder) throws {
+extension NamedRef: Decodable {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let kind = try container.decode(NamedTypeKind.self, forKey: .kind)
         let name = try container.decode(String.self, forKey: .name)
@@ -188,8 +186,8 @@ extension GraphQL.NamedRef: Decodable {
     }
 }
 
-extension GraphQL.ObjectRef: Decodable {
-    init(from decoder: Decoder) throws {
+extension ObjectRef: Decodable {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let kind = try container.decode(NamedTypeKind.self, forKey: .kind)
         let name = try container.decode(String.self, forKey: .name)
@@ -199,7 +197,7 @@ extension GraphQL.ObjectRef: Decodable {
             self = .object(name)
         default:
             throw DecodingError.typeMismatch(
-                GraphQL.OutputRef.self,
+                OutputRef.self,
                 DecodingError.Context(
                     codingPath: decoder.codingPath,
                     debugDescription: "Couldn't decode output object."
@@ -214,8 +212,8 @@ extension GraphQL.ObjectRef: Decodable {
     }
 }
 
-extension GraphQL.InterfaceRef: Decodable {
-    init(from decoder: Decoder) throws {
+extension InterfaceRef: Decodable {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let kind = try container.decode(NamedTypeKind.self, forKey: .kind)
         let name = try container.decode(String.self, forKey: .name)
@@ -225,7 +223,7 @@ extension GraphQL.InterfaceRef: Decodable {
             self = .interface(name)
         default:
             throw DecodingError.typeMismatch(
-                GraphQL.OutputRef.self,
+                OutputRef.self,
                 DecodingError.Context(
                     codingPath: decoder.codingPath,
                     debugDescription: "Couldn't decode output object."
@@ -240,8 +238,8 @@ extension GraphQL.InterfaceRef: Decodable {
     }
 }
 
-extension GraphQL.OutputRef: Decodable {
-    init(from decoder: Decoder) throws {
+extension OutputRef: Decodable {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let kind = try container.decode(NamedTypeKind.self, forKey: .kind)
         let name = try container.decode(String.self, forKey: .name)
@@ -259,7 +257,7 @@ extension GraphQL.OutputRef: Decodable {
             self = .enum(name)
         default:
             throw DecodingError.typeMismatch(
-                GraphQL.OutputRef.self,
+                OutputRef.self,
                 DecodingError.Context(
                     codingPath: decoder.codingPath,
                     debugDescription: "Couldn't decode output object."
@@ -274,8 +272,8 @@ extension GraphQL.OutputRef: Decodable {
     }
 }
 
-extension GraphQL.InputRef: Decodable {
-    init(from decoder: Decoder) throws {
+extension InputRef: Decodable {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let kind = try container.decode(NamedTypeKind.self, forKey: .kind)
         let name = try container.decode(String.self, forKey: .name)
@@ -289,7 +287,7 @@ extension GraphQL.InputRef: Decodable {
             self = .inputObject(name)
         default:
             throw DecodingError.typeMismatch(
-                GraphQL.InputRef.self,
+                InputRef.self,
                 DecodingError.Context(
                     codingPath: decoder.codingPath,
                     debugDescription: "Couldn't decode output object."
@@ -306,10 +304,8 @@ extension GraphQL.InputRef: Decodable {
 
 // MARK: - Type Alias
 
-extension GraphQL {
-    typealias NamedTypeRef = TypeRef<NamedRef>
-    typealias OutputTypeRef = TypeRef<OutputRef>
-    typealias InputTypeRef = TypeRef<InputRef>
-    typealias ObjectTypeRef = TypeRef<ObjectRef>
-    typealias InterfaceTypeRef = TypeRef<InterfaceRef>
-}
+public typealias NamedTypeRef = TypeRef<NamedRef>
+public typealias OutputTypeRef = TypeRef<OutputRef>
+public typealias InputTypeRef = TypeRef<InputRef>
+public typealias ObjectTypeRef = TypeRef<ObjectRef>
+public typealias InterfaceTypeRef = TypeRef<InterfaceRef>

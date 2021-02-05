@@ -1,4 +1,5 @@
 import Foundation
+import GraphQLAST
 
 /*
  Coder is responsible for generating an intermediate type that
@@ -14,9 +15,9 @@ extension GraphQLCodegen {
     /// Generates a struct that is used as an intermediate decoder and encoder in generated code.
     func generateEncodableStruct(
         _ name: String,
-        fields: [GraphQL.Field],
+        fields: [Field],
         protocols: [String],
-        possibleTypes: [GraphQL.ObjectRef]? = nil
+        possibleTypes: [ObjectRef]? = nil
     ) throws -> [String] {
         /* Code */
         var code = [String]()
@@ -56,8 +57,8 @@ extension GraphQLCodegen {
     }
 
     func generateDecodableExtension(
-        fields: [GraphQL.Field],
-        possibleTypes: [GraphQL.ObjectRef]? = nil
+        fields: [Field],
+        possibleTypes: [ObjectRef]? = nil
     ) throws -> [String] {
         var code = [String]()
 
@@ -73,7 +74,7 @@ extension GraphQLCodegen {
 
     // MARK: - Private helpers
 
-    private func generateDecoder(for fields: [GraphQL.Field], initTypename: Bool) throws -> [String] {
+    private func generateDecoder(for fields: [Field], initTypename: Bool) throws -> [String] {
         var code = [String]()
         code.append(contentsOf: [
             "init(from decoder: Decoder) throws {",
@@ -115,7 +116,7 @@ extension GraphQLCodegen {
         return code
     }
 
-    private func generateDecoderForField(_ field: GraphQL.Field) throws -> [String] {
+    private func generateDecoderForField(_ field: Field) throws -> [String] {
         let type = try generateOutputType(ref: field.type.namedType)
         let decoderType = generateDecoderType(type, for: field.type.nullable)
 
