@@ -24,10 +24,6 @@ let package = Package(
             name: "GraphQLAST",
             targets: ["GraphQLAST"]
         ),
-        .library(
-            name: "SwiftAST",
-            targets: ["SwiftAST"]
-        ),
     ],
     dependencies: [
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
@@ -44,7 +40,7 @@ let package = Package(
         ),
         .target(
             name: "SwiftGraphQLCodegen",
-            dependencies: ["SwiftFormat", "GraphQLAST", "SwiftAST"],
+            dependencies: ["SwiftFormat", "GraphQLAST"],
             path: "Sources/SwiftGraphQLCodegen"
         ),
         .target(
@@ -61,11 +57,6 @@ let package = Package(
             name: "GraphQLAST",
             dependencies: [],
             path: "Sources/GraphQLAST"
-        ),
-        .target(
-            name: "SwiftAST",
-            dependencies: ["SwiftFormat"],
-            path: "Sources/SwiftAST"
         ),
         /* Tests */
         .testTarget(
