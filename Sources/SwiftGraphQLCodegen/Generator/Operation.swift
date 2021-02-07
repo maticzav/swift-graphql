@@ -1,19 +1,15 @@
-import Foundation
 import GraphQLAST
-import SwiftAST
 
-extension GraphQLAST.Operation: BlockProtocol {
-    public var block: Block {
-        var code = [String]()
-
-        code.append("extension Objects.\(type.name.pascalCase): \(self.protocol) {")
-        code.append("    static var operation: String { \"\(self.operation)\" } ")
-        code.append("}")
-
-        
-        return .blocks([])
+extension Operation {
+    /// Returns a definition of an operation.
+    func declaration() -> String {
+        """
+        extension Objects.\(type.name.pascalCase): \(self.protocol) {
+            static var operation: String { \"\(operation)\" }
+        }
+        """
     }
-    
+
     private var operation: String {
         switch self {
         case .query:

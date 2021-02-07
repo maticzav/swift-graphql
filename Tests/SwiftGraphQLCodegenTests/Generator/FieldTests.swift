@@ -1,13 +1,10 @@
+@testable import GraphQLAST
 @testable import SwiftGraphQLCodegen
 import XCTest
 
 final class FieldTests: XCTestCase {
-    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
-
-    // MARK: - Tests
-
     func testFieldDocs() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "id",
             description: "Object identifier.",
             args: [],
@@ -16,21 +13,18 @@ final class FieldTests: XCTestCase {
             deprecationReason: "Use ID instead."
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         /// Object identifier.
         @available(*, deprecated, message: "Use ID instead.")
         func id() throws -> String? {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "id",
-                arguments: [
-                ]
+                arguments: []
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 return data.id[field.alias!]
@@ -48,7 +42,7 @@ final class FieldTests: XCTestCase {
     // MARK: - Scalar
 
     func testScalarField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "id",
             description: nil,
             args: [],
@@ -57,19 +51,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         func id() throws -> String {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "id",
-                arguments: [
-                ]
+                arguments: []
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.id[field.alias!] {
@@ -88,7 +79,7 @@ final class FieldTests: XCTestCase {
     }
 
     func testNullableScalarField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "id",
             description: nil,
             args: [],
@@ -97,19 +88,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         func id() throws -> String? {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "id",
-                arguments: [
-                ]
+                arguments: []
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 return data.id[field.alias!]
@@ -125,7 +113,7 @@ final class FieldTests: XCTestCase {
     }
 
     func testListScalarField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "ids",
             description: nil,
             args: [],
@@ -134,19 +122,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         func ids() throws -> [String]? {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "ids",
-                arguments: [
-                ]
+                arguments: []
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 return data.ids[field.alias!]
@@ -162,7 +147,7 @@ final class FieldTests: XCTestCase {
     }
 
     func testGenearateNonNullableListScalarField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "ids",
             description: nil,
             args: [],
@@ -171,19 +156,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         func ids() throws -> [String] {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "ids",
-                arguments: [
-                ]
+                arguments: []
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.ids[field.alias!] {
@@ -204,7 +186,7 @@ final class FieldTests: XCTestCase {
     // MARK: - Enumerators
 
     func testEnumField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "episode",
             description: nil,
             args: [],
@@ -213,19 +195,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         func episode() throws -> Enums.Episode {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "episode",
-                arguments: [
-                ]
+                arguments: []
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.episode[field.alias!] {
@@ -244,7 +223,7 @@ final class FieldTests: XCTestCase {
     }
 
     func testNullableEnumField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "episode",
             description: nil,
             args: [],
@@ -253,19 +232,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         func episode() throws -> Enums.Episode? {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "episode",
-                arguments: [
-                ]
+                arguments: []
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 return data.episode[field.alias!]
@@ -281,7 +257,7 @@ final class FieldTests: XCTestCase {
     }
 
     func testNullableListEnumField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "episode",
             description: nil,
             args: [],
@@ -292,15 +268,12 @@ final class FieldTests: XCTestCase {
 
         let expected = try """
         func episode() throws -> [Enums.Episode?] {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "episode",
-                arguments: [
-                ]
+                arguments: []
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.episode[field.alias!] {
@@ -315,7 +288,7 @@ final class FieldTests: XCTestCase {
 
         /* Test */
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         XCTAssertEqual(generated, expected)
     }
@@ -323,7 +296,7 @@ final class FieldTests: XCTestCase {
     // MARK: - Selections
 
     func testSelectionField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "hero",
             description: nil,
             args: [],
@@ -332,20 +305,17 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
-        func hero<Type>(_ selection: Selection<Type, Objects.Hero>) throws -> Type {
-            /* Selection */
+        func hero<Type>(selection: Selection<Type, Objects.Hero>) throws -> Type {
             let field = GraphQLField.composite(
                 name: "hero",
-                arguments: [
-                ],
+                arguments: [],
                 selection: selection.selection
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
@@ -364,7 +334,7 @@ final class FieldTests: XCTestCase {
     }
 
     func testNullableSelectionField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "hero",
             description: nil,
             args: [],
@@ -373,20 +343,17 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
-        func hero<Type>(_ selection: Selection<Type, Objects.Hero?>) throws -> Type {
-            /* Selection */
+        func hero<Type>(selection: Selection<Type, Objects.Hero?>) throws -> Type {
             let field = GraphQLField.composite(
                 name: "hero",
-                arguments: [
-                ],
+                arguments: [],
                 selection: selection.selection
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 return try selection.decode(data: data.hero[field.alias!])
@@ -402,7 +369,7 @@ final class FieldTests: XCTestCase {
     }
 
     func testListSelectionField() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "hero",
             description: nil,
             args: [],
@@ -411,20 +378,17 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
-        func hero<Type>(_ selection: Selection<Type, [Objects.Hero]>) throws -> Type {
-            /* Selection */
+        func hero<Type>(selection: Selection<Type, [Objects.Hero]>) throws -> Type {
             let field = GraphQLField.composite(
                 name: "hero",
-                arguments: [
-                ],
+                arguments: [],
                 selection: selection.selection
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
@@ -445,11 +409,11 @@ final class FieldTests: XCTestCase {
     // MARK: - Arguments
 
     func testFieldWithScalarArgument() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "hero",
             description: nil,
             args: [
-                GraphQL.InputValue(
+                InputValue(
                     name: "id",
                     description: nil,
                     type: .nonNull(.named(.scalar("ID")))
@@ -460,20 +424,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         func hero(id: String) throws -> String {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "hero",
-                arguments: [
-                    Argument(name: "id", type: "ID!", value: id),
-                ]
+                arguments: [Argument(name: "id", type: "ID!", value: id)]
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
@@ -492,11 +452,11 @@ final class FieldTests: XCTestCase {
     }
 
     func testFieldWithOptionalArgument() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "hero",
             description: nil,
             args: [
-                GraphQL.InputValue(
+                InputValue(
                     name: "id",
                     description: nil,
                     type: .named(.scalar("ID"))
@@ -507,20 +467,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
-        func hero(id: OptionalArgument<String> = .absent) throws -> String {
-            /* Selection */
+        func hero(id: OptionalArgument<String> = .absent()) throws -> String {
             let field = GraphQLField.leaf(
                 name: "hero",
-                arguments: [
-                    Argument(name: "id", type: "ID", value: id),
-                ]
+                arguments: [Argument(name: "id", type: "ID", value: id)]
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
@@ -539,11 +495,11 @@ final class FieldTests: XCTestCase {
     }
 
     func testFieldWithInputObjectArgument() throws {
-        let field = GraphQL.Field(
+        let field = Field(
             name: "hero",
             description: nil,
             args: [
-                GraphQL.InputValue(
+                InputValue(
                     name: "id",
                     description: nil,
                     type: .nonNull(.named(.inputObject("Input")))
@@ -554,20 +510,16 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try generator.generateField(field).joined(separator: "\n").format()
+        let generated = try field.selection(scalars: ["ID": "String"]).format()
 
         let expected = try """
         func hero(id: InputObjects.Input) throws -> String {
-            /* Selection */
             let field = GraphQLField.leaf(
                 name: "hero",
-                arguments: [
-                    Argument(name: "id", type: "Input!", value: id),
-                ]
+                arguments: [Argument(name: "id", type: "Input!", value: id)]
             )
             self.select(field)
 
-            /* Decoder */
             switch self.response {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {

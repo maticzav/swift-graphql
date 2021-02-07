@@ -48,7 +48,6 @@ public struct HashMap {
     }
 }
 
-
 /*
  We use DynamicCodingKeys to allow response decoder to look up
  for arbitrary key in the response. Otherwise, we would have to

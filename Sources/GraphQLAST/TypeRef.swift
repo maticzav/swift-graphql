@@ -309,3 +309,16 @@ public typealias OutputTypeRef = TypeRef<OutputRef>
 public typealias InputTypeRef = TypeRef<InputRef>
 public typealias ObjectTypeRef = TypeRef<ObjectRef>
 public typealias InterfaceTypeRef = TypeRef<InterfaceRef>
+
+public extension ObjectTypeRef {
+    var name: String {
+        switch self {
+        case let .named(ref):
+            return ref.name
+        case let .list(ref):
+            return ref.namedType.name
+        case let .nonNull(ref):
+            return ref.namedType.name
+        }
+    }
+}

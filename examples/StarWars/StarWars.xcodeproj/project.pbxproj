@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 53;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -170,7 +170,8 @@
 /* Begin PBXShellScriptBuildPhase section */
 		02017D90253C617C0041BABE /* Generate GraphQL API */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 8;
+			alwaysOutOfDate = 1;
+			buildActionMask = 12;
 			files = (
 			);
 			inputFileListPaths = (
@@ -182,7 +183,7 @@
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "cd \"${SRCROOT}\"/Codegen\nxcrun -sdk macosx swift run\n";
 		};

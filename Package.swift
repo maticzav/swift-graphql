@@ -65,7 +65,7 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftGraphQLCodegenTests",
-            dependencies: ["Files", "SwiftGraphQLCodegen"]
+            dependencies: ["Files", "SwiftGraphQLCodegen", "GraphQLAST"]
         ),
         .testTarget(
             name: "GraphQLASTTests",

@@ -3,12 +3,6 @@ import Files
 import XCTest
 
 final class GeneratorTests: XCTestCase {
-    let generator = GraphQLCodegen(
-        options: GraphQLCodegen.Options(scalarMappings: ["Date": "DateTime"])
-    )
-
-    // MARK: - Tests
-
     func testGenerateTarget() throws {
         /* Target */
         let tmp = try Folder.temporary.createSubfolderIfNeeded(at: "SwiftGraphQL")
@@ -18,6 +12,10 @@ final class GeneratorTests: XCTestCase {
 
         /* Fetching */
         let endpoint = URL(string: "http://localhost:4000")!
+
+        let generator = GraphQLCodegen(
+            scalars: ["Date": "DateTime"]
+        )
         try generator.generate(target, from: endpoint)
 
         /* Tests */

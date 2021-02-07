@@ -1,11 +1,11 @@
 import Foundation
 import SwiftGraphQL
 
-let characterId = Selection<String, Interfaces.Character> {
+let characterId = Selection.Character {
     try $0.id()
 }
 
-let character = Selection<Character, Interfaces.Character> {
+let character = Selection.Character {
     Character(
         id: try $0.selection(characterId),
         name: try $0.name(),
@@ -16,7 +16,7 @@ let character = Selection<Character, Interfaces.Character> {
     )
 }
 
-let human = Selection<Human, Objects.Human> {
+let human = Selection.Human {
     Human(
         id: try $0.id(),
         name: try $0.name(),
@@ -64,7 +64,7 @@ let query = Selection<Data, Objects.Query> {
         whoami: try $0.whoami(),
         time: try $0.time(),
         greeting: greeting,
-        character: try $0.character(id: "1000", characterUnion.nonNullOrFail),
-        characters: try $0.characters(Selection.list(character))
+        character: try $0.character(id: "1000", selection: characterUnion.nonNullOrFail),
+        characters: try $0.characters(selection: Selection.list(character))
     )
 }

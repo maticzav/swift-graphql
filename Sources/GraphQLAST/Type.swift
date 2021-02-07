@@ -4,10 +4,10 @@ public enum Operation {
     case query(ObjectType)
     case mutation(ObjectType)
     case subscription(ObjectType)
-    
+
     public var type: ObjectType {
         switch self {
-        case .query(let type), .mutation(let type), .subscription(let type):
+        case let .query(type), let .mutation(type), let .subscription(type):
             return type
         }
     }

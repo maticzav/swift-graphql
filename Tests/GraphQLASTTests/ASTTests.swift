@@ -54,7 +54,6 @@ final class ASTTests: XCTestCase {
 
         let value = try parse(json.data(using: .utf8)!)
         let expected = Schema(
-            description: nil,
             types: [
                 .object(ObjectType(
                     name: "Human",
@@ -74,9 +73,7 @@ final class ASTTests: XCTestCase {
                     ]
                 )),
             ],
-            queryType: Operation(name: "Query"),
-            mutationType: nil,
-            subscriptionType: nil
+            query: "Query"
         )
 
         /* Tests */

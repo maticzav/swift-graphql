@@ -7,52 +7,15 @@ import GraphQLAST
  */
 
 public struct GraphQLCodegen {
-    let options: Options
+    private let scalars: ScalarMap
 
     // MARK: - Initializer
 
-    public init(options: Options = Options()) {
-        self.options = options
-    }
-
-    // MARK: - Options
-
-    public struct Options {
-        public typealias ScalarMap = [String: String]
-
-        /// Map of scalar GraphQL values and their Swift types.
-        private let scalarMap: ScalarMap
-
-        // MARK: - Initializer
-
-        public init(scalarMappings: ScalarMap = [:]) {
-            let map = builtInScalars.merging(
-                scalarMappings,
-                uniquingKeysWith: { _, override in override }
-            )
-
-            scalarMap = map
-        }
-
-        // MARK: - Methods
-
-        /// Returns the mapped value of the scalar.
-        func scalar(_ name: String) throws -> String {
-            if let mapping = scalarMap[name] {
-                return mapping
-            }
-            throw GraphQLCodegenError.unknownScalar(name)
-        }
-
-        // MARK: - Default values
-
-        private let builtInScalars: ScalarMap = [
-            "ID": "String",
-            "String": "String",
-            "Int": "Int",
-            "Boolean": "Bool",
-            "Float": "Double",
-        ]
+    public init(scalars: ScalarMap) {
+        self.scalars = ScalarMap.builtin.merging(
+            scalars,
+            uniquingKeysWith: { _, override in override }
+        )
     }
 
     // MARK: - Methods
@@ -74,103 +37,41 @@ public struct GraphQLCodegen {
     /// Generates the API and returns it to handler.
     public func generate(from endpoint: URL) throws -> String {
         let schema = try Schema(from: endpoint)
-        let code = try generate(from: schema)
+        let code = try generate(schema: schema)
         return code
     }
 
     /// Generates the code that can be used to define selections.
-    func generate(from schema: Schema) throws -> String {
-        /* Data */
+    func generate(schema: Schema) throws -> String {
+        let code = """
+        import SwiftGraphQL
 
-        // ObjectTypes for operations
-        let operations: [(type: ObjectType, operation: Operation)] = [
-            (schema.queryType.name.pascalCase, .query),
-            (schema.mutationType?.name.pascalCase, .mutation),
-            (schema.subscriptionType?.name.pascalCase, .subscription),
-        ].compactMap { type, operation in
-            schema.objects.first(where: { $0.name == type }).map { ($0, operation) }
-        }
+        // MARK: - Operations
+        enum Operations {}
+        \(schema.operations.map { $0.declaration() }.lines)
 
-        // Object types for all other objects.
-        let objects: [ObjectType] = schema.objects
+        // MARK: - Objects
+        enum Objects {}
+        \(try schema.objects.map { try $0.declaration(objects: schema.objects, scalars: scalars) }.lines)
 
-        // Phantom type references
-        var types = [NamedType]()
-        types.append(contentsOf: schema.objects.map { .object($0) })
-        types.append(contentsOf: schema.inputObjects.map { .inputObject($0) })
+        // MARK: - Interfaces
+        enum Interfaces {}
+        \(try schema.interfaces.map { try $0.declaration(objects: schema.objects, scalars: scalars) }.lines)
 
-        /* Code parts. */
+        // MARK: - Unions
+        enum Unions {}
+        \(try schema.unions.map { try $0.declaration(objects: schema.objects, scalars: scalars) }.lines)
 
-        let operationsPart = try operations.map {
-            try generateOperation(type: $0.type, operation: $0.operation)
-        }
+        // MARK: - Enums
+        enum Enums {}
+        \(schema.enums.map { $0.declaration }.lines)
 
-        let objectsPart = try objects.map {
-            try generateObject($0)
-        }
-
-        let interfacesPart = try schema.interfaces.map {
-            try generateInterface($0, with: objects)
-        }
-
-        let unionsPart = try schema.unions.map {
-            try generateUnion($0, with: objects)
-        }
-
-        let enumsPart = schema.enums.map {
-            generateEnum($0)
-        }
-
-        let inputObjectsPart = try schema.inputObjects.map {
-            try generateInputObject($0.name.pascalCase, for: $0)
-        }
-
-        /* File. */
-        let code = [
-            "import SwiftGraphQL",
-            "",
-            "// MARK: - Operations",
-            "",
-            "enum Operations {}",
-            "",
-            operationsPart,
-            "",
-            "// MARK: - Objects",
-            "",
-            "enum Objects {}",
-            "",
-            objectsPart,
-            "",
-            "// MARK: - Interfaces",
-            "",
-            "enum Interfaces {}",
-            "",
-            interfacesPart,
-            "",
-            "// MARK: - Unions",
-            "",
-            "enum Unions {}",
-            "",
-            unionsPart,
-            "",
-            "// MARK: - Enums",
-            "",
-            "enum Enums {",
-            enumsPart,
-            "}",
-            "",
-            "// MARK: - Input Objects",
-            "",
-            "enum InputObjects {",
-            inputObjectsPart,
-            "}",
-        ].joined(separator: "\n")
+        // MARK: - Input Objects
+        enum InputObjects {}
+        \(try schema.inputObjects.map { try $0.declaration(scalars: scalars) }.lines)
+        """
 
         let source = try code.format()
         return source
     }
-}
-
-enum GraphQLCodegenError: Error {
-    case unknownScalar(String)
 }

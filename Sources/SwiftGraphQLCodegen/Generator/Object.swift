@@ -1,51 +1,33 @@
 import Foundation
 import GraphQLAST
-import SwiftAST
 
-extension GraphQLCodegen {
-    /// Generates a function to handle a type.
-    func generateObject(_ type: ObjectType) throws -> [String] {
-        let name = type.name.pascalCase
-
-        /* Code */
-        var code = [String]()
-
-        /* Definition */
-        code.append("extension Objects {")
-        code.append(contentsOf:
-            try generateEncodableStruct(
-                name,
-                fields: type.fields
-            )
-        )
-        code.append("}")
-
-        // MARK: TODO: availability, IDE selection.
-
-        /* Decoder */
-        /*
-         We make conformance to decodable an extension so we can still leverage
-         the default init a struct gets.
-         */
-        code.append("extension Objects.\(name): Decodable {")
-        code.append(contentsOf: try generateDecodableExtension(fields: type.fields))
-        code.append("}")
-
-        code.append("")
-        
-        /* Fields */
-        code.append("extension Fields where TypeLock == Objects.\(name) {")
-        code.append(contentsOf: try type.fields.flatMap { try generateField($0) })
-        code.append("}")
-        
-        // MARK: TODO: selection
-
-        return code
+extension ObjectType: Structure {
+    var possibleTypes: [ObjectTypeRef] {
+        [ObjectTypeRef.named(ObjectRef.object(name))]
     }
 }
 
-extension ObjectType: BlockProtocol {
-    public var block: Block {
-        .blocks([])
+extension ObjectType {
+    /// Declares (i.e. creates) the object itself.
+    func declaration(objects: [ObjectType], scalars: ScalarMap) throws -> String {
+        let name = self.name.pascalCase
+
+        return """
+        extension Objects {
+        \(try self.struct(name: name, objects: objects, scalars: scalars))
+        }
+
+        extension Objects.\(name): Decodable {
+        \(try self.allFields(objects: objects).decoder(scalars: scalars))
+        }
+
+        extension Fields where TypeLock == Objects.\(name) {
+        \(try fields.selection(scalars: scalars))
+        }
+
+        extension Selection where TypeLock == Never, Type == Never {
+            typealias \(name)<T> = Selection<T, Objects.\(name)>
+        }
+        """
     }
 }

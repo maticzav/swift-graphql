@@ -7,59 +7,91 @@ import GraphQLAST
 
  We first decode the key that references a result and use the type
  engraved in the alias to further decode the result. The result is
- saved into a HashMap structure that groups fields with the same type
- and extract a dictionary of results from it.
+ saved into a HashMap structure that groups fields with the same type.
+ */
+
+// MARK: - Structure
+
+/*
+ This section contains functions that we use to generate the structure
+ definition itself.
  */
 
 protocol Structure {
     var fields: [Field] { get }
-    var possibleTypes: [ObjectRef] { get }
+    var possibleTypes: [ObjectTypeRef] { get }
 }
 
 extension Structure {
-    func structure(name: String) -> String {
-        let properties = fields
-            .map { $0.declaration }
-            .joined(separator: "\n")
+    /// Returns a list of fields shared between all types in the interface.
+    func allFields(objects: [ObjectType]) -> [Field] {
+        var shared: [Field] = fields
+
+        for object in objects {
+            // Skip object if it's not inside possible types.
+            guard possibleTypes.contains(where: { $0.name == object.name }) else { continue }
+            // Append fields otherwise.
+            for field in object.fields {
+                // Make suer fields are unique.
+                shared.append(field)
+            }
+        }
+
+        return shared.unique(by: { $0.name })
+    }
+}
+
+extension Structure {
+    /// Returns a definition of a struct that represents a given structure.
+    func `struct`(name: String, objects: [ObjectType], scalars: ScalarMap) throws -> String {
+        let typename: String
+        if let object = self.possibleTypes.first, self.possibleTypes.count == 1 {
+            typename = "let __typename: TypeName = .\(object.name.camelCase)"
+        } else {
+            typename = "let __typename: TypeName"
+        }
         
+        let properties = try allFields(objects: objects)
+            .sorted(by: { $0.name < $1.name })
+            .map { try $0.declaration(scalars: scalars) }
+            .lines
+
         return """
         struct \(name) {
-            let __typename: TypeName
+            \(typename)
             \(properties)
 
             \(possibleTypes.typename)
         }
         """
     }
-    
-    var decoder: String {
-        ""
+}
+
+private extension Field {
+    /// Return a field variable declaration in the structure.
+    func declaration(scalars: ScalarMap) throws -> String {
+        let type = try self.type.namedType.type(scalars: scalars)
+        let wrappedType = self.type.nonNullable.type(for: type)
+
+        return "let \(name.camelCase.normalize): [String: \(wrappedType)]"
     }
 }
 
-extension Collection where Element == ObjectRef {
-    fileprivate var typename: String {
-        let types = self
-            .map { "case \($0.name.camelCase.normalize) = \"\($0.name)\"" }
-            .joined(separator: "\n")
-        
-        return """
-        enum TypeName: String, Codable {
-        \(types)
-        }
-        """
-    }
-}
+// MARK: - Decoder
+
+/*
+ This section contains code that we use to generate the decoder for
+ given fields.
+ */
 
 extension Collection where Element == Field {
-    var decoder: String {
-        let cases: String = self
-            .map { $0.decoder }
+    /// Returns a function definition for decoder initializer.
+    func decoder(scalars: ScalarMap, includeTypenameDecoder typename: Bool = false) throws -> String {
+        let cases: String = try self.map { try $0.decoder(scalars: scalars) }
             .joined(separator: "\n")
-        let mappings: String = self
-            .map { "self.\($0.name.camelCase) = map[\"\($0.name.camelCase)\"]" }
+        let mappings: String = self.map { "self.\($0.name.camelCase) = map[\"\($0.name.camelCase)\"]" }
             .joined(separator: "\n")
-        
+
         return """
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
@@ -73,10 +105,17 @@ extension Collection where Element == Field {
 
                 switch field {
                 \(cases)
+                default:
+                    throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: decoder.codingPath,
+                            debugDescription: "Unknown key \\(field)."
+                        )
+                    )
                 }
             }
 
-            self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: \"__typename\")!)
+            \(typename ? #"self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)"# : "")
 
             \(mappings)
         }
@@ -84,22 +123,48 @@ extension Collection where Element == Field {
     }
 }
 
+private extension Collection where Element == ObjectTypeRef {
+    var typename: String {
+        let types = map { "case \($0.name.camelCase.normalize) = \"\($0.name)\"" }
+            .joined(separator: "\n")
 
-extension Field {
-    fileprivate var declaration: String {
-        let type = generateDecoderType(try generateOutputType(ref: type.namedType), for: type.nonNullable)
-        return "let \($0.name.camelCase.normalize): [String: \(type)]"
+        return """
+        enum TypeName: String, Codable {
+        \(types)
+        }
+        """
     }
-    
-    fileprivate var decoder: String {
-        let type = try generateOutputType(ref: type.namedType)
-        let decoderType = generateDecoderType(type, for: type.nullable)
-        
+}
+
+private extension Field {
+    /// Returns a code that we use to decode a field in the response.
+    func decoder(scalars: ScalarMap) throws -> String {
+        let type = try self.type.namedType.type(scalars: scalars)
+        let wrappedType = self.type.nullable.type(for: type)
+
         return """
         case \"\(name.camelCase)\":
-            if let value = try container.decode(\(decoderType).self, forKey: codingKey) {
+            if let value = try container.decode(\(wrappedType).self, forKey: codingKey) {
                 map.set(key: field, hash: alias, value: value as Any)
             }
         """
+    }
+}
+
+extension OutputRef {
+    /// Returns an internal reference to the given output type ref.
+    func type(scalars: ScalarMap) throws -> String {
+        switch self {
+        case let .scalar(scalar):
+            return try scalars.scalar(scalar)
+        case let .enum(enm):
+            return "Enums.\(enm.pascalCase)"
+        case let .object(type):
+            return "Objects.\(type.pascalCase)"
+        case let .interface(type):
+            return "Interfaces.\(type.pascalCase)"
+        case let .union(type):
+            return "Unions.\(type.pascalCase)"
+        }
     }
 }

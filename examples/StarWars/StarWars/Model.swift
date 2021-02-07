@@ -13,24 +13,24 @@ class Model: ObservableObject {
     func fetch() {
         print("FETCHING")
 
-        // Perform query.
-//        SG.send(
-//            query,
-//            to: "http://localhost:4000",
-//            operationName: "Query",
-//            headers: ["Authorization": "Bearer Matic"]
-//        ) { result in
-//            do {
-//                let data = try result.get()
-//                print("DATA")
-//                print(data)
-//                DispatchQueue.main.async {
-//                    self.data = data.data
-//                }
-//            } catch let error {
-//                print(error)
-//            }
-//        }
+//         Perform query.
+        SG.send(
+            query,
+            to: "http://localhost:4000",
+            operationName: "Query",
+            headers: ["Authorization": "Bearer Matic"]
+        ) { result in
+            do {
+                let data = try result.get()
+                print("DATA")
+                print(data)
+                DispatchQueue.main.async {
+                    self.data = data.data
+                }
+            } catch let error {
+                print(error)
+            }
+        }
     }
 
     func startListening() {

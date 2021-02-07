@@ -3,22 +3,14 @@ import SwiftGraphQL
 // MARK: - Operations
 
 enum Operations {}
-
-/* Query */
-
 extension Objects.Query: GraphQLHttpOperation {
     static var operation: String { "query" }
 }
-
-/* Mutation */
 
 extension Objects.Mutation: GraphQLHttpOperation {
     static var operation: String { "mutation" }
 }
 
-/* Subscription */
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Objects.Subscription: GraphQLWebSocketOperation {
     static var operation: String { "subscription" }
 }
@@ -26,20 +18,18 @@ extension Objects.Subscription: GraphQLWebSocketOperation {
 // MARK: - Objects
 
 enum Objects {}
-
-/* Mutation */
-
 extension Objects {
-    struct Mutation: Encodable {
-        /* Mutation */
-
-        /* Properties */
+    struct Mutation {
+        let __typename: TypeName = .mutation
         let mutate: [String: Bool]
+
+        enum TypeName: String, Codable {
+            case mutation = "Mutation"
+        }
     }
 }
 
 extension Objects.Mutation: Decodable {
-    /* Decoder */
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
 
@@ -71,15 +61,12 @@ extension Objects.Mutation: Decodable {
 
 extension Fields where TypeLock == Objects.Mutation {
     func mutate() throws -> Bool {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "mutate",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.mutate[field.alias!] {
@@ -92,22 +79,25 @@ extension Fields where TypeLock == Objects.Mutation {
     }
 }
 
-/* Droid */
+extension Selection where TypeLock == Never, Type == Never {
+    typealias Mutation<T> = Selection<T, Objects.Mutation>
+}
 
 extension Objects {
-    struct Droid: Encodable {
-        /* Droid */
-
-        /* Properties */
+    struct Droid {
+        let __typename: TypeName = .droid
+        let appearsIn: [String: [Enums.Episode]]
         let id: [String: String]
         let name: [String: String]
         let primaryFunction: [String: String]
-        let appearsIn: [String: [Enums.Episode]]
+
+        enum TypeName: String, Codable {
+            case droid = "Droid"
+        }
     }
 }
 
 extension Objects.Droid: Decodable {
-    /* Decoder */
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
 
@@ -123,16 +113,16 @@ extension Objects.Droid: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
             case "name":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "primaryFunction":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             default:
@@ -146,23 +136,20 @@ extension Objects.Droid: Decodable {
         }
 
         id = map["id"]
+        appearsIn = map["appearsIn"]
         name = map["name"]
         primaryFunction = map["primaryFunction"]
-        appearsIn = map["appearsIn"]
     }
 }
 
 extension Fields where TypeLock == Objects.Droid {
     func id() throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "id",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.id[field.alias!] {
@@ -175,15 +162,12 @@ extension Fields where TypeLock == Objects.Droid {
     }
 
     func name() throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "name",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.name[field.alias!] {
@@ -196,15 +180,12 @@ extension Fields where TypeLock == Objects.Droid {
     }
 
     func primaryFunction() throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "primaryFunction",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.primaryFunction[field.alias!] {
@@ -217,15 +198,12 @@ extension Fields where TypeLock == Objects.Droid {
     }
 
     func appearsIn() throws -> [Enums.Episode] {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "appearsIn",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.appearsIn[field.alias!] {
@@ -238,23 +216,26 @@ extension Fields where TypeLock == Objects.Droid {
     }
 }
 
-/* Human */
+extension Selection where TypeLock == Never, Type == Never {
+    typealias Droid<T> = Selection<T, Objects.Droid>
+}
 
 extension Objects {
-    struct Human: Encodable {
-        /* Human */
-
-        /* Properties */
-        let id: [String: String]
-        let name: [String: String]
-        let homePlanet: [String: String]
+    struct Human {
+        let __typename: TypeName = .human
         let appearsIn: [String: [Enums.Episode]]
+        let homePlanet: [String: String]
+        let id: [String: String]
         let infoUrl: [String: String]
+        let name: [String: String]
+
+        enum TypeName: String, Codable {
+            case human = "Human"
+        }
     }
 }
 
 extension Objects.Human: Decodable {
-    /* Decoder */
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
 
@@ -266,7 +247,15 @@ extension Objects.Human: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
             case "id":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -275,14 +264,6 @@ extension Objects.Human: Decodable {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "homePlanet":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -296,25 +277,22 @@ extension Objects.Human: Decodable {
             }
         }
 
+        appearsIn = map["appearsIn"]
         id = map["id"]
+        infoUrl = map["infoUrl"]
         name = map["name"]
         homePlanet = map["homePlanet"]
-        appearsIn = map["appearsIn"]
-        infoUrl = map["infoUrl"]
     }
 }
 
 extension Fields where TypeLock == Objects.Human {
     func id() throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "id",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.id[field.alias!] {
@@ -327,15 +305,12 @@ extension Fields where TypeLock == Objects.Human {
     }
 
     func name() throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "name",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.name[field.alias!] {
@@ -348,16 +323,14 @@ extension Fields where TypeLock == Objects.Human {
     }
 
     /// The home planet of the human, or null if unknown.
+
     func homePlanet() throws -> String? {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "homePlanet",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             return data.homePlanet[field.alias!]
@@ -367,15 +340,12 @@ extension Fields where TypeLock == Objects.Human {
     }
 
     func appearsIn() throws -> [Enums.Episode] {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "appearsIn",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.appearsIn[field.alias!] {
@@ -388,15 +358,12 @@ extension Fields where TypeLock == Objects.Human {
     }
 
     func infoUrl() throws -> String? {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "infoURL",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             return data.infoUrl[field.alias!]
@@ -406,28 +373,31 @@ extension Fields where TypeLock == Objects.Human {
     }
 }
 
-/* Query */
+extension Selection where TypeLock == Never, Type == Never {
+    typealias Human<T> = Selection<T, Objects.Human>
+}
 
 extension Objects {
-    struct Query: Encodable {
-        /* Query */
-
-        /* Properties */
-        let human: [String: Objects.Human]
-        let droid: [String: Objects.Droid]
+    struct Query {
+        let __typename: TypeName = .query
         let character: [String: Unions.CharacterUnion]
-        let luke: [String: Objects.Human]
-        let humans: [String: [Objects.Human]]
-        let droids: [String: [Objects.Droid]]
         let characters: [String: [Interfaces.Character]]
+        let droid: [String: Objects.Droid]
+        let droids: [String: [Objects.Droid]]
         let greeting: [String: String]
-        let whoami: [String: String]
+        let human: [String: Objects.Human]
+        let humans: [String: [Objects.Human]]
+        let luke: [String: Objects.Human]
         let time: [String: DateTime]
+        let whoami: [String: String]
+
+        enum TypeName: String, Codable {
+            case query = "Query"
+        }
     }
 }
 
 extension Objects.Query: Decodable {
-    /* Decoder */
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
 
@@ -439,40 +409,40 @@ extension Objects.Query: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
-            case "human":
-                if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
+            case "whoami":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "droid":
                 if let value = try container.decode(Objects.Droid?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "character":
-                if let value = try container.decode(Unions.CharacterUnion?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "luke":
+            case "human":
                 if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "humans":
-                if let value = try container.decode([Objects.Human]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "droids":
-                if let value = try container.decode([Objects.Droid]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "characters":
-                if let value = try container.decode([Interfaces.Character]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "greeting":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "whoami":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
+            case "humans":
+                if let value = try container.decode([Objects.Human]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "character":
+                if let value = try container.decode(Unions.CharacterUnion?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "droids":
+                if let value = try container.decode([Objects.Droid]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "luke":
+                if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "characters":
+                if let value = try container.decode([Interfaces.Character]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "time":
@@ -489,32 +459,28 @@ extension Objects.Query: Decodable {
             }
         }
 
-        human = map["human"]
-        droid = map["droid"]
-        character = map["character"]
-        luke = map["luke"]
-        humans = map["humans"]
-        droids = map["droids"]
-        characters = map["characters"]
-        greeting = map["greeting"]
         whoami = map["whoami"]
+        droid = map["droid"]
+        human = map["human"]
+        greeting = map["greeting"]
+        humans = map["humans"]
+        character = map["character"]
+        droids = map["droids"]
+        luke = map["luke"]
+        characters = map["characters"]
         time = map["time"]
     }
 }
 
 extension Fields where TypeLock == Objects.Query {
-    func human<Type>(id: String, _ selection: Selection<Type, Objects.Human?>) throws -> Type {
-        /* Selection */
+    func human<Type>(id: String, selection: Selection<Type, Objects.Human?>) throws -> Type {
         let field = GraphQLField.composite(
             name: "human",
-            arguments: [
-                Argument(name: "id", type: "ID!", value: id),
-            ],
+            arguments: [Argument(name: "id", type: "ID!", value: id)],
             selection: selection.selection
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             return try selection.decode(data: data.human[field.alias!])
@@ -523,18 +489,14 @@ extension Fields where TypeLock == Objects.Query {
         }
     }
 
-    func droid<Type>(id: String, _ selection: Selection<Type, Objects.Droid?>) throws -> Type {
-        /* Selection */
+    func droid<Type>(id: String, selection: Selection<Type, Objects.Droid?>) throws -> Type {
         let field = GraphQLField.composite(
             name: "droid",
-            arguments: [
-                Argument(name: "id", type: "ID!", value: id),
-            ],
+            arguments: [Argument(name: "id", type: "ID!", value: id)],
             selection: selection.selection
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             return try selection.decode(data: data.droid[field.alias!])
@@ -543,18 +505,14 @@ extension Fields where TypeLock == Objects.Query {
         }
     }
 
-    func character<Type>(id: String, _ selection: Selection<Type, Unions.CharacterUnion?>) throws -> Type {
-        /* Selection */
+    func character<Type>(id: String, selection: Selection<Type, Unions.CharacterUnion?>) throws -> Type {
         let field = GraphQLField.composite(
             name: "character",
-            arguments: [
-                Argument(name: "id", type: "ID!", value: id),
-            ],
+            arguments: [Argument(name: "id", type: "ID!", value: id)],
             selection: selection.selection
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             return try selection.decode(data: data.character[field.alias!])
@@ -563,17 +521,14 @@ extension Fields where TypeLock == Objects.Query {
         }
     }
 
-    func luke<Type>(_ selection: Selection<Type, Objects.Human?>) throws -> Type {
-        /* Selection */
+    func luke<Type>(selection: Selection<Type, Objects.Human?>) throws -> Type {
         let field = GraphQLField.composite(
             name: "luke",
-            arguments: [
-            ],
+            arguments: [],
             selection: selection.selection
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             return try selection.decode(data: data.luke[field.alias!])
@@ -582,17 +537,14 @@ extension Fields where TypeLock == Objects.Query {
         }
     }
 
-    func humans<Type>(_ selection: Selection<Type, [Objects.Human]>) throws -> Type {
-        /* Selection */
+    func humans<Type>(selection: Selection<Type, [Objects.Human]>) throws -> Type {
         let field = GraphQLField.composite(
             name: "humans",
-            arguments: [
-            ],
+            arguments: [],
             selection: selection.selection
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.humans[field.alias!] {
@@ -604,17 +556,14 @@ extension Fields where TypeLock == Objects.Query {
         }
     }
 
-    func droids<Type>(_ selection: Selection<Type, [Objects.Droid]>) throws -> Type {
-        /* Selection */
+    func droids<Type>(selection: Selection<Type, [Objects.Droid]>) throws -> Type {
         let field = GraphQLField.composite(
             name: "droids",
-            arguments: [
-            ],
+            arguments: [],
             selection: selection.selection
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.droids[field.alias!] {
@@ -626,17 +575,14 @@ extension Fields where TypeLock == Objects.Query {
         }
     }
 
-    func characters<Type>(_ selection: Selection<Type, [Interfaces.Character]>) throws -> Type {
-        /* Selection */
+    func characters<Type>(selection: Selection<Type, [Interfaces.Character]>) throws -> Type {
         let field = GraphQLField.composite(
             name: "characters",
-            arguments: [
-            ],
+            arguments: [],
             selection: selection.selection
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.characters[field.alias!] {
@@ -649,16 +595,12 @@ extension Fields where TypeLock == Objects.Query {
     }
 
     func greeting(input: OptionalArgument<InputObjects.Greeting> = .absent()) throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "greeting",
-            arguments: [
-                Argument(name: "input", type: "Greeting", value: input),
-            ]
+            arguments: [Argument(name: "input", type: "Greeting", value: input)]
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.greeting[field.alias!] {
@@ -671,15 +613,12 @@ extension Fields where TypeLock == Objects.Query {
     }
 
     func whoami() throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "whoami",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.whoami[field.alias!] {
@@ -692,15 +631,12 @@ extension Fields where TypeLock == Objects.Query {
     }
 
     func time() throws -> DateTime {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "time",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.time[field.alias!] {
@@ -713,19 +649,22 @@ extension Fields where TypeLock == Objects.Query {
     }
 }
 
-/* Subscription */
+extension Selection where TypeLock == Never, Type == Never {
+    typealias Query<T> = Selection<T, Objects.Query>
+}
 
 extension Objects {
-    struct Subscription: Encodable {
-        /* Subscription */
-
-        /* Properties */
+    struct Subscription {
+        let __typename: TypeName = .subscription
         let number: [String: Int]
+
+        enum TypeName: String, Codable {
+            case subscription = "Subscription"
+        }
     }
 }
 
 extension Objects.Subscription: Decodable {
-    /* Decoder */
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
 
@@ -757,16 +696,14 @@ extension Objects.Subscription: Decodable {
 
 extension Fields where TypeLock == Objects.Subscription {
     /// Returns a random number every second. You should see it changing if your subscriptions work right.
+
     func number() throws -> Int {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "number",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.number[field.alias!] {
@@ -779,33 +716,31 @@ extension Fields where TypeLock == Objects.Subscription {
     }
 }
 
+extension Selection where TypeLock == Never, Type == Never {
+    typealias Subscription<T> = Selection<T, Objects.Subscription>
+}
+
 // MARK: - Interfaces
 
 enum Interfaces {}
-
-/* Character */
-
 extension Interfaces {
-    struct Character: Encodable {
-        /* Character */
+    struct Character {
+        let __typename: TypeName
+        let appearsIn: [String: [Enums.Episode]]
+        let homePlanet: [String: String]
+        let id: [String: String]
+        let infoUrl: [String: String]
+        let name: [String: String]
+        let primaryFunction: [String: String]
+
         enum TypeName: String, Codable {
             case droid = "Droid"
             case human = "Human"
         }
-
-        /* Properties */
-        let __typename: TypeName
-        let id: [String: String]
-        let name: [String: String]
-        let primaryFunction: [String: String]
-        let appearsIn: [String: [Enums.Episode]]
-        let homePlanet: [String: String]
-        let infoUrl: [String: String]
     }
 }
 
 extension Interfaces.Character: Decodable {
-    /* Decoder */
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
 
@@ -817,6 +752,14 @@ extension Interfaces.Character: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
+            case "infoUrl":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
             case "id":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
@@ -829,15 +772,7 @@ extension Interfaces.Character: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
             case "homePlanet":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -852,27 +787,26 @@ extension Interfaces.Character: Decodable {
         }
 
         __typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
+
+        infoUrl = map["infoUrl"]
+        appearsIn = map["appearsIn"]
         id = map["id"]
         name = map["name"]
         primaryFunction = map["primaryFunction"]
-        appearsIn = map["appearsIn"]
         homePlanet = map["homePlanet"]
-        infoUrl = map["infoUrl"]
     }
 }
 
 extension Fields where TypeLock == Interfaces.Character {
     /// The id of the character
+
     func id() throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "id",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.id[field.alias!] {
@@ -885,16 +819,14 @@ extension Fields where TypeLock == Interfaces.Character {
     }
 
     /// The name of the character
+
     func name() throws -> String {
-        /* Selection */
         let field = GraphQLField.leaf(
             name: "name",
-            arguments: [
-            ]
+            arguments: []
         )
         select(field)
 
-        /* Decoder */
         switch response {
         case let .decoding(data):
             if let data = data.name[field.alias!] {
@@ -908,35 +840,17 @@ extension Fields where TypeLock == Interfaces.Character {
 }
 
 extension Fields where TypeLock == Interfaces.Character {
-    func on<Type>(
-        droid: Selection<Type, Objects.Droid>,
-        human: Selection<Type, Objects.Human>
-    ) throws -> Type {
-        /* Selection */
-        select([
-            GraphQLField.fragment(type: "Droid", selection: droid.selection),
-            GraphQLField.fragment(type: "Human", selection: human.selection),
-        ])
-        /* Decoder */
+    func on<Type>(droid: Selection<Type, Objects.Droid>, human: Selection<Type, Objects.Human>) throws -> Type {
+        select([GraphQLField.fragment(type: "Droid", selection: droid.selection), GraphQLField.fragment(type: "Human", selection: human.selection)])
+
         switch response {
         case let .decoding(data):
             switch data.__typename {
             case .droid:
-                let data = Objects.Droid(
-                    id: data.id,
-                    name: data.name,
-                    primaryFunction: data.primaryFunction,
-                    appearsIn: data.appearsIn
-                )
+                let data = Objects.Droid(appearsIn: data.appearsIn, id: data.id, name: data.name, primaryFunction: data.primaryFunction)
                 return try droid.decode(data: data)
             case .human:
-                let data = Objects.Human(
-                    id: data.id,
-                    name: data.name,
-                    homePlanet: data.homePlanet,
-                    appearsIn: data.appearsIn,
-                    infoUrl: data.infoUrl
-                )
+                let data = Objects.Human(appearsIn: data.appearsIn, homePlanet: data.homePlanet, id: data.id, infoUrl: data.infoUrl, name: data.name)
                 return try human.decode(data: data)
             }
         case .mocking:
@@ -945,33 +859,31 @@ extension Fields where TypeLock == Interfaces.Character {
     }
 }
 
+extension Selection where TypeLock == Never, Type == Never {
+    typealias Character<T> = Selection<T, Interfaces.Character>
+}
+
 // MARK: - Unions
 
 enum Unions {}
-
-/* CharacterUnion */
-
 extension Unions {
-    struct CharacterUnion: Encodable {
-        /* CharacterUnion */
+    struct CharacterUnion {
+        let __typename: TypeName
+        let appearsIn: [String: [Enums.Episode]]
+        let homePlanet: [String: String]
+        let id: [String: String]
+        let infoUrl: [String: String]
+        let name: [String: String]
+        let primaryFunction: [String: String]
+
         enum TypeName: String, Codable {
             case human = "Human"
             case droid = "Droid"
         }
-
-        /* Properties */
-        let __typename: TypeName
-        let id: [String: String]
-        let name: [String: String]
-        let primaryFunction: [String: String]
-        let appearsIn: [String: [Enums.Episode]]
-        let homePlanet: [String: String]
-        let infoUrl: [String: String]
     }
 }
 
 extension Unions.CharacterUnion: Decodable {
-    /* Decoder */
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
 
@@ -987,11 +899,15 @@ extension Unions.CharacterUnion: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "name":
+            case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "primaryFunction":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "name":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -1000,10 +916,6 @@ extension Unions.CharacterUnion: Decodable {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "homePlanet":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -1018,45 +930,28 @@ extension Unions.CharacterUnion: Decodable {
         }
 
         __typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
+
         id = map["id"]
-        name = map["name"]
+        infoUrl = map["infoUrl"]
         primaryFunction = map["primaryFunction"]
+        name = map["name"]
         appearsIn = map["appearsIn"]
         homePlanet = map["homePlanet"]
-        infoUrl = map["infoUrl"]
     }
 }
 
 extension Fields where TypeLock == Unions.CharacterUnion {
-    func on<Type>(
-        human: Selection<Type, Objects.Human>,
-        droid: Selection<Type, Objects.Droid>
-    ) throws -> Type {
-        /* Selection */
-        select([
-            GraphQLField.fragment(type: "Human", selection: human.selection),
-            GraphQLField.fragment(type: "Droid", selection: droid.selection),
-        ])
-        /* Decoder */
+    func on<Type>(human: Selection<Type, Objects.Human>, droid: Selection<Type, Objects.Droid>) throws -> Type {
+        select([GraphQLField.fragment(type: "Human", selection: human.selection), GraphQLField.fragment(type: "Droid", selection: droid.selection)])
+
         switch response {
         case let .decoding(data):
             switch data.__typename {
             case .human:
-                let data = Objects.Human(
-                    id: data.id,
-                    name: data.name,
-                    homePlanet: data.homePlanet,
-                    appearsIn: data.appearsIn,
-                    infoUrl: data.infoUrl
-                )
+                let data = Objects.Human(appearsIn: data.appearsIn, homePlanet: data.homePlanet, id: data.id, infoUrl: data.infoUrl, name: data.name)
                 return try human.decode(data: data)
             case .droid:
-                let data = Objects.Droid(
-                    id: data.id,
-                    name: data.name,
-                    primaryFunction: data.primaryFunction,
-                    appearsIn: data.appearsIn
-                )
+                let data = Objects.Droid(appearsIn: data.appearsIn, id: data.id, name: data.name, primaryFunction: data.primaryFunction)
                 return try droid.decode(data: data)
             }
         case .mocking:
@@ -1065,21 +960,29 @@ extension Fields where TypeLock == Unions.CharacterUnion {
     }
 }
 
+extension Selection where TypeLock == Never, Type == Never {
+    typealias CharacterUnion<T> = Selection<T, Unions.CharacterUnion>
+}
+
 // MARK: - Enums
 
-enum Enums {
+enum Enums {}
+extension Enums {
     /// One of the films in the Star Wars Trilogy
     enum Episode: String, CaseIterable, Codable {
         /// Released in 1977.
+
         case newhope = "NEWHOPE"
-
         /// Released in 1980.
-        case empire = "EMPIRE"
 
+        case empire = "EMPIRE"
         /// Released in 1983
+
         case jedi = "JEDI"
     }
+}
 
+extension Enums {
     /// Language
     enum Language: String, CaseIterable, Codable {
         case en = "EN"
@@ -1090,37 +993,35 @@ enum Enums {
 
 // MARK: - Input Objects
 
-enum InputObjects {
+enum InputObjects {}
+extension InputObjects {
     struct Greeting: Encodable, Hashable {
         var language: OptionalArgument<Enums.Language> = .absent()
+
         var name: String
 
-        /* Encoder */
         func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
-
             if language.hasValue { try container.encode(language, forKey: .language) }
             try container.encode(name, forKey: .name)
         }
 
-        /* CodingKeys */
         enum CodingKeys: String, CodingKey {
             case language
             case name
         }
     }
+}
 
+extension InputObjects {
     struct GreetingOptions: Encodable, Hashable {
         var prefix: OptionalArgument<String> = .absent()
 
-        /* Encoder */
         func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
-
             if prefix.hasValue { try container.encode(prefix, forKey: .prefix) }
         }
 
-        /* CodingKeys */
         enum CodingKeys: String, CodingKey {
             case prefix
         }

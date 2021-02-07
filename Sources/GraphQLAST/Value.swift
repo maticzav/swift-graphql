@@ -1,5 +1,6 @@
 import Foundation
 
+/// Represents a single GraphQL field.
 public struct Field: Decodable, Equatable {
     public let name: String
     public let description: String?
@@ -9,12 +10,14 @@ public struct Field: Decodable, Equatable {
     public let deprecationReason: String?
 }
 
+/// Represents a GraphQL type that may be used as an input value.
 public struct InputValue: Decodable, Equatable {
     public let name: String
     public let description: String?
     public let type: InputTypeRef
 }
 
+/// Represents a  GraphQL enumerator case.
 public struct EnumValue: Codable, Equatable {
     public let name: String
     public let description: String?

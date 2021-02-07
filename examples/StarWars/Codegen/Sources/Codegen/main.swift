@@ -16,11 +16,7 @@ do {
         .createFile(at: "API.swift").url
 
     /* Create Generator */
-    let scalars: [String: String] = ["Date": "DateTime"]
-    let options = GraphQLCodegen.Options(
-        scalarMappings: scalars
-    )
-    let generator = GraphQLCodegen(options: options)
+    let generator = GraphQLCodegen(scalars: ["Date": "DateTime"])
 
     try generator.generate(target, from: endpoint)
 

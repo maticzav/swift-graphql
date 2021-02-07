@@ -1,37 +1,35 @@
+@testable import GraphQLAST
 @testable import SwiftGraphQLCodegen
+
 import XCTest
 
 final class EnumTests: XCTestCase {
-    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
-
-    // MARK: - Tests
-
     func testGenerateEnum() throws {
         /* Declaration */
 
-        let type = GraphQL.EnumType(
+        let type = EnumType(
             name: "Episodes",
             description: "Collection of all StarWars episodes.",
             enumValues: [
-                GraphQL.EnumValue(
+                EnumValue(
                     name: "NEWHOPE",
                     description: "Released in 1977.",
                     isDeprecated: false,
                     deprecationReason: nil
                 ),
-                GraphQL.EnumValue(
+                EnumValue(
                     name: "EMPIRE",
                     description: nil,
                     isDeprecated: false,
                     deprecationReason: nil
                 ),
-                GraphQL.EnumValue(
+                EnumValue(
                     name: "JEDI",
                     description: "Released in 1983.",
                     isDeprecated: true,
                     deprecationReason: "Was too good."
                 ),
-                GraphQL.EnumValue(
+                EnumValue(
                     name: "SKYWALKER",
                     description: nil,
                     isDeprecated: true,
@@ -40,23 +38,24 @@ final class EnumTests: XCTestCase {
             ]
         )
 
-        let generated = try generator.generateEnum(type).joined(separator: "\n").format()
+        let generated = try type.declaration.format()
 
         let expected = try """
-        /// Collection of all StarWars episodes.
-        enum Episodes: String, CaseIterable, Codable {
-            /// Released in 1977.
-            case newhope = "NEWHOPE"
+        extension Enums {
+            /// Collection of all StarWars episodes.
+            enum Episodes: String, CaseIterable, Codable {
+                /// Released in 1977.
 
-            case empire = "EMPIRE"
+                case newhope = "NEWHOPE"
 
-            /// Released in 1983.
-            @available(*, deprecated, message: "Was too good.")
-            case jedi = "JEDI"
+                case empire = "EMPIRE"
+                /// Released in 1983.
+                @available(*, deprecated, message: "Was too good.")
+                case jedi = "JEDI"
 
-            @available(*, deprecated, message: "")
-            case skywalker = "SKYWALKER"
-
+                @available(*, deprecated, message: "")
+                case skywalker = "SKYWALKER"
+            }
         }
         """.format()
 

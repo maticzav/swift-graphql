@@ -8,132 +8,133 @@ import GraphQLAST
  the actual fields using CodingKeys enumerator.
  */
 
-extension GraphQLCodegen {
-    /// Generates struct that is applicable to input object.
-    func generateInputObject(_ name: String, for type: InputObjectType) throws -> [String] {
-        /* Filter recursive fields */
-        let inputFields = type.inputFields.filter {
-            switch $0.type.inverted {
-            case let .named(.inputObject(fieldTypeName)), let .nullable(.named(.inputObject(fieldTypeName))):
-                if fieldTypeName.pascalCase == name {
-                    print("warning: Field '\(name).\($0.name)' has recursive type and is not supported by SwiftGraphQL")
-                    return false
-                }
-            default: break
+// MARK: - Struct Definition
+
+extension InputObjectType {
+    /// Returns the code that represents a particular InputObjectType in our schema. It contains
+    /// an encoder as well as the function used to add values into it.
+    func declaration(scalars: ScalarMap) throws -> String {
+        """
+        extension InputObjects {
+            struct \(self.name.pascalCase): Encodable, Hashable {
+
+            \(try inputFields.map { try $0.declaration(scalars: scalars) }.joined(separator: "\n"))
+
+            \(inputFields.encoder)
+            \(inputFields.codingKeys)
             }
-            return true
         }
+        """
+    }
+}
 
-        /* Code */
-        var code = [String]()
+// MARK: - Fields
 
-        code.append("struct \(name): Encodable, Hashable {")
+/*
+ This section contains functions that we use to generate field definitions
+ of an input object.
+ */
 
-        /* Fields */
-        code.append(contentsOf:
-            try inputFields.flatMap { try generateInputField($0) }
-        )
-        code.append("")
-
-        /* Encoder */
-        code.append("/* Encoder */")
-        code.append(contentsOf: generateEncoder(for: inputFields))
-        code.append("")
-
-        /* Coding keys */
-        code.append("/* CodingKeys */")
-        code.append(contentsOf: generateCodingKeys(for: inputFields))
-
-        code.append("}")
-
-        return code
+extension InputValue {
+    /// Returns a declaration of the input value (i.e. the property definition, docs and default value.
+    fileprivate func declaration(scalars: ScalarMap) throws -> String {
+        """
+        \(docs)
+        var \(name.camelCase.normalize): \(try type.type(scalars: scalars)) \(self.default)
+        """
     }
 
-    // MARK: - Private helpers
+    private var docs: String {
+        if let description = self.description {
+            return "/// \(description)"
+        }
+        return ""
+    }
 
-    /// Generates a single fileld.
-    private func generateInputField(_ field: InputValue) throws -> [String] {
-        switch field.type.inverted {
+    /// The default value if the value is nullable.
+    private var `default`: String {
+        switch type.inverted {
         case .nullable:
-            return [
-                generateDescription(for: field),
-                "var \(field.name.camelCase.normalize): \(try generatePropertyType(for: field.type)) = .absent()",
-            ]
-            .compactMap { $0 }
+            return " = .absent()"
         default:
-            return [
-                generateDescription(for: field),
-                "var \(field.name.camelCase.normalize): \(try generatePropertyType(for: field.type))",
-            ]
-            .compactMap { $0 }
+            return ""
         }
     }
+}
 
-    private func generateDescription(for field: InputValue) -> String? {
-        field.description.map { "/// \($0)" }
+extension InputTypeRef {
+    /// Returns an internal type for a given input type ref.
+    func type(scalars: ScalarMap) throws -> String {
+        try inverted.type(scalars: scalars)
     }
+}
 
-    func generatePropertyType(for ref: InputTypeRef) throws -> String {
-        try generatePropertyType(for: ref.inverted)
-    }
-
-    private func generatePropertyType(for ref: InvertedInputTypeRef) throws -> String {
-        switch ref {
+extension InvertedInputTypeRef {
+    /// Returns an internal type for a given input type ref.
+    func type(scalars: ScalarMap) throws -> String {
+        switch self {
         case let .named(named):
             switch named {
             case let .scalar(scalar):
-                return try options.scalar(scalar)
+                return try scalars.scalar(scalar)
             case let .enum(enm):
                 return "Enums.\(enm.pascalCase)"
             case let .inputObject(inputObject):
                 return "InputObjects.\(inputObject.pascalCase)"
             }
         case let .list(subref):
-            let wrappedType = try generatePropertyType(for: subref)
-            return "[\(wrappedType)]"
+            return "[\(try subref.type(scalars: scalars))]"
         case let .nullable(subref):
-            let wrappedType = try generatePropertyType(for: subref)
-            return "OptionalArgument<\(wrappedType)>"
+            return "OptionalArgument<\(try subref.type(scalars: scalars))>"
+        }
+    }
+}
+
+// MARK: - Codable
+
+/*
+ This section contains functions that we use to make an input object
+ conform to codable protocol.
+ */
+
+private extension Collection where Element == InputValue {
+    /// Generates encoder function for an input object.
+    var encoder: String {
+        """
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            \(map { $0.encoder }.joined(separator: "\n"))
+        }
+        """
+    }
+
+    /// Returns a codingkeys enumerator that we can use to create a codable out of our type.
+    var codingKeys: String {
+        """
+        enum CodingKeys: String, CodingKey {
+        \(map { $0.codingKey }.joined(separator: "\n"))
+        }
+        """
+    }
+}
+
+private extension InputValue {
+    /// Returns an encoder for this input value.
+    var encoder: String {
+        let key = name.camelCase.normalize
+
+        switch type.inverted {
+        case .nullable:
+            // Only encode nullables when they have a value.
+            return "if \(key).hasValue { try container.encode(\(key), forKey: .\(key)) }"
+        default:
+            // Always encode keys that are not optional.
+            return "try container.encode(\(key), forKey: .\(key))"
         }
     }
 
-    /// Generates encoder function for an input object.
-    private func generateEncoder(for fields: [InputValue]) -> [String] {
-        /* Code */
-        var code = [String]()
-
-        code.append("func encode(to encoder: Encoder) throws {")
-        code.append("var container = encoder.container(keyedBy: CodingKeys.self)")
-        code.append("")
-
-        code.append(contentsOf: fields.map {
-            let key = $0.name.camelCase.normalize
-
-            switch $0.type.inverted {
-            case .nullable:
-                // Only encode nullables when they have a value.
-                return "if \(key).hasValue { try container.encode(\(key), forKey: .\(key)) }"
-            default:
-                // Always encode keys that are not optional.
-                return "try container.encode(\(key), forKey: .\(key))"
-            }
-        })
-        code.append("}")
-
-        return code
-    }
-
-    /// Generates coding keys enumerator for a particular input object.
-    private func generateCodingKeys(for fields: [InputValue]) -> [String] {
-        /* Code */
-        var code = [String]()
-
-        code.append("enum CodingKeys: String, CodingKey {")
-        code.append(contentsOf: fields.map {
-            "case \($0.name.camelCase.normalize) = \"\($0.name)\""
-        })
-        code.append("}")
-
-        return code
+    /// Returns a coding key for this input value.
+    var codingKey: String {
+        "case \(name.camelCase.normalize) = \"\(name)\""
     }
 }

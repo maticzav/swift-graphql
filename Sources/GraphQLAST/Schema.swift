@@ -3,54 +3,80 @@ import Foundation
 // MARK: - Schema
 
 public struct Schema: Decodable, Equatable {
-    public let description: String?
-    
     /// Collection of all types in the schema.
     public let types: [NamedType]
 
-    /**
-     Internal information about the types of root operations.
-     */
-    private let queryTypeName: String
-    private let mutationTypeName: String?
-    private let subscriptionTypeName: String?
+    private let _query: String
+    private let _mutation: String?
+    private let _subscription: String?
+
+    // MARK: - Initializer
+
+    public init(types: [NamedType], query: String, mutation: String? = nil, subscription: String? = nil) {
+        self.types = types
+
+        self._query = query
+        self._mutation = mutation
+        self._subscription = subscription
+    }
+    
+    // MARK: - Decoder
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.types = try container.decode([NamedType].self, forKey: .types)
+        self._query = try container.decode(_Operation.self, forKey: .query).name
+        self._mutation = try container.decode(_Operation?.self, forKey: .mutation)?.name
+        self._subscription = try container.decode(_Operation?.self, forKey: .subscription)?.name
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case types
+        case query = "queryType"
+        case mutation = "mutationType"
+        case subscription = "subscriptionType"
+    }
+    
+    private struct _Operation: Codable {
+        var name: String
+    }
 }
 
 // MARK: - Accessors
 
 public extension Schema {
-    
     /// Searches for a type with a given name.
     func type(name: String) -> NamedType? {
         types.first(where: { $0.name == name })
     }
-    
+
     /// Searches for an object with a given name.
     func object(name: String) -> ObjectType? {
         objects.first(where: { $0.name == name })
     }
-    
+
     // MARK: - Operations
-    
+
     /// Query operation type in the schema.
     var query: Operation {
-        .query(object(name: queryTypeName)!)
+        .query(object(name: _query)!)
     }
-    
+
     /// Mutation operation type in the schema.
     var mutation: Operation? {
-        mutationTypeName
+        _mutation
             .flatMap { object(name: $0) }
             .flatMap { .mutation($0) }
     }
-    
+
     /// Subscription operation type in the schema.
     var subscription: Operation? {
-        subscriptionTypeName
+        _subscription
             .flatMap { object(name: $0) }
             .flatMap { .subscription($0) }
     }
-    
+
     /// Returns operation types in the schema.
     var operations: [Operation] {
         [query, mutation, subscription].compactMap { $0 }
