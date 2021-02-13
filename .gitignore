@@ -4,6 +4,7 @@
 # Swift
 
 /.build
+build
 /Packages
 xcuserdata/
 
@@ -14,5 +15,15 @@ Package.resolved
 
 node_modules
 
+package.tgz
+
 responses/*
 !responses/.gitkeep
+
+# Yarn
+
+.yarn/cache
+.yarn/install-state.gz
+.yarn/build-state.yml 
+
+tsconfig.tsbuildinfo

@@ -109,20 +109,20 @@ extension Objects.Droid: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
-            case "id":
+            case "name":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "name":
+            case "id":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "primaryFunction":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             default:
@@ -135,10 +135,10 @@ extension Objects.Droid: Decodable {
             }
         }
 
-        id = map["id"]
-        appearsIn = map["appearsIn"]
         name = map["name"]
+        id = map["id"]
         primaryFunction = map["primaryFunction"]
+        appearsIn = map["appearsIn"]
     }
 }
 
@@ -247,14 +247,6 @@ extension Objects.Human: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
             case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
@@ -263,8 +255,16 @@ extension Objects.Human: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
+            case "id":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
             case "homePlanet":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             default:
@@ -277,11 +277,11 @@ extension Objects.Human: Decodable {
             }
         }
 
-        appearsIn = map["appearsIn"]
-        id = map["id"]
         infoUrl = map["infoUrl"]
         name = map["name"]
+        id = map["id"]
         homePlanet = map["homePlanet"]
+        appearsIn = map["appearsIn"]
     }
 }
 
@@ -413,40 +413,40 @@ extension Objects.Query: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "droid":
-                if let value = try container.decode(Objects.Droid?.self, forKey: codingKey) {
+            case "luke":
+                if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "human":
                 if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "greeting":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "humans":
-                if let value = try container.decode([Objects.Human]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "character":
-                if let value = try container.decode(Unions.CharacterUnion?.self, forKey: codingKey) {
+            case "time":
+                if let value = try container.decode(DateTime?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "droids":
                 if let value = try container.decode([Objects.Droid]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "luke":
-                if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
+            case "droid":
+                if let value = try container.decode(Objects.Droid?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "greeting":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "characters":
                 if let value = try container.decode([Interfaces.Character]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "time":
-                if let value = try container.decode(DateTime?.self, forKey: codingKey) {
+            case "character":
+                if let value = try container.decode(Unions.CharacterUnion?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "humans":
+                if let value = try container.decode([Objects.Human]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             default:
@@ -460,15 +460,15 @@ extension Objects.Query: Decodable {
         }
 
         whoami = map["whoami"]
-        droid = map["droid"]
-        human = map["human"]
-        greeting = map["greeting"]
-        humans = map["humans"]
-        character = map["character"]
-        droids = map["droids"]
         luke = map["luke"]
-        characters = map["characters"]
+        human = map["human"]
         time = map["time"]
+        droids = map["droids"]
+        droid = map["droid"]
+        greeting = map["greeting"]
+        characters = map["characters"]
+        character = map["character"]
+        humans = map["humans"]
     }
 }
 
@@ -752,19 +752,19 @@ extension Interfaces.Character: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
+            case "name":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "homePlanet":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
             case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
             case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "name":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -772,8 +772,8 @@ extension Interfaces.Character: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "homePlanet":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             default:
@@ -788,12 +788,12 @@ extension Interfaces.Character: Decodable {
 
         __typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
 
-        infoUrl = map["infoUrl"]
-        appearsIn = map["appearsIn"]
-        id = map["id"]
         name = map["name"]
-        primaryFunction = map["primaryFunction"]
         homePlanet = map["homePlanet"]
+        infoUrl = map["infoUrl"]
+        id = map["id"]
+        primaryFunction = map["primaryFunction"]
+        appearsIn = map["appearsIn"]
     }
 }
 
@@ -895,11 +895,11 @@ extension Unions.CharacterUnion: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
-            case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "infoUrl":
+            case "name":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -907,15 +907,15 @@ extension Unions.CharacterUnion: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "name":
+            case "id":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+            case "homePlanet":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "homePlanet":
+            case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -931,12 +931,12 @@ extension Unions.CharacterUnion: Decodable {
 
         __typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
 
-        id = map["id"]
-        infoUrl = map["infoUrl"]
-        primaryFunction = map["primaryFunction"]
-        name = map["name"]
         appearsIn = map["appearsIn"]
+        name = map["name"]
+        primaryFunction = map["primaryFunction"]
+        id = map["id"]
         homePlanet = map["homePlanet"]
+        infoUrl = map["infoUrl"]
     }
 }
 

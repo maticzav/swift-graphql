@@ -34,7 +34,7 @@ struct Human: Identifiable {
 }
 
 // Create a selection.
-let human = Selection<Human, Objects.Human> {
+let human = Selection.Human {
     Human(
         id: try $0.id(), 
         name: try $0.name(),
@@ -43,7 +43,7 @@ let human = Selection<Human, Objects.Human> {
 }
 
 // Construct a query.
-let query = Selection<[Human], Operations.Query> {
+let query = Selection.Query {
     try $0.humans(human.list)
 }
 

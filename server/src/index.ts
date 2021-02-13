@@ -36,7 +36,7 @@ const schema = makeSchema({
     ),
     export: 'ContextType',
   },
-  prettierConfig: require.resolve('../prettier.config.js'),
+  prettierConfig: require.resolve('../../prettier.config.js'),
 })
 
 /* Server */

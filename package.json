@@ -1,0 +1,17 @@
+{
+  "name": "swift-graphql",
+  "private": true,
+  "workspaces": [
+    "server",
+    "website"
+  ],
+  "scripts": {
+    "g:tsc": "cd $INIT_CWD && tsc",
+    "g:prettier": "cd $INIT_CWD && prettier"
+  },
+  "devDependencies": {
+    "husky": "^4.3.6",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.3"
+  }
+}

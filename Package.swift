@@ -16,7 +16,7 @@ let package = Package(
             targets: ["SwiftGraphQLCodegen"]
         ),
         .executable(
-            name: "SwiftGraphQLCLI",
+            name: "swift-graphql",
             targets: ["SwiftGraphQLCLI"]
         ),
         /* Utilities */
@@ -49,6 +49,7 @@ let package = Package(
                 "SwiftGraphQLCodegen",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "Yams",
+                "Files"
             ],
             path: "Sources/SwiftGraphQLCLI"
         ),

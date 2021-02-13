@@ -14,9 +14,22 @@
 		023B598525C5C99C00292965 /* SwiftGraphQL in Frameworks */ = {isa = PBXBuildFile; productRef = 023B598425C5C99C00292965 /* SwiftGraphQL */; };
 		027E2B81258172D500B903EF /* Commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 027E2B80258172D500B903EF /* Commands.swift */; };
 		027E2B842581732800B903EF /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 027E2B832581732800B903EF /* Model.swift */; };
+		02A5C8B325D57EED005A83A6 /* SwiftGraphQLCodegen in Frameworks */ = {isa = PBXBuildFile; productRef = 02A5C8B225D57EED005A83A6 /* SwiftGraphQLCodegen */; settings = {ATTRIBUTES = (Required, ); }; };
 		02CA03EE253CA05C00B05BD1 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02CA03ED253CA05B00B05BD1 /* API.swift */; };
 		02EBAE3D254579CE009B2554 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02EBAE3C254579CE009B2554 /* DateTime.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		02A5C8A725D57EDC005A83A6 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		02208E73253C596D00014850 /* StarWars.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StarWars.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -27,6 +40,7 @@
 		02208E7F253C596E00014850 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		027E2B80258172D500B903EF /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
 		027E2B832581732800B903EF /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		02A5C8A925D57EDC005A83A6 /* CodeGen */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CodeGen; sourceTree = BUILT_PRODUCTS_DIR; };
 		02CA03ED253CA05B00B05BD1 /* API.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		02EBAE3C254579CE009B2554 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -37,6 +51,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				023B598525C5C99C00292965 /* SwiftGraphQL in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		02A5C8A625D57EDC005A83A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				02A5C8B325D57EED005A83A6 /* SwiftGraphQLCodegen in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				02208E73253C596D00014850 /* StarWars.app */,
+				02A5C8A925D57EDC005A83A6 /* CodeGen */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -123,17 +146,40 @@
 			productReference = 02208E73253C596D00014850 /* StarWars.app */;
 			productType = "com.apple.product-type.application";
 		};
+		02A5C8A825D57EDC005A83A6 /* CodeGen */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 02A5C8AF25D57EDC005A83A6 /* Build configuration list for PBXNativeTarget "CodeGen" */;
+			buildPhases = (
+				02A5C8A525D57EDC005A83A6 /* Sources */,
+				02A5C8A625D57EDC005A83A6 /* Frameworks */,
+				02A5C8A725D57EDC005A83A6 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CodeGen;
+			packageProductDependencies = (
+				02A5C8B225D57EED005A83A6 /* SwiftGraphQLCodegen */,
+			);
+			productName = Codegen;
+			productReference = 02A5C8A925D57EDC005A83A6 /* CodeGen */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		02208E6B253C596D00014850 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1200;
+				LastSwiftUpdateCheck = 1220;
 				LastUpgradeCheck = 1200;
 				TargetAttributes = {
 					02208E72253C596D00014850 = {
 						CreatedOnToolsVersion = 12.0.1;
+					};
+					02A5C8A825D57EDC005A83A6 = {
+						CreatedOnToolsVersion = 12.2;
 					};
 				};
 			};
@@ -151,6 +197,7 @@
 			projectRoot = "";
 			targets = (
 				02208E72253C596D00014850 /* StarWars */,
+				02A5C8A825D57EDC005A83A6 /* CodeGen */,
 			);
 		};
 /* End PBXProject section */
@@ -200,6 +247,13 @@
 				027E2B842581732800B903EF /* Model.swift in Sources */,
 				027E2B81258172D500B903EF /* Commands.swift in Sources */,
 				02208E77253C596D00014850 /* Main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		02A5C8A525D57EDC005A83A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,6 +420,32 @@
 			};
 			name = Release;
 		};
+		02A5C8AD25D57EDC005A83A6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 85FQBW59UC;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		02A5C8AE25D57EDC005A83A6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 85FQBW59UC;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -387,12 +467,25 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		02A5C8AF25D57EDC005A83A6 /* Build configuration list for PBXNativeTarget "CodeGen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				02A5C8AD25D57EDC005A83A6 /* Debug */,
+				02A5C8AE25D57EDC005A83A6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		023B598425C5C99C00292965 /* SwiftGraphQL */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SwiftGraphQL;
+		};
+		02A5C8B225D57EED005A83A6 /* SwiftGraphQLCodegen */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftGraphQLCodegen;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

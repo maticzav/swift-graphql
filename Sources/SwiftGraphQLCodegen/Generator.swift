@@ -20,21 +20,9 @@ public struct GraphQLCodegen {
 
     // MARK: - Methods
 
-    /// Generates a target GraphQL Swift file.
+    /// Generates a target SwiftGraphQL Selection file.
     ///
-    /// - parameter target: Output file path.
     /// - parameter from: GraphQL server endpoint.
-    ///
-    /// - note: This function does not create a target file. You should make sure file exists beforehand.
-    public func generate(
-        _ target: URL,
-        from schemaURL: URL
-    ) throws {
-        let code: String = try generate(from: schemaURL)
-        try code.write(to: target, atomically: true, encoding: .utf8)
-    }
-
-    /// Generates the API and returns it to handler.
     public func generate(from endpoint: URL) throws -> String {
         let schema = try Schema(from: endpoint)
         let code = try generate(schema: schema)

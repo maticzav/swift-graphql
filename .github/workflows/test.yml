@@ -1,0 +1,19 @@
+name: Test
+
+on:
+  push: {}
+  pull_request: {}
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Resolve
+        run: swift package resolve
+      - name: Build
+        run: swift build
+      - name: Perform package tests
+        run: swift test
+      - name: Integration tests with workflows
+        run: ./scripts/test.sh
