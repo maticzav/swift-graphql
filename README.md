@@ -54,11 +54,13 @@ SG.send(query, to: "http://swift-graphql.heroku.com") { result in
         print(data) // [Human]
     }
 }
+
+// Listen for subscriptions
 ```
 
 ## Installation
 
-Installation consists of two parts; you need to include the client in your iOS/macOS project, and locally generate the code using code generator.
+Make sure Xcode 11+ is installed first. Installation consists of two parts; you need to include the client in your iOS/macOS project, and locally generate the code using code generator.
 
 #### Installing SwiftGraphQL Client
 
@@ -76,7 +78,42 @@ Then press Next and complete the remaining steps. You should select `SwiftGraphQ
 
 To learn more about Swift Package Manager, check out the [official documentation](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
 
-#### Installing Code Generator
+### Installing Code Generator
+
+SwiftGraphQL generator comes as a CLI tool and as a library that you may import. You can use Mint, Homebrew and Make to use CLI only, or you may import it as a SPM dependency and use the generator itself.
+
+#### Mint
+
+```sh
+mint install maticzav/swift-graphql
+```
+
+> You can read more about Mint [here](https://github.com/yonaskolb/mint).
+
+#### Homebrew
+
+```sh
+brew tap maticzav/swift-graphql https://github.com/maticzav/swift-graphql.git
+brew install SwiftGraphQL
+```
+
+#### Make
+
+```sh
+git clone https://github.com/maticzav/swift-graphql.git
+cd swift-graphql
+make install
+```
+
+To run the generator type `swift-graphql`. If you are using any custom scalars, you should create a configuration file called `swiftgraphql.yml` and put in data-type mappings as a key-value dictionary like this.
+
+```yml
+scalars:
+  Date: DateTime
+  Upload: Upload
+```
+
+You can also run `swift-graphql help` to learn more about options and how it works.
 
 ## Why?
 
@@ -88,15 +125,13 @@ To learn more about Swift Package Manager, check out the [official documentation
 
 ---
 
-## How it works?
+## How does it work?
 
 It seems like the best way to learn how to use SwiftGraphQL is by understanding how it works behind the scenes.
 
 The first concept that you should know about is `Selection`. Selection lets you select which fields you want to query from a certain GraphQL object. The interesting part about Selection is that there's actually only one `Selection` type, but it has generic extensions. Those generic extensions are using _phantom types_ to differentiate which fields you may select in particular object.
 
 TLDR; Phantom types let you use Generics to constrain methods to specific types. You can see them at work in the funny looking `Selection<Type, Scope>` parts of the code that let you select what you want to query. You can read more about phantom types [here](https://www.swiftbysundell.com/articles/phantom-types-in-swift/), but for now it suffice to understand that we use `Scope` to limit what you may or may not select in a query.
-
-> Take a breath, pause, think about `Selection`.
 
 Now that you know about selection, let's say that we want to query some fields on our `Human` GraphQL type. The first parameter in `Selection` - `Type` - lets us say what the end "product" of this selection is going to be. This could be a `String`, a `Bool`, a `Human`, a `Droid` - anything. _You decide!_.
 
@@ -107,15 +142,17 @@ You can think of these two as:
 - `Type`: what your app will receive
 - `Scope` what SwiftGraphQL should query.
 
-> Take a breath, pause, think about `Scope` and `Type`.
+> Take a breath, pause, think about `TypeLock`, `Scope` and `Type`.
 
-But how do we _select_ the fields? That's what the `Selection` initializer is for. Selection initializer is a class with methods matching the names of GraphQL fields in your type. When you call a method two things happen. First, the method tells selection that you want to query that field. Secondly, it tries to process the data from the response and returns the data that was supposed to get from that particular field.
+But how do we _select_ the fields?
+
+That's what the `Selection` initializer is for. Selection initializer is a class with methods matching the names of GraphQL fields in your type. When you call a method two things happen. First, the method tells selection that you want to query that field. Secondly, it tries to process the data from the response and returns the data that was supposed to get from that particular field.
 
 For example:
 
 ```swift
 let human = Selection<Human, Objects.Human> { select in
-    Human(
+    MyHuman(
         id: try select.id(), // String
         name: try select.name(), // String
         homePlanet: try select.homePlanet() // String?
@@ -125,14 +162,26 @@ let human = Selection<Human, Objects.Human> { select in
 
 As you may have noticed, `id` returns just a string - not an optional. But how's that possible if the first time we call that function we don't even have the data yet? SwiftGraphQL intuitively mocks the data the first time around to make sure Swift is happy. That value, however, is left unnoticed - you'll never see it.
 
-> Take a breath, pause, think about `Selection`. Again.
+> Take a breath, `Selection` is quite neat, right?
+
+To make selection even easier, library makes typealiaii for each type in your schema. This way you don't have to write that much boilerplate and we can leverage Swift type-system to figure out some things for us. You can rewrite the above selection like this.
+
+```swift
+let human = Selection.Human { select in
+    MyHuman(
+        id: try select.id(), // String
+        name: try select.name(), // String
+        homePlanet: try select.homePlanet() // String?
+    )
+}
+```
 
 Alright! Now that we truly understand `Selection`, let's fetch some data. We use `GraphQLClient`'s `send` method to send queries to the backend. To make sure you are sending the right data, `send` methods only accept selections of `Operations.Query` and `Operations.Mutation`. This way, compiler will tell you if you messed something up.
 
 We construct a query in a very similar fashion to making a human selection.
 
 ```swift
-let query = Selection<[Human], Operations.Query> {
+let query = Selection.Query {
     try $0.humans(human.list)
 }
 ```
@@ -165,8 +214,6 @@ SG.send(query, to: "http://localhost:4000") { result in
         print(data)
     }
 }
-
-
 ```
 
 > SwiftGraphQL intentionally doesn't implement any caching mechanism. This is only a query library and it does that very well. You should implement caching functionality yourself, but you probably don't need it in most cases.
