@@ -1,5 +1,5 @@
 {
-  "name": "swapi-server",
+  "name": "server",
   "version": "0.0.0",
   "scripts": {
     "start": "ts-node-dev --ignore-watch star-wars-typegen.ts --no-notify --respawn ./src"

@@ -7,11 +7,10 @@
 ## Features
 
 - ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
-- 🦅 **Swift-First:** It lets you use Swift constructs in favour of GraphQL language.
 - 🏖 **Time Saving:** I've built it so you don't have to waste your precious time.
+- ☝️ **Generate once:** Only when your schema changes.
+- ☎️ **Support subscriptions:** Listen to subscriptions using webhooks.
 - 🏔 **High Level:** You don't have to worry about naming collisions, variables, _anything_. Just Swift.
-- ☝️ **Generate once:** Only generate selection when your schema changes.
-- ☎️ **Subscriptions:** It supports subscriptions as well.
 
 ## Overview
 
@@ -55,8 +54,6 @@ send(query, to: "http://swift-graphql.heroku.com") { result in
         print(data) // [Human]
     }
 }
-
-// Listen for subscriptions
 ```
 
 ## Installation
@@ -115,6 +112,11 @@ scalars:
 ```
 
 You can also run `swift-graphql help` to learn more about options and how it works.
+
+---
+
+<!-- index-start -->
+<!-- index-end -->
 
 ## Why?
 
@@ -203,9 +205,25 @@ let query = Selection.Query {
 
 Once you've created a query-, mutation- or a subscription-type selection, you may call one of the `send` and `listen` methods that SwiftGrpahQL exposes. To fetch a query or send a mutation, use `send` method. And to listen for subscriptions, use `listen` method.
 
-```swift
+> Make sure you use `ws` protocol when listening for subscriptions!
 
+```swift
+send(query, to: "http://localhost:4000") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
+}
+
+listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
+}
 ```
+
+> 💡 If you try to pass in any other type instead of root operation types, your code won't compile.
+
+---
 
 ## Reference
 
@@ -385,7 +403,7 @@ let human = Selection<String, Objects.Human> { select in
 }
 ```
 
-### `Union`
+### `Unions`
 
 - `SwiftGraphQL`
 
@@ -493,11 +511,15 @@ struct DateTime: Codec {
 
 > Don't forget to add your scalar mapping to code generator options. Otherwise, generator will fail with _unknown scalar_ error.
 
-### `GraphQLCodegen`
+### SwiftGraphQLCodegen
+
+SwiftGraphQLCodegen exposes only one function - `generate` - that lets you fetch schema from a remote endpoint and get Swift code that SwiftGraphQL relies on to create queries.
+
+#### `generate`
 
 - `SwiftGraphQLCodegen`
 
-Lets you generate the code based on a remote schema. Use `generate` method to generate selection code for `SwiftGraphQL`.
+Lets you generate the code based on a remote schema.
 
 > I suggest you try to do most of the things with built-in CLI and only opt-in for the codegen when absolutely necessary.
 
@@ -588,6 +610,6 @@ Thank you! 🙌
 
 ---
 
-### Licence
+### License
 
 MIT @ Matic Zavadlal

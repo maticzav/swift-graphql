@@ -8,7 +8,7 @@ do
     swift run swift-graphql http://localhost:4000 --config "${example}/swiftgraphql.yml" --output "${example}/StarWars/API.swift"
 
     echo "🧘‍♂️ Building ${example}"
-    swift build --package-path ${example} -c release
+    swift build --package-path ${example}
 
     echo "✅  Built ${example}"
 done
