@@ -9,7 +9,13 @@ jobs:
   build:
     runs-on: macOS-latest
     steps:
-      - uses: actions/checkout@v2
+      # Setup
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      # Build
+      - run: yarn install --skip-builds
       - name: Generate table of contents
         run: |
           cd scripts
