@@ -1,4 +1,30 @@
 .DS_Store
+*.log*
+
+# Swift
+
 /.build
+build
 /Packages
 xcuserdata/
+
+Package.resolved
+.swiftpm
+
+# Server
+
+node_modules
+
+package.tgz
+
+dist
+responses/*
+!responses/.gitkeep
+
+# Yarn
+
+.yarn/cache
+.yarn/install-state.gz
+.yarn/build-state.yml 
+
+tsconfig.tsbuildinfo

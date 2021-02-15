@@ -1,64 +1,66 @@
 import Foundation
+import GraphQLAST
 
-/**
- This file contains publicly accessible functions used to generate SwiftGraphQL code.
+/*
+ This file contains publicly accessible functions used to
+ generate SwiftGraphQL code.
  */
 
 public struct GraphQLCodegen {
-    let options: Options
-    
-    public init(options: Options = Options()) {
-        self.options = options
+    private let scalars: ScalarMap
+
+    // MARK: - Initializer
+
+    public init(scalars: ScalarMap) {
+        self.scalars = ScalarMap.builtin.merging(
+            scalars,
+            uniquingKeysWith: { _, override in override }
+        )
     }
-    
+
     // MARK: - Methods
-    
-    /// Generates a target GraphQL Swift file.
+
+    /// Generates a target SwiftGraphQL Selection file.
     ///
-    /// - Parameters:
-    ///     - target: Target output file path.
-    ///     - from: GraphQL server endpoint.
-    ///     - onComplete: A function triggered once the generation finishes.
-    ///
-    /// - Note: This function does not create a target file. You should make sure file exists beforehand.
-    public func generate(
-        _ target: URL,
-        from schemaURL: URL
-    ) throws {
-        let code: String = try self.generate(from: schemaURL)
-        try code.write(to: target, atomically: true, encoding: .utf8)
-    }
-    
-    /// Generates the API and returns it to handler.
-    public func generate(from schemaURL: URL) throws -> String {
-        let schema: GraphQL.Schema = try GraphQLCodegen.downloadFrom(schemaURL)
-        let code = try self.generate(from: schema)
+    /// - parameter from: GraphQL server endpoint.
+    public func generate(from endpoint: URL) throws -> String {
+        let schema = try Schema(from: endpoint)
+        let code = try generate(schema: schema)
         return code
     }
-    
-    /// Generator options.
-    ///
-    /// - Parameters:
-    ///     - scalarMappings: A dicitonary of GraphQL scalar keys and Swift type mappings.
-    public struct Options {
-        public typealias ScalarMap = [String: String]
-        
-        let scalarMappings: ScalarMap
-        
-        public init(scalarMappings: ScalarMap = [:]) {
-            let map = builtInScalars.merging(scalarMappings, uniquingKeysWith: { (_, override) in override })
-            
-            self.scalarMappings = map
-        }
-        
-        // MARK: - Default values
-        
-        private let builtInScalars: ScalarMap = [
-            "ID": "String",
-            "String": "String",
-            "Int": "Int",
-            "Boolean": "Bool",
-            "Float": "Double"
-        ]
+
+    /// Generates the code that can be used to define selections.
+    func generate(schema: Schema) throws -> String {
+        let code = """
+        // This file was auto-generated using maticzav/swift-graphql. DO NOT EDIT MANUALLY!
+        import SwiftGraphQL
+
+        // MARK: - Operations
+        enum Operations {}
+        \(schema.operations.map { $0.declaration() }.lines)
+
+        // MARK: - Objects
+        enum Objects {}
+        \(try schema.objects.map { try $0.declaration(objects: schema.objects, scalars: scalars) }.lines)
+
+        // MARK: - Interfaces
+        enum Interfaces {}
+        \(try schema.interfaces.map { try $0.declaration(objects: schema.objects, scalars: scalars) }.lines)
+
+        // MARK: - Unions
+        enum Unions {}
+        \(try schema.unions.map { try $0.declaration(objects: schema.objects, scalars: scalars) }.lines)
+
+        // MARK: - Enums
+        enum Enums {}
+        \(schema.enums.map { $0.declaration }.lines)
+
+        // MARK: - Input Objects
+        enum InputObjects {}
+        \(try schema.inputObjects.map { try $0.declaration(scalars: scalars) }.lines)
+        """
+
+        let source = try code.format()
+        return source
     }
 }

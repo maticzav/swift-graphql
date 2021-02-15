@@ -1,39 +1,57 @@
 import Foundation
+import GraphQLAST
 
 /*
  We represent enumerator values as strings. There's nothing
  special in here, just the generated code.
  */
 
-extension GraphQLCodegen {
-    /// Generates an enumeration code.
-    func generateEnum(_ type: GraphQL.EnumType) -> [String] {
-        [ generateEnumDoc(for: type),
-          "enum \(type.name.pascalCase): String, CaseIterable, Codable {",
-        ] + type.enumValues.flatMap { generateEnumCase(for: $0).indent(by: 4) } +
-        ["}"]
-    }
-    
-    // MARK: - Private helpers
-    
-    private func generateEnumDoc(for type: GraphQL.EnumType) -> String {
-        "/// \(type.description ?? "\(type.name)")"
+// MARK: - Enum
+
+extension EnumType {
+    /// Represents the enum structure.
+    var declaration: String {
+        """
+        extension Enums {
+            \(docs)
+            enum \(name.pascalCase): String, CaseIterable, Codable {
+            \(values)
+            }
+        }
+        """
     }
 
-    private func generateEnumCase(for env: GraphQL.EnumValue) -> [String] {
-        [ generateEnumCaseDoc(for: env),
-          generateEnumCaseDeprecationDoc(for: env),
-          #"case \#(env.name.camelCase.normalize) = "\#(env.name)""#,
-          ""
-        ]
-        .compactMap { $0 }
+    private var docs: String {
+        "/// \(description ?? name)"
     }
-    
-    private func generateEnumCaseDoc(for env: GraphQL.EnumValue) -> String? {
-        env.description.map { "/// \($0)" }
+
+    /// Represents possible enum cases.
+    private var values: String {
+        enumValues.map { $0.declaration }.joined(separator: "\n")
     }
-    
-    private func generateEnumCaseDeprecationDoc(for env: GraphQL.EnumValue) -> String? {
-        env.isDeprecated ? "@available(*, deprecated, message: \"\(env.deprecationReason ?? "")\")" : nil
+}
+
+// MARK: - EnumValue
+
+extension EnumValue {
+    /// Returns an enum case definition.
+    fileprivate var declaration: String {
+        """
+        \(docs)
+        \(availability)
+        case \(name.camelCase.normalize) = "\(name)"
+        """
+    }
+
+    private var docs: String {
+        description.map { "/// \($0)" } ?? ""
+    }
+
+    private var availability: String {
+        if isDeprecated {
+            let message = deprecationReason ?? ""
+            return "@available(*, deprecated, message: \"\(message)\")"
+        }
+        return ""
     }
 }

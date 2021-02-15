@@ -4,57 +4,50 @@ import Foundation
  This file contains source code used for encoding and decoding selection.
  */
 
-public enum GraphQLOperationType: String, Codable, CaseIterable {
-    case query = "query"
-    case mutation = "mutation"
-//    case subscription = "subscription"
-}
-
 extension Collection where Element == GraphQLField {
     /// Returns a GraphQL query for the current selection set.
-    func serialize(for operationType: GraphQLOperationType) -> String {
+    func serialize(for operationType: String) -> String {
         serialize(for: operationType, operationName: nil)
     }
-    
+
     /// Returns a GraphQL query for the current selection set.
-    func serialize(for operationType: GraphQLOperationType, operationName: String?) -> String {
+    func serialize(for operationType: String, operationName: String?) -> String {
         // http://spec.graphql.org/June2018/#sec-Language.Operations
         let operationDefinition: String = [
-            operationType.rawValue,
+            operationType,
             operationName,
-            self.arguments.serializedForVariables,
+            arguments.serializedForVariables,
         ].compactMap { $0 }.joined(separator: " ")
-        
+
         // http://spec.graphql.org/June2018/#sec-Selection-Sets
         let query = [
             "\(operationDefinition) {",
-            self.serialized.indent(by: 2).joined(separator: "\n"),
-            "}"
+            serialized.indent(by: 2).joined(separator: "\n"),
+            "}",
         ].joined(separator: "\n")
-        
+
         return query
     }
 }
-    
+
 // MARK: - Private helpers
 
-extension GraphQLField {
-    fileprivate var serialized: [String] {
+private extension GraphQLField {
+    var serialized: [String] {
         switch self {
-        case .leaf(let name, let arguments):
-            return [ "\(self.alias!): \(name)\(arguments.serializedForArguments)" ]
-        case .composite(let name, let arguments, let subselection):
+        case let .leaf(name, arguments):
+            return ["\(alias!): \(name)\(arguments.serializedForArguments)"]
+        case let .composite(name, arguments, subselection):
             return
-                [ "\(self.alias!): \(name)\(arguments.serializedForArguments) {",
-                  "__typename".indent(by: 2)
-                ] +
+                ["\(alias!): \(name)\(arguments.serializedForArguments) {",
+                 "__typename".indent(by: 2)] +
                 subselection.serialized.indent(by: 2) +
-                [ "}" ]
-        case .fragment(let type, let subselection):
+                ["}"]
+        case let .fragment(type, subselection):
             return
-                [ "...on \(type) {" ] +
+                ["...on \(type) {"] +
                 subselection.serialized.indent(by: 2) +
-                [ "}" ]
+                ["}"]
         }
     }
 }
@@ -62,7 +55,7 @@ extension GraphQLField {
 extension Collection where Element == GraphQLField {
     /// Returns a GraphQL query for the current selection set.
     var serialized: [String] {
-        self.flatMap { $0.serialized }
+        flatMap { $0.serialized }
     }
 }
 
@@ -71,43 +64,48 @@ extension Collection where Element == GraphQLField {
 extension Argument {
     /// Returns a serialized query parameter.
     var serializedForArgument: String {
-        "\(self.name): $\(self.hash)"
+        "\(name): $\(hash)"
     }
-    
+
     /// Returns a serialized query variable.
     var serializedForVariable: String {
-        "$\(self.hash): \(self.type)"
+        "$\(hash): \(type)"
     }
 }
 
 extension Collection where Element == Argument {
     /// Returns the list of all argumetns that have a value.
     var present: [Argument] {
-        self.compactMap {
+        compactMap {
             if $0.value == nil {
                 return nil
             }
             return $0
         }
     }
-    
+
     /// Serializes a collection of arguments into a query string.
     var serializedForArguments: String {
         /* Return empty string for no arguments. */
-        if self.present.isEmpty {
+        if present.isEmpty {
             return ""
         }
-        return "(\(self.present.map { $0.serializedForArgument }.joined(separator: ", ")))"
-
+        return "(\(present.map { $0.serializedForArgument }.joined(separator: ", ")))"
     }
-    
+
     /// Returns serialized query variables.
     var serializedForVariables: String? {
         // Return empty string if there's no arguments.
-        if self.present.isEmpty {
+        if present.isEmpty {
             return nil
         }
+
+        let args = present
+            .unique(by: { $0.hash })
+            .map { $0.serializedForVariable }
+            .joined(separator: ", ")
+
         // Wrap them in parantheses otherwise.
-        return "(\(self.present.map { $0.serializedForVariable }.joined(separator: ", ")))"
+        return "(\(args))"
     }
 }

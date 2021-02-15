@@ -1,306 +1,328 @@
 import Foundation
+import GraphQLAST
 
 /*
- Each field decoder contains a selection part that is responsible for
+ We use functions - selections - to construct a query.
+
+ Each selection function contains a selection part that is responsible for
  telling the Selection about its existance and a decoder part that
  checks for the result and returns it as a function value.
- 
+
  The last part of the function is a mock value which we use as a placeholder
  of the return value on the first run when we collect the selection.
  */
 
-extension GraphQLCodegen {
-    // MARK: - Field Selection
-    
-    /// Generates a SwiftGraphQL field.
-    func generateField(_ field: GraphQL.Field) throws -> [String] {
-        var lines = [String]()
-        
-        // Documentation.
-        if let docs = generateFieldDoc(for: field) {
-            lines.append(docs)
-        }
-        if let deprecationDocs = generateFieldDeprecationDoc(for: field) {
-            lines.append(deprecationDocs)
-        }
-        
-        // Field method.
-        lines.append("func \(try generateFnDefinition(for: field)) throws -> \(try generateReturnType(for: field.type)) {")
-        lines.append("    /* Selection */")
-        lines.append(contentsOf: generateFieldSelection(for: field).indent(by: 4))
-        lines.append("    self.select(field)")
-        lines.append("")
-        lines.append("    /* Decoder */")
-        lines.append("    switch self.response {")
-        lines.append("    case .decoding(let data):")
-        lines.append(contentsOf: generateDecoder(for: field).indent(by: 8))
-        lines.append("    case .mocking:")
-        lines.append("        return \(try generateMockData(for: field.type))")
-        lines.append("    }")
-        lines.append("}")
-        
-        return lines
-    }
-    
-    // MARK: - Documentation
-    
-    /// Generates field documentation.
-    private func generateFieldDoc(for field: GraphQL.Field) -> String? {
-        field.description.map { "/// \($0)" }
-    }
-    
-    /// Generates deprecation documentation.
-    private func generateFieldDeprecationDoc(for field: GraphQL.Field) -> String? {
-        field.isDeprecated ? "@available(*, deprecated, message: \"\(field.deprecationReason ?? "")\")" : nil
-    }
-    
-    // MARK: - Function definition
+// MARK: - Function Definition
 
-    /// Generates a function definition for a field.
-    private func generateFnDefinition(for field: GraphQL.Field) throws -> String {
-        let fnName = field.name.camelCase.normalize
-        
-        /* Kinds of fields. */
-        switch field.type.namedType {
-        /* Scalar, Enum */
-        case .scalar(_), .enum(_):
-            let arguments = try generateFnParameters(for: field.args)
-            return "\(fnName)(\(arguments))"
-        /* Selections */
-        case .object(let typeLock):
-            let type = "Objects.\(typeLock.pascalCase)"
-            let decoderType = generateDecoderType(type, for: field.type)
-            return try generateFnDefinitionWithSelection(
-                name: fnName,
-                args: field.args,
-                decoderType: decoderType
-            )
-        case .interface(let typeLock):
-            let typeLock = "Interfaces.\(typeLock.pascalCase)"
-            let decoderType = generateDecoderType(typeLock, for: field.type)
-            return try generateFnDefinitionWithSelection(
-                name: fnName,
-                args: field.args,
-                decoderType: decoderType
-            )
-        case .union(let typeLock):
-            let typeLock = "Unions.\(typeLock.pascalCase)"
-            let decoderType = generateDecoderType(typeLock, for: field.type)
-            return try generateFnDefinitionWithSelection(
-                name: fnName,
-                args: field.args,
-                decoderType: decoderType
-            )
+/*
+ This section contains functions that we use to generate the selection
+ function itself.
+ */
+
+extension Collection where Element == Field {
+    /// Returns the functions that represent selection for a given type.
+    func selection(scalars: ScalarMap) throws -> String {
+        try map { try $0.selection(scalars: scalars) }.joined(separator: "\n")
+    }
+}
+
+extension Field {
+    /// Returns the function that may be used to create selection using SwiftGraphQL.
+    func selection(scalars: ScalarMap) throws -> String {
+        """
+        \(docs)
+        \(availability)
+        func \(fName)\(try fParameters(scalars: scalars)) throws -> \(try type.returnType(scalars: scalars)) {
+            \(selection)
+            self.select(field)
+
+            switch self.response {
+            case .decoding(let data):
+                \(decoder)
+            case .mocking:
+                return \(try type.mock(scalars: scalars))
+            }
         }
+        """
     }
-    
-    /// Returns a string representation of function defenition that has selection and might have arguments.
-    private func generateFnDefinitionWithSelection(
-        name: String,
-        args: [GraphQL.InputValue],
-        decoderType: String
-    ) throws -> String {
-        /* Function without arguments. */
-        if args.isEmpty {
-            return "\(name)<Type>(_ selection: Selection<Type, \(decoderType)>)"
+
+    // MARK: - TODO: generate function parameter docs and example!
+
+    private var docs: String {
+        if let description = self.description {
+            return "/// \(description)"
         }
-        /* Function with arguments. */
-        let parameters = try generateFnParameters(for: args)
-        return "\(name)<Type>(\(parameters), _ selection: Selection<Type, \(decoderType)>)"
+        return ""
     }
-    
-    /// Generates arguments for accessor function.
-    private func generateFnParameters(for args: [GraphQL.InputValue]) throws -> String {
-        try args.map { try generateParameter(for: $0) }.joined(separator: ", ")
+
+    private var availability: String {
+        if isDeprecated {
+            let message = deprecationReason ?? ""
+            return "@available(*, deprecated, message: \"\(message)\")"
+        }
+        return ""
     }
-    
-    /// Generates a function parameter based on an input value.
-    private func generateParameter(for input: GraphQL.InputValue) throws -> String {
-        switch input.type.inverted {
-        case .nullable(_):
-            return "\(input.name.camelCase.normalize): \(try generatePropertyType(for: input.type)) = .absent"
+
+    private var fName: String {
+        name.camelCase.normalize
+    }
+
+    private func fParameters(scalars: ScalarMap) throws -> String {
+        try args.parameters(field: self, scalars: scalars, typelock: type.type(for: typelock))
+    }
+
+    /// Returns a typelock value for this field.
+    private var typelock: String {
+        switch type.namedType {
+        case let .object(typelock):
+            return "Objects.\(typelock.pascalCase)"
+        case let .interface(typelock):
+            return "Interfaces.\(typelock.pascalCase)"
+        case let .union(typelock):
+            return "Unions.\(typelock.pascalCase)"
         default:
-            return "\(input.name.camelCase.normalize): \(try generatePropertyType(for: input.type))"
+            return "<ERROR>"
         }
     }
-    
-//    /// Generates a type definition for an argument function parameter.
-//    private func generateParameterType(for ref: GraphQL.InputTypeRef) throws -> String {
-//        switch ref.namedType {
-//        case .scalar(let scalar):
-//            let scalar = try options.scalar(scalar)
-//            return generatePropertyType(scalar, for: ref)
-//        case .enum(let enm):
-//            let type = "Enums.\(enm.pascalCase)"
-//            return generatePropertyType(type, for: ref)
-//        case .inputObject(let inputObject):
-//            let type = "InputObjects.\(inputObject.pascalCase)"
-//            return generatePropertyType(type, for: ref)
-//        }
-//    }
+}
 
-    /// Recursively generates a return type of a referrable type.
-    private func generateReturnType(for ref: GraphQL.OutputTypeRef) throws -> String {
-        switch ref.namedType {
-        case .scalar(let scalar):
-            let scalar = try options.scalar(scalar)
-            return generateDecoderType(scalar, for: ref)
-        case .enum(let enm):
-            let type = "Enums.\(enm.pascalCase)"
-            return generateDecoderType(type, for: ref)
-        case .interface(_),
-            .object(_),
-            .union(_):
-            return "Type"
-        }
-    }
-    
-    // Generates an intermediate type used in custom decoders to cast JSON representation of the data.
-    func generateDecoderType<Ref>(_ typeName: String, for ref: GraphQL.TypeRef<Ref>) -> String {
-        generateDecoderType(typeName, for: ref.inverted)
-    }
+// MARK: - Parameters
 
-    /// Generates an intermediate type used in custom decoders to cast JSON representation of the data.
-    private func generateDecoderType<Ref>(_ typeName: String, for ref: GraphQL.InvertedTypeRef<Ref>) -> String {
-        switch ref {
-        case .named(_):
-            return typeName
-        case .list(let subRef):
-            return "[\(generateDecoderType(typeName, for: subRef))]"
-        case .nullable(let subRef):
-            return "\(generateDecoderType(typeName, for: subRef))?"
-        }
-    }
-    
-    // MARK: - Selection
+/*
+ This section contains function used to generate function parameters.
+ Some functions here rely on function from InputObject file.
+ */
 
-    /// Generates an internal leaf definition used for composing selection set.
-    private func generateFieldSelection(for field: GraphQL.Field) -> [String] {
+private extension Collection where Element == InputValue {
+    /// Returns a function parameter definition.
+    func parameters(field: Field, scalars: ScalarMap, typelock: String) throws -> String {
+        /*
+         We only return parameters when given scalars. If the function is referencing another type,
+         however, we also generate a generic type and add arguments.
+         */
         switch field.type.namedType {
-        case .scalar(_), .enum(_):
-            return
-                [ "let field = GraphQLField.leaf(",
-                  "    name: \"\(field.name)\",",
-                  "    arguments: ["
-                ] + generateSelectionArguments(for: field.args).indent(by: 8) +
-                [ "    ]",
-                  ")"
-                ]
-        case .interface(_), .object(_), .union(_):
-            return
-                [ "let field = GraphQLField.composite(",
-                  "    name: \"\(field.name)\",",
-                  "    arguments: ["
-                ] + generateSelectionArguments(for: field.args).indent(by: 8) +
-                [ "    ],",
-                  "    selection: selection.selection",
-                  ")"
-                ]
+        case .scalar, .enum:
+            return "(\(try parameters(scalars: scalars)))"
+        default:
+            if isEmpty {
+                return "<Type>(selection: Selection<Type, \(typelock)>)"
+            }
+            return "<Type>(\(try parameters(scalars: scalars)), selection: Selection<Type, \(typelock)>)"
         }
     }
-    
-    /// Generates a dictionary of argument builders.
-    private func generateSelectionArguments(for args: [GraphQL.InputValue]) -> [String] {
-        args.map { #"Argument(name: "\#($0.name.camelCase)", type: "\#(generateArgumentType(for: $0.type))", value: \#($0.name.camelCase.normalize)),"# }
+
+    /// Returns a list of parameters for given input values.
+    func parameters(scalars: ScalarMap) throws -> String {
+        try map { try $0.parameter(scalars: scalars) }.joined(separator: ", ")
     }
-    
-    /// Generates a GraphQL acceptable type of an argument.
-    private func generateArgumentType(for ref: GraphQL.InputTypeRef) -> String {
-        switch ref {
-        /* Named Type */
-        case .named(let named):
+}
+
+extension InputValue {
+    /// Generates a function parameter for this input value.
+    fileprivate func parameter(scalars: ScalarMap) throws -> String {
+        "\(name.camelCase.normalize): \(try type.type(scalars: scalars)) \(self.default)"
+    }
+
+    /// Returns the default value of the parameter.
+    private var `default`: String {
+        switch type.inverted {
+        case .nullable:
+            return "= .absent()"
+        default:
+            return ""
+        }
+    }
+}
+
+// MARK: - Selection
+
+/*
+ This section contains function that we use to generate parts of the code
+ that tell SwiftGraphQL how to construct the query.
+ */
+
+private extension Field {
+    /// Generates an internal leaf definition used for composing selection set.
+    var selection: String {
+        switch type.namedType {
+        case .scalar, .enum:
+            return """
+            let field = GraphQLField.leaf(
+                 name: \"\(name)\",
+                 arguments: [ \(args.arguments) ]
+            )
+            """
+        case .interface, .object, .union:
+            return """
+            let field = GraphQLField.composite(
+                 name: \"\(name)\",
+                 arguments: [ \(args.arguments) ],
+                 selection: selection.selection
+            )
+            """
+        }
+    }
+}
+
+private extension Collection where Element == InputValue {
+    /// Returns a list of SwiftGraphQL Argument definitions that SwiftGraphQL accepts to create a GraphQL query.
+    var arguments: String {
+        map { $0.argument }.joined(separator: ",")
+    }
+}
+
+private extension InputValue {
+    /// Returns a SwiftGraphQL Argument definition for a given input value.
+    var argument: String {
+        #"Argument(name: "\#(name.camelCase)", type: "\#(type.argument)", value: \#(name.camelCase.normalize))"#
+    }
+}
+
+extension InputTypeRef {
+    /// Generates an argument definition that we use to make selection using the client.
+    var argument: String {
+        /*
+         We use this variable recursively on list and null references.
+         */
+        switch self {
+        case let .named(named):
             switch named {
-            case .enum(let name), .inputObject(let name), .scalar(let name):
+            case let .enum(name), let .inputObject(name), let .scalar(name):
                 return name
             }
-        /* Wrappers */
-        case .list(let subref):
-            return "[\(generateArgumentType(for: subref))]"
-        case .nonNull(let subref):
-            return "\(generateArgumentType(for: subref))!"
+        case let .list(subref):
+            return "[\(subref.argument)]"
+        case let .nonNull(subref):
+            return "\(subref.argument)!"
         }
     }
-    
-    // MARK: - Accessors
+}
 
-    /// Generates a field decoder.
-    private func generateDecoder(for field: GraphQL.Field) -> [String] {
-        let name = field.name.camelCase
-        
-        switch field.type.inverted.namedType {
-        /* Scalar, Enumeration */
-        case .scalar(_), .enum(_):
-            switch field.type.inverted {
-            case .nullable(_):
-                /*
-                 When decoding a nullable scalar, we just return the value.
-                 */
-                return [ "return data.\(name)[field.alias!]" ]
+// MARK: - Decoders
+
+/*
+ This section contains functions that we use to generate decoders
+ for a selection.
+ */
+
+private extension Field {
+    /// Returns selection decoder for this field.
+    var decoder: String {
+        let name = self.name.camelCase
+
+        switch type.inverted.namedType {
+        case .scalar(_), .enum:
+            switch type.inverted {
+            case .nullable:
+                // When decoding a nullable scalar, we just return the value.
+                return "return data.\(name)[field.alias!]"
             default:
-                /*
-                 In list value and non-optional scalars we want to make sure that value is present.
-                 */
-                return [
-                    "if let data = data.\(name)[field.alias!] {",
-                    "    return data",
-                    "}",
-                    "throw SG.HttpError.badpayload"
-                ]
+                // In list value and non-optional scalars we want to make sure that value is present.
+                return """
+                if let data = data.\(name)[field.alias!] {
+                    return data
+                }
+                throw HttpError.badpayload
+                """
             }
-        /* Selections */
-        case .interface(_), .object(_), .union(_):
-            switch field.type.inverted {
-            case .nullable(_):
-                /*
-                 When decoding a nullable field we simply pass it down to the decoder.
-                 */
-                return [ "return try selection.decode(data: data.\(name)[field.alias!])" ]
+        case .interface, .object, .union:
+            switch type.inverted {
+            case .nullable:
+                // When decoding a nullable field we simply pass it down to the decoder.
+                return "return try selection.decode(data: data.\(name)[field.alias!])"
             default:
-                /*
-                 When decoding a non-nullable field, we want to make sure that field is present.
-                 */
-                return [
-                    "if let data = data.\(name)[field.alias!] {",
-                    "    return try selection.decode(data: data)",
-                    "}",
-                    "throw SG.HttpError.badpayload"
-                ]
+                // When decoding a non-nullable field, we want to make sure that field is present.
+                return """
+                if let data = data.\(name)[field.alias!] {
+                    return try selection.decode(data: data)
+                }
+                throw HttpError.badpayload
+                """
             }
         }
     }
-    
-    // MARK: - Mocking
+}
 
-    /// Generates value placeholders for the API.
-    private func generateMockData(for ref: GraphQL.OutputTypeRef) throws -> String {
-        switch ref.namedType {
-        /* Scalars */
-        case .scalar(let scalar):
-            let type = try options.scalar(scalar)
-            return generateMockWrapper("\(type).mockValue", for: ref)
-        /* Enumerations */
-        case .enum(let enm):
-            return generateMockWrapper("Enums.\(enm.pascalCase).allCases.first!", for: ref)
-        /* Selections */
-        case .interface(_), .object(_), .union(_):
+// MARK: - Mocking
+
+/*
+ This section contains functions that we use to create mock
+ values for a given field.
+ */
+
+extension OutputTypeRef {
+    /// Generates mock data for this output ref.
+    func mock(scalars: ScalarMap) throws -> String {
+        switch namedType {
+        case let .scalar(scalar):
+            let type = try scalars.scalar(scalar)
+            return mock(value: "\(type).mockValue")
+        case let .enum(enm):
+            return mock(value: "Enums.\(enm.pascalCase).allCases.first!")
+        case .interface, .object, .union:
             return "selection.mock()"
         }
     }
-    
-    /// Generates the mock value for wrapped type.
-    private func generateMockWrapper(_ value: String, for ref: GraphQL.OutputTypeRef) -> String {
-        generateMockWrapper(value, for: ref.inverted)
+
+    /// Returns a mock value wrapped according to ref.
+    private func mock(value: String) -> String {
+        inverted.mock(value: value)
     }
-    
-    /// Generates the mock value for wrapped type.
-    private func generateMockWrapper(_ value: String, for ref: GraphQL.InvertedOutputTypeRef) -> String {
-        switch ref {
-        case .named(_):
+}
+
+extension InvertedOutputTypeRef {
+    /// Returns a mock value wrapped according to ref.
+    func mock(value: String) -> String {
+        switch self {
+        case .named:
             return value
-        case .list(_):
+        case .list:
             return "[]"
-        case .nullable(_):
+        case .nullable:
             return "nil"
+        }
+    }
+}
+
+// MARK: - Output Types
+
+/*
+ This section contains functions that we use to generate return
+ types of fields.
+ */
+
+private extension OutputTypeRef {
+    /// Returns a return type of a referrable type.
+    func returnType(scalars: ScalarMap) throws -> String {
+        switch namedType {
+        case let .scalar(scalar):
+            let scalar = try scalars.scalar(scalar)
+            return type(for: scalar)
+        case let .enum(enm):
+            return type(for: "Enums.\(enm.pascalCase)")
+        case .interface, .object, .union:
+            return "Type"
+        }
+    }
+}
+
+extension TypeRef {
+    /// Returns a wrapped instance of a given type respecting the reference.
+    func type(for name: String) -> String {
+        inverted.type(for: name)
+    }
+}
+
+extension InvertedTypeRef {
+    /// Returns a wrapped instance of a given type respecting the reference.
+    func type(for name: String) -> String {
+        switch self {
+        case .named:
+            return name
+        case let .list(subref):
+            return "[\(subref.type(for: name))]"
+        case let .nullable(subref):
+            return "\(subref.type(for: name))?"
         }
     }
 }

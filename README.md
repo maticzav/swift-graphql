@@ -7,16 +7,17 @@
 ## Features
 
 - ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
-- 🦅 **Swift-First:** It lets you use Swift constructs in favour of GraphQL language.
 - 🏖 **Time Saving:** I've built it so you don't have to waste your precious time.
+- ☝️ **Generate once:** Only when your schema changes.
+- ☎️ **Support subscriptions:** Listen to subscriptions using webhooks.
 - 🏔 **High Level:** You don't have to worry about naming collisions, variables, _anything_. Just Swift.
 
 ## Overview
 
-SwiftGraphQL is a Swift code generator. It lets you create queries using Swift, and guarantees that every query you create is valid.
+SwiftGraphQL is a Swift code generator and a lightweight GraphQL client. It lets you create queries using Swift, and guarantees that every query you create is valid.
 
 The library is centered around three core principles:
-    
+
 - 🚀 If your project compiles, your queries work.
 - 🦉 Use Swift in favour of GraphQL wherever possible.
 - 🌳 Your application model should be independent of your schema.
@@ -34,21 +35,21 @@ struct Human: Identifiable {
 }
 
 // Create a selection.
-let human = Selection<Human, Objects.Human> {
+let human = Selection.Human {
     Human(
-        id: try $0.id(), 
+        id: try $0.id(),
         name: try $0.name(),
         homePlanet: try $0.homePlanet()
     )
 }
 
 // Construct a query.
-let query = Selection<[Human], Operations.Query> {
+let query = Selection.Query {
     try $0.humans(human.list)
 }
 
 // Perform the query.
-SG.send(query, to: "http://swift-graphql.heroku.com") { result in
+send(query, to: "http://swift-graphql.heroku.com") { result in
     if let data = try? result.get() {
         print(data) // [Human]
     }
@@ -56,6 +57,10 @@ SG.send(query, to: "http://swift-graphql.heroku.com") { result in
 ```
 
 ## Installation
+
+Make sure Xcode 11+ is installed first. Installation consists of two parts; you need to include the client in your iOS/macOS project, and locally generate the code using code generator.
+
+#### Installing SwiftGraphQL Client
 
 To install it using Swift Package Manager, open the following menu item in Xcode:
 
@@ -67,48 +72,117 @@ In the Choose Package Repository prompt add this url:
 https://github.com/maticzav/swift-graphql/
 ```
 
-Then press Next and complete the remaining steps.
+Then press Next and complete the remaining steps. You should select `SwiftGraphQL` as a dependency, since that includes the client code.
 
 To learn more about Swift Package Manager, check out the [official documentation](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
 
+### Installing Code Generator
+
+SwiftGraphQL generator comes as a CLI tool and as a library that you may import. You can use Mint, Homebrew and Make to use CLI only, or you may import it as a SPM dependency and use the generator itself.
+
+#### Mint
+
+```sh
+mint install maticzav/swift-graphql
+```
+
+> You can read more about Mint [here](https://github.com/yonaskolb/mint).
+
+#### Homebrew
+
+```sh
+brew tap maticzav/swift-graphql https://github.com/maticzav/swift-graphql.git
+brew install SwiftGraphQL
+```
+
+#### Make
+
+```sh
+git clone https://github.com/maticzav/swift-graphql.git
+cd swift-graphql
+make install
+```
+
+To run the generator type `swift-graphql`. If you are using any custom scalars, you should create a configuration file called `swiftgraphql.yml` and put in data-type mappings as a key-value dictionary like this. Keys should be GraphQL types, and values should be SwiftGraphQL Codecs.
+
+```yml
+scalars:
+  Date: DateTime
+  Upload: Upload
+```
+
+You can also run `swift-graphql help` to learn more about options and how it works.
+
+---
+
+  <!-- index-start -->
+
+- [Why?](#why)
+- [How does it work?](#howdoesitwork)
+- [Sending requests](#sendingrequests)
+- [Reference](#reference)
+  - [`send`](#send)
+  - [`listen`](#listen)
+  - [`Selection<Type, Scope>`](#selectiontypescope)
+    - [Nullable, list, and non-nullable fields](#nullablelistandnonnullablefields)
+    - [Making selection on the entire type](#makingselectionontheentiretype)
+    - [Mapping Selection](#mappingselection)
+  - [`Unions`](#unions)
+  - [`Interfaces`](#interfaces)
+  - [`OptionalArgument`](#optionalargument)
+  - [`Codecs` - Custom Scalars](#codecscustomscalars)
+  - [SwiftGraphQLCodegen](#swiftgraphqlcodegen)
+    - [`generate`](#generate)
+- [F.A.Q](#faq)
+  - [How do I create a fragment?](#howdoicreateafragment)
+  - [How do I create an alias?](#howdoicreateanalias)
+  - [My queries include strange alias. What is that about?](#myqueriesincludestrangealiaswhatisthatabout)
+  - [How do we populate the values?](#howdowepopulatethevalues)
+  - [Why do I have to include try whenever I select something?](#whydoihavetoincludetrywheneveriselectsomething)
+  - [What are the pitfalls in Apollo iOS that you were referring to at the top?](#whatarethepitfallsinapolloiosthatyouwerereferringtoatthetop)
+- [Roadmap and Contributing](#roadmapandcontributing)
+- [Thank you](#thankyou)
+- [License](#license)
+<!-- index-end -->
+
 ## Why?
 
-__Why bother?__ Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link between backend and your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
+**Why bother?** Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link between backend and your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
 
-__Why another GraphQL library?__ There was no other library that would let me fetch my schema, generate the Swift code, build queries in Swift, and easily adapt query results to my model. I was considering using Apollo iOS for my projects, but I couldn't get to the same level of type-safety as with SwiftGraphQL.
+**Why another GraphQL library?** There was no other library that would let me fetch my schema, generate the Swift code, build queries in Swift, and easily adapt query results to my model. I was considering using Apollo iOS for my projects, but I couldn't get to the same level of type-safety as with SwiftGraphQL.
 
 > This library has been heavily inspired by Dillon Kearns [elm-graphql](http://github.com/dillonkearns/elm-graphql).
 
 ---
 
-
-## How it works?
+## How does it work?
 
 It seems like the best way to learn how to use SwiftGraphQL is by understanding how it works behind the scenes.
 
-The first concept that you should know about is `Selection`. Selection lets you select which fields you want to query from a certain GraphQL object. The interesting part about Selection is that there's actually only one `Selection` type, but it has generic extensions. Those generic extensions are using _phantom types_ to differentiate which fields you may select in particular object. 
+The first concept that you should know about is `Selection`. Selection lets you select which fields you want to query from a certain GraphQL object. The interesting part about Selection is that there's actually only one `Selection` type, but it has generic extensions. Those generic extensions are using _phantom types_ to differentiate which fields you may select in particular object.
 
 TLDR; Phantom types let you use Generics to constrain methods to specific types. You can see them at work in the funny looking `Selection<Type, Scope>` parts of the code that let you select what you want to query. You can read more about phantom types [here](https://www.swiftbysundell.com/articles/phantom-types-in-swift/), but for now it suffice to understand that we use `Scope` to limit what you may or may not select in a query.
-
-> Take a breath, pause, think about `Selection`.
 
 Now that you know about selection, let's say that we want to query some fields on our `Human` GraphQL type. The first parameter in `Selection` - `Type` - lets us say what the end "product" of this selection is going to be. This could be a `String`, a `Bool`, a `Human`, a `Droid` - anything. _You decide!_.
 
 The second parameter - `Scope` (or `TypeLock`) - then tells `Selection` which object you want to query.
 
 You can think of these two as:
+
 - `Type`: what your app will receive
 - `Scope` what SwiftGraphQL should query.
 
-> Take a breath, pause, think about `Scope` and `Type`.
+> Take a breath, pause, think about `TypeLock`, `Scope` and `Type`.
 
-But how do we _select_ the fields? That's what the `Selection` initializer is for. Selection initializer is a class with methods matching the names of GraphQL fields in your type. When you call a method two things happen. First, the method tells selection that you want to query that field. Secondly, it tries to process the data from the response and returns the data that was supposed to get from that particular field.
+But how do we _select_ the fields?
+
+That's what the `Selection` initializer is for. Selection initializer is a class with methods matching the names of GraphQL fields in your type. When you call a method two things happen. First, the method tells selection that you want to query that field. Secondly, it tries to process the data from the response and returns the data that was supposed to get from that particular field.
 
 For example:
 
 ```swift
 let human = Selection<Human, Objects.Human> { select in
-    Human(
+    MyHuman(
         id: try select.id(), // String
         name: try select.name(), // String
         homePlanet: try select.homePlanet() // String?
@@ -118,14 +192,26 @@ let human = Selection<Human, Objects.Human> { select in
 
 As you may have noticed, `id` returns just a string - not an optional. But how's that possible if the first time we call that function we don't even have the data yet? SwiftGraphQL intuitively mocks the data the first time around to make sure Swift is happy. That value, however, is left unnoticed - you'll never see it.
 
-> Take a breath, pause, think about `Selection`. Again.
+> Take a breath, `Selection` is quite neat, right?
+
+To make selection even easier, library makes typealiaii for each type in your schema. This way you don't have to write that much boilerplate and we can leverage Swift type-system to figure out some things for us. You can rewrite the above selection like this.
+
+```swift
+let human = Selection.Human { select in
+    MyHuman(
+        id: try select.id(), // String
+        name: try select.name(), // String
+        homePlanet: try select.homePlanet() // String?
+    )
+}
+```
 
 Alright! Now that we truly understand `Selection`, let's fetch some data. We use `GraphQLClient`'s `send` method to send queries to the backend. To make sure you are sending the right data, `send` methods only accept selections of `Operations.Query` and `Operations.Mutation`. This way, compiler will tell you if you messed something up.
 
 We construct a query in a very similar fashion to making a human selection.
 
 ```swift
-let query = Selection<[Human], Operations.Query> {
+let query = Selection.Query {
     try $0.humans(human.list)
 }
 ```
@@ -135,116 +221,64 @@ The different part now is that `humans` accept another selection - a human selec
 _NOTE:_ We could also simply count the number of humans in the database. We would do that by changing the `Type` to `Int` - we are counting - and use Swift's `count` property on a list.
 
 ```swift
-let query = Selection<Int, Operations.Query> {
+let query = Selection.Query {
     try $0.humans(human.list).count
 }
 ```
 
 > Take a breath. This is it. Pretty neat, huh?! 😄
 
-## Getting started
+## Sending requests
 
-In the following few sections I want to show you how to set up SwiftGraphQL and create your first query. 
+Once you've created a query-, mutation- or a subscription-type selection, you may call one of the `send` and `listen` methods that SwiftGrpahQL exposes. To fetch a query or send a mutation, use `send` method. And to listen for subscriptions, use `listen` method.
 
-> You can try connecting to your API right away or use `https://swapi-ql.herokuapp.com/graphql` as a playground.
-
-We'll create a code generation build step using SwiftPackage executable and explore the API using XCode autocompletion.
-
-## Generating Swift code
-
-First, we need to somehow generate the code specific to your GraphQL schema. We can do that by creating SwiftPackage executable.
-
-1. Open your terminal and navigate to your project root.
-2. Create a folder named `Codegen` next to your application folder and `cd` inside.
-3. Run `swift package init --type executable` to initialize your executable.
-4. Run `open Package.swift` to open XCode editor and add SwiftGraphQL to your dependencies. (I also recommend using Files by John Sundell as a file navigator, but you can use a library of your choice.)
+> Make sure you use `ws` protocol when listening for subscriptions!
 
 ```swift
-// swift-tools-version:5.3
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+send(query, to: "http://localhost:4000") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
+}
 
-import PackageDescription
-
-let package = Package(
-    // ...
-    dependencies: [
-        /* Depdendencies*/
-        .package(name: "SwiftGraphQL", url: "https://github.com/maticzav/swift-graphql", Package.Dependency.Requirement.branch("main")),
-        .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
-    ],
-    targets: [
-        .target(
-            name: "Codegen",
-            dependencies: ["SwiftGraphQL", "Files"]),
-    ]
-    // ...
-)
-```
-
-> Don't forget to add both libraries to target depdencies!
-
-5. Now, open up `main.swift` inside your `Sources`. You want to make it look something like this:
-
-```swift
-import Files
-import Foundation
-import SwiftGraphQLCodegen
-
-let endpoint = URL(string: "http://localhost:4000")!
-
-do {
-    let target = try Folder.current.parent!
-        .subfolder(at: "<APP>")
-        .createFile(at: "API.swift").url
-
-    /* Create Generator */
-    let scalars: [String: String] = [
-        // Here you can map your scalars GraphQL: Swift.
-    ]
-    let options = GraphQLCodegen.Options(scalarMappings: scalars)
-    let generator = GraphQLCodegen(options: options)
-
-    /* Generate the API */
-    try generator.generate(target, from: endpoint)
-    print("Generated API to \(target.absoluteString)")
-} catch let error {
-    print("ERROR: \(error.localizedDescription)")
-    exit(1)
+listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
 }
 ```
 
-> You can checkout more customization options below in documentation.
-
-6. Lastly, you want to add a build step to your project. Click on your project file in XCode and navigate to `Build Phases` after you've selected a target. Click on a _plus_ and name the build step "__Generate GraphQL__". Drag it below the dependencies at the top to make sure it occurs soon enough and paste in the shell below.
-
-```bash
-cd "${SRCROOT}"/Codegen
-xcrun -sdk macosx swift run
-```
-
-<div align="center"><img src="media/buildphase.png" width="500" /></div>
-
-
-7. 🎉 That's it! You can verify that it's working by building the project and seeing the generated code.
-
-> NOTE: You might need to drag the file into the project/workspace.
-
+> 💡 If you try to pass in any other type instead of root operation types, your code won't compile.
 
 ---
 
+## Reference
 
-## Documentation
-
-### `SwiftGraphQL`
+### `send`
 
 - `SwiftGraphQL`
 
-SwiftGraphQL exposes only one method - `send` - that lets you send your query to your server. It uses URLRequest internally and shared URLSession to perform the request, and returns Swift's Request type with the data.
+SwiftGraphQL exposes only two methods - `send` - that lets you send your query to your server and `listen` that lets you create subscription listeners. It uses URLRequest internally and shared URLSession to perform the request, and returns Swift's Request type with the data.
 
-You can pass in the dictionary of  `headers` to implement authorization mechanism.
+You can pass in the dictionary of `headers` to implement authorization mechanism.
 
 ```swift
-SG.send(query, to: "http://localhost:4000") { result in
+send(query, to: "http://localhost:4000") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
+}
+```
+
+### `listen`
+
+- `SwiftGraphQL`
+
+Lets you listen for subscription events coming from your server.
+You can pass in the dictionary of `headers` to implement authorization mechanism.
+
+```swift
+listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
     if let data = try? result.get() {
         print(data)
     }
@@ -257,12 +291,13 @@ SG.send(query, to: "http://localhost:4000") { result in
 
 - `SwiftGraphQL`
 
-Selection lets you select fields that you want to fetch from the query on a particular type. 
+Selection lets you select fields that you want to fetch from the query on a particular type.
 
 SwiftGraphQL has generated phantom types for your operations, objects, interfaces and unions. You can find them by typing `Unions.`/`Interfaces.`/`Objects.`/`Operations.` followed by a name from your GraphQL schema. You plug those into the `Scope` parameter.
 
 The other parameter `Type` is what your constructor should return.
 
+> We generate type alias in selection which let you use XCode intellisnse and may infer your return type. They work like `Selection.ObjectName`.
 
 ##### Nullable, list, and non-nullable fields
 
@@ -273,18 +308,17 @@ Each selection comes with three calculated properties that let you do that:
 - `nullable` - to query nullable fields
 - `nonNullOrFail` - to query nullable fields that should be there
 
-
 ```swift
 // Create a non-nullable selection.
-let human = Selection<Human, Objects.Human> {
+let human = Selection.Human {
     Human(
-        id: try $0.id(), 
+        id: try $0.id(),
         name: try $0.name()
     )
 }
 
 // Use it with nullable and list fields.
-let query = Selection<Void, Operations.Query> {
+let query = Selection.Query {
     let list = try $0.humans(human.list)
     let nullable = try $0.human(id: "100", human.nullable)
 }
@@ -294,14 +328,14 @@ You can achieve the same effect using `Selection` static functions `.list`, `.nu
 
 ```swift
 // Use it with nullable and list fields.
-let query = Selection<Void, Operations.Query> {
+let query = Selection.Query {
     let list = try $0.humans(Selection.list(human))
 }
 ```
 
 ##### Making selection on the entire type
 
-You might want to write a selection on the entire type from the selection composer itself. This usually happens if you have a distinct identifier reused in many types. 
+You might want to write a selection on the entire type from the selection composer itself. This usually happens if you have a distinct identifier reused in many types.
 
 Consider the following scenario where we have an `id` field in `Human` type. There are many cases where we only query `id` field from the `Human` that's why we create a human id selection.
 
@@ -319,7 +353,7 @@ struct Human {
     let name: String
 }
 
-let human = Selection<Human, Objects.Human> {
+let human = Selection.Human {
     Human(
         id: try $0.selection(humanId),
         name: try $0.name()
@@ -330,7 +364,7 @@ let human = Selection<Human, Objects.Human> {
 An alternative approach would be to manually rewrite the selection inside `Human` again.
 
 ```swift
-let human = Selection<Human, Objects.Human> {
+let human = Selection.Human {
     Human(
         id: HumanID.fromString(try $0.id()),
         name: try $0.name()
@@ -396,7 +430,7 @@ let human = Selection<String, Objects.Human> { select in
 }
 ```
 
-### `Union`
+### `Unions`
 
 - `SwiftGraphQL`
 
@@ -421,22 +455,21 @@ Interfaces are very similar to unions. The only difference is that you may query
 
 ```swift
 let characterInteface = Selection<String, Interfaces.Character> {
-    
+
     /* Common */
     let name = try $0.name()
-    
+
     /* Fragments */
     let about = try $0.on(
         droid: Selection<String, Objects.Droid> { droid in try droid.primaryFunction() /* String */ },
         human: Selection<String, Objects.Human> { human in try human.homePlanet() /* String */ }
     )
-    
+
     return "\(name). \(about)"
 }
 ```
 
 You'd usually want to create a Swift enumerator and have different selecitons return different cases.
-
 
 ### `OptionalArgument`
 
@@ -444,10 +477,9 @@ You'd usually want to create a Swift enumerator and have different selecitons re
 
 GraphQL's `null` value in an input type may be entirely omitted to represent the absence of a value or supplied as `null` to provide `null` value. This comes in especially handy in mutations.
 
-Because of that, every input object that has an optional property accepts an optional argument that may either be `.present(value)`, `.absent` or `.null`.
+Because of that, every input object that has an optional property accepts an optional argument that may either be `.present(value)`, `.absent()` or `.null()`. We use functions to support recursive type annotations that GraphQL allows.
 
 > NOTE: Every nullable argument is by default absent so you don't have to write boilerplate.
-
 
 ### `Codecs` - Custom Scalars
 
@@ -468,13 +500,13 @@ You should provide a codec for every scalar that is not natively supported by Gr
 // DateTime Example
 struct DateTime: Codec {
     private var data: Date
-    
+
     init(from date: Date) {
         self.data = date
     }
-    
+
     // MARK: - Public interface
-    
+
     var value: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "fr")
@@ -482,23 +514,23 @@ struct DateTime: Codec {
 
         return formatter.string(from: self.data)
     }
-    
+
     // MARK: - Codec conformance
-    
+
     // MARK: - Decoder
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let value = try container.decode(Int.self)
-        
+
         self.data = Date(timeIntervalSince1970: TimeInterval(value))
     }
-    
+
     // MARK: - Encoder
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(Int(data.timeIntervalSince1970))
     }
-    
+
     // MARK: - Mock value
     static var mockValue = DateTime(from: Date())
 }
@@ -506,33 +538,28 @@ struct DateTime: Codec {
 
 > Don't forget to add your scalar mapping to code generator options. Otherwise, generator will fail with _unknown scalar_ error.
 
+### SwiftGraphQLCodegen
 
-### `GraphQLCodegen`
+SwiftGraphQLCodegen exposes only one function - `generate` - that lets you fetch schema from a remote endpoint and get Swift code that SwiftGraphQL relies on to create queries.
 
-- `SwiftGraphQLCodegen`
-
-Lets you generate the code based on a remote schema. It accepts an optional argument `options`.
-
-Use `.generate` method to generate the code into a specified target. SwiftGraphQL assumes that the target file already exists.
-
-I suggest using John Sundell's Files library for navigation between folders and file creation. Check the example above to see how I use it.
-
-### `GraphQLCodegen.Options`
+#### `generate`
 
 - `SwiftGraphQLCodegen`
 
-Lets you customize code generation. Accepts one property - `scalarMappings` which should be a dictionary of strings that map keys of GraphQL scalars into Swift scalars.
+Lets you generate the code based on a remote schema.
+
+> I suggest you try to do most of the things with built-in CLI and only opt-in for the codegen when absolutely necessary.
 
 ```swift
 let scalars: [String: String] = ["Date": "DateTime"]
-let options = GraphQLCodegen.Options(scalarMappings: scalars)
+let generator = GraphQLCodegen(scalars: config.scalars)
+
+let code = try generator.generate(from: url)
 ```
 
 ---
 
-
 ## F.A.Q
-
 
 ### How do I create a fragment?
 
@@ -544,19 +571,24 @@ You can't. SwiftGraphQL aims to use Swift's high level language features in favo
 
 ### My queries include strange alias. What is that about?
 
-SwiftGraphQL uses hashes to construct your queries. There are two parts of the query builder that contribute to the hashes; 
+SwiftGraphQL uses hashes to construct your queries. There are two parts of the query builder that contribute to the hashes;
+
 - the first one - _query parameters_ - uses hashes to differentiate between same fields with different parameters. Because of this, you don't have to manually check that your field names don't collide.
 - the second one - _query variables_ - uses hashes to link your input values to the part of the query they belong to. SwiftGraphQL laverages Swift's native JSON serialization as I've found it incredibly difficult to represent enumerator values in GraphQL SDL. This way it's also more performant.
 
 ```gql
-query($__rsdpxy7uqurl: Greeting!, $__l9q38fwdev22: Greeting!, $_b2ryvzutf9x2: ID!) {
+query(
+  $__rsdpxy7uqurl: Greeting!
+  $__l9q38fwdev22: Greeting!
+  $_b2ryvzutf9x2: ID!
+) {
   greeting__m9oi5wy5dzot: greeting(input: $__rsdpxy7uqurl)
   character__16agce2xby25o: character(id: $_b2ryvzutf9x2) {
     __typename
-    ...on Human {
+    ... on Human {
       homePlanet___5osgbeo0g455: homePlanet
     }
-    ...on Droid {
+    ... on Droid {
       primaryFunction___5osgbeo0g455: primaryFunction
     }
   }
@@ -578,7 +610,6 @@ Apollo iOS code generator lets you write your queries upfront and generates the 
 
 I ended up writing lots of boilerplate just to get it working, and would have to rewrite it in multiple places everytime backend team changed something.
 
-
 ## Roadmap and Contributing
 
 This library is feature complete for our use case. We are actively using it in our production applications and plan to expand it as our needs change. We'll also publish performance updates and bug fixes that we find.
@@ -590,24 +621,22 @@ Feel free to create a pull request with future improvements. Please, document yo
 Here's a rough collection of ideas we might tackle next:
 
 - Networking Layer
-- Subscriptions
 - Caching
 
 > PS.: PRs for the above features will be reviewed a lot more quickly!
 
 ## Thank you
 
-I want to dedicate this last secion to everyone who helped me along the way. 
+I want to dedicate this last secion to everyone who helped me along the way.
+
 - First, I would like to thank Dillon Kearns, the author of [elm-graphql](http://github.com/dillonkearns/elm-graphql), who inspired me to write the library, and helped me understand the core principles behind his Elm version.
 - I would like to thank Peter Albert for giving me a chance to build this library, having faith that it's possible, and all the conversations that helped me push through the difficult parts of it.
 - Lastly, I'd like to thank Martijn Walraven and Apollo iOS team, who helped me understand how Apollo GraphQL works, and for the inspiration about the parts of the code I wasn't sure about.
 
 Thank you! 🙌
 
-
 ---
 
-
-### Licence
+## License
 
 MIT @ Matic Zavadlal

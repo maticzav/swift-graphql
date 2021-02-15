@@ -1,0 +1,17 @@
+{
+  "name": "server",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "yarn g:tsnd --respawn ./src",
+    "build": "yarn g:tsc"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.11",
+    "apollo-server": "^2.19.2",
+    "apollo-server-express": "^2.19.2",
+    "express": "^4.17.1",
+    "graphql": "^15.4.0",
+    "graphql-tools": "^7.0.2",
+    "nexus": "^1.0.0"
+  }
+}

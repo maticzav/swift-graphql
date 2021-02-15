@@ -1,5 +1,5 @@
-import XCTest
 @testable import SwiftGraphQLCodegen
+import XCTest
 
 final class StringExtensionsTest: XCTestCase {
     func testCamelCase() {
@@ -8,7 +8,7 @@ final class StringExtensionsTest: XCTestCase {
         XCTAssertEqual("linkToURL".camelCase, "linkToUrl")
         XCTAssertEqual("grandfather_father.son grandson".camelCase, "grandfatherFatherSonGrandson")
     }
-    
+
     func testPascalCase() {
         XCTAssertEqual("grandfather_father.son grandson".pascalCase, "GrandfatherFatherSonGrandson")
     }

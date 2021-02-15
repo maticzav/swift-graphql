@@ -1,0 +1,18 @@
+name: Generate Table Of Contents
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate table of contents
+        run: |
+          cd scripts
+          yarn g:tsn index.ts
+          git commit -am "chore: generate TOC"
+          git push

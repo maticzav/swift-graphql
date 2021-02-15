@@ -1,0 +1,24 @@
+{
+  "name": "swift-graphql",
+  "private": true,
+  "workspaces": [
+    "server",
+    "website"
+  ],
+  "scripts": {
+    "g:tsc": "cd $INIT_CWD && tsc",
+    "g:tsn": "cd $INIT_CWD && ts-node",
+    "g:tsnd": "cd $INIT_CWD && ts-node-dev",
+    "g:prettier": "cd $INIT_CWD && prettier"
+  },
+  "devDependencies": {
+    "@types/marked": "^1.2.2",
+    "@types/prettier": "^2.2.1",
+    "husky": "^4.3.6",
+    "marked": "^2.0.0",
+    "prettier": "^2.2.1",
+    "ts-node": "^9.1.1",
+    "ts-node-dev": "^1.1.1",
+    "typescript": "^4.1.3"
+  }
+}

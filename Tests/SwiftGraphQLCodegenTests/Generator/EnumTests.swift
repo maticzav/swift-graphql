@@ -1,92 +1,35 @@
-import XCTest
+@testable import GraphQLAST
 @testable import SwiftGraphQLCodegen
 
+import XCTest
 
 final class EnumTests: XCTestCase {
-    let generator = GraphQLCodegen(options: GraphQLCodegen.Options())
-    
-    // MARK: - Tests
-    
-    func testGenerateEmptyEnum() {
-        let type = GraphQL.EnumType(
-            name: "Episodes",
-            description: "Collection of all StarWars episodes.",
-            enumValues: []
-        )
-        
-        let expected = """
-        /// Collection of all StarWars episodes.
-        enum Episodes: String, CaseIterable, Codable {
-        }
-        """
-        
-        /* Test */
-        
-        XCTAssertEqual(
-            generator.generateEnum(type).joined(separator: "\n"),
-            expected
-        )
-    }
-    
-    func testGenerateEnumWithoutDescription() {
-        let type = GraphQL.EnumType(
-            name: "Episodes",
-            description: "Collection of all StarWars episodes.",
-            enumValues: [
-                GraphQL.EnumValue(
-                    name: "NEWHOPE",
-                    description: "Released in 1977.",
-                    isDeprecated: false,
-                    deprecationReason: nil
-                ),
-            ]
-        )
-        
-        let expected = """
-        /// Collection of all StarWars episodes.
-        enum Episodes: String, CaseIterable, Codable {
-            /// Released in 1977.
-            case newhope = "NEWHOPE"
-            
-        }
-        """
-        
-        /* Test */
-        
-        XCTAssertEqual(
-            generator.generateEnum(type).joined(separator: "\n"),
-            expected
-        )
-    }
-    
-    
-    
-    func testGenerateEnumWithDescription() {
+    func testGenerateEnum() throws {
         /* Declaration */
-        
-        let type = GraphQL.EnumType(
+
+        let type = EnumType(
             name: "Episodes",
             description: "Collection of all StarWars episodes.",
             enumValues: [
-                GraphQL.EnumValue(
+                EnumValue(
                     name: "NEWHOPE",
                     description: "Released in 1977.",
                     isDeprecated: false,
                     deprecationReason: nil
                 ),
-                GraphQL.EnumValue(
+                EnumValue(
                     name: "EMPIRE",
                     description: nil,
                     isDeprecated: false,
                     deprecationReason: nil
                 ),
-                GraphQL.EnumValue(
+                EnumValue(
                     name: "JEDI",
                     description: "Released in 1983.",
                     isDeprecated: true,
                     deprecationReason: "Was too good."
                 ),
-                GraphQL.EnumValue(
+                EnumValue(
                     name: "SKYWALKER",
                     description: nil,
                     isDeprecated: true,
@@ -94,32 +37,30 @@ final class EnumTests: XCTestCase {
                 ),
             ]
         )
-        
-        let expected = """
-        /// Collection of all StarWars episodes.
-        enum Episodes: String, CaseIterable, Codable {
-            /// Released in 1977.
-            case newhope = "NEWHOPE"
-            
-            case empire = "EMPIRE"
-            
-            /// Released in 1983.
-            @available(*, deprecated, message: "Was too good.")
-            case jedi = "JEDI"
-            
-            @available(*, deprecated, message: "")
-            case skywalker = "SKYWALKER"
-            
+
+        let generated = try type.declaration.format()
+
+        let expected = try """
+        extension Enums {
+            /// Collection of all StarWars episodes.
+            enum Episodes: String, CaseIterable, Codable {
+                /// Released in 1977.
+
+                case newhope = "NEWHOPE"
+
+                case empire = "EMPIRE"
+                /// Released in 1983.
+                @available(*, deprecated, message: "Was too good.")
+                case jedi = "JEDI"
+
+                @available(*, deprecated, message: "")
+                case skywalker = "SKYWALKER"
+            }
         }
-        """
-        
+        """.format()
+
         /* Test */
-        
-        XCTAssertEqual(
-            generator.generateEnum(type).joined(separator: "\n"),
-            expected
-        )
+
+        XCTAssertEqual(generated, expected)
     }
 }
-
-
