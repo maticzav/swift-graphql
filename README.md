@@ -116,6 +116,34 @@ You can also run `swift-graphql help` to learn more about options and how it wor
 ---
 
 <!-- index-start -->
+
+- [Why?](#why)
+- [How does it work?](#howdoesitwork)
+- [Sending requests](#sendingrequests)
+- [Reference](#reference)
+  - [`send`](#send)
+  - [`listen`](#listen)
+  - [`Selection<Type, Scope>`](#selectiontypescope)
+    - [Nullable, list, and non-nullable fields](#nullablelistandnonnullablefields)
+    - [Making selection on the entire type](#makingselectionontheentiretype)
+    - [Mapping Selection](#mappingselection)
+  - [`Unions`](#unions)
+  - [`Interfaces`](#interfaces)
+  - [`OptionalArgument`](#optionalargument)
+  - [`Codecs` - Custom Scalars](#codecscustomscalars)
+  - [SwiftGraphQLCodegen](#swiftgraphqlcodegen)
+    - [`generate`](#generate)
+- [F.A.Q](#faq)
+  - [How do I create a fragment?](#howdoicreateafragment)
+  - [How do I create an alias?](#howdoicreateanalias)
+  - [My queries include strange alias. What is that about?](#myqueriesincludestrangealiaswhatisthatabout)
+  - [How do we populate the values?](#howdowepopulatethevalues)
+  - [Why do I have to include try whenever I select something?](#whydoihavetoincludetrywheneveriselectsomething)
+  - [What are the pitfalls in Apollo iOS that you were referring to at the top?](#whatarethepitfallsinapolloiosthatyouwerereferringtoatthetop)
+- [Roadmap and Contributing](#roadmapandcontributing)
+- [Thank you](#thankyou)
+  - [License](#license)
+
 <!-- index-end -->
 
 ## Why?
@@ -610,6 +638,6 @@ Thank you! 🙌
 
 ---
 
-### License
+## License
 
 MIT @ Matic Zavadlal

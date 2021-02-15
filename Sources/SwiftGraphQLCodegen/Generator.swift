@@ -32,6 +32,7 @@ public struct GraphQLCodegen {
     /// Generates the code that can be used to define selections.
     func generate(schema: Schema) throws -> String {
         let code = """
+        // This file was auto-generated using maticzav/swift-graphql. DO NOT EDIT MANUALLY!
         import SwiftGraphQL
 
         // MARK: - Operations

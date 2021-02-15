@@ -66,7 +66,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.id[field.alias!] {
                     return data
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return String.mockValue
             }
@@ -171,7 +171,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.ids[field.alias!] {
                     return data
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return []
             }
@@ -210,7 +210,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.episode[field.alias!] {
                     return data
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return Enums.Episode.allCases.first!
             }
@@ -279,7 +279,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.episode[field.alias!] {
                     return data
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return []
             }
@@ -321,7 +321,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.hero[field.alias!] {
                     return try selection.decode(data: data)
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return selection.mock()
             }
@@ -394,7 +394,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.hero[field.alias!] {
                     return try selection.decode(data: data)
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return selection.mock()
             }
@@ -439,7 +439,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.hero[field.alias!] {
                     return data
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return String.mockValue
             }
@@ -482,7 +482,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.hero[field.alias!] {
                     return data
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return String.mockValue
             }
@@ -525,7 +525,7 @@ final class FieldTests: XCTestCase {
                 if let data = data.hero[field.alias!] {
                     return data
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
             case .mocking:
                 return String.mockValue
             }

@@ -15,7 +15,7 @@ export const Subscription = subscriptionType({
           }
         })()
       },
-      resolve(eventData) {
+      resolve(eventData: number) {
         return eventData
       },
     })

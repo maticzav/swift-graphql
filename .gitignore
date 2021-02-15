@@ -17,6 +17,7 @@ node_modules
 
 package.tgz
 
+dist
 responses/*
 !responses/.gitkeep
 

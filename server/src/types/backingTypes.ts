@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { NexusGenEnums } from '../star-wars-typegen'
+import { NexusGenEnums } from '../nexus.types'
 
 export interface ContextType {
   req: Request

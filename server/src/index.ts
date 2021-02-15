@@ -69,10 +69,14 @@ const server = new ApolloServer({
   ],
 })
 
-const port = process.env.PORT || 4000
+/* Start */
 
-server.listen({ port }, () => {
-  console.log(
-    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`,
-  )
-})
+if (require.main === module) {
+  const port = process.env.PORT || 4000
+
+  server.listen({ port }, () => {
+    console.log(
+      `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`,
+    )
+  })
+}
