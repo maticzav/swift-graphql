@@ -17,8 +17,4 @@ jobs:
       # Build
       - run: yarn install --skip-builds
       - name: Generate table of contents
-        run: |
-          cd scripts
-          yarn g:tsn index.ts
-          git commit -am "chore: generate TOC"
-          git push
+        run: ./scripts/toc.sh
