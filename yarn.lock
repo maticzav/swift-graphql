@@ -3064,6 +3064,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/prettier@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "@types/prettier@npm:2.2.1"
+  checksum: 9dc257dfc51eab6bc1e9ce58df94b309a206b2cdc6768709de3d20f70ae545c616bbc46add6d66f66cfa6cfbb0613dd09e6b6028ff6ff8ba9d3625f38d85cc66
+  languageName: node
+  linkType: hard
+
 "@types/prop-types@npm:*":
   version: 15.7.3
   resolution: "@types/prop-types@npm:15.7.3"
@@ -14863,6 +14870,7 @@ fsevents@~2.3.1:
   resolution: "swift-graphql@workspace:."
   dependencies:
     "@types/marked": ^1.2.2
+    "@types/prettier": ^2.2.1
     husky: ^4.3.6
     marked: ^2.0.0
     prettier: ^2.2.1

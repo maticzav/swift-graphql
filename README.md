@@ -115,7 +115,7 @@ You can also run `swift-graphql help` to learn more about options and how it wor
 
 ---
 
-<!-- index-start -->
+  <!-- index-start -->
 
 - [Why?](#why)
 - [How does it work?](#howdoesitwork)
@@ -142,8 +142,7 @@ You can also run `swift-graphql help` to learn more about options and how it wor
   - [What are the pitfalls in Apollo iOS that you were referring to at the top?](#whatarethepitfallsinapolloiosthatyouwerereferringtoatthetop)
 - [Roadmap and Contributing](#roadmapandcontributing)
 - [Thank you](#thankyou)
-  - [License](#license)
-
+- [License](#license)
 <!-- index-end -->
 
 ## Why?

@@ -1,6 +1,7 @@
 import fs from 'fs'
-import path from 'path'
 import marked from 'marked'
+import path from 'path'
+import prettier from 'prettier'
 import { promisify } from 'util'
 
 const readfile = promisify(fs.readFile)
@@ -35,7 +36,20 @@ main()
  * Updates table of contents with a given index.
  */
 function update(raw: string, index: string): string {
-  return raw.replace(/<!-- index-start -->([\w\W]*)<!-- index-end -->/, index)
+  index = `
+  <!-- index-start -->
+  ${index}
+  <!-- index-end -->
+  `
+
+  const source = raw.replace(
+    /<!-- index-start -->([\w\W]*)<!-- index-end -->/,
+    index,
+  )
+
+  return prettier.format(source, {
+    parser: 'markdown',
+  })
 }
 
 /**
