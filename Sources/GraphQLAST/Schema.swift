@@ -15,29 +15,29 @@ public struct Schema: Decodable, Equatable {
     public init(types: [NamedType], query: String, mutation: String? = nil, subscription: String? = nil) {
         self.types = types
 
-        self._query = query
-        self._mutation = mutation
-        self._subscription = subscription
+        _query = query
+        _mutation = mutation
+        _subscription = subscription
     }
-    
+
     // MARK: - Decoder
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        self.types = try container.decode([NamedType].self, forKey: .types)
-        self._query = try container.decode(_Operation.self, forKey: .query).name
-        self._mutation = try container.decode(_Operation?.self, forKey: .mutation)?.name
-        self._subscription = try container.decode(_Operation?.self, forKey: .subscription)?.name
+
+        types = try container.decode([NamedType].self, forKey: .types)
+        _query = try container.decode(_Operation.self, forKey: .query).name
+        _mutation = try container.decode(_Operation?.self, forKey: .mutation)?.name
+        _subscription = try container.decode(_Operation?.self, forKey: .subscription)?.name
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case types
         case query = "queryType"
         case mutation = "mutationType"
         case subscription = "subscriptionType"
     }
-    
+
     private struct _Operation: Codable {
         var name: String
     }

@@ -33,11 +33,11 @@ extension Collection where Element == ObjectTypeRef {
     private var selection: String {
         map { $0.fragment }.joined(separator: ", ")
     }
-    
+
     private func decoders(objects: [ObjectType]) -> String {
-        self.map { $0.decoder(objects: objects) }.lines
+        map { $0.decoder(objects: objects) }.lines
     }
-    
+
     private var mock: String {
         first!.namedType.name.camelCase
     }

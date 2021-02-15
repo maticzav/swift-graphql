@@ -20,7 +20,7 @@ extension InterfaceType {
         }
 
         extension Interfaces.\(name): Decodable {
-        \(try self.allFields(objects: objects).decoder(scalars: scalars, includeTypenameDecoder: true))
+        \(try allFields(objects: objects).decoder(scalars: scalars, includeTypenameDecoder: true))
         }
 
         extension Fields where TypeLock == Interfaces.\(name) {

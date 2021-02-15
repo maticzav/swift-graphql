@@ -68,3 +68,9 @@ let query = Selection<Data, Objects.Query> {
         characters: try $0.characters(selection: Selection.list(character))
     )
 }
+
+// MARK: - Subscriptions
+
+let subscription = Selection.Subscription {
+    return try $0.number()
+}

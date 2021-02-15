@@ -21,7 +21,7 @@ extension GraphQLResult where TypeLock: Decodable {
             errors = response.errors
         } catch {
             // Catches all errors and turns them into a bad payload SwiftGraphQL error.
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         }
     }
 
@@ -36,7 +36,7 @@ extension GraphQLResult where TypeLock: Decodable {
             errors = response.payload.errors
         } catch {
             // Catches all errors and turns them into a bad payload SwiftGraphQL error.
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         }
     }
 

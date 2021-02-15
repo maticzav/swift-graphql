@@ -6,15 +6,15 @@ class Model: ObservableObject {
 
     @Published private(set) var data = Data()
     @Published private(set) var subscriptionData: Int = 0
-    private var token: Token?
+    private var socket: URLSessionWebSocketTask?
 
     // MARK: - Intentions
 
     func fetch() {
         print("FETCHING")
 
-//         Perform query.
-        SG.send(
+        // Perform query.
+        send(
             query,
             to: "http://localhost:4000",
             operationName: "Query",
@@ -27,8 +27,8 @@ class Model: ObservableObject {
                 DispatchQueue.main.async {
                     self.data = data.data
                 }
-            } catch let error {
-                print(error)
+            } catch {
+                print("FETCH", error)
             }
         }
     }
@@ -36,12 +36,9 @@ class Model: ObservableObject {
     func startListening() {
         print("STARTED LISTENING")
 
-        let subscription = Selection<Int, Objects.Subscription> {
-            return try $0.number()
-        }
-
-        token = SG.listen(
-            for: subscription.nonNullOrFail,
+        // Create a subcription.
+        socket = listen(
+            for: subscription,
             on: "ws://localhost:4000/graphql"
         ) { [weak self] result in
             do {
@@ -50,7 +47,7 @@ class Model: ObservableObject {
                     self?.subscriptionData = resultValue.data
                 }
             } catch {
-//                print("SUBS", error)
+                print("SUBS", error)
             }
         }
     }

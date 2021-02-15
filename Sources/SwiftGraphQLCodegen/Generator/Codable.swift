@@ -45,12 +45,12 @@ extension Structure {
     /// Returns a definition of a struct that represents a given structure.
     func `struct`(name: String, objects: [ObjectType], scalars: ScalarMap) throws -> String {
         let typename: String
-        if let object = self.possibleTypes.first, self.possibleTypes.count == 1 {
+        if let object = possibleTypes.first, self.possibleTypes.count == 1 {
             typename = "let __typename: TypeName = .\(object.name.camelCase)"
         } else {
             typename = "let __typename: TypeName"
         }
-        
+
         let properties = try allFields(objects: objects)
             .sorted(by: { $0.name < $1.name })
             .map { try $0.declaration(scalars: scalars) }
@@ -87,9 +87,9 @@ private extension Field {
 extension Collection where Element == Field {
     /// Returns a function definition for decoder initializer.
     func decoder(scalars: ScalarMap, includeTypenameDecoder typename: Bool = false) throws -> String {
-        let cases: String = try self.map { try $0.decoder(scalars: scalars) }
+        let cases: String = try map { try $0.decoder(scalars: scalars) }
             .joined(separator: "\n")
-        let mappings: String = self.map { "self.\($0.name.camelCase) = map[\"\($0.name.camelCase)\"]" }
+        let mappings: String = map { "self.\($0.name.camelCase) = map[\"\($0.name.camelCase)\"]" }
             .joined(separator: "\n")
 
         return """

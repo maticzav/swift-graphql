@@ -18,7 +18,7 @@ extension ObjectType {
         }
 
         extension Objects.\(name): Decodable {
-        \(try self.allFields(objects: objects).decoder(scalars: scalars))
+        \(try allFields(objects: objects).decoder(scalars: scalars))
         }
 
         extension Fields where TypeLock == Objects.\(name) {

@@ -21,7 +21,7 @@ extension UnionType {
         }
 
         extension Unions.\(name): Decodable {
-        \(try self.allFields(objects: objects).decoder(scalars: scalars, includeTypenameDecoder: true))
+        \(try allFields(objects: objects).decoder(scalars: scalars, includeTypenameDecoder: true))
         }
 
         \(possibleTypes.selection(name: "Unions.\(name)", objects: objects))

@@ -68,7 +68,7 @@ extension Field {
     }
 
     private func fParameters(scalars: ScalarMap) throws -> String {
-        try args.parameters(field: self, scalars: scalars, typelock: self.type.type(for: typelock))
+        try args.parameters(field: self, scalars: scalars, typelock: type.type(for: typelock))
     }
 
     /// Returns a typelock value for this field.
@@ -222,7 +222,7 @@ private extension Field {
                 if let data = data.\(name)[field.alias!] {
                     return data
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
                 """
             }
         case .interface, .object, .union:
@@ -236,7 +236,7 @@ private extension Field {
                 if let data = data.\(name)[field.alias!] {
                     return try selection.decode(data: data)
                 }
-                throw SG.HttpError.badpayload
+                throw HttpError.badpayload
                 """
             }
         }

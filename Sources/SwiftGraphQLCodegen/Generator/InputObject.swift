@@ -16,7 +16,7 @@ extension InputObjectType {
     func declaration(scalars: ScalarMap) throws -> String {
         """
         extension InputObjects {
-            struct \(self.name.pascalCase): Encodable, Hashable {
+            struct \(name.pascalCase): Encodable, Hashable {
 
             \(try inputFields.map { try $0.declaration(scalars: scalars) }.joined(separator: "\n"))
 

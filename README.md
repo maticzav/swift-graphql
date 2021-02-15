@@ -10,7 +10,8 @@
 - 🦅 **Swift-First:** It lets you use Swift constructs in favour of GraphQL language.
 - 🏖 **Time Saving:** I've built it so you don't have to waste your precious time.
 - 🏔 **High Level:** You don't have to worry about naming collisions, variables, _anything_. Just Swift.
-- ☝️ **Generate once:** Generate once - whenever your schema changes.
+- ☝️ **Generate once:** Only generate selection when your schema changes.
+- ☎️ **Subscriptions:** It supports subscriptions as well.
 
 ## Overview
 
@@ -49,7 +50,7 @@ let query = Selection.Query {
 }
 
 // Perform the query.
-SG.send(query, to: "http://swift-graphql.heroku.com") { result in
+send(query, to: "http://swift-graphql.heroku.com") { result in
     if let data = try? result.get() {
         print(data) // [Human]
     }
@@ -105,7 +106,7 @@ cd swift-graphql
 make install
 ```
 
-To run the generator type `swift-graphql`. If you are using any custom scalars, you should create a configuration file called `swiftgraphql.yml` and put in data-type mappings as a key-value dictionary like this.
+To run the generator type `swift-graphql`. If you are using any custom scalars, you should create a configuration file called `swiftgraphql.yml` and put in data-type mappings as a key-value dictionary like this. Keys should be GraphQL types, and values should be SwiftGraphQL Codecs.
 
 ```yml
 scalars:
@@ -198,9 +199,17 @@ let query = Selection.Query {
 
 > Take a breath. This is it. Pretty neat, huh?! 😄
 
-## Documentation
+## Sending requests
 
-### `SwiftGraphQL`
+Once you've created a query-, mutation- or a subscription-type selection, you may call one of the `send` and `listen` methods that SwiftGrpahQL exposes. To fetch a query or send a mutation, use `send` method. And to listen for subscriptions, use `listen` method.
+
+```swift
+
+```
+
+## Reference
+
+### `send`
 
 - `SwiftGraphQL`
 
@@ -209,7 +218,22 @@ SwiftGraphQL exposes only two methods - `send` - that lets you send your query t
 You can pass in the dictionary of `headers` to implement authorization mechanism.
 
 ```swift
-SG.send(query, to: "http://localhost:4000") { result in
+send(query, to: "http://localhost:4000") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
+}
+```
+
+### `listen`
+
+- `SwiftGraphQL`
+
+Lets you listen for subscription events coming from your server.
+You can pass in the dictionary of `headers` to implement authorization mechanism.
+
+```swift
+listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
     if let data = try? result.get() {
         print(data)
     }
@@ -227,6 +251,8 @@ Selection lets you select fields that you want to fetch from the query on a part
 SwiftGraphQL has generated phantom types for your operations, objects, interfaces and unions. You can find them by typing `Unions.`/`Interfaces.`/`Objects.`/`Operations.` followed by a name from your GraphQL schema. You plug those into the `Scope` parameter.
 
 The other parameter `Type` is what your constructor should return.
+
+> We generate type alias in selection which let you use XCode intellisnse and may infer your return type. They work like `Selection.ObjectName`.
 
 ##### Nullable, list, and non-nullable fields
 
@@ -406,7 +432,7 @@ You'd usually want to create a Swift enumerator and have different selecitons re
 
 GraphQL's `null` value in an input type may be entirely omitted to represent the absence of a value or supplied as `null` to provide `null` value. This comes in especially handy in mutations.
 
-Because of that, every input object that has an optional property accepts an optional argument that may either be `.present(value)`, `.absent` or `.null`.
+Because of that, every input object that has an optional property accepts an optional argument that may either be `.present(value)`, `.absent()` or `.null()`. We use functions to support recursive type annotations that GraphQL allows.
 
 > NOTE: Every nullable argument is by default absent so you don't have to write boilerplate.
 
@@ -471,21 +497,15 @@ struct DateTime: Codec {
 
 - `SwiftGraphQLCodegen`
 
-Lets you generate the code based on a remote schema. It accepts an optional argument `options`.
+Lets you generate the code based on a remote schema. Use `generate` method to generate selection code for `SwiftGraphQL`.
 
-Use `.generate` method to generate the code into a specified target. SwiftGraphQL assumes that the target file already exists.
-
-I suggest using John Sundell's Files library for navigation between folders and file creation. Check the example above to see how I use it.
-
-### `GraphQLCodegen.Options`
-
-- `SwiftGraphQLCodegen`
-
-Lets you customize code generation. Accepts one property - `scalarMappings` which should be a dictionary of strings that map keys of GraphQL scalars into Swift scalars.
+> I suggest you try to do most of the things with built-in CLI and only opt-in for the codegen when absolutely necessary.
 
 ```swift
 let scalars: [String: String] = ["Date": "DateTime"]
-let options = GraphQLCodegen.Options(scalarMappings: scalars)
+let generator = GraphQLCodegen(scalars: config.scalars)
+
+let code = try generator.generate(from: url)
 ```
 
 ---

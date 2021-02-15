@@ -49,7 +49,7 @@ let package = Package(
                 "SwiftGraphQLCodegen",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "Yams",
-                "Files"
+                "Files",
             ],
             path: "Sources/SwiftGraphQLCLI"
         ),

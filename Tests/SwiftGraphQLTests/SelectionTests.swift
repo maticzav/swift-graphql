@@ -86,7 +86,7 @@ final class SelectionTests: XCTestCase {
             )
         ) { (error) -> Void in
             // Errors with wrong data.
-            XCTAssertEqual(error as? SG.HttpError, SG.HttpError.badpayload)
+            XCTAssertEqual(error as? HttpError, HttpError.badpayload)
         }
     }
 

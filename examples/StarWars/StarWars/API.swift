@@ -72,7 +72,7 @@ extension Fields where TypeLock == Objects.Mutation {
             if let data = data.mutate[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return Bool.mockValue
         }
@@ -113,16 +113,16 @@ extension Objects.Droid: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
             case "primaryFunction":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "appearsIn":
                 if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "id":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             default:
@@ -136,9 +136,9 @@ extension Objects.Droid: Decodable {
         }
 
         name = map["name"]
-        id = map["id"]
         primaryFunction = map["primaryFunction"]
         appearsIn = map["appearsIn"]
+        id = map["id"]
     }
 }
 
@@ -155,7 +155,7 @@ extension Fields where TypeLock == Objects.Droid {
             if let data = data.id[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -173,7 +173,7 @@ extension Fields where TypeLock == Objects.Droid {
             if let data = data.name[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -191,7 +191,7 @@ extension Fields where TypeLock == Objects.Droid {
             if let data = data.primaryFunction[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -209,7 +209,7 @@ extension Fields where TypeLock == Objects.Droid {
             if let data = data.appearsIn[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return []
         }
@@ -255,16 +255,16 @@ extension Objects.Human: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "homePlanet":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+            case "id":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             default:
@@ -279,9 +279,9 @@ extension Objects.Human: Decodable {
 
         infoUrl = map["infoUrl"]
         name = map["name"]
-        id = map["id"]
-        homePlanet = map["homePlanet"]
         appearsIn = map["appearsIn"]
+        homePlanet = map["homePlanet"]
+        id = map["id"]
     }
 }
 
@@ -298,7 +298,7 @@ extension Fields where TypeLock == Objects.Human {
             if let data = data.id[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -316,7 +316,7 @@ extension Fields where TypeLock == Objects.Human {
             if let data = data.name[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -351,7 +351,7 @@ extension Fields where TypeLock == Objects.Human {
             if let data = data.appearsIn[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return []
         }
@@ -409,20 +409,16 @@ extension Objects.Query: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
-            case "whoami":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "luke":
-                if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
+            case "humans":
+                if let value = try container.decode([Objects.Human]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "human":
                 if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "time":
-                if let value = try container.decode(DateTime?.self, forKey: codingKey) {
+            case "greeting":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "droids":
@@ -433,10 +429,6 @@ extension Objects.Query: Decodable {
                 if let value = try container.decode(Objects.Droid?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "greeting":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
             case "characters":
                 if let value = try container.decode([Interfaces.Character]?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
@@ -445,8 +437,16 @@ extension Objects.Query: Decodable {
                 if let value = try container.decode(Unions.CharacterUnion?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "humans":
-                if let value = try container.decode([Objects.Human]?.self, forKey: codingKey) {
+            case "luke":
+                if let value = try container.decode(Objects.Human?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "whoami":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "time":
+                if let value = try container.decode(DateTime?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             default:
@@ -459,16 +459,16 @@ extension Objects.Query: Decodable {
             }
         }
 
-        whoami = map["whoami"]
-        luke = map["luke"]
+        humans = map["humans"]
         human = map["human"]
-        time = map["time"]
+        greeting = map["greeting"]
         droids = map["droids"]
         droid = map["droid"]
-        greeting = map["greeting"]
         characters = map["characters"]
         character = map["character"]
-        humans = map["humans"]
+        luke = map["luke"]
+        whoami = map["whoami"]
+        time = map["time"]
     }
 }
 
@@ -550,7 +550,7 @@ extension Fields where TypeLock == Objects.Query {
             if let data = data.humans[field.alias!] {
                 return try selection.decode(data: data)
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return selection.mock()
         }
@@ -569,7 +569,7 @@ extension Fields where TypeLock == Objects.Query {
             if let data = data.droids[field.alias!] {
                 return try selection.decode(data: data)
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return selection.mock()
         }
@@ -588,7 +588,7 @@ extension Fields where TypeLock == Objects.Query {
             if let data = data.characters[field.alias!] {
                 return try selection.decode(data: data)
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return selection.mock()
         }
@@ -606,7 +606,7 @@ extension Fields where TypeLock == Objects.Query {
             if let data = data.greeting[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -624,7 +624,7 @@ extension Fields where TypeLock == Objects.Query {
             if let data = data.whoami[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -642,7 +642,7 @@ extension Fields where TypeLock == Objects.Query {
             if let data = data.time[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return DateTime.mockValue
         }
@@ -709,7 +709,7 @@ extension Fields where TypeLock == Objects.Subscription {
             if let data = data.number[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return Int.mockValue
         }
@@ -752,11 +752,15 @@ extension Interfaces.Character: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
-            case "name":
+            case "homePlanet":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "homePlanet":
+            case "primaryFunction":
+                if let value = try container.decode(String?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "name":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -765,10 +769,6 @@ extension Interfaces.Character: Decodable {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
             case "id":
-                if let value = try container.decode(String?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "primaryFunction":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -788,11 +788,11 @@ extension Interfaces.Character: Decodable {
 
         __typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
 
-        name = map["name"]
         homePlanet = map["homePlanet"]
+        primaryFunction = map["primaryFunction"]
+        name = map["name"]
         infoUrl = map["infoUrl"]
         id = map["id"]
-        primaryFunction = map["primaryFunction"]
         appearsIn = map["appearsIn"]
     }
 }
@@ -812,7 +812,7 @@ extension Fields where TypeLock == Interfaces.Character {
             if let data = data.id[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -832,7 +832,7 @@ extension Fields where TypeLock == Interfaces.Character {
             if let data = data.name[field.alias!] {
                 return data
             }
-            throw SG.HttpError.badpayload
+            throw HttpError.badpayload
         case .mocking:
             return String.mockValue
         }
@@ -895,11 +895,7 @@ extension Unions.CharacterUnion: Decodable {
             let field = GraphQLField.getFieldNameFromAlias(alias)
 
             switch field {
-            case "appearsIn":
-                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
-                    map.set(key: field, hash: alias, value: value as Any)
-                }
-            case "name":
+            case "infoUrl":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -911,11 +907,15 @@ extension Unions.CharacterUnion: Decodable {
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "homePlanet":
+            case "name":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
-            case "infoUrl":
+            case "appearsIn":
+                if let value = try container.decode([Enums.Episode]?.self, forKey: codingKey) {
+                    map.set(key: field, hash: alias, value: value as Any)
+                }
+            case "homePlanet":
                 if let value = try container.decode(String?.self, forKey: codingKey) {
                     map.set(key: field, hash: alias, value: value as Any)
                 }
@@ -931,12 +931,12 @@ extension Unions.CharacterUnion: Decodable {
 
         __typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
 
-        appearsIn = map["appearsIn"]
-        name = map["name"]
+        infoUrl = map["infoUrl"]
         primaryFunction = map["primaryFunction"]
         id = map["id"]
+        name = map["name"]
+        appearsIn = map["appearsIn"]
         homePlanet = map["homePlanet"]
-        infoUrl = map["infoUrl"]
     }
 }
 

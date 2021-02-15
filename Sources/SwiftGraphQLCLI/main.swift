@@ -27,10 +27,10 @@ struct SwiftGraphQLCLI: ParsableCommand {
         guard let url = URL(string: endpoint) else {
             SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.endpoint)
         }
-        
+
         // Load configuration if config path is present, otherwise use default.
         let config: Config
-        
+
         if let configPath = self.config {
             let raw = try Folder.current.file(at: configPath).read()
             config = try Config(from: raw)
@@ -41,14 +41,14 @@ struct SwiftGraphQLCLI: ParsableCommand {
         // Generate the code.
         let generator = GraphQLCodegen(scalars: config.scalars)
         let code = try generator.generate(from: url)
-        
+
         // Write to target file or stdout.
-        if let outputPath = self.output {
+        if let outputPath = output {
             try Folder.current.file(at: outputPath).write(code)
         } else {
             FileHandle.standardOutput.write(code.data(using: .utf8)!)
         }
-        
+
         // The end
     }
 }
@@ -57,7 +57,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
 /*
  swiftgraphql.yml
- 
+
  ```yml
  scalars:
      Date: DateTime
@@ -67,27 +67,25 @@ struct SwiftGraphQLCLI: ParsableCommand {
 struct Config: Codable, Equatable {
     /// Key-Value dictionary of scalar mappings.
     let scalars: ScalarMap
-    
+
     // MARK: - Initializers
-    
+
     /// Creates an empty configuration instance.
     init() {
         scalars = ScalarMap()
     }
-    
+
     /// Creates a new config instance from given parameters.
     init(scalars: ScalarMap) {
         self.scalars = scalars
     }
-    
+
     /// Tries to decode the configuration from a string.
     init(from data: Data) throws {
         let decoder = YAMLDecoder()
         self = try decoder.decode(Config.self, from: data)
     }
 }
-
-
 
 // MARK: - Errors
 
