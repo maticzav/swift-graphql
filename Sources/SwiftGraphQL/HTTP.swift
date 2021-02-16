@@ -124,7 +124,7 @@ private func send<Type, TypeLock>(
 
 // MARK: - Listen
 
-/// Observe a subscription for as long as you keep Token in memory
+/// Starts a webhook listener and returns a URLSessionWebSocket that you may use to manipulate session.
 ///
 /// - parameter endpoint: Server endpoint URL.
 /// - parameter operationName: The name of the GraphQL query.
@@ -151,7 +151,7 @@ public func listen<Type, TypeLock>(
     )
 }
 
-/// Observe a subscription for as long as you keep Token in memory
+/// Starts a webhook listener and returns a URLSessionWebSocket that you may use to manipulate session.
 ///
 /// - Note: This is a shortcut function for when you are expecting the result.
 ///         The only difference between this one and the other one is that you may select
@@ -182,7 +182,7 @@ public func listen<Type, TypeLock>(
     )
 }
 
-/// Starts a webhook listener.
+/// Starts a webhook listener and returns a URLSessionWebSocket that you may use to close session.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 private func listen<Type, TypeLock>(
     selection: Selection<Type, TypeLock?>,

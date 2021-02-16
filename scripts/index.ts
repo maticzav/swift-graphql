@@ -101,7 +101,11 @@ function strip(raw: string): string {
  * Returns a heading link that may be used to navigate around.
  */
 function linkify(heading: string): string {
-  return heading.toLowerCase().replace(/[^\w]/g, '').split(' ').join('-')
+  return heading
+    .toLowerCase()
+    .split(/\s+/)
+    .join('-')
+    .replace(/[^-\w]/g, '')
 }
 
 /**

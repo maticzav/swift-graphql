@@ -118,30 +118,30 @@ You can also run `swift-graphql help` to learn more about options and how it wor
   <!-- index-start -->
 
 - [Why?](#why)
-- [How does it work?](#howdoesitwork)
-- [Sending requests](#sendingrequests)
+- [How does it work?](#how-does-it-work)
+- [Sending requests](#sending-requests)
 - [Reference](#reference)
   - [`send`](#send)
   - [`listen`](#listen)
-  - [`Selection<Type, Scope>`](#selectiontypescope)
-    - [Nullable, list, and non-nullable fields](#nullablelistandnonnullablefields)
-    - [Making selection on the entire type](#makingselectionontheentiretype)
-    - [Mapping Selection](#mappingselection)
+  - [`Selection<Type, Scope>`](#selectiontype-scope)
+    - [Nullable, list, and non-nullable fields](#nullable-list-and-non-nullable-fields)
+    - [Making selection on the entire type](#making-selection-on-the-entire-type)
+    - [Mapping Selection](#mapping-selection)
   - [`Unions`](#unions)
   - [`Interfaces`](#interfaces)
   - [`OptionalArgument`](#optionalargument)
-  - [`Codecs` - Custom Scalars](#codecscustomscalars)
+  - [`Codecs` - Custom Scalars](#codecs---custom-scalars)
   - [SwiftGraphQLCodegen](#swiftgraphqlcodegen)
     - [`generate`](#generate)
 - [F.A.Q](#faq)
-  - [How do I create a fragment?](#howdoicreateafragment)
-  - [How do I create an alias?](#howdoicreateanalias)
-  - [My queries include strange alias. What is that about?](#myqueriesincludestrangealiaswhatisthatabout)
-  - [How do we populate the values?](#howdowepopulatethevalues)
-  - [Why do I have to include try whenever I select something?](#whydoihavetoincludetrywheneveriselectsomething)
-  - [What are the pitfalls in Apollo iOS that you were referring to at the top?](#whatarethepitfallsinapolloiosthatyouwerereferringtoatthetop)
-- [Roadmap and Contributing](#roadmapandcontributing)
-- [Thank you](#thankyou)
+  - [How do I create a fragment?](#how-do-i-create-a-fragment)
+  - [How do I create an alias?](#how-do-i-create-an-alias)
+  - [My queries include strange alias. What is that about?](#my-queries-include-strange-alias-what-is-that-about)
+  - [How do we populate the values?](#how-do-we-populate-the-values)
+  - [Why do I have to include try whenever I select something?](#why-do-i-have-to-include-try-whenever-i-select-something)
+  - [What are the pitfalls in Apollo iOS that you were referring to at the top?](#what-are-the-pitfalls-in-apollo-ios-that-you-were-referring-to-at-the-top)
+- [Roadmap and Contributing](#roadmap-and-contributing)
+- [Thank you](#thank-you)
 - [License](#license)
 <!-- index-end -->
 
@@ -254,11 +254,15 @@ listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
 
 ## Reference
 
+Here you can find in-depth overview of each function that SwiftGraphQL exposes.
+
+> SwiftGraphQL intentionally doesn't implement any caching mechanism. This is only a query library and it does that very well. You should implement caching functionality yourself, but you probably don't need it in most cases.
+
 ### `send`
 
 - `SwiftGraphQL`
 
-SwiftGraphQL exposes only two methods - `send` - that lets you send your query to your server and `listen` that lets you create subscription listeners. It uses URLRequest internally and shared URLSession to perform the request, and returns Swift's Request type with the data.
+Lets you send your query to your server. It uses URLRequest internally and shared URLSession to perform the request, and returns Swift's Request type with the data.
 
 You can pass in the dictionary of `headers` to implement authorization mechanism.
 
@@ -277,15 +281,19 @@ send(query, to: "http://localhost:4000") { result in
 Lets you listen for subscription events coming from your server.
 You can pass in the dictionary of `headers` to implement authorization mechanism.
 
+> ❗️ NOTE: You should handle the closing of sockets. SwiftGraphQL intentionally doesn't handle websocket state and only implements the decoding and sending mechanism.
+
 ```swift
-listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
+// Start the event.
+let task = listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
     if let data = try? result.get() {
         print(data)
     }
 }
-```
 
-> SwiftGraphQL intentionally doesn't implement any caching mechanism. This is only a query library and it does that very well. You should implement caching functionality yourself, but you probably don't need it in most cases.
+// To close the socket.
+task.close()
+```
 
 ### `Selection<Type, Scope>`
 
