@@ -16,9 +16,7 @@ jobs:
         run: swift build
       - name: Perform package tests
         run: swift test
-      - name: Integration tests with workflows
+      - name: Publish new brew version
         run: |
           make update_brew
-          git add .
-          git commit -m ":rocket: publish brew"
           git push

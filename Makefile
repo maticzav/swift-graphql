@@ -1,5 +1,5 @@
 TOOL_NAME = swift-graphql
-VERSION = $(git describe --abbrev=0 --tags)
+VERSION = $(shell git describe --abbrev=0 --tags)
 
 PREFIX = /usr/local
 INSTALL_PATH = $(PREFIX)/bin/$(TOOL_NAME)
