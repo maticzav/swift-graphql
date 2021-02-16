@@ -1,8 +1,8 @@
 class SwiftGraphQL < Formula
     desc "GraphQL code generator and client written in Swift"
     homepage "https://github.com/maticzav/SwiftGraphQL"
-    url "https://github.com/maticzav/swift-graphql/archive/2.0.0-beta.6.tar.gz"
-    sha256 "260f0551ee781a5110da34693941615464f8c1a6af2dccc0b03e867b2ac17c98"
+    url "https://github.com/maticzav/swift-graphql/archive/2.0.0.tar.gz"
+    sha256 "6f7184d00b5f132b6ce410359925d361c824250e79b282692733b389e1682085"
     head "https://github.com/maticzav/swift-graphql.git"
   
     depends_on :xcode
