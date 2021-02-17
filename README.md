@@ -60,7 +60,7 @@ send(query, to: "http://swift-graphql.heroku.com") { result in
 
 Make sure Xcode 11+ is installed first. Installation consists of two parts; you need to include the client in your iOS/macOS project, and locally generate the code using code generator.
 
-#### Installing SwiftGraphQL Client
+### Installing SwiftGraphQL Client
 
 To install it using Swift Package Manager, open the following menu item in Xcode:
 
