@@ -1,4 +1,4 @@
-class SwiftGraphQL < Formula
+class Swiftgraphql < Formula
     desc "GraphQL code generator and client written in Swift"
     homepage "https://github.com/maticzav/SwiftGraphQL"
     url "https://github.com/maticzav/swift-graphql/archive/2.0.0.tar.gz"

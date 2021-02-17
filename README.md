@@ -4,12 +4,14 @@
 
 > A GraphQL client that lets you forget about GraphQL.
 
+![CI Tests](https://github.com/maticzav/swift-graphql/workflows/Test/badge.svg)
+
 ## Features
 
 - ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
 - 🏖 **Time Saving:** I've built it so you don't have to waste your precious time.
 - ☝️ **Generate once:** Only when your schema changes.
-- ☎️ **Support subscriptions:** Listen to subscriptions using webhooks.
+- ☎️ **Subscriptions:** Listen to subscriptions using webhooks.
 - 🏔 **High Level:** You don't have to worry about naming collisions, variables, _anything_. Just Swift.
 
 ## Overview
