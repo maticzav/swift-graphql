@@ -23,8 +23,8 @@ public struct GraphQLCodegen {
     /// Generates a target SwiftGraphQL Selection file.
     ///
     /// - parameter from: GraphQL server endpoint.
-    public func generate(from endpoint: URL) throws -> String {
-        let schema = try Schema(from: endpoint)
+    public func generate(from endpoint: URL, withHeaders headers: [String: String] = [:]) throws -> String {
+        let schema = try Schema(from: endpoint, withHeaders: headers)
         let code = try generate(schema: schema)
         return code
     }
