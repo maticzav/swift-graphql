@@ -637,7 +637,7 @@ Here's a rough collection of ideas we might tackle next:
 
 ## Thank you
 
-I want to dedicate this last secion to everyone who helped me along the way.
+I want to dedicate this last section to everyone who helped me along the way.
 
 - First, I would like to thank Dillon Kearns, the author of [elm-graphql](http://github.com/dillonkearns/elm-graphql), who inspired me to write the library, and helped me understand the core principles behind his Elm version.
 - I would like to thank Peter Albert for giving me a chance to build this library, having faith that it's possible, and all the conversations that helped me push through the difficult parts of it.
