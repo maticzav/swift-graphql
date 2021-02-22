@@ -69,6 +69,10 @@ let reservedWords = [
     "throws",
     "true",
     "try",
+    /* Booleans */
+    "not",
+    "and",
+    "or",
     /* Keywords used in patterns */
     "_",
     // NOTE: There are other reserved keywords, but they aren't important in context.

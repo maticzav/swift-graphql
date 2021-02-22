@@ -174,7 +174,7 @@ private extension Collection where Element == InputValue {
 private extension InputValue {
     /// Returns a SwiftGraphQL Argument definition for a given input value.
     var argument: String {
-        #"Argument(name: "\#(name.camelCase)", type: "\#(type.argument)", value: \#(name.camelCase.normalize))"#
+        #"Argument(name: "\#(name)", type: "\#(type.argument)", value: \#(name.camelCase.normalize))"#
     }
 }
 

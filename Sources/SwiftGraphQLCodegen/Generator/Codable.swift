@@ -37,7 +37,7 @@ extension Structure {
             }
         }
 
-        return shared.unique(by: { $0.name })
+        return shared.unique(by: { $0.name }).sorted(by: {$0.name < $1.name})
     }
 }
 

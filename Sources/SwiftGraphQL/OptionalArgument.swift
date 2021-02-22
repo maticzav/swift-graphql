@@ -20,7 +20,7 @@ public struct OptionalArgument<Type>: OptionalArgumentProtocol {
     // MARK: - Initializer
 
     public enum Value {
-        case present(Type)
+        indirect case present(Type)
         case absent
         case null
     }

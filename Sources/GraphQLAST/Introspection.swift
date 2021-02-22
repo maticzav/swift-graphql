@@ -144,9 +144,13 @@ private struct IntrospectionQuery: Decodable, Equatable {
 // MARK: - Loader
 
 /// Fetches a schema from the provided endpoint using introspection query.
-func fetch(from endpoint: URL) throws -> Data {
+func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) throws -> Data {
     /* Compose a request. */
     var request = URLRequest(url: endpoint)
+
+    for header in headers {
+        request.setValue(header.value, forHTTPHeaderField: header.key)
+    }
 
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue("application/json", forHTTPHeaderField: "Accept")
@@ -209,8 +213,8 @@ enum IntrospectionError: Error {
 
 public extension Schema {
     /// Downloads a schema from the provided endpoint.
-    init(from endpoint: URL) throws {
-        let introspection: Data = try fetch(from: endpoint)
+    init(from endpoint: URL, withHeaders headers: [String: String] = [:]) throws {
+        let introspection: Data = try fetch(from: endpoint, withHeaders: headers)
         self = try parse(introspection)
     }
 }
