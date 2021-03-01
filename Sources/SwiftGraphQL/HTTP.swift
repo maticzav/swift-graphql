@@ -232,10 +232,8 @@ private func listen<Type, TypeLock>(
                 eventHandler(.failure(.network(error)))
             case let .success(message):
                 // Try to serialize the response.
-                if let data = message.data {
-                    if let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
-                        eventHandler(.success(result))
-                    }
+                if let data = message.data, let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
+                    eventHandler(.success(result))
                 } else {
                     eventHandler(.failure(.badpayload))
                 }
