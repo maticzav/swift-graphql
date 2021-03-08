@@ -19,6 +19,9 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
     @Option(name: .shortAndLong, help: "Relative path from CWD to the output file.")
     var output: String?
+    
+    @Option(help: "Include this Authorization header in the request to the endpoint.")
+    var authorization: String?
 
     // MARK: - Main
 
@@ -37,10 +40,16 @@ struct SwiftGraphQLCLI: ParsableCommand {
         } else {
             config = Config()
         }
+        
+        var headers: [String: String] = [:]
+        
+        if let authorization = authorization {
+            headers["Authorization"] = authorization
+        }
 
         // Generate the code.
         let generator = GraphQLCodegen(scalars: config.scalars)
-        let code = try generator.generate(from: url)
+        let code = try generator.generate(from: url, withHeaders: headers)
 
         // Write to target file or stdout.
         if let outputPath = output {
