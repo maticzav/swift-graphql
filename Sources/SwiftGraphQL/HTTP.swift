@@ -232,11 +232,16 @@ private func listen<Type, TypeLock>(
                 eventHandler(.failure(.network(error)))
             case let .success(message):
                 // Try to serialize the response.
-                if let data = message.data, let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
-                    eventHandler(.success(result))
-                } else {
-                    eventHandler(.failure(.badpayload))
-                }
+                if let data = message.data {
+                    let jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    if jsonObject?["type"] as? String == "data" {
+                        if let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
+                            eventHandler(.success(result))
+                        } else {
+                            eventHandler(.failure(.badpayload))
+                        }
+                    }
+                }   
             }
 
             // Receive next message
@@ -247,7 +252,17 @@ private func listen<Type, TypeLock>(
     // Clear request and create a session.
     request.httpBody = nil
     let socket: URLSessionWebSocketTask = URLSession.shared.webSocketTask(with: request)
-
+    
+    // GQL_CONNECTION_INIT
+    // Client sends this message after plain websocket connection to start the communication with the server
+    let connectionInit: Data = try! JSONSerialization.data(withJSONObject: ["type": "connection_init"])
+    socket.send(.data(connectionInit)) { error in
+        if let error = error {
+            print("GQL_CONNECTION_INIT error:", error)
+            return eventHandler(.failure(.network(error)))
+        }
+    }
+    
     // Attach receiver
     receiveNext(on: socket)
 
