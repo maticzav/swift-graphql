@@ -70,8 +70,21 @@ struct Character: Identifiable {
 //    let friend: [Character]
 }
 
-struct Human {
+struct Human: Queriable {
     let id: String
     let name: String
     let url: String?
+    
+    init(fields: Fields.Human) throws {
+        self.id = try fields.id()
+        self.name = try fields.name()
+        self.url = try fields.infoUrl()
+    }
 }
+
+
+
+
+//let query = Selection.Query {
+//    let chars = $0.character(id: "", selection: Character)
+//}

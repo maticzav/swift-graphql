@@ -141,10 +141,16 @@ public func listen<Type, TypeLock>(
     protocol webSocketProtocol: String = "graphql-subscriptions",
     onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
 ) -> URLSessionWebSocketTask? where TypeLock: GraphQLWebSocketOperation & Decodable {
-    listen(
+    // Validate that we got a valid url.
+    guard let url = URL(string: endpoint) else {
+        eventHandler(.failure(.badURL))
+        return nil
+    }
+    
+    return listen(
         selection: selection,
         operationName: operationName,
-        endpoint: endpoint,
+        endpoint: url,
         headers: headers,
         webSocketProtocol: webSocketProtocol,
         eventHandler: eventHandler
@@ -172,6 +178,70 @@ public func listen<Type, TypeLock>(
     protocol webSocketProtocol: String = "graphql-subscriptions",
     onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
 ) -> URLSessionWebSocketTask? where TypeLock: GraphQLWebSocketOperation & Decodable {
+    // Validate that we got a valid url.
+    guard let url = URL(string: endpoint) else {
+        eventHandler(.failure(.badURL))
+        return nil
+    }
+    
+    return listen(
+        selection: selection.nonNullOrFail,
+        operationName: operationName,
+        endpoint: url,
+        headers: headers,
+        webSocketProtocol: webSocketProtocol,
+        eventHandler: eventHandler
+    )
+}
+
+/// Starts a webhook listener and returns a URLSessionWebSocket that you may use to manipulate session.
+///
+/// - parameter endpoint: Server endpoint URL.
+/// - parameter operationName: The name of the GraphQL query.
+/// - parameter headers: A dictionary of key-value header pairs.
+/// - parameter onEvent: Closure that is called each subscription event.
+///
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+@discardableResult
+public func listen<Type, TypeLock>(
+    for selection: Selection<Type, TypeLock?>,
+    on endpoint: URL,
+    operationName: String? = nil,
+    headers: HttpHeaders = [:],
+    protocol webSocketProtocol: String = "graphql-subscriptions",
+    onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
+) -> URLSessionWebSocketTask? where TypeLock: GraphQLWebSocketOperation & Decodable {
+    listen(
+        selection: selection,
+        operationName: operationName,
+        endpoint: endpoint,
+        headers: headers,
+        webSocketProtocol: webSocketProtocol,
+        eventHandler: eventHandler
+    )
+}
+
+/// Starts a webhook listener and returns a URLSessionWebSocket that you may use to manipulate session.
+///
+/// - Note: This is a shortcut function for when you are expecting the result.
+///         The only difference between this one and the other one is that you may select
+///         on non-nullable TypeLock instead of a nullable one.
+///
+/// - parameter endpoint: Server endpoint URL.
+/// - parameter operationName: The name of the GraphQL query.
+/// - parameter headers: A dictionary of key-value header pairs.
+/// - parameter onEvent: Closure that is called each subscription event.
+///
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+@discardableResult
+public func listen<Type, TypeLock>(
+    for selection: Selection<Type, TypeLock>,
+    on endpoint: URL,
+    operationName: String? = nil,
+    headers: HttpHeaders = [:],
+    protocol webSocketProtocol: String = "graphql-subscriptions",
+    onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
+) -> URLSessionWebSocketTask? where TypeLock: GraphQLWebSocketOperation & Decodable {
     listen(
         selection: selection.nonNullOrFail,
         operationName: operationName,
@@ -182,27 +252,24 @@ public func listen<Type, TypeLock>(
     )
 }
 
+
+
+
 /// Starts a webhook listener and returns a URLSessionWebSocket that you may use to close session.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 private func listen<Type, TypeLock>(
     selection: Selection<Type, TypeLock?>,
     operationName: String?,
-    endpoint: String,
+    endpoint: URL,
     headers: HttpHeaders,
     webSocketProtocol: String,
     eventHandler: @escaping (Response<Type, TypeLock>) -> Void
 ) -> URLSessionWebSocketTask? where TypeLock: GraphQLWebSocketOperation & Decodable {
-    // Validate that we got a valid url.
-    guard let url = URL(string: endpoint) else {
-        eventHandler(.failure(.badURL))
-        return nil
-    }
-    
     // Create a GraphQL request.
     var request = createGraphQLRequest(
         selection: selection,
         operationName: operationName,
-        url: url,
+        url: endpoint,
         headers: headers,
         method: .get
     )
@@ -329,7 +396,7 @@ public typealias HttpHeaders = [String: String]
 
 /// Creates a valid URLRequest using given selection.
 private func createGraphQLRequest<Type, TypeLock>(
-    selection: Selection<Type, TypeLock?>,
+    query: Selection<Type, TypeLock?>,
     operationName: String?,
     url: URL,
     headers: HttpHeaders,
@@ -346,7 +413,7 @@ private func createGraphQLRequest<Type, TypeLock>(
     request.httpMethod = method.rawValue
 
     // Compose a query.
-    let query = selection.selection.serialize(for: TypeLock.operation, operationName: operationName)
+    let query = query.selection.serialize(for: TypeLock.operation, operationName: operationName)
     var variables = [String: NSObject]()
 
     for argument in selection.selection.arguments {

@@ -5,6 +5,18 @@ let characterId = Selection.Character {
     try $0.id()
 }
 
+//enum C {
+//    case human(String, Int)
+//    case droid(String)
+//}
+//
+//let c = Selection.Character {
+//    $0.on(
+//        droid: .init { C.droid(try $0.name()) },
+//        human: .init { C.human(try $0.name(), 1) }
+//    )
+//}
+
 let character = Selection.Character {
     Character(
         id: try $0.selection(characterId),
@@ -16,15 +28,15 @@ let character = Selection.Character {
     )
 }
 
-let human = Selection.Human {
-    Human(
-        id: try $0.id(),
-        name: try $0.name(),
-        url: try $0.infoUrl()
-    )
-}
+//let human = Selection.Human {
+//    Human(
+//        id: try $0.id(),
+//        name: try $0.name(),
+//        url: try $0.infoUrl()
+//    )
+//}
 
-let foo: Selection<Human?, Objects.Human> = human.map { $0 }
+let foo: Selection<Human?, Objects.Human> = Human.map { $0 }
 
 let luke = Selection<String?, Interfaces.Character> { _ in
     nil

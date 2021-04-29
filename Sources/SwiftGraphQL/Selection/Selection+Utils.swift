@@ -9,7 +9,15 @@ import Foundation
  List modifier makes a selection list-complaint.
  */
 
-public extension Selection where TypeLock: Decodable {
+extension Collection: Queriable where Element: Queriable {
+    init(fields: Fields<[TypeLock]>) {
+        fields.sel
+    }
+}
+
+
+
+extension Queriable where TypeLock: Decodable {
     /// Lets you convert a type selection into a list selection.
     var list: Selection<[Type], [TypeLock]> {
         Selection<[Type], [TypeLock]> { selection in
@@ -34,7 +42,7 @@ public extension Selection where TypeLock: Decodable {
  nullable response from the server.
  */
 
-public extension Selection where TypeLock: Decodable {
+extension Queriable where TypeLock: Decodable {
     /// Lets you decode nullable values.
     var nullable: Selection<Type?, TypeLock?> {
         Selection<Type?, TypeLock?> { selection in
@@ -124,57 +132,43 @@ public extension Selection where TypeLock: Decodable {
 
 // MARK: - Fields Extensions
 
-public extension Fields {
-    /// Lets you leave the selection empty.
-    var empty: Selection<Void, TypeLock> {
-        Selection<Void, TypeLock> { selection in
-            /* Selection */
-            let field = GraphQLField.leaf(name: "__typename", arguments: [])
-            selection.select(field)
-
-            /* Decoder */
-            return ()
-        }
-    }
-
-    /// Lets you make a selection inside selection set on the entire field.
-    func selection<T>(_ selection: Selection<T, TypeLock>) throws -> T {
-        /* Selection */
-        select(selection.selection)
-
-        /* Decoder */
-        switch response {
-        case let .decoding(data):
-            return try selection.decode(data: data)
-        case .mocking:
-            return selection.mock()
-        }
-    }
-}
-
-/*
- Helper functions that let you make changes upfront.
- */
-
-public extension Selection where TypeLock: Decodable {
-    /// Lets you provide non-list selection for list field.
-    static func list<NonListType, NonListTypeLock>(
-        _ selection: Selection<NonListType, NonListTypeLock>
-    ) -> Selection<Type, TypeLock> where Type == [NonListType], TypeLock == [NonListTypeLock] {
-        selection.list
-    }
-
-    /// Lets you provide non-nullable selection for nullable field.
-    static func nullable<NonNullType, NonNullTypeLock>(
-        _ selection: Selection<NonNullType, NonNullTypeLock>
-    ) -> Selection<Type, TypeLock> where Type == NonNullType?, TypeLock == NonNullTypeLock? {
-        selection.nullable
-    }
-
-    /// Lets you provide non-nullable selection for nullable field and require that it has a value.
-    static func nonNullOrFail<NonNullTypeLock>(
-        _ selection: Selection<Type, NonNullTypeLock>
-    ) -> Selection<Type, TypeLock> where TypeLock == NonNullTypeLock? {
-        selection.nonNullOrFail
-    }
-}
+//public extension Fields {
+//    /// Lets you leave the selection empty.
+//    var empty: Selection<Void, TypeLock> {
+//        Selection<Void, TypeLock> { selection in
+//            /* Selection */
+//            let field = GraphQLField.leaf(name: "__typename", arguments: [])
+//            selection.select(field)
+//
+//            /* Decoder */
+//            return ()
+//        }
+//    }
+//}
+//
+///*
+// Helper functions that let you make changes upfront.
+// */
+//
+//public extension Selection where TypeLock: Decodable {
+//    /// Lets you provide non-list selection for list field.
+//    static func list<NonListType, NonListTypeLock>(
+//        _ selection: Selection<NonListType, NonListTypeLock>
+//    ) -> Selection<Type, TypeLock> where Type == [NonListType], TypeLock == [NonListTypeLock] {
+//        selection.list
+//    }
+//
+//    /// Lets you provide non-nullable selection for nullable field.
+//    static func nullable<NonNullType, NonNullTypeLock>(
+//        _ selection: Selection<NonNullType, NonNullTypeLock>
+//    ) -> Selection<Type, TypeLock> where Type == NonNullType?, TypeLock == NonNullTypeLock? {
+//        selection.nullable
+//    }
+//
+//    /// Lets you provide non-nullable selection for nullable field and require that it has a value.
+//    static func nonNullOrFail<NonNullTypeLock>(
+//        _ selection: Selection<Type, NonNullTypeLock>
+//    ) -> Selection<Type, TypeLock> where TypeLock == NonNullTypeLock? {
+//        selection.nonNullOrFail
+//    }
+//}
