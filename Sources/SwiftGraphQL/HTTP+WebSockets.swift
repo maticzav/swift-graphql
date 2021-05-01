@@ -193,11 +193,11 @@ private func listen<Type, TypeLock>(
                 if let data = message.data {
                     let jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                     if jsonObject?["type"] as? String == "data" {
-                        if let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
-                            eventHandler(.success(result))
-                        } else {
-                            eventHandler(.failure(.badpayload))
-                        }
+//                        if let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
+//                            eventHandler(.success(result))
+//                        } else {
+//                            eventHandler(.failure(.badpayload))
+//                        }
                     }
                 }   
             }
@@ -288,3 +288,205 @@ private func createGraphQLRequest<Type, TypeLock>(
     return request
 }
 
+
+public protocol GraphQLEnabledSocket {
+    associatedtype InitParamaters
+    init(params: InitParamaters)
+    /// - parameter errorHandler: A closure that receives an Error that indicates an error encountered while sending.
+    func send(message: Data, errorHandler: @escaping (Error) -> Void)
+    func receiveMessages(_ handler: @escaping (Result<Data, Error>) -> Void)
+}
+
+
+
+/// https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
+public class GraphQLSocket<S: GraphQLEnabledSocket> {
+    
+    typealias Message = GraphQLSocketMessage
+    typealias IncommingMessage = GraphQLSocketMessage<Never>
+    
+    enum SocketState {
+        case notRunning, started, running
+    }
+    
+    private var socket: S?
+    private var initParams: S.InitParamaters
+    private var autoReconnect: Bool
+    private var state: SocketState = .notRunning {
+        didSet { startQueue() }
+    }
+    private var queue: [(GraphQLSocket) -> Void] = []
+    
+    private var decoder = JSONDecoder()
+    private var encoder = JSONEncoder()
+    
+    public init(_ params: S.InitParamaters, autoReconnect: Bool = false) {
+        self.initParams = params
+        self.autoReconnect = autoReconnect
+    }
+    
+    public enum StartError: Error {
+        case alreadyStarted
+        case failedToEncodeConnectionParams(error: Error)
+        case connectionInit(error: Error)
+    }
+    
+    /// Starts a socket without connectionParams.
+    public func start(errorHandler: @escaping (StartError) -> Void) {
+        start(connectionParams: Optional<Never>.none, errorHandler: errorHandler)
+    }
+    
+    /// Starts a socket.
+    public func start<P>(connectionParams: P, errorHandler: @escaping (StartError) -> Void) {
+        guard state == .notRunning else {
+            return errorHandler(.alreadyStarted)
+        }
+        
+        do {
+            let message = Message.connectionInit(connectionParams)
+            let messageData = try encoder.encode(message)
+            state = .started
+            socket = S(params: initParams)
+            socket?.send(message: messageData, errorHandler: { [weak self] in
+                self?.state = .notRunning
+                errorHandler(.connectionInit(error: $0))
+            })
+        } catch {
+            return errorHandler(.failedToEncodeConnectionParams(error: error))
+        }
+    }
+    
+    public func subscribe<Type, TypeLock>(
+        to selection: Selection<Type, TypeLock>,
+        operationName: String? = nil,
+        eventHandler: @escaping (Response<Type, TypeLock>) -> Void
+    ) {
+        switch state {
+        case .notRunning:
+            // throw maybe?
+            print("Not running")
+        case .started:
+            print("Still waiting for connection_ack, subscribe is queued")
+            queue += [{
+                $0.subscribe(to: selection, operationName: operationName, eventHandler: eventHandler)
+            }]
+        case .running:
+            print("uh")
+        }
+    }
+    
+    /// Closes the current socket, you can then call start to open a new socket
+    public func stop() {
+        
+    }
+    
+    private func startListeningForMessages(on socket: S) {
+        
+    }
+    
+    /// Starts the queue if the websocket is running
+    private func startQueue() {
+        guard state == .running else { return }
+        queue.forEach { $0(self) }
+        queue = []
+    }
+}
+import Combine
+
+
+/// MARK: Messages
+
+public struct GraphQLSocketMessage<OutgoingPayload>: Encodable {
+    public enum MessageType: String, Codable {
+        case connection_init
+        case connection_ack
+        case subscribe
+        case next
+        case error
+        case complete
+    }
+    
+    public var type: MessageType
+    public var id: String?
+    /// Used for retreiving payload after decoding incomming message
+    private var container: KeyedDecodingContainer<CodingKeys>?
+    /// Used for payload on outgoing message
+    private var addedPayload: OutgoingPayload?
+    
+    private enum CodingKeys: CodingKey {
+        case type
+        case id
+        case payload
+    }
+    
+    public func with(payload: OutgoingPayload) -> Self {
+        var copy = self
+        copy.addedPayload = payload
+        return copy
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(type, forKey: .type)
+        try container.encodeIfPresent(id, forKey: .id)
+        fatalError("dont want this rn")
+    }
+}
+
+extension GraphQLSocketMessage: Decodable where OutgoingPayload == Never {
+    public init(from decoder: Decoder) throws {
+        self.container = try decoder.container(keyedBy: CodingKeys.self)
+        self.type = try container!.decode(MessageType.self, forKey: .type)
+        self.id = try container!.decodeIfPresent(String.self, forKey: .id)
+    }
+
+    public enum DecodingPayloadError: Swift.Error {
+        /// This can happen when the Message struct was not initialised through Decodable
+        case missingContainer
+    }
+
+    public func decodePayload<IncommingPayload: Decodable>(ofType type: IncommingPayload.Type = IncommingPayload.self) throws -> IncommingPayload {
+        if let container = container {
+            return try container.decode(IncommingPayload.self, forKey: .payload)
+        } else {
+            throw DecodingPayloadError.missingContainer
+        }
+    }
+}
+
+extension GraphQLSocketMessage where OutgoingPayload: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(type, forKey: .type)
+        try container.encodeIfPresent(id, forKey: .id)
+        try container.encodeIfPresent(addedPayload, forKey: .payload)
+    }
+}
+
+
+/// MARK: Outgoing
+
+extension GraphQLSocketMessage where OutgoingPayload == Never {
+    public static func connectionInit<P>(_ connectionParams: P) -> GraphQLSocketMessage<P> {
+        GraphQLSocketMessage<P>(type: .connection_init, id: nil).with(payload: connectionParams)
+    }
+}
+
+/// MARK: Incomming
+
+
+// I expected this to make GraphQLSocketMessage.Next work but it doesn't.
+// I still have to write <Never>? Why does this work for Selection but not here?
+extension GraphQLSocketMessage where OutgoingPayload == Never {
+    public typealias ConnectionAcknowledged = GraphQLSocketMessage<Never>
+    public typealias Next = GraphQLSocketMessage<Never>
+    public typealias Error = GraphQLSocketMessage<Never>
+    public typealias Complete = GraphQLSocketMessage<Never>
+}
+
+
+struct GraphQLQueryPayload: Encodable {
+    var query: String
+    var variables: [String: NSObject]? // TODO: I think we should have an AnyCodable dependency like: https://github.com/Flight-School/AnyCodable
+    var operationName: String?
+}

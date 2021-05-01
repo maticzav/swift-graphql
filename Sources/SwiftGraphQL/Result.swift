@@ -15,25 +15,20 @@ extension GraphQLResult where TypeLock: Decodable {
         do {
             let decoder = JSONDecoder()
             let response = try decoder.decode(GraphQLResponse.self, from: response)
-            let data = try selection.decode(data: response.data)
-
-            self.data = data
-            errors = response.errors
+            self.data = try selection.decode(data: response.data)
+            self.errors = response.errors
         } catch {
             // Catches all errors and turns them into a bad payload SwiftGraphQL error.
             throw HttpError.badpayload
         }
     }
 
-    init(webSocketResponse: Data, with selection: Selection<Type, TypeLock?>) throws {
+    init(webSocketMessage: GraphQLSocketMessage<Never>, with selection: Selection<Type, TypeLock?>) throws {
         // Decodes the data using provided selection.
         do {
-            let decoder = JSONDecoder()
-            let response = try decoder.decode(GraphQLWebSocketResponse.self, from: webSocketResponse)
-            let data = try selection.decode(data: response.payload.data)
-
-            self.data = data
-            errors = response.payload.errors
+            let response: GraphQLResponse = try webSocketMessage.decodePayload()
+            self.data = try selection.decode(data: response.data)
+            self.errors = response.errors
         } catch {
             // Catches all errors and turns them into a bad payload SwiftGraphQL error.
             throw HttpError.badpayload
@@ -45,10 +40,6 @@ extension GraphQLResult where TypeLock: Decodable {
     struct GraphQLResponse: Decodable {
         let data: TypeLock?
         let errors: [GraphQLError]?
-    }
-
-    struct GraphQLWebSocketResponse: Decodable {
-        let payload: GraphQLResponse
     }
 }
 
