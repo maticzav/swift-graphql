@@ -162,7 +162,7 @@ private func listen<Type, TypeLock>(
 
     // Compose a query.
     let query = selection.selection.serialize(for: TypeLock.operation, operationName: operationName)
-    var variables = [String: NSObject]()
+    var variables = [String: AnyCodable]()
 
     for argument in selection.selection.arguments {
         variables[argument.hash] = argument.value
@@ -263,27 +263,9 @@ private func createGraphQLRequest<Type, TypeLock>(
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.httpMethod = method.rawValue
 
-    // Compose a query.
-    let query = selection.selection.serialize(for: TypeLock.operation, operationName: operationName)
-    var variables = [String: NSObject]()
-
-    for argument in selection.selection.arguments {
-        variables[argument.hash] = argument.value
-    }
-
-    // Construct a request body.
-    var body: [String: Any] = [
-        "query": query,
-        "variables": variables,
-    ]
-
-    if let operationName = operationName {
-        // Add the operation name to the request body if needed.
-        body["operationName"] = operationName
-    }
-
-    // Construct a HTTP request.
-    request.httpBody = try! JSONSerialization.data(withJSONObject: body)
+    let encoder = JSONEncoder()
+    let payload = selection.buildPayload(operationName: operationName)
+    request.httpBody = try! encoder.encode(payload)
 
     return request
 }
@@ -484,9 +466,23 @@ extension GraphQLSocketMessage where OutgoingPayload == Never {
     public typealias Complete = GraphQLSocketMessage<Never>
 }
 
-
-struct GraphQLQueryPayload: Encodable {
-    var query: String
-    var variables: [String: NSObject]? // TODO: I think we should have an AnyCodable dependency like: https://github.com/Flight-School/AnyCodable
-    var operationName: String?
+public struct GraphQLQueryPayload: Encodable {
+    public var query: String
+    public var variables: [String: AnyCodable]
+    public var operationName: String?
+    
+    internal init<Type, TypeLock, Operation>(
+        selection: Selection<Type, TypeLock>,
+        operationType: Operation.Type,
+        operationName: String?
+    ) where Operation: GraphQLOperation {
+        self.query = selection.selection.serialize(for: Operation.operation, operationName: operationName)
+        
+        self.variables = [:]
+        for argument in selection.selection.arguments {
+            variables[argument.hash] = argument.value
+        }
+        
+        self.operationName = operationName
+    }
 }

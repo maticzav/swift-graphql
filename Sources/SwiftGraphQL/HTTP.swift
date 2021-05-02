@@ -188,30 +188,10 @@ private func createGraphQLRequest<Type, TypeLock>(
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.httpMethod = method.rawValue
 
-    // Compose a query.
-    let query = selection.selection.serialize(for: TypeLock.operation, operationName: operationName)
-    var variables = [String: NSObject]()
-
-    for argument in selection.selection.arguments {
-        variables[argument.hash] = argument.value
-    }
-
-    // Construct a request body.
-    var body: [String: Any] = [
-        "query": query,
-        "variables": variables,
-    ]
-
-    if let operationName = operationName {
-        // Add the operation name to the request body if needed.
-        body["operationName"] = operationName
-    }
-
-    // Construct a HTTP request.
-    request.httpBody = try! JSONSerialization.data(
-        withJSONObject: body,
-        options: []
-    )
+    // Construct HTTP body.
+    let encoder = JSONEncoder()
+    let payload = selection.buildPayload(operationName: operationName)
+    request.httpBody = try! encoder.encode(payload)
 
     return request
 }

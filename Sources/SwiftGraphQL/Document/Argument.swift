@@ -10,7 +10,7 @@ public struct Argument: Hashable {
     let name: String
     let type: String
     let hash: String
-    let value: NSObject?
+    let value: AnyCodable?
 
     /*
      NOTE:
@@ -51,7 +51,7 @@ public struct Argument: Hashable {
         if let value = value as? OptionalArgumentProtocol, !value.hasValue {
             self.value = nil
         } else {
-            self.value = try! VariableEncoder().encode(value)
+            self.value = AnyCodable(value)
         }
     }
 
@@ -68,6 +68,11 @@ public struct Argument: Hashable {
     struct HashableValue<Value: Hashable>: Hashable {
         let value: Value
         let type: String
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine(hash)
     }
 }
 
