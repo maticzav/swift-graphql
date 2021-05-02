@@ -57,10 +57,31 @@ struct ContentView: View {
             }
             .navigationTitle("StarWars 🌌")
         }
-        .onAppear(perform: {
+        .onAppearOrEnterForeground {
             model.fetch()
             model.startListening()
-        })
+        }
+        .onDisappearOrEnterBackground {
+            model.stopListening()
+        }
+    }
+}
+
+extension View {
+    func onAppearOrEnterForeground(perform block: @escaping () -> Void) -> some View {
+        self.onAppear(perform: block)
+            .on(UIApplication.willEnterForegroundNotification, perform: { _ in block() })
+    }
+    
+    func onDisappearOrEnterBackground(perform block: @escaping () -> Void) -> some View {
+        self.onAppear(perform: block)
+            .on(UIApplication.willResignActiveNotification, perform: { _ in block() })
+    }
+    
+    func on(_ notification: Notification.Name,
+            nc: NotificationCenter = NotificationCenter.default,
+            perform block: @escaping (Notification) -> Void) -> some View {
+        self.onReceive(nc.publisher(for: notification), perform: block)
     }
 }
 
