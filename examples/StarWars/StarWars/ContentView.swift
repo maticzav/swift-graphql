@@ -74,7 +74,7 @@ extension View {
     }
     
     func onDisappearOrEnterBackground(perform block: @escaping () -> Void) -> some View {
-        self.onAppear(perform: block)
+        self.onDisappear(perform: block)
             .on(UIApplication.willResignActiveNotification, perform: { _ in block() })
     }
     
