@@ -37,7 +37,7 @@ class Model: ObservableObject {
     func startListening() {
         print("STARTED LISTENING")
         if socket == nil {
-            socket = .init(URLSessionWebSocketTask.InitParamaters(url: URL(string: "ws://localhost:4000/subscriptions")!, headers: [:]), autoConnect: true)
+            socket = .init(.init(url: URL(string: "ws://localhost:4000/subscriptions")!, headers: [:]), autoConnect: true)
         }
         
         cancellable = socket?.subscribe(to: subscription.nonNullOrFail) { [weak self] result in
