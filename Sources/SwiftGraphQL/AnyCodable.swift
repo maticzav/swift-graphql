@@ -17,7 +17,13 @@ public struct AnyCodable {
     public let value: Any
     
     public init<T>(_ value: T?) {
-        self.value = value ?? ()
+        if let preventNesting = value as? AnyCodable {
+            self = preventNesting
+        } else if let value = value.flattened() {
+            self.value = value
+        } else {
+            self.value = ()
+        }
     }
 }
 
@@ -178,4 +184,18 @@ extension AnyCodable: ExpressibleByNilLiteral, ExpressibleByBooleanLiteral, Expr
     public init(dictionaryLiteral elements: (AnyHashable, Any)...) {
         self.init(Dictionary<AnyHashable, Any>(elements, uniquingKeysWith: { (first, _) in first }))
     }
+}
+
+protocol Flattenable {
+  func flattened() -> Any?
+}
+
+extension Optional: Flattenable {
+  func flattened() -> Any? {
+    switch self {
+    case .some(let x as Flattenable): return x.flattened()
+    case .some(let x): return x
+    case .none: return nil
+    }
+  }
 }
