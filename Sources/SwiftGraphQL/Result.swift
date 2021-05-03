@@ -23,7 +23,7 @@ extension GraphQLResult where TypeLock: Decodable {
         }
     }
 
-    init(webSocketMessage: GraphQLSocketMessage<Never>, with selection: Selection<Type, TypeLock?>) throws {
+    init(webSocketMessage: GraphQLSocketMessage, with selection: Selection<Type, TypeLock?>) throws {
         // Decodes the data using provided selection.
         do {
             let response: GraphQLResponse = try webSocketMessage.decodePayload()
