@@ -79,8 +79,10 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                         _ = "The server will never send these messages"
                     }
                     
-                case .failure(let error):
-                    print("receive(message:)", error)
+                case .failure(_):
+                    // Should we send this error to the start errorHandler?
+                    // This could happen during the entire lifetime of the socket so
+                    // it's not really a start error
                     self?.stop()
                 }
             }
@@ -368,7 +370,6 @@ extension URLSessionWebSocketTask: GraphQLEnabledSocket {
     
     public func send(message: Data, errorHandler: @escaping (Error) -> Void) {
         self.send(.data(message), completionHandler: {
-            print("sendcompleted", $0)
             if let error = $0 {
                 errorHandler(error)
             }
