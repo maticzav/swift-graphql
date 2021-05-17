@@ -122,3 +122,25 @@ public struct Selection<Type, TypeLock> {
         mocked
     }
 }
+
+extension Selection  {
+    /// Builds a payload that can be sent to the server
+    public func buildPayload(operationName: String? = nil) -> GraphQLQueryPayload
+    where TypeLock: GraphQLOperation {
+        return GraphQLQueryPayload(
+            selection: self,
+            operationType: TypeLock.self,
+            operationName: operationName
+        )
+    }
+    
+    /// Builds a payload that can be sent to the server
+    public func buildPayload<UnwrappedTypeLock>(operationName: String? = nil) -> GraphQLQueryPayload
+    where UnwrappedTypeLock: GraphQLOperation, Optional<UnwrappedTypeLock> == TypeLock {
+        return GraphQLQueryPayload(
+            selection: self,
+            operationType: UnwrappedTypeLock.self,
+            operationName: operationName
+        )
+    }
+}

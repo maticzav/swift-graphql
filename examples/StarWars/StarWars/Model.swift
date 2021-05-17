@@ -6,8 +6,9 @@ class Model: ObservableObject {
 
     @Published private(set) var data = Data()
     @Published private(set) var subscriptionData: Int = 0
-    private var socket: URLSessionWebSocketTask?
-
+    private var socket: GraphQLSocket<URLSessionWebSocketTask>?
+    var cancellable: SocketCancellable?
+    
     // MARK: - Intentions
 
     func fetch() {
@@ -16,7 +17,7 @@ class Model: ObservableObject {
         // Perform query.
         send(
             query,
-            to: "http://localhost:4000",
+            to: "http://localhost:4000/graphql",
             operationName: "Query",
             headers: ["Authorization": "Bearer Matic"]
         ) { result in
@@ -35,14 +36,14 @@ class Model: ObservableObject {
 
     func startListening() {
         print("STARTED LISTENING")
-
-        // Create a subcription.
-        socket = listen(
-            for: subscription,
-            on: "ws://localhost:4000/graphql"
-        ) { [weak self] result in
+        if socket == nil {
+            socket = .init(.init(url: URL(string: "ws://localhost:4000/subscriptions")!, headers: [:]), autoConnect: true)
+        }
+        
+        cancellable = socket?.subscribe(to: subscription.nonNullOrFail) { [weak self] result in
             do {
                 let resultValue = try result.get()
+                print(resultValue)
                 DispatchQueue.main.async {
                     self?.subscriptionData = resultValue.data
                 }
@@ -50,6 +51,10 @@ class Model: ObservableObject {
                 print("SUBS", error)
             }
         }
+    }
+    
+    func stopListening() {
+        cancellable = nil
     }
 }
 

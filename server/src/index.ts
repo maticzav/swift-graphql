@@ -1,5 +1,4 @@
 import { makeSchema } from 'nexus'
-import { ApolloServer } from 'apollo-server'
 import * as path from 'path'
 
 import { data } from './data'
@@ -41,42 +40,63 @@ const schema = makeSchema({
 
 /* Server */
 
-const server = new ApolloServer({
-  schema,
-  debug: true,
-  context: ({ req }) => {
-    /* Context */
-    let context: ContextType = {
-      req: req,
-      data: data,
-    }
-    return context
-  },
-  plugins: [
-    /**
-     * Logs the query to the console.
-     */
-    {
-      requestDidStart(requestContext) {
-        console.log(requestContext.request.query)
-        return {
-          willSendResponse(res) {
-            console.log(res.response.data)
-          },
-        }
-      },
+const express = require("express");
+//import express from 'express';
+const ws = require("ws");
+// import ws from 'ws'; // yarn add ws
+import { useServer } from 'graphql-ws/lib/use/ws';
+import { execute, subscribe, GraphQLError } from 'graphql';
+import { createServer, IncomingMessage, Server } from 'http';
+import { graphqlHTTP } from 'express-graphql';
+
+const port = process.env.PORT || 4000;
+
+const http = express();
+const httpServer = createServer(http);
+
+http.use('/graphql', async (req: any, res: any) => {
+  const context: any = { req: req, data: data };
+
+	graphqlHTTP({
+		schema: schema,
+		context: context
+	})(req, res);
+});
+
+const wsServer = new ws.Server({
+  server: httpServer,
+  path: '/subscriptions'
+});
+
+useServer(
+  {
+    schema,
+    execute,
+    subscribe,
+    onConnect: (ctx) => {
+      console.log('Connect', ctx);
+      ctx["data"] = data
     },
-  ],
-})
+    onSubscribe: (ctx, msg) => {
+      console.log('Subscribe', { ctx, msg });
+    },
+    onNext: (ctx, msg, args, result) => {
+      console.debug('Next', { ctx, msg, args, result });
+    },
+    onError: (ctx, msg, errors) => {
+      console.error('Error', { ctx, msg, errors });
+    },
+    onComplete: (ctx, msg) => {
+      console.log('Complete', { ctx, msg });
+    }
+  },
+  wsServer
+);
 
-/* Start */
+httpServer.listen(port, () => {
+	console.log(`HTTP server listening on port ${port}`);
+});
 
-if (require.main === module) {
-  const port = process.env.PORT || 4000
-
-  server.listen({ port }, () => {
-    console.log(
-      `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`,
-    )
-  })
-}
+console.log(
+  `🚀 Server ready at http://localhost:${port}/graphql`,
+);
