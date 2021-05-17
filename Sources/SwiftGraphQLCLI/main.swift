@@ -22,6 +22,12 @@ struct SwiftGraphQLCLI: ParsableCommand {
     
     @Option(help: "Include this Authorization header in the request to the endpoint.")
     var authorization: String?
+    
+    // MARK: - Configuration
+    
+    var configuration = CommandConfiguration(
+        commandName: "swift-graphql"
+    )
 
     // MARK: - Main
 

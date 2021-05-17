@@ -105,7 +105,21 @@ cd swift-graphql
 make install
 ```
 
-To run the generator type `swift-graphql`. If you are using any custom scalars, you should create a configuration file called `swiftgraphql.yml` and put in data-type mappings as a key-value dictionary like this. Keys should be GraphQL types, and values should be SwiftGraphQL Codecs.
+### Generating the code
+
+```
+USAGE: swift-graphql <endpoint> [--config <config>] [--output <output>]
+
+ARGUMENTS:
+  <endpoint>              GraphQL server endpoint.
+
+OPTIONS:
+  --config <config>       Relative path from CWD to your YML config file.
+  -o, --output <output>   Relative path from CWD to the output file.
+  -h, --help              Show help information.
+```
+
+To run the generator, type `swift-graphql`. If you are using any custom scalars, you should create a configuration file called `swiftgraphql.yml` and put in data-type mappings as a key-value dictionary like this. Keys should be GraphQL types, and values should be SwiftGraphQL Codecs.
 
 ```yml
 scalars:
@@ -113,7 +127,7 @@ scalars:
   Upload: Upload
 ```
 
-You can also run `swift-graphql help` to learn more about options and how it works.
+You can also run `swift-graphql --help` to learn more about options and how it works.
 
 ---
 
