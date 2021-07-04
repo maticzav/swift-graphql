@@ -1,81 +1,98 @@
-import React from 'react'
-import Layout from '@theme/Layout'
-import Link from '@docusaurus/Link'
-import useBaseUrl from '@docusaurus/useBaseUrl'
+import Head from 'next/head'
+import { FeatureList, HeroGradient, HeroIllustration, InfoList } from '@theguild/components'
+import { handlePushRoute } from '@guild-docs/client'
 
-import styles from './styles.module.css'
-import { Feature } from '../components/feature'
-import clsx from 'clsx'
-
-/* Page */
-
-/**
- * Home page is a landing page that user gets to to
- */
-export default function Home() {
-  /* Constants */
-
-  const thumbnailBackgroundURL = useBaseUrl('./img/thumbnail.png')
-
-  /* Page */
-
+export default function Index() {
   return (
-    <Layout
-      title={`SwiftGraphQL`}
-      description="A Swift client that lets you forget about GraphQL."
-    >
-      {/* Header */}
-      <header className="container">
-        <img
-          className={styles.thumbnail}
-          src={thumbnailBackgroundURL}
-          alt={'SwiftGraphQL Background'}
-        />
-      </header>
+    <>
+      <Head>
+        <title>SwiftGraphQL</title>
+      </Head>
+      <HeroGradient
+        title="GraphQL permissions as another layer of abstraction."
+        description="Implement your server permissions in a clear and deterministic way."
+        link={{
+          href: '/docs',
+          children: 'Get Started',
+          title: 'Learn more about GraphQL Shield',
+          onClick: (e) => handlePushRoute('/docs', e),
+        }}
+        // version={
+        //   <a href="https://www.npmjs.com/package/@envelop/core" target="_blank">
+        //     <img src="https://badge.fury.io/js/%40envelop%2Fcore.svg" alt="npm version" height="18" />
+        //   </a>
+        // }
+        colors={['#FF34AE', '#1CC8EE']}
+        // image={{
+        //   src: '/assets/home-claw.png',
+        //   alt: 'Illustration',
+        // }}
+      />
+      <FeatureList
+        title="What's GraphQL Shield?"
+        items={[
+          {
+            image: {
+              alt: 'Pluggable',
+              src: '/assets/features-pluggable.png',
+            },
+            title: 'Pluggable',
+            description: 'Powerful plugin system that wraps the entire GraphQL execution pipeline.',
+          },
+          {
+            image: {
+              alt: 'Flexible',
+              src: '/assets/features-modern.png',
+            },
+            title: 'Flexible',
+            description: 'Use with any HTTP server, and any GraphQL schema libraries (code-first / schema-first).',
+          },
+          {
+            image: {
+              alt: 'Develop Faster',
+              src: '/assets/features-performant.png',
+            },
+            title: 'Develop Faster',
+            description: `You don't have to reinvent the wheel for every feature. You can write/use Envelop plugin for most workflows.`,
+          },
+        ]}
+      />
 
-      {/*  */}
-      {/* Main */}
-      <main className="container">
-        <h2 className={styles.featuresTitle}>Features</h2>
-        <section className={styles.features}>
-          <div className="row">
-            {features.map((props, idx) => (
-              <Feature key={idx} {...props} />
-            ))}
-          </div>
-        </section>
-      </main>
-      {/*  */}
-    </Layout>
+      <HeroIllustration
+        title="How it works?"
+        description="GraphQL Shield wrapps your schema resolvers and inteligently manages access to fields."
+        image={{
+          src: '/assets/home-communication.png',
+          alt: 'Illustration',
+        }}
+        flipped
+      />
+
+      <InfoList
+        title="Learn More"
+        items={[
+          {
+            title: 'The envelop approach',
+            description: 'Learn more about Envelop core and how it works',
+            link: {
+              href: '/docs',
+              children: 'Documentation',
+              title: 'Read the documentation',
+              onClick: (e) => handlePushRoute('/docs', e),
+            },
+          },
+          {
+            title: 'Integrations',
+            description: 'Integrate GraphQL Shield with your existing setup quickly.',
+            link: {
+              href: '/docs/integrations',
+              children: 'Integrations & Examples',
+              title: 'Search examples',
+              onClick: (e) => handlePushRoute('/docs/integrations', e),
+            },
+          },
+        ]}
+      />
+    </>
   )
 }
-
-/* Content */
-
-const features = [
-  {
-    title: 'TypeSafe',
-    imageUrl: 'img/undraw_docusaurus_mountain.svg',
-    description: (
-      <>
-        SwiftGraphQL was designed ground up to be end-to-end type-safe. If your
-        project compiles, we guarantee that queries are valid.
-      </>
-    ),
-  },
-  {
-    title: 'Focus on What Matters',
-    imageUrl: 'img/undraw_docusaurus_tree.svg',
-    description: (
-      <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
-      </>
-    ),
-  },
-  {
-    title: 'Lightweight',
-    imageUrl: 'img/undraw_docusaurus_react.svg',
-    description: <></>,
-  },
-]

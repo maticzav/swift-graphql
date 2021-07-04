@@ -28,3 +28,7 @@ responses/*
 .yarn/build-state.yml 
 
 tsconfig.tsbuildinfo
+
+# Website
+
+.next
