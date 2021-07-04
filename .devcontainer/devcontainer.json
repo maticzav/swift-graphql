@@ -1,0 +1,32 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
+{
+  "name": "sniper",
+
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // Set *default* container specific settings.json values on container create.
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "/bin/bash"
+  },
+
+  "extensions": [
+    "bradlc.vscode-tailwindcss",
+    "visualstudioexptteam.vscodeintellicode",
+    "esbenp.prettier-vscode",
+    "arcanis.vscode-zipfs",
+    "coenraads.bracket-pair-colorizer",
+    "ms-azuretools.vscode-docker",
+    "silvenon.mdx"
+  ],
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [],
+
+  // https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach
+  // "runArgs": ["--net=host"],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "yarn install"
+}

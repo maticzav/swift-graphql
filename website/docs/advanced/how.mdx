@@ -1,0 +1,101 @@
+---
+title: How does SwiftGraphQL work?
+sidebar_label: How does it work?
+---
+
+## How does it work?
+
+It seems like the best way to learn how to use SwiftGraphQL is by understanding how it works behind the scenes.
+
+The first concept that you should know about is `Selection`. Selection lets you select which fields you want to query from a certain GraphQL object. The interesting part about Selection is that there's actually only one `Selection` type, but it has generic extensions. Those generic extensions are using _phantom types_ to differentiate which fields you may select in particular object.
+
+TLDR; Phantom types let you use Generics to constrain methods to specific types. You can see them at work in the funny looking `Selection<Type, Scope>` parts of the code that let you select what you want to query. You can read more about phantom types [here](https://www.swiftbysundell.com/articles/phantom-types-in-swift/), but for now it suffice to understand that we use `Scope` to limit what you may or may not select in a query.
+
+Now that you know about selection, let's say that we want to query some fields on our `Human` GraphQL type. The first parameter in `Selection` - `Type` - lets us say what the end "product" of this selection is going to be. This could be a `String`, a `Bool`, a `Human`, a `Droid` - anything. _You decide!_.
+
+The second parameter - `Scope` (or `TypeLock`) - then tells `Selection` which object you want to query.
+
+You can think of these two as:
+
+- `Type`: what your app will receive
+- `Scope` what SwiftGraphQL should query.
+
+> Take a breath, pause, think about `TypeLock`, `Scope` and `Type`.
+
+But how do we _select_ the fields?
+
+That's what the `Selection` initializer is for. Selection initializer is a class with methods matching the names of GraphQL fields in your type. When you call a method two things happen. First, the method tells selection that you want to query that field. Secondly, it tries to process the data from the response and returns the data that was supposed to get from that particular field.
+
+For example:
+
+```swift
+let human = Selection<Human, Objects.Human> { select in
+    MyHuman(
+        id: try select.id(), // String
+        name: try select.name(), // String
+        homePlanet: try select.homePlanet() // String?
+    )
+}
+```
+
+As you may have noticed, `id` returns just a string - not an optional. But how's that possible if the first time we call that function we don't even have the data yet? SwiftGraphQL intuitively mocks the data the first time around to make sure Swift is happy. That value, however, is left unnoticed - you'll never see it.
+
+> Take a breath, `Selection` is quite neat, right?
+
+To make selection even easier, library makes typealiaii for each type in your schema. This way you don't have to write that much boilerplate and we can leverage Swift type-system to figure out some things for us. You can rewrite the above selection like this.
+
+```swift
+let human = Selection.Human { select in
+    MyHuman(
+        id: try select.id(), // String
+        name: try select.name(), // String
+        homePlanet: try select.homePlanet() // String?
+    )
+}
+```
+
+Alright! Now that we truly understand `Selection`, let's fetch some data. We use `GraphQLClient`'s `send` method to send queries to the backend. To make sure you are sending the right data, `send` methods only accept selections of `Operations.Query` and `Operations.Mutation`. This way, compiler will tell you if you messed something up.
+
+We construct a query in a very similar fashion to making a human selection.
+
+```swift
+let query = Selection.Query {
+    try $0.humans(human.list)
+}
+```
+
+The different part now is that `humans` accept another selection - a human selection. Furthermore, each selection let's you make it nullable using `.nullable` or convert it into a list using `.list`. This way, you can query a list of humans or an optional human.
+
+_NOTE:_ We could also simply count the number of humans in the database. We would do that by changing the `Type` to `Int` - we are counting - and use Swift's `count` property on a list.
+
+```swift
+let query = Selection.Query {
+    try $0.humans(human.list).count
+}
+```
+
+> Take a breath. This is it. Pretty neat, huh?! 😄
+
+## Sending requests
+
+Once you've created a query-, mutation- or a subscription-type selection, you may call one of the `send` and `listen` methods that SwiftGrpahQL exposes. To fetch a query or send a mutation, use `send` method. And to listen for subscriptions, use `listen` method.
+
+> Make sure you use `ws` protocol when listening for subscriptions!
+
+```swift
+send(query, to: "http://localhost:4000") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
+}
+
+listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
+    if let data = try? result.get() {
+        print(data)
+    }
+}
+```
+
+> 💡 If you try to pass in any other type instead of root operation types, your code won't compile.
+
+---

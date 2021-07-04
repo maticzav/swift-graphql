@@ -1,81 +1,98 @@
-import React from 'react'
-import Layout from '@theme/Layout'
-import Link from '@docusaurus/Link'
-import useBaseUrl from '@docusaurus/useBaseUrl'
+import Head from 'next/head'
+import { FeatureList, HeroGradient, HeroIllustration, InfoList } from '@theguild/components'
+import { handlePushRoute } from '@guild-docs/client'
 
-import styles from './styles.module.css'
-import { Feature } from '../components/feature'
-import clsx from 'clsx'
-
-/* Page */
-
-/**
- * Home page is a landing page that user gets to to
- */
-export default function Home() {
-  /* Constants */
-
-  const thumbnailBackgroundURL = useBaseUrl('./img/thumbnail.png')
-
-  /* Page */
-
+export default function Index() {
   return (
-    <Layout
-      title={`SwiftGraphQL`}
-      description="A Swift client that lets you forget about GraphQL."
-    >
-      {/* Header */}
-      <header className="container">
-        <img
-          className={styles.thumbnail}
-          src={thumbnailBackgroundURL}
-          alt={'SwiftGraphQL Background'}
-        />
-      </header>
+    <>
+      <Head>
+        <title>SwiftGraphQL</title>
+      </Head>
+      <HeroGradient
+        title="A GraphQL client that lets you forget about GraphQL"
+        description=""
+        link={{
+          href: '/docs',
+          children: 'Start Querying',
+          title: 'Start programming with SwiftGraphQL',
+          onClick: (e) => handlePushRoute('/docs', e),
+        }}
+        // version={
+        //   <a href="https://www.npmjs.com/package/@envelop/core" target="_blank">
+        //     <img src="https://badge.fury.io/js/%40envelop%2Fcore.svg" alt="npm version" height="18" />
+        //   </a>
+        // }
+        colors={['#FB8A51', '#F25C40']}
+        // image={{
+        //   src: '/assets/home-claw.png',
+        //   alt: 'Illustration',
+        // }}
+      />
+      <FeatureList
+        title="Features"
+        items={[
+          {
+            image: {
+              alt: 'Intuitive',
+              src: '/assets/features-pluggable.png',
+            },
+            title: 'Intuitive',
+            description: 'You will forget about the GraphQL layer altogether. Just Swift.',
+          },
+          {
+            image: {
+              alt: 'Flexible',
+              src: '/assets/features-modern.png',
+            },
+            title: 'Query, Mutate & Subscribe',
+            description: 'SwiftGraphQL supports query, mutation and subscription operations.',
+          },
+          {
+            image: {
+              alt: 'Develop Faster',
+              src: '/assets/features-performant.png',
+            },
+            title: 'Robust',
+            description: `If your project compiles, your queries work. You cannot make an invalid query that would compile.`,
+          },
+        ]}
+      />
 
-      {/*  */}
-      {/* Main */}
-      <main className="container">
-        <h2 className={styles.featuresTitle}>Features</h2>
-        <section className={styles.features}>
-          <div className="row">
-            {features.map((props, idx) => (
-              <Feature key={idx} {...props} />
-            ))}
-          </div>
-        </section>
-      </main>
-      {/*  */}
-    </Layout>
+      <HeroIllustration
+        title="How it works?"
+        description="GraphQL Shield wrapps your schema resolvers and inteligently manages access to fields."
+        image={{
+          src: '/assets/home-communication.png',
+          alt: 'Illustration',
+        }}
+        flipped
+      />
+
+      <InfoList
+        title="Learn More"
+        items={[
+          {
+            title: 'Why SwiftGraphQL?',
+            description: 'Learn more about Envelop core and how it works',
+            link: {
+              href: '/docs',
+              children: 'Documentation',
+              title: 'Read the documentation',
+              onClick: (e) => handlePushRoute('/docs', e),
+            },
+          },
+          {
+            title: 'F.A.Q',
+            description: 'Find answers to most common questions about SwiftGraphQL',
+            link: {
+              href: '/docs/integrations',
+              children: 'Integrations & Examples',
+              title: 'Search examples',
+              onClick: (e) => handlePushRoute('/docs/integrations', e),
+            },
+          },
+        ]}
+      />
+    </>
   )
 }
-
-/* Content */
-
-const features = [
-  {
-    title: 'TypeSafe',
-    imageUrl: 'img/undraw_docusaurus_mountain.svg',
-    description: (
-      <>
-        SwiftGraphQL was designed ground up to be end-to-end type-safe. If your
-        project compiles, we guarantee that queries are valid.
-      </>
-    ),
-  },
-  {
-    title: 'Focus on What Matters',
-    imageUrl: 'img/undraw_docusaurus_tree.svg',
-    description: (
-      <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
-      </>
-    ),
-  },
-  {
-    title: 'Lightweight',
-    imageUrl: 'img/undraw_docusaurus_react.svg',
-    description: <></>,
-  },
-]

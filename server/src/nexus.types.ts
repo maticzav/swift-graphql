@@ -11,10 +11,7 @@ declare global {
     /**
      * Date custom scalar type
      */
-    date<FieldName extends string>(
-      fieldName: FieldName,
-      opts?: core.CommonInputFieldConfig<TypeName, FieldName>,
-    ): void // "Date";
+    date<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "Date";
   }
 }
 declare global {
@@ -22,10 +19,7 @@ declare global {
     /**
      * Date custom scalar type
      */
-    date<FieldName extends string>(
-      fieldName: FieldName,
-      ...opts: core.ScalarOutSpread<TypeName, FieldName>
-    ): void // "Date";
+    date<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "Date";
   }
 }
 
@@ -75,13 +69,9 @@ export interface NexusGenUnions {
   CharacterUnion: NexusGenRootTypes['Droid'] | NexusGenRootTypes['Human']
 }
 
-export type NexusGenRootTypes = NexusGenInterfaces &
-  NexusGenObjects &
-  NexusGenUnions
+export type NexusGenRootTypes = NexusGenInterfaces & NexusGenObjects & NexusGenUnions
 
-export type NexusGenAllTypes = NexusGenRootTypes &
-  NexusGenScalars &
-  NexusGenEnums
+export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
   Droid: {
@@ -216,9 +206,7 @@ export type NexusGenUnionNames = keyof NexusGenUnions
 
 export type NexusGenObjectsUsingAbstractStrategyIsTypeOf = never
 
-export type NexusGenAbstractsUsingStrategyResolveType =
-  | 'Character'
-  | 'CharacterUnion'
+export type NexusGenAbstractsUsingStrategyResolveType = 'Character' | 'CharacterUnion'
 
 export type NexusGenFeaturesConfig = {
   abstractTypeStrategies: {
@@ -244,19 +232,14 @@ export interface NexusGenTypes {
   interfaceNames: NexusGenInterfaceNames
   scalarNames: NexusGenScalarNames
   unionNames: NexusGenUnionNames
-  allInputTypes:
-    | NexusGenTypes['inputNames']
-    | NexusGenTypes['enumNames']
-    | NexusGenTypes['scalarNames']
+  allInputTypes: NexusGenTypes['inputNames'] | NexusGenTypes['enumNames'] | NexusGenTypes['scalarNames']
   allOutputTypes:
     | NexusGenTypes['objectNames']
     | NexusGenTypes['enumNames']
     | NexusGenTypes['unionNames']
     | NexusGenTypes['interfaceNames']
     | NexusGenTypes['scalarNames']
-  allNamedTypes:
-    | NexusGenTypes['allInputTypes']
-    | NexusGenTypes['allOutputTypes']
+  allNamedTypes: NexusGenTypes['allInputTypes'] | NexusGenTypes['allOutputTypes']
   abstractTypes: NexusGenTypes['interfaceNames'] | NexusGenTypes['unionNames']
   abstractTypeMembers: NexusGenAbstractTypeMembers
   objectsUsingAbstractStrategyIsTypeOf: NexusGenObjectsUsingAbstractStrategyIsTypeOf
@@ -266,14 +249,8 @@ export interface NexusGenTypes {
 
 declare global {
   interface NexusGenPluginTypeConfig<TypeName extends string> {}
-  interface NexusGenPluginFieldConfig<
-    TypeName extends string,
-    FieldName extends string
-  > {}
-  interface NexusGenPluginInputFieldConfig<
-    TypeName extends string,
-    FieldName extends string
-  > {}
+  interface NexusGenPluginFieldConfig<TypeName extends string, FieldName extends string> {}
+  interface NexusGenPluginInputFieldConfig<TypeName extends string, FieldName extends string> {}
   interface NexusGenPluginSchemaConfig {}
   interface NexusGenPluginArgConfig {}
 }

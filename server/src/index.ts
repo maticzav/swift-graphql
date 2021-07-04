@@ -21,19 +21,13 @@ const schema = makeSchema({
   sourceTypes: {
     modules: [
       {
-        module: path.join(
-          __dirname.replace(/\/dist$/, '/src'),
-          './types/backingTypes.ts',
-        ),
+        module: path.join(__dirname.replace(/\/dist$/, '/src'), './types/backingTypes.ts'),
         alias: 'swapi',
       },
     ],
   },
   contextType: {
-    module: path.join(
-      __dirname.replace(/\/dist$/, '/src'),
-      './types/backingTypes.ts',
-    ),
+    module: path.join(__dirname.replace(/\/dist$/, '/src'), './types/backingTypes.ts'),
     export: 'ContextType',
   },
   prettierConfig: require.resolve('../../prettier.config.js'),
@@ -75,8 +69,6 @@ if (require.main === module) {
   const port = process.env.PORT || 4000
 
   server.listen({ port }, () => {
-    console.log(
-      `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`,
-    )
+    console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
   })
 }
