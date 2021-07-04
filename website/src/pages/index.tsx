@@ -1,5 +1,10 @@
 import Head from 'next/head'
-import { FeatureList, HeroGradient, HeroIllustration, InfoList } from '@theguild/components'
+import {
+  FeatureList,
+  HeroGradient,
+  HeroIllustration,
+  InfoList,
+} from '@theguild/components'
 import { handlePushRoute } from '@guild-docs/client'
 
 export default function Index() {
@@ -9,12 +14,12 @@ export default function Index() {
         <title>SwiftGraphQL</title>
       </Head>
       <HeroGradient
-        title="GraphQL permissions as another layer of abstraction."
-        description="Implement your server permissions in a clear and deterministic way."
+        title="A GraphQL client that lets you forget about GraphQL"
+        description=""
         link={{
           href: '/docs',
-          children: 'Get Started',
-          title: 'Learn more about GraphQL Shield',
+          children: 'Start Querying',
+          title: 'Start programming with SwiftGraphQL',
           onClick: (e) => handlePushRoute('/docs', e),
         }}
         // version={
@@ -22,38 +27,40 @@ export default function Index() {
         //     <img src="https://badge.fury.io/js/%40envelop%2Fcore.svg" alt="npm version" height="18" />
         //   </a>
         // }
-        colors={['#FF34AE', '#1CC8EE']}
+        colors={['#FB8A51', '#F25C40']}
         // image={{
         //   src: '/assets/home-claw.png',
         //   alt: 'Illustration',
         // }}
       />
       <FeatureList
-        title="What's GraphQL Shield?"
+        title="Features"
         items={[
           {
             image: {
-              alt: 'Pluggable',
+              alt: 'Intuitive',
               src: '/assets/features-pluggable.png',
             },
-            title: 'Pluggable',
-            description: 'Powerful plugin system that wraps the entire GraphQL execution pipeline.',
+            title: 'Intuitive',
+            description:
+              'You will forget about the GraphQL layer altogether. Just Swift.',
           },
           {
             image: {
               alt: 'Flexible',
               src: '/assets/features-modern.png',
             },
-            title: 'Flexible',
-            description: 'Use with any HTTP server, and any GraphQL schema libraries (code-first / schema-first).',
+            title: 'Query, Mutate & Subscribe',
+            description:
+              'SwiftGraphQL supports query, mutation and subscription operations.',
           },
           {
             image: {
               alt: 'Develop Faster',
               src: '/assets/features-performant.png',
             },
-            title: 'Develop Faster',
-            description: `You don't have to reinvent the wheel for every feature. You can write/use Envelop plugin for most workflows.`,
+            title: 'Robust',
+            description: `If your project compiles, your queries work. You cannot make an invalid query that would compile.`,
           },
         ]}
       />
@@ -72,7 +79,7 @@ export default function Index() {
         title="Learn More"
         items={[
           {
-            title: 'The envelop approach',
+            title: 'Why SwiftGraphQL?',
             description: 'Learn more about Envelop core and how it works',
             link: {
               href: '/docs',
@@ -82,8 +89,9 @@ export default function Index() {
             },
           },
           {
-            title: 'Integrations',
-            description: 'Integrate GraphQL Shield with your existing setup quickly.',
+            title: 'F.A.Q',
+            description:
+              'Find answers to most common questions about SwiftGraphQL',
             link: {
               href: '/docs/integrations',
               children: 'Integrations & Examples',

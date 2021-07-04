@@ -5,16 +5,15 @@ export function getRoutes(): IRoutes {
     _: {
       docs: {
         $name: 'Docs',
-        $routes: ['README', 'getting-started', 'shield', 'rules'],
+        $routes: ['README', 'installation', 'generation', 'selection', 'faq'],
         _: {
+          reference: {
+            $name: 'Reference',
+            $routes: ['client', 'generator'],
+          },
           advanced: {
             $name: 'Advanced',
-            $routes: [
-              'whitelisting',
-              'reference',
-              'troubleshooting',
-              'reference',
-            ],
+            $routes: ['how', 'codecs'],
           },
         },
       },

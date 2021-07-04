@@ -1,58 +1,47 @@
 ---
-title: What is GraphQL Shield?
+title: Say hello to SwiftGraphQL!
 ---
 
-## What is Shield?
+## Overview
 
-Shield is a GraphQL library that helps you create a permission layer for your server.
-Its main focus is creating a meaningful, well-rounded and scalable API that will make you
-confident about your permission layer.
+SwiftGraphQL is a Swift code generator and a lightweight GraphQL client. It lets you create queries using Swift, and guarantees that every query you create is valid.
 
-Using an intuitive rule-first API, you'll be able to define the collection of rules
-that you can use across your permission system.
+The library is centered around three core principles:
 
-## Features
+- 🚀 If your project compiles, your queries work.
+- 🦉 Use Swift in favour of GraphQL wherever possible.
+- 🌳 Your application model should be independent of your schema.
 
-- **Flexible:** Based on [GraphQL Middleware](https://github.com/prismagraphql/graphql-middleware).
-- **Compatible:** Works with all GraphQL Servers.
-- **Smart:** Intelligent V8 Shield engine caches all your request to prevent any unnecessary load.
-- **Per-Type or Per-Field:** Write permissions for your schema, types or specific fields.
+Here's a short preview of the SwiftGraphQL code
 
-## Installation
+```swift
+import SwiftGraphQL
 
-Start by adding GraphQL Shield to your server:
+// Define a Swift model.
+struct Human: Identifiable {
+    let id: String
+    let name: String
+    let homePlanet: String?
+}
 
-<PackageInstall packageName="graphql-shield" />
+// Create a selection.
+let human = Selection.Human {
+    Human(
+        id: try $0.id(),
+        name: try $0.name(),
+        homePlanet: try $0.homePlanet()
+    )
+}
 
-## Example
+// Construct a query.
+let query = Selection.Query {
+    try $0.humans(human.list)
+}
 
-Here's an example of how you can define permissions using GraphQL Shield
-
-```ts
-const isAuthenticated = rule({ cache: 'contextual' })(async (parent, args, ctx, info) => {
-  return ctx.user !== null
-})
-
-const isAdmin = rule({ cache: 'contextual' })(async (parent, args, ctx, info) => {
-  return ctx.user.role === 'admin'
-})
-
-const isEditor = rule({ cache: 'contextual' })(async (parent, args, ctx, info) => {
-  return ctx.user.role === 'editor'
-})
-
-// Permissions
-
-const permissions = shield({
-  Query: {
-    frontPage: not(isAuthenticated),
-    fruits: and(isAuthenticated, or(isAdmin, isEditor)),
-    customers: and(isAuthenticated, isAdmin),
-  },
-  Mutation: {
-    addFruitToBasket: isAuthenticated,
-  },
-  Fruit: isAuthenticated,
-  Customer: isAdmin,
-})
+// Perform the query.
+send(query, to: "http://swift-graphql.heroku.com") { result in
+    if let data = try? result.get() {
+        print(data) // [Human]
+    }
+}
 ```

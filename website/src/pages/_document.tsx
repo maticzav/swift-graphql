@@ -9,6 +9,7 @@ export default class MyDocument extends Document {
       <Html>
         <Head />
         <head>
+          {/* Favicon */}
           <link
             rel="apple-touch-icon"
             sizes="57x57"
@@ -83,6 +84,7 @@ export default class MyDocument extends Document {
           <meta name="msapplication-TileImage" content="/ms-icon-144x144.png" />
           <meta name="theme-color" content="#ffffff" />
 
+          {/* Fonts */}
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link
             href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=block"
@@ -92,6 +94,9 @@ export default class MyDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=block"
             rel="stylesheet"
           />
+
+          {/* Crisp */}
+          <script async src="https://the-guild.dev/static/crisp.js" />
         </head>
         <body>
           <ColorModeScript initialColorMode="light" />

@@ -4,9 +4,23 @@ import '../../public/style.css'
 import '../../public/admonitions.css'
 
 import { appWithTranslation } from 'next-i18next'
-import { chakra, Code, Box, extendTheme, Text, theme as chakraTheme, UnorderedList, useColorModeValue } from '@chakra-ui/react'
+import {
+  chakra,
+  Code,
+  Box,
+  extendTheme,
+  Text,
+  theme as chakraTheme,
+  UnorderedList,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import { mode } from '@chakra-ui/theme-tools'
-import { CombinedThemeProvider, DocsPage, ExtendComponents, handlePushRoute } from '@guild-docs/client'
+import {
+  CombinedThemeProvider,
+  DocsPage,
+  ExtendComponents,
+  handlePushRoute,
+} from '@guild-docs/client'
 import { Footer, Header, Subheader } from '@theguild/components'
 import { CopyToClipboard } from '../components/CopyToClipboard'
 import { PackageInstall } from '../components/PackageInstall'
@@ -16,7 +30,7 @@ import type { AppProps } from 'next/app'
 ExtendComponents({
   a: chakra('a', {
     baseStyle: {
-      color: '#2f77c9',
+      color: '#F25C40',
       _hover: {
         textDecoration: 'underline',
       },
@@ -38,7 +52,15 @@ ExtendComponents({
   inlineCode: (props) => {
     const colorScheme = useColorModeValue('blackAlpha', undefined)
 
-    return <Code margin="1px" colorScheme={colorScheme} fontWeight="semibold" fontSize="0.875em" {...props} />
+    return (
+      <Code
+        margin="1px"
+        colorScheme={colorScheme}
+        fontWeight="semibold"
+        fontSize="0.875em"
+        {...props}
+      />
+    )
   },
   Text,
   PackageInstall,
@@ -80,7 +102,7 @@ const theme = extendTheme({
   styles,
 })
 
-const accentColor = '#1CC8EE'
+const accentColor = '#F25C40'
 
 const serializedMdx = process.env.SERIALIZED_MDX_ROUTES
 const mdxRoutes = { data: serializedMdx && JSON.parse(serializedMdx) }
@@ -99,7 +121,7 @@ function AppContent(appProps: AppProps) {
           title: 'SwiftGraphQL',
           description: '',
           image: {
-            src: '/logo.png',
+            src: '/swift.svg',
             alt: 'SwiftGraphQL Logo',
           },
           onClick: (e) => handlePushRoute('/', e),
@@ -132,7 +154,15 @@ function AppContent(appProps: AppProps) {
           onClick: (e) => handlePushRoute('/docs', e),
         }}
       />
-      {isDocs ? <DocsPage accentColor={accentColor} appProps={appProps} mdxRoutes={mdxRoutes} /> : <Component {...pageProps} />}
+      {isDocs ? (
+        <DocsPage
+          accentColor={accentColor}
+          appProps={appProps}
+          mdxRoutes={mdxRoutes}
+        />
+      ) : (
+        <Component {...pageProps} />
+      )}
       <Footer />
     </>
   )

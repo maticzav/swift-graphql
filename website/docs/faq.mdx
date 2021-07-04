@@ -1,0 +1,53 @@
+---
+title: Frequently Asked Questions
+sidebar_label: F.A.Q
+---
+
+### How do I create a fragment?
+
+Just create a new variable with a selection. In a way, every selection is a fragment!
+
+### How do I create an alias?
+
+You can't. SwiftGraphQL aims to use Swift's high level language features in favour of GraphQL. The primary goal of GraphQL alias is to support fetching same fields with different parameters. SwiftGraphQL automatically manages alias based on the values you provide to a particular field. Because of this, you can select the same field as many times as you'd like.
+
+### My queries include strange alias. What is that about?
+
+SwiftGraphQL uses hashes to construct your queries. There are two parts of the query builder that contribute to the hashes;
+
+- the first one - _query parameters_ - uses hashes to differentiate between same fields with different parameters. Because of this, you don't have to manually check that your field names don't collide.
+- the second one - _query variables_ - uses hashes to link your input values to the part of the query they belong to. SwiftGraphQL laverages Swift's native JSON serialization as I've found it incredibly difficult to represent enumerator values in GraphQL SDL. This way it's also more performant.
+
+```gql
+query (
+  $__rsdpxy7uqurl: Greeting!
+  $__l9q38fwdev22: Greeting!
+  $_b2ryvzutf9x2: ID!
+) {
+  greeting__m9oi5wy5dzot: greeting(input: $__rsdpxy7uqurl)
+  character__16agce2xby25o: character(id: $_b2ryvzutf9x2) {
+    __typename
+    ... on Human {
+      homePlanet___5osgbeo0g455: homePlanet
+    }
+    ... on Droid {
+      primaryFunction___5osgbeo0g455: primaryFunction
+    }
+  }
+}
+```
+
+### How do we populate the values?
+
+We use the limitation of Swift's types that you cannot recursively reference a nullable type, but can reference a list type. To prevent cycles in value mocking, we always return empty lists and fill all scalars and referenced objects with values. If you were to create a cycle, Swift wouldn't let you compile your app.
+
+### Why do I have to include try whenever I select something?
+
+Swift handles errors in a very upfront way. Since we are trying to decode nested values, the decoder might fail
+at various different depths. Because of that, we have to write `try`.
+
+### What are the pitfalls in Apollo iOS that you were referring to at the top?
+
+Apollo iOS code generator lets you write your queries upfront and generates the type annotations for them. Let's say that there's a `Human` object type that has a property `friends` (who are also humans). Because you could select different fields in `Human` than in `friends` (sub-`Human`), Apollo generates two different nested structs for "each" of the humans. In TypeScript and JavaScript this is not a problem, since objects are not "locked" into definition. In Swift, however, this becomes problematic as you probably want to represent all your humans in your model with only one human type.
+
+I ended up writing lots of boilerplate just to get it working, and would have to rewrite it in multiple places everytime backend team changed something.
