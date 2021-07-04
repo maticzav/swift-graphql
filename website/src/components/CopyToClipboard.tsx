@@ -1,13 +1,13 @@
-import { useCopyToClipboard } from 'react-use';
-import { MdContentCopy } from 'react-icons/md';
-import { IconButton, useToast } from '@chakra-ui/react';
-import { memo, useState } from 'react';
-import { TiTickOutline } from 'react-icons/ti';
+import { useCopyToClipboard } from 'react-use'
+import { MdContentCopy } from 'react-icons/md'
+import { IconButton, useToast } from '@chakra-ui/react'
+import { memo, useState } from 'react'
+import { TiTickOutline } from 'react-icons/ti'
 
 export const CopyToClipboard = memo(({ value }: { value: string }) => {
-  const [, copy] = useCopyToClipboard();
-  const [copied, setCopied] = useState<string | undefined>();
-  const toast = useToast();
+  const [, copy] = useCopyToClipboard()
+  const [copied, setCopied] = useState<string | undefined>()
+  const toast = useToast()
 
   return (
     <IconButton
@@ -18,20 +18,20 @@ export const CopyToClipboard = memo(({ value }: { value: string }) => {
       icon={copied ? <TiTickOutline /> : <MdContentCopy />}
       title="Copy to clipboard"
       onClick={() => {
-        copy(value);
+        copy(value)
 
-        setCopied(value);
+        setCopied(value)
         toast({
           status: 'info',
           title: `Copied to clipboard!`,
           position: 'bottom',
           duration: 1000,
-        });
+        })
 
         setTimeout(() => {
-          setCopied(undefined);
-        }, 1000);
+          setCopied(undefined)
+        }, 1000)
       }}
     />
-  );
-});
+  )
+})

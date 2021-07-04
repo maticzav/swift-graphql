@@ -1,6 +1,6 @@
-<div align="center"><img src="media/thumbnail.png" width="860" /></div>
-
-# 🦅 SwiftGraphQL
+<div align="center">
+<img src="media/thumbnail.png" width="240" />
+</div>
 
 > A GraphQL client that lets you forget about GraphQL.
 

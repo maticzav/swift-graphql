@@ -42,10 +42,7 @@ function update(raw: string, index: string): string {
   <!-- index-end -->
   `
 
-  const source = raw.replace(
-    /<!-- index-start -->([\w\W]*)<!-- index-end -->/,
-    index,
-  )
+  const source = raw.replace(/<!-- index-start -->([\w\W]*)<!-- index-end -->/, index)
 
   return prettier.format(source, {
     parser: 'markdown',

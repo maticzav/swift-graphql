@@ -1,10 +1,5 @@
 import Head from 'next/head'
-import {
-  FeatureList,
-  HeroGradient,
-  HeroIllustration,
-  InfoList,
-} from '@theguild/components'
+import { FeatureList, HeroGradient, HeroIllustration, InfoList } from '@theguild/components'
 import { handlePushRoute } from '@guild-docs/client'
 
 export default function Index() {
@@ -42,8 +37,7 @@ export default function Index() {
               src: '/assets/features-pluggable.png',
             },
             title: 'Intuitive',
-            description:
-              'You will forget about the GraphQL layer altogether. Just Swift.',
+            description: 'You will forget about the GraphQL layer altogether. Just Swift.',
           },
           {
             image: {
@@ -51,8 +45,7 @@ export default function Index() {
               src: '/assets/features-modern.png',
             },
             title: 'Query, Mutate & Subscribe',
-            description:
-              'SwiftGraphQL supports query, mutation and subscription operations.',
+            description: 'SwiftGraphQL supports query, mutation and subscription operations.',
           },
           {
             image: {
@@ -90,8 +83,7 @@ export default function Index() {
           },
           {
             title: 'F.A.Q',
-            description:
-              'Find answers to most common questions about SwiftGraphQL',
+            description: 'Find answers to most common questions about SwiftGraphQL',
             link: {
               href: '/docs/integrations',
               children: 'Integrations & Examples',
