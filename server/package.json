@@ -6,15 +6,16 @@
     "build": "yarn g:tsc"
   },
   "dependencies": {
-    "@types/express": "^4.17.11",
+    "@types/express": "^4.17.13",
     "apollo-server": "^2.25.2",
     "apollo-server-express": "^2.25.2",
     "express": "^4.17.1",
-    "graphql-tools": "^7.0.2",
-    "nexus": "^1.0.0",
-    "ws": "^7.4.5"
+    "graphql": "^15.5.1",
+    "graphql-tools": "^7.0.5",
+    "nexus": "^1.1.0",
+    "ws": "^7.5.3"
   },
   "devDependencies": {
-    "@types/ws": "^7"
+    "@types/ws": "^7.4.6"
   }
 }

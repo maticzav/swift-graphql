@@ -132,6 +132,11 @@ function AppContent(appProps: AppProps) {
           title: 'Start using SwiftGraphQL',
           onClick: (e) => handlePushRoute('/docs', e),
         }}
+        ctaProps={{
+          style: {
+            background: 'linear-gradient(135.17deg, #F35D41 -7.39%, #FB8950 143.25%);',
+          },
+        }}
       />
       {isDocs ? <DocsPage accentColor={accentColor} appProps={appProps} mdxRoutes={mdxRoutes} /> : <Component {...pageProps} />}
       <Footer />

@@ -24,8 +24,10 @@ export default function Index() {
         image={{
           src: '/assets/hero.png',
           alt: 'Illustration',
+        }}
+        imageProps={{
           style: {
-            maxWidth: '34rem',
+            maxWidth: '35rem',
           },
         }}
       />
