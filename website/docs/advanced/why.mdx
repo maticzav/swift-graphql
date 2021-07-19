@@ -1,0 +1,22 @@
+---
+title: Why?
+sidebar_label: Why SwiftGraphQL?
+---
+
+## Why SwiftGraphQL?
+
+Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link between backend and your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
+
+## Why another GraphQL client?
+
+There was no other library that would let me fetch my schema, generate the Swift code, build queries in Swift, and easily adapt query results to my model. I was considering using Apollo iOS for my projects, but I couldn't get to the same level of type-safety as with SwiftGraphQL.
+
+> This library has been heavily inspired by Dillon Kearns elm-graphql.
+
+## Why not Apollo iOS?
+
+Apollo iOS code generator lets you write your queries upfront and generates the type annotations for them. Unfortunatelly, it introduces a lot of collisions when _actually_ working with generated types.
+
+For example, Let's say that there's a Human object type that has a property friends (who are also humans). Because you could select different fields in Human than in friends (sub-Human), Apollo generates two different nested structs for "each" of the humans. In TypeScript and JavaScript this is not a problem, since objects are not "locked" into definition. In Swift, however, this becomes problematic as you probably want to represent all your humans in your model with only one human type.
+
+I ended up writing lots of boilerplate just to get it working, and would have to rewrite it in multiple places everytime backend team changed something.

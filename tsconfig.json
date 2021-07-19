@@ -14,10 +14,5 @@
     "lib": ["esnext"],
     "skipLibCheck": true
   },
-  "exclude": [
-    "**/tests/**/*",
-    "**/dist/**/*",
-    "**/node_modules/**/*",
-    "**/scripts/**/*"
-  ]
+  "exclude": ["**/tests/**/*", "**/dist/**/*", "**/node_modules/**/*", "**/scripts/**/*"]
 }

@@ -1,0 +1,53 @@
+---
+title: Installation
+sidebar_label: Installation
+---
+
+## Installation
+
+SwiftGraphQL is a code generator as well as a ligtweight client. That's why it's important that you install both of them.
+
+Make sure Xcode 11+ is installed first. Then, you need to include the client in your iOS/macOS project, and locally generate the code using code generator.
+
+### Installing SwiftGraphQL Client
+
+To install it using Swift Package Manager, open the following menu item in Xcode:
+
+File > Swift Packages > Add Package Dependency...
+
+In the Choose Package Repository prompt add this url:
+
+```
+https://github.com/maticzav/swift-graphql/
+```
+
+Then press Next and complete the remaining steps. You should select `SwiftGraphQL` as a dependency, since that includes the client code.
+
+To learn more about Swift Package Manager, check out the [official documentation](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
+
+### Installing Code Generator
+
+SwiftGraphQL generator comes as a CLI tool and as a library that you may import. You can use Mint, Homebrew and Make to use CLI only, or you may import it as a SPM dependency and use the generator itself.
+
+#### Mint
+
+```sh
+mint install maticzav/swift-graphql
+```
+
+> You can read more about Mint [here](https://github.com/yonaskolb/mint).
+
+#### Homebrew
+
+```sh
+brew tap maticzav/swift-graphql https://github.com/maticzav/swift-graphql.git
+brew install SwiftGraphQL
+```
+
+#### Make
+
+```sh
+git clone https://github.com/maticzav/swift-graphql.git
+cd swift-graphql
+make install
+```

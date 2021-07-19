@@ -1,0 +1,190 @@
+---
+title: Programatically writing query selection
+sidebar_label: Writing Queries
+---
+
+Selection lets you select fields that you want to fetch from the query on a particular type.
+
+SwiftGraphQL has generated phantom types for your operations, objects, interfaces and unions. You can find them by typing `Unions.`/`Interfaces.`/`Objects.`/`Operations.` followed by a name from your GraphQL schema. You plug those into the `Scope` parameter.
+
+The other parameter `Type` is what your constructor should return.
+
+> We generate type alias in selection which let you use XCode intellisnse and may infer your return type. They work like `Selection.ObjectName`.
+
+##### Nullable, list, and non-nullable fields
+
+Selection packs a collection of utility functions that let you select nullable and list fields using your existing selecitons.
+Each selection comes with three calculated properties that let you do that:
+
+- `list` - to query lists
+- `nullable` - to query nullable fields
+- `nonNullOrFail` - to query nullable fields that should be there
+
+```swift
+// Create a non-nullable selection.
+let human = Selection.Human {
+    Human(
+        id: try $0.id(),
+        name: try $0.name()
+    )
+}
+
+// Use it with nullable and list fields.
+let query = Selection.Query {
+    let list = try $0.humans(human.list)
+    let nullable = try $0.human(id: "100", human.nullable)
+}
+```
+
+You can achieve the same effect using `Selection` static functions `.list`, `.nullable`, and `.nonNullOrFail`.
+
+```swift
+// Use it with nullable and list fields.
+let query = Selection.Query {
+    let list = try $0.humans(Selection.list(human))
+}
+```
+
+##### Making selection on the entire type
+
+You might want to write a selection on the entire type from the selection composer itself. This usually happens if you have a distinct identifier reused in many types.
+
+Consider the following scenario where we have an `id` field in `Human` type. There are many cases where we only query `id` field from the `Human` that's why we create a human id selection.
+
+```swift
+let humanId = Selection<HumanID, Objects.Human> {
+    HumanID.fromString(try $0.id())
+}
+```
+
+Now, we want to reuse that same selection when query a detailed human type. To do that, we can use `selection` helper method that lets you make a selection on the whole `TypeLock` from inside the selection.
+
+```swift
+struct Human {
+    let id: HumanID
+    let name: String
+}
+
+let human = Selection.Human {
+    Human(
+        id: try $0.selection(humanId),
+        name: try $0.name()
+    )
+}
+```
+
+An alternative approach would be to manually rewrite the selection inside `Human` again.
+
+```swift
+let human = Selection.Human {
+    Human(
+        id: HumanID.fromString(try $0.id()),
+        name: try $0.name()
+    )
+}
+```
+
+Having distinct types for ids of different object types is particularly useful in large projects as it gives you verification that you are not using a wrong identifier for a particular type of field. At first, this might seem useless and cumbersome, but it makes your code more robust once you get used to it.
+
+##### Mapping Selection
+
+You might want to map the result of your selection to a new type and get a selection for that new type.
+You can do that by calling a `map` function on selection and provide a mapping.
+
+```swift
+struct Human {
+    let id: String
+    let name: String
+}
+
+// Create a selection.
+let human = Selection.Human {
+    Human(
+        id: try $0.id(),
+        name: try $0.name(),
+    )
+}
+
+// Map the original selection on Human to return String.
+let humanName: Selection<String, Objects.Human> = human.map { $0.name }
+```
+
+> ⚠️ Don't make any nested calls to the API. Use the first half of the initializer to fetch all the data and return the calculated result. Just don't make nested requests.
+
+```swift
+// WRONG!
+let human = Selection.Human { select in
+    let message: String
+    if try select.likesStrawberries() {
+        message = try select.name()
+    } else {
+        message = try select.homePlanet()
+    }
+    return message
+}
+
+// Correct.
+let human = Selection.Human { select in
+
+    /* Data */
+    let likesStrawberries = try select.likesStrawberries()
+    let name = try select.name()
+    let homePlanet = try select.homePlanet()
+
+    /* Return */
+    let message: String
+    if likesStrawberries {
+        message = name
+    } else {
+        message = homePlanet
+    }
+    return message
+}
+```
+
+### `Unions`
+
+When fetching a union you should provide selections for each of the union sub-types. Additionally, all of those selections should resolve to the same type.
+
+```swift
+let characterUnion = Selection.CharacterUnion {
+    try $0.on(
+        human: .init { try $0.funFact() /* String */ },
+        droid: .init { try $0.primaryFunction() /* String */ }
+    )
+}
+```
+
+You'd usually want to create a Swift enumerator and have different selecitons return different cases.
+
+### `Interfaces`
+
+Interfaces are very similar to unions. The only difference is that you may query for a common field from the intersection.
+
+```swift
+let characterInteface = Selection.Character {
+
+    /* Common */
+    let name = try $0.name()
+
+    /* Fragments */
+    let about = try $0.on(
+        droid: Selection<String, Objects.Droid> { droid in try droid.primaryFunction() /* String */ },
+        human: Selection<String, Objects.Human> { human in try human.homePlanet() /* String */ }
+    )
+
+    return "\(name). \(about)"
+}
+```
+
+You'd usually want to create a Swift enumerator and have different selecitons return different cases.
+
+### `OptionalArgument`
+
+- `SwiftGraphQL`
+
+GraphQL's `null` value in an input type may be entirely omitted to represent the absence of a value or supplied as `null` to provide `null` value. This comes in especially handy in mutations.
+
+Because of that, every input object that has an optional property accepts an optional argument that may either be `.present(value)`, `.absent()` or `.null()`. We use functions to support recursive type annotations that GraphQL allows.
+
+> NOTE: Every nullable argument is by default absent so you don't have to write boilerplate.

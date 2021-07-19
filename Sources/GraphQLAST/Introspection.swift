@@ -153,13 +153,17 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
     }
 
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue("application/json", forHTTPHeaderField: "Accept")
+    request.setValue("*/*", forHTTPHeaderField: "Accept")
     request.httpMethod = "POST"
 
-    let query: [String: Any] = ["query": introspectionQuery]
+    let payload: [String: Any] = [
+        "query": introspectionQuery,
+        "variables": [String: Any](),
+        "operationName": "IntrospectionQuery"
+    ]
 
     request.httpBody = try! JSONSerialization.data(
-        withJSONObject: query,
+        withJSONObject: payload,
         options: JSONSerialization.WritingOptions()
     )
 
@@ -176,8 +180,14 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
             return
         }
 
-        guard let httpResponse = response as? HTTPURLResponse, (200 ... 299).contains(httpResponse.statusCode) else {
-            result = .failure(.statusCode)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            result = .failure(.unknown)
+            semaphore.signal()
+            return
+        }
+        
+        guard (200 ... 299).contains(httpResponse.statusCode) else {
+            result = .failure(.statusCode(httpResponse.statusCode))
             semaphore.signal()
             return
         }
@@ -205,7 +215,7 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
 
 enum IntrospectionError: Error {
     case error(Error)
-    case statusCode
+    case statusCode(Int)
     case unknown
 }
 
