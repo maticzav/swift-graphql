@@ -1,4 +1,4 @@
-import Combine
+//import Combine
 import Foundation
 
 /*
@@ -122,163 +122,6 @@ private func send<Type, TypeLock>(
 }
 
 
-// MARK: - Listen
-
-/// Starts a webhook listener and returns a URLSessionWebSocket that you may use to manipulate session.
-///
-/// - parameter endpoint: Server endpoint URL.
-/// - parameter operationName: The name of the GraphQL query.
-/// - parameter headers: A dictionary of key-value header pairs.
-/// - parameter onEvent: Closure that is called each subscription event.
-///
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@discardableResult
-public func listen<Type, TypeLock>(
-    for selection: Selection<Type, TypeLock?>,
-    on endpoint: String,
-    operationName: String? = nil,
-    headers: HttpHeaders = [:],
-    protocol webSocketProtocol: String = "graphql-subscriptions",
-    onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
-) -> URLSessionWebSocketTask? where TypeLock: GraphQLWebSocketOperation & Decodable {
-    listen(
-        selection: selection,
-        operationName: operationName,
-        endpoint: endpoint,
-        headers: headers,
-        webSocketProtocol: webSocketProtocol,
-        eventHandler: eventHandler
-    )
-}
-
-/// Starts a webhook listener and returns a URLSessionWebSocket that you may use to manipulate session.
-///
-/// - Note: This is a shortcut function for when you are expecting the result.
-///         The only difference between this one and the other one is that you may select
-///         on non-nullable TypeLock instead of a nullable one.
-///
-/// - parameter endpoint: Server endpoint URL.
-/// - parameter operationName: The name of the GraphQL query.
-/// - parameter headers: A dictionary of key-value header pairs.
-/// - parameter onEvent: Closure that is called each subscription event.
-///
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@discardableResult
-public func listen<Type, TypeLock>(
-    for selection: Selection<Type, TypeLock>,
-    on endpoint: String,
-    operationName: String? = nil,
-    headers: HttpHeaders = [:],
-    protocol webSocketProtocol: String = "graphql-subscriptions",
-    onEvent eventHandler: @escaping (Response<Type, TypeLock>) -> Void
-) -> URLSessionWebSocketTask? where TypeLock: GraphQLWebSocketOperation & Decodable {
-    listen(
-        selection: selection.nonNullOrFail,
-        operationName: operationName,
-        endpoint: endpoint,
-        headers: headers,
-        webSocketProtocol: webSocketProtocol,
-        eventHandler: eventHandler
-    )
-}
-
-/// Starts a webhook listener and returns a URLSessionWebSocket that you may use to close session.
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-private func listen<Type, TypeLock>(
-    selection: Selection<Type, TypeLock?>,
-    operationName: String?,
-    endpoint: String,
-    headers: HttpHeaders,
-    webSocketProtocol: String,
-    eventHandler: @escaping (Response<Type, TypeLock>) -> Void
-) -> URLSessionWebSocketTask? where TypeLock: GraphQLWebSocketOperation & Decodable {
-    // Validate that we got a valid url.
-    guard let url = URL(string: endpoint) else {
-        eventHandler(.failure(.badURL))
-        return nil
-    }
-    
-    // Create a GraphQL request.
-    var request = createGraphQLRequest(
-        selection: selection,
-        operationName: operationName,
-        url: url,
-        headers: headers,
-        method: .get
-    )
-    
-    if request.value(forHTTPHeaderField: "Sec-WebSocket-Protocol") == nil {
-        request.setValue(webSocketProtocol, forHTTPHeaderField: "Sec-WebSocket-Protocol")
-    }
-
-    // Construct a message.
-    let message: [String: Any] = [
-        "payload": try! JSONSerialization.jsonObject(with: request.httpBody!, options: []),
-        "type": "start",
-        // "id": UUID().uuidString
-    ]
-
-    let messageData = try! JSONSerialization.data(
-        withJSONObject: message,
-        options: []
-    )
-
-    // Create an event handler.
-    func receiveNext(on socket: URLSessionWebSocketTask?) {
-        socket?.receive { [weak socket] result in
-            /* Process the response. */
-            switch result {
-            case let .failure(error):
-                eventHandler(.failure(.network(error)))
-            case let .success(message):
-                // Try to serialize the response.
-                if let data = message.data, let result = try? GraphQLResult(webSocketResponse: data, with: selection) {
-                    eventHandler(.success(result))
-                } else {
-                    eventHandler(.failure(.badpayload))
-                }
-            }
-
-            // Receive next message
-            receiveNext(on: socket)
-        }
-    }
-
-    // Clear request and create a session.
-    request.httpBody = nil
-    let socket: URLSessionWebSocketTask = URLSession.shared.webSocketTask(with: request)
-
-    // Attach receiver
-    receiveNext(on: socket)
-
-    // Send message
-    socket.send(.data(messageData)) { error in
-        if error != nil {
-            eventHandler(.failure(.badpayload))
-        }
-    }
-    socket.resume()
-
-    return socket
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension URLSessionWebSocketTask.Message {
-    var data: Data? {
-        switch self {
-        case let .data(data):
-            return data
-        case let .string(string):
-            return string.data(using: .utf8)
-        @unknown default:
-            return nil
-        }
-    }
-}
-
-
-
-
 // MARK: - Request type aliaii
 
 /// Represents an error of the actual request.
@@ -345,30 +188,10 @@ private func createGraphQLRequest<Type, TypeLock>(
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.httpMethod = method.rawValue
 
-    // Compose a query.
-    let query = selection.selection.serialize(for: TypeLock.operation, operationName: operationName)
-    var variables = [String: NSObject]()
-
-    for argument in selection.selection.arguments {
-        variables[argument.hash] = argument.value
-    }
-
-    // Construct a request body.
-    var body: [String: Any] = [
-        "query": query,
-        "variables": variables,
-    ]
-
-    if let operationName = operationName {
-        // Add the operation name to the request body if needed.
-        body["operationName"] = operationName
-    }
-
-    // Construct a HTTP request.
-    request.httpBody = try! JSONSerialization.data(
-        withJSONObject: body,
-        options: []
-    )
+    // Construct HTTP body.
+    let encoder = JSONEncoder()
+    let payload = selection.buildPayload(operationName: operationName)
+    request.httpBody = try! encoder.encode(payload)
 
     return request
 }

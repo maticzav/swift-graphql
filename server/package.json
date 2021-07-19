@@ -10,8 +10,11 @@
     "apollo-server": "^2.25.2",
     "apollo-server-express": "^2.25.2",
     "express": "^4.17.1",
-    "graphql": "^15.4.0",
     "graphql-tools": "^7.0.2",
-    "nexus": "^1.0.0"
+    "nexus": "^1.0.0",
+    "ws": "^7.4.5"
+  },
+  "devDependencies": {
+    "@types/ws": "^7"
   }
 }
