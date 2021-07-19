@@ -14,7 +14,7 @@ extension EnumType {
         """
         extension Enums {
             \(docs)
-            enum \(name.pascalCase): String, CaseIterable, Codable {
+            enum \(name): String, CaseIterable, Codable {
             \(values)
             }
         }
@@ -39,7 +39,7 @@ extension EnumValue {
         """
         \(docs)
         \(availability)
-        case \(name.camelCase.normalize) = "\(name)"
+        case \(name.normalize) = "\(name)"
         """
     }
 

@@ -16,7 +16,7 @@ extension InputObjectType {
     func declaration(scalars: ScalarMap) throws -> String {
         """
         extension InputObjects {
-            struct \(name.pascalCase): Encodable, Hashable {
+            struct \(name): Encodable, Hashable {
 
             \(try inputFields.map { try $0.declaration(scalars: scalars) }.joined(separator: "\n"))
 
@@ -40,7 +40,7 @@ extension InputValue {
     fileprivate func declaration(scalars: ScalarMap) throws -> String {
         """
         \(docs)
-        var \(name.camelCase.normalize): \(try type.type(scalars: scalars)) \(self.default)
+        var \(name.normalize): \(try type.type(scalars: scalars)) \(self.default)
         """
     }
 
@@ -78,9 +78,9 @@ extension InvertedInputTypeRef {
             case let .scalar(scalar):
                 return try scalars.scalar(scalar)
             case let .enum(enm):
-                return "Enums.\(enm.pascalCase)"
+                return "Enums.\(enm)"
             case let .inputObject(inputObject):
-                return "InputObjects.\(inputObject.pascalCase)"
+                return "InputObjects.\(inputObject)"
             }
         case let .list(subref):
             return "[\(try subref.type(scalars: scalars))]"
@@ -121,7 +121,7 @@ private extension Collection where Element == InputValue {
 private extension InputValue {
     /// Returns an encoder for this input value.
     var encoder: String {
-        let key = name.camelCase.normalize
+        let key = name.normalize
 
         switch type.inverted {
         case .nullable:
@@ -135,6 +135,6 @@ private extension InputValue {
 
     /// Returns a coding key for this input value.
     var codingKey: String {
-        "case \(name.camelCase.normalize) = \"\(name)\""
+        "case \(name.normalize) = \"\(name)\""
     }
 }

@@ -31,17 +31,17 @@ final class InputObjectTests: XCTestCase {
                 /// Field description.
                 var id: InputObjects.AnotherInputObject
 
-                var inputValue: OptionalArgument<ID> = .absent()
+                var input_value: OptionalArgument<ID> = .absent()
 
                 func encode(to encoder: Encoder) throws {
                     var container = encoder.container(keyedBy: CodingKeys.self)
                     try container.encode(id, forKey: .id)
-                    if inputValue.hasValue { try container.encode(inputValue, forKey: .inputValue) }
+                    if input_value.hasValue { try container.encode(input_value, forKey: .input_value) }
                 }
 
                 enum CodingKeys: String, CodingKey {
                     case id
-                    case inputValue = "input_value"
+                    case input_value
                 }
             }
         }
@@ -73,7 +73,7 @@ final class InputObjectTests: XCTestCase {
         extension InputObjects {
             struct InputObject: Encodable, Hashable {
                 /// Field description.
-                var id: Enums.Enum
+                var id: Enums.ENUM
 
                 func encode(to encoder: Encoder) throws {
                     var container = encoder.container(keyedBy: CodingKeys.self)

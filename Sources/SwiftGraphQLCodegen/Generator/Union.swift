@@ -13,7 +13,7 @@ extension UnionType: Structure {
 extension UnionType {
     /// Returns a declaration of the union type that we add to the generated file.
     func declaration(objects: [ObjectType], scalars: ScalarMap) throws -> String {
-        let name = self.name.pascalCase
+        let name = self.name
 
         return """
         extension Unions {

@@ -12,7 +12,7 @@ extension InterfaceType: Structure {}
 extension InterfaceType {
     /// Returns a code that represents an interface.
     func declaration(objects: [ObjectType], scalars: ScalarMap) throws -> String {
-        let name = self.name.pascalCase
+        let name = self.name
 
         return """
         extension Interfaces {

@@ -10,7 +10,7 @@ extension ObjectType: Structure {
 extension ObjectType {
     /// Declares (i.e. creates) the object itself.
     func declaration(objects: [ObjectType], scalars: ScalarMap) throws -> String {
-        let name = self.name.pascalCase
+        let name = self.name
 
         return """
         extension Objects {

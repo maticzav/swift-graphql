@@ -4,7 +4,7 @@ extension Operation {
     /// Returns a definition of an operation.
     func declaration() -> String {
         """
-        extension Objects.\(type.name.pascalCase): \(self.protocol) {
+        extension Objects.\(type.name): \(self.protocol) {
             static var operation: String { \"\(operation)\" }
         }
         """

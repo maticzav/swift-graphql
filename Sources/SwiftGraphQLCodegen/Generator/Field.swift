@@ -64,7 +64,7 @@ extension Field {
     }
 
     private var fName: String {
-        name.camelCase.normalize
+        name.normalize
     }
 
     private func fParameters(scalars: ScalarMap) throws -> String {
@@ -75,11 +75,11 @@ extension Field {
     private var typelock: String {
         switch type.namedType {
         case let .object(typelock):
-            return "Objects.\(typelock.pascalCase)"
+            return "Objects.\(typelock)"
         case let .interface(typelock):
-            return "Interfaces.\(typelock.pascalCase)"
+            return "Interfaces.\(typelock)"
         case let .union(typelock):
-            return "Unions.\(typelock.pascalCase)"
+            return "Unions.\(typelock)"
         default:
             return "<ERROR>"
         }
@@ -120,7 +120,7 @@ private extension Collection where Element == InputValue {
 extension InputValue {
     /// Generates a function parameter for this input value.
     fileprivate func parameter(scalars: ScalarMap) throws -> String {
-        "\(name.camelCase.normalize): \(try type.type(scalars: scalars)) \(self.default)"
+        "\(name.normalize): \(try type.type(scalars: scalars)) \(self.default)"
     }
 
     /// Returns the default value of the parameter.
@@ -174,7 +174,7 @@ private extension Collection where Element == InputValue {
 private extension InputValue {
     /// Returns a SwiftGraphQL Argument definition for a given input value.
     var argument: String {
-        #"Argument(name: "\#(name)", type: "\#(type.argument)", value: \#(name.camelCase.normalize))"#
+        #"Argument(name: "\#(name)", type: "\#(type.argument)", value: \#(name.normalize))"#
     }
 }
 
@@ -208,7 +208,7 @@ extension InputTypeRef {
 private extension Field {
     /// Returns selection decoder for this field.
     var decoder: String {
-        let name = self.name.camelCase
+        let name = self.name
 
         switch type.inverted.namedType {
         case .scalar(_), .enum:
@@ -258,7 +258,7 @@ extension OutputTypeRef {
             let type = try scalars.scalar(scalar)
             return mock(value: "\(type).mockValue")
         case let .enum(enm):
-            return mock(value: "Enums.\(enm.pascalCase).allCases.first!")
+            return mock(value: "Enums.\(enm).allCases.first!")
         case .interface, .object, .union:
             return "selection.mock()"
         }
@@ -299,7 +299,7 @@ private extension OutputTypeRef {
             let scalar = try scalars.scalar(scalar)
             return type(for: scalar)
         case let .enum(enm):
-            return type(for: "Enums.\(enm.pascalCase)")
+            return type(for: "Enums.\(enm)")
         case .interface, .object, .union:
             return "Type"
         }

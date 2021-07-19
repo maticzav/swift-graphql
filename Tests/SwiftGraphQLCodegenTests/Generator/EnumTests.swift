@@ -46,15 +46,15 @@ final class EnumTests: XCTestCase {
             enum Episodes: String, CaseIterable, Codable {
                 /// Released in 1977.
 
-                case newhope = "NEWHOPE"
+                case NEWHOPE = "NEWHOPE"
 
-                case empire = "EMPIRE"
+                case EMPIRE = "EMPIRE"
                 /// Released in 1983.
                 @available(*, deprecated, message: "Was too good.")
-                case jedi = "JEDI"
+                case JEDI = "JEDI"
 
                 @available(*, deprecated, message: "")
-                case skywalker = "SKYWALKER"
+                case SKYWALKER = "SKYWALKER"
             }
         }
         """.format()

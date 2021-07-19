@@ -46,7 +46,7 @@ extension Structure {
     func `struct`(name: String, objects: [ObjectType], scalars: ScalarMap) throws -> String {
         let typename: String
         if let object = possibleTypes.first, self.possibleTypes.count == 1 {
-            typename = "let __typename: TypeName = .\(object.name.camelCase)"
+            typename = "let __typename: TypeName = .\(object.name)"
         } else {
             typename = "let __typename: TypeName"
         }
@@ -73,7 +73,7 @@ private extension Field {
         let type = try self.type.namedType.type(scalars: scalars)
         let wrappedType = self.type.nonNullable.type(for: type)
 
-        return "let \(name.camelCase.normalize): [String: \(wrappedType)]"
+        return "let \(name.normalize): [String: \(wrappedType)]"
     }
 }
 
@@ -89,7 +89,7 @@ extension Collection where Element == Field {
     func decoder(scalars: ScalarMap, includeTypenameDecoder typename: Bool = false) throws -> String {
         let cases: String = try map { try $0.decoder(scalars: scalars) }
             .joined(separator: "\n")
-        let mappings: String = map { "self.\($0.name.camelCase) = map[\"\($0.name.camelCase)\"]" }
+        let mappings: String = map { "self.\($0.name) = map[\"\($0.name)\"]" }
             .joined(separator: "\n")
 
         return """
@@ -125,7 +125,7 @@ extension Collection where Element == Field {
 
 private extension Collection where Element == ObjectTypeRef {
     var typename: String {
-        let types = map { "case \($0.name.camelCase.normalize) = \"\($0.name)\"" }
+        let types = map { "case \($0.name.normalize) = \"\($0.name)\"" }
             .joined(separator: "\n")
 
         return """
@@ -143,7 +143,7 @@ private extension Field {
         let wrappedType = self.type.nullable.type(for: type)
 
         return """
-        case \"\(name.camelCase)\":
+        case \"\(name)\":
             if let value = try container.decode(\(wrappedType).self, forKey: codingKey) {
                 map.set(key: field, hash: alias, value: value as Any)
             }
@@ -158,13 +158,13 @@ extension OutputRef {
         case let .scalar(scalar):
             return try scalars.scalar(scalar)
         case let .enum(enm):
-            return "Enums.\(enm.pascalCase)"
+            return "Enums.\(enm)"
         case let .object(type):
-            return "Objects.\(type.pascalCase)"
+            return "Objects.\(type)"
         case let .interface(type):
-            return "Interfaces.\(type.pascalCase)"
+            return "Interfaces.\(type)"
         case let .union(type):
-            return "Unions.\(type.pascalCase)"
+            return "Unions.\(type)"
         }
     }
 }
