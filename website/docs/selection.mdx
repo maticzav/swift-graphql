@@ -1,6 +1,6 @@
 ---
-title: Making Query Selection
-sidebar_label: Queries
+title: Programatically writing query selection
+sidebar_label: Writing Queries
 ---
 
 Selection lets you select fields that you want to fetch from the query on a particular type.
@@ -98,7 +98,7 @@ struct Human {
 }
 
 // Create a selection.
-let human = Selection<Human, Objects.Human> {
+let human = Selection.Human {
     Human(
         id: try $0.id(),
         name: try $0.name(),
@@ -113,7 +113,7 @@ let humanName: Selection<String, Objects.Human> = human.map { $0.name }
 
 ```swift
 // WRONG!
-let human = Selection<String, Objects.Human> { select in
+let human = Selection.Human { select in
     let message: String
     if try select.likesStrawberries() {
         message = try select.name()
@@ -124,7 +124,7 @@ let human = Selection<String, Objects.Human> { select in
 }
 
 // Correct.
-let human = Selection<String, Objects.Human> { select in
+let human = Selection.Human { select in
 
     /* Data */
     let likesStrawberries = try select.likesStrawberries()
@@ -147,7 +147,7 @@ let human = Selection<String, Objects.Human> { select in
 When fetching a union you should provide selections for each of the union sub-types. Additionally, all of those selections should resolve to the same type.
 
 ```swift
-let characterUnion = Selection<String, Unions.CharacterUnion> {
+let characterUnion = Selection.CharacterUnion {
     try $0.on(
         human: .init { try $0.funFact() /* String */ },
         droid: .init { try $0.primaryFunction() /* String */ }
@@ -162,7 +162,7 @@ You'd usually want to create a Swift enumerator and have different selecitons re
 Interfaces are very similar to unions. The only difference is that you may query for a common field from the intersection.
 
 ```swift
-let characterInteface = Selection<String, Interfaces.Character> {
+let characterInteface = Selection.Character {
 
     /* Common */
     let name = try $0.name()

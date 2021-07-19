@@ -75,12 +75,12 @@ const theme = extendTheme({
   },
   config: {
     initialColorMode: 'light',
-    useSystemColorMode: false,
+    useSystemColorMode: true,
   },
   styles,
 })
 
-const accentColor = '#F25C40'
+export const accentColor = '#F25C40'
 
 const serializedMdx = process.env.SERIALIZED_MDX_ROUTES
 const mdxRoutes = { data: serializedMdx && JSON.parse(serializedMdx) }
@@ -97,11 +97,12 @@ function AppContent(appProps: AppProps) {
         activeLink={router.asPath}
         product={{
           title: 'SwiftGraphQL',
-          description: '',
+          description: 'GraphQL client and Code Generator.',
           image: {
             src: '/swift.svg',
             alt: 'SwiftGraphQL Logo',
           },
+
           onClick: (e) => handlePushRoute('/', e),
         }}
         links={[
@@ -144,7 +145,18 @@ const AppContentWrapper = appWithTranslation(function TranslatedApp(appProps) {
 
 export default function App(appProps: AppProps) {
   return (
-    <CombinedThemeProvider theme={theme} accentColor={accentColor}>
+    <CombinedThemeProvider
+      theme={theme}
+      accentColor={accentColor}
+      defaultSeo={{
+        title: 'SwiftGraphQL',
+        description: 'A Swift GraphQL client and code generator.',
+        logo: {
+          url: 'https://swift-graphql.com/swift.svg',
+          alt: 'SwiftGraphQL Logo',
+        },
+      }}
+    >
       <AppContentWrapper {...appProps} />
     </CombinedThemeProvider>
   )
