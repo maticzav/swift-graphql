@@ -1,5 +1,7 @@
 import { subscriptionType } from 'nexus'
 
+import { wait } from '../utils'
+
 /* Subscription */
 
 export const Subscription = subscriptionType({
@@ -9,7 +11,7 @@ export const Subscription = subscriptionType({
       subscribe() {
         return (async function* () {
           while (true) {
-            await new Promise((res) => setTimeout(res, 1000))
+            await wait(1000)
             yield Math.floor(Math.random() * 100)
           }
         })()

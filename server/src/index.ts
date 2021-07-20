@@ -1,6 +1,14 @@
 import { makeSchema } from 'nexus'
 import * as path from 'path'
 
+import * as express from 'express'
+
+import * as ws from 'ws'
+import { useServer } from 'graphql-ws/lib/use/ws'
+import { execute, subscribe, GraphQLError } from 'graphql'
+import { createServer, IncomingMessage, Server } from 'http'
+import { graphqlHTTP } from 'express-graphql'
+
 import { data } from './data'
 import * as allTypes from './graphql'
 import { ContextType } from './types/backingTypes'
@@ -34,33 +42,24 @@ const schema = makeSchema({
 
 /* Server */
 
-const express = require("express");
-//import express from 'express';
-const ws = require("ws");
-// import ws from 'ws'; // yarn add ws
-import { useServer } from 'graphql-ws/lib/use/ws';
-import { execute, subscribe, GraphQLError } from 'graphql';
-import { createServer, IncomingMessage, Server } from 'http';
-import { graphqlHTTP } from 'express-graphql';
+const port = process.env.PORT || 4000
 
-const port = process.env.PORT || 4000;
-
-const http = express();
-const httpServer = createServer(http);
+const http = express()
+const httpServer = createServer(http)
 
 http.use('/graphql', async (req: any, res: any) => {
-  const context: any = { req: req, data: data };
+  const context: any = { req: req, data: data }
 
-	graphqlHTTP({
-		schema: schema,
-		context: context
-	})(req, res);
-});
+  graphqlHTTP({
+    schema: schema,
+    context: context,
+  })(req, res)
+})
 
 const wsServer = new ws.Server({
   server: httpServer,
-  path: '/subscriptions'
-});
+  path: '/subscriptions',
+})
 
 useServer(
   {
@@ -68,27 +67,27 @@ useServer(
     execute,
     subscribe,
     onConnect: (ctx) => {
-      console.log('Connect', ctx);
-      ctx["data"] = data
+      console.log('Connect', ctx)
+      ctx['data'] = data
     },
     onSubscribe: (ctx, msg) => {
-      console.log('Subscribe', { ctx, msg });
+      console.log('Subscribe', { ctx, msg })
     },
     onNext: (ctx, msg, args, result) => {
-      console.debug('Next', { ctx, msg, args, result });
+      console.debug('Next', { ctx, msg, args, result })
     },
     onError: (ctx, msg, errors) => {
-      console.error('Error', { ctx, msg, errors });
+      console.error('Error', { ctx, msg, errors })
     },
     onComplete: (ctx, msg) => {
-      console.log('Complete', { ctx, msg });
-    }
+      console.log('Complete', { ctx, msg })
+    },
   },
-  wsServer
-);
+  wsServer,
+)
 
 httpServer.listen(port, () => {
-	console.log(`HTTP server listening on port ${port}`);
-});
+  console.log(`HTTP server listening on port ${port}`)
+})
 
-console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
+console.log(`🚀 Server ready at http://localhost:${port}/graphql`)
