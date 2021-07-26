@@ -2325,31 +2325,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@guild-docs/server@npm:0.2.18":
-  version: 0.2.18
-  resolution: "@guild-docs/server@npm:0.2.18"
+"@guild-docs/server@npm:0.2.22":
+  version: 0.2.22
+  resolution: "@guild-docs/server@npm:0.2.22"
   dependencies:
-    "@guild-docs/types": ^0.2.16
+    "@guild-docs/types": ^0.2.17
     github-slugger: ^1.3.0
     globby: ^11.0.4
     gray-matter: ^4.0.3
-    next-mdx-remote: ^3.0.2
+    next-mdx-remote: ^3.0.4
+    node-fetch: ^2.6.1
     npms.io: ^2.0.6
     remark-emoji: ^2.2.0
-    remark-slug: ^6.0.0
+    remark-slug: ^6.1.0
     tiny-lru: ^7.0.6
   peerDependencies:
     next: ^11.0.1
-    next-i18next: ^8.5.1
+    next-i18next: ^8.5.3
     react: ^17.0.2
     react-dom: ^17.0.2
     remark-admonitions: ^1.2.1
     remark-prism: ^1.3.6
-  checksum: c85de27f8d44bf0f162d3c0d6cdf1260aced31ee412d490820c2426dabcb9c8036b5a9d3dd14ff7facfeba5b7661536423410fa87522070d4e027f7ee3c535cd
+  checksum: 29d99b6df40e964ae50b6c1c9cc7575f38e761257e2d77db0a38bc23eb126a2d5330b36bc3973005f609ea909392e70218c5cde9508f31eeae45fd7d97f5151c
   languageName: node
   linkType: hard
 
-"@guild-docs/types@npm:^0.2.16, @guild-docs/types@npm:^0.2.17":
+"@guild-docs/types@npm:^0.2.17":
   version: 0.2.17
   resolution: "@guild-docs/types@npm:0.2.17"
   peerDependencies:
@@ -2684,9 +2685,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@theguild/components@npm:1.4.5":
-  version: 1.4.5
-  resolution: "@theguild/components@npm:1.4.5"
+"@theguild/components@npm:1.4.7":
+  version: 1.4.7
+  resolution: "@theguild/components@npm:1.4.7"
   dependencies:
     "@emotion/react": ^11.4.0
     "@emotion/styled": ^11.3.0
@@ -2704,7 +2705,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-  checksum: 1ac23b6bc5d0855feaea8231183fdd84d806cca48c8b3aca20e8820f1fccc7728cfd1ba0207ad2e805fdf890aaf4848ae549fef93861d98dc81a459f38d43dc3
+  checksum: b04f0fcd819aa71acb9305de3e13cc885a5f91cfe8da3a380cc037afc013abe7492e4e0b9f090c2e0086f7b82fef38b11f2eb0afdccbf7a68230ef7eb8556a11
   languageName: node
   linkType: hard
 
@@ -2779,12 +2780,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/concurrently@npm:6.2.0":
-  version: 6.2.0
-  resolution: "@types/concurrently@npm:6.2.0"
+"@types/concurrently@npm:6.2.1":
+  version: 6.2.1
+  resolution: "@types/concurrently@npm:6.2.1"
   dependencies:
     "@types/node": "*"
-  checksum: 02b953f53a1b3681ce2426725fe1c3663bb945975a78ab123c43330041df749aa7134bb534989b8a493e7059f26dc5bb59d51b73f745997505e93f13d5630022
+  checksum: a348f1f09cbf8cff7b901682eb554a1d1bdc4729f22a2e2486125877c0fb56f6f56631fc743df2484d0836e510cbfa37cad5f550ac11028dac07d3bc02251168
   languageName: node
   linkType: hard
 
@@ -4995,7 +4996,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:2.22.1, date-fns@npm:^2.16.1":
+"date-fns@npm:2.23.0":
+  version: 2.23.0
+  resolution: "date-fns@npm:2.23.0"
+  checksum: 5b23cf7f08a27d0c1633e81304c95ac2bacb1160d86a25d36c40c84853796e442e597a4d75acec3f0920a71f3a65dd55b37565d356fa3fb4c2345225df42d930
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^2.16.1":
   version: 2.22.1
   resolution: "date-fns@npm:2.22.1"
   checksum: a89dc6cdf3929b3f0d54d129a3c288df995fc3e6c8099dacc215e5404b4950fc8551d11a58968dfd3b8d576d0c5e637072f615e8f9c3e47d82c81e3952007d5b
@@ -5397,7 +5405,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:0.12.15, esbuild@npm:^0.12.8, esbuild@npm:^0.12.9":
+"esbuild@npm:0.12.16":
+  version: 0.12.16
+  resolution: "esbuild@npm:0.12.16"
+  bin:
+    esbuild: bin/esbuild
+  checksum: 3fc788d3b9532b2168060e146fe3ef183504cfc98382e7de2526790789fd948e193719d1c6345fefeda887b8449187e75a56d81368f7a2b3f3c26aae0e83dfb7
+  languageName: node
+  linkType: hard
+
+"esbuild@npm:^0.12.8, esbuild@npm:^0.12.9":
   version: 0.12.15
   resolution: "esbuild@npm:0.12.15"
   bin:
@@ -8045,7 +8062,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next-mdx-remote@npm:^3.0.2":
+"next-mdx-remote@npm:^3.0.2, next-mdx-remote@npm:^3.0.4":
   version: 3.0.4
   resolution: "next-mdx-remote@npm:3.0.4"
   dependencies:
@@ -8958,10 +8975,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prism-themes@npm:1.7.0":
-  version: 1.7.0
-  resolution: "prism-themes@npm:1.7.0"
-  checksum: e843eaaae17af65009c1667dcf931439df8a5dfaf0728d439f5ca1e98dcf516911002d812261486f3ecb1e642f8424937c3d8cfa546a22c9b41b6c858f8be007
+"prism-themes@npm:1.8.0":
+  version: 1.8.0
+  resolution: "prism-themes@npm:1.8.0"
+  checksum: ac6b5e9aa96180629f313cfda6f38d81ca998e33f8ba5418c218f2a0638dd88dfe150009c8434be6c0f7b8f84f42fff3f387258b05b992665cb18c84c6b55ea0
   languageName: node
   linkType: hard
 
@@ -9745,7 +9762,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remark-slug@npm:^6.0.0":
+"remark-slug@npm:^6.1.0":
   version: 6.1.0
   resolution: "remark-slug@npm:6.1.0"
   dependencies:
@@ -11802,9 +11819,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"valtio@npm:1.0.7":
-  version: 1.0.7
-  resolution: "valtio@npm:1.0.7"
+"valtio@npm:1.1.0":
+  version: 1.1.0
+  resolution: "valtio@npm:1.1.0"
   dependencies:
     proxy-compare: 2.0.1
   peerDependencies:
@@ -11821,7 +11838,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 0c11a104ba6182d50536df80bf8ed1ac54e8733f706f90443cd5efebbec1b804e22d7cd8a77e559db513a1e97a07eca4287984aaf8e6d9ea06ec04210e9c6919
+  checksum: 9c508953b22d17d1bada043b33c612df6318e5fd83305e313d3e22855a28f5de8112152bc0f92eb3996052c8c0fdb2d1b3b09ccb9ae1ef6597796e50918defc5
   languageName: node
   linkType: hard
 
@@ -11974,10 +11991,10 @@ __metadata:
     "@emotion/react": 11.4.0
     "@emotion/styled": 11.3.0
     "@guild-docs/client": 0.2.20
-    "@guild-docs/server": 0.2.18
+    "@guild-docs/server": 0.2.22
     "@mdx-js/react": 1.6.22
-    "@theguild/components": 1.4.5
-    "@types/concurrently": 6.2.0
+    "@theguild/components": 1.4.7
+    "@types/concurrently": 6.2.1
     "@types/fs-extra": 9.0.12
     "@types/mdx-js__react": 1.5.4
     "@types/node": 15.14.2
@@ -11985,8 +12002,8 @@ __metadata:
     "@types/react-dom": 17.0.9
     "@types/wait-on": 5.3.1
     concurrently: 6.2.0
-    date-fns: 2.22.1
-    esbuild: 0.12.15
+    date-fns: 2.23.0
+    esbuild: 0.12.16
     esbuild-register: 2.6.0
     framer-motion: 4.1.17
     fs-extra: 10.0.0
@@ -11996,7 +12013,7 @@ __metadata:
     next-remote-watch: 1.0.0
     npms.io: 2.0.6
     open-cli: 6.0.1
-    prism-themes: 1.7.0
+    prism-themes: 1.8.0
     react: 17.0.2
     react-dom: 17.0.2
     react-icons: 4.2.0
@@ -12010,7 +12027,7 @@ __metadata:
     typescript: 4.3.5
     undici: 3.3.6
     use-http: 1.0.21
-    valtio: 1.0.7
+    valtio: 1.1.0
     wait-on: 5.3.0
     zustand: 3.5.7
   languageName: unknown

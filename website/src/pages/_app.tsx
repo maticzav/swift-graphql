@@ -6,7 +6,7 @@ import '../../public/admonitions.css'
 import { appWithTranslation } from 'next-i18next'
 import { chakra, Code, Box, extendTheme, Text, theme as chakraTheme, UnorderedList, useColorModeValue } from '@chakra-ui/react'
 import { mode } from '@chakra-ui/theme-tools'
-import { CombinedThemeProvider, DocsPage, ExtendComponents, handlePushRoute } from '@guild-docs/client'
+import { AppSeoProps, CombinedThemeProvider, DocsPage, ExtendComponents, handlePushRoute } from '@guild-docs/client'
 import { Footer, Header, Subheader } from '@theguild/components'
 import { CopyToClipboard } from '../components/CopyToClipboard'
 import { PackageInstall } from '../components/PackageInstall'
@@ -148,20 +148,19 @@ const AppContentWrapper = appWithTranslation(function TranslatedApp(appProps) {
   return <AppContent {...appProps} />
 })
 
+const defaultSeo: AppSeoProps = {
+  title: 'SwiftGraphQL',
+  description: 'A Swift GraphQL client and code generator.',
+  logo: {
+    url: 'https://www.swift-graphql.com/swift.png',
+    alt: 'SwiftGraphQL Logo',
+  },
+  twitter: {},
+}
+
 export default function App(appProps: AppProps) {
   return (
-    <CombinedThemeProvider
-      theme={theme}
-      accentColor={accentColor}
-      defaultSeo={{
-        title: 'SwiftGraphQL',
-        description: 'A Swift GraphQL client and code generator.',
-        logo: {
-          url: 'https://swift-graphql.com/swift.svg',
-          alt: 'SwiftGraphQL Logo',
-        },
-      }}
-    >
+    <CombinedThemeProvider theme={theme} accentColor={accentColor} defaultSeo={defaultSeo}>
       <AppContentWrapper {...appProps} />
     </CombinedThemeProvider>
   )
