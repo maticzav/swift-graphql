@@ -124,7 +124,7 @@ public struct Selection<Type, TypeLock> {
 }
 
 extension Selection  {
-    /// Builds a payload that can be sent to the server
+    /// Builds a payload that can be sent to the server.
     public func buildPayload(operationName: String? = nil) -> GraphQLQueryPayload
     where TypeLock: GraphQLOperation {
         return GraphQLQueryPayload(

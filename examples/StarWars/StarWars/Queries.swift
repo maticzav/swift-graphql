@@ -74,3 +74,19 @@ let query = Selection<Data, Objects.Query> {
 let subscription = Selection.Subscription {
     return try $0.number()
 }
+
+
+let socket = GraphQLSocket()
+
+socket.on("number") { number in
+    print(number)
+}
+
+let message = Selection.Message {
+    return $0.text()
+}
+
+socket.on("message", query: message) { res in
+    res
+}
+socket.message()

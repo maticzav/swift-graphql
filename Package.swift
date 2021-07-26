@@ -30,6 +30,10 @@ let package = Package(
             name: "GraphQLAST",
             targets: ["GraphQLAST"]
         ),
+        .library(
+            name: "GraphQLWebSocket",
+            targets: ["GraphQLWebSocket"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
@@ -64,6 +68,11 @@ let package = Package(
             name: "GraphQLAST",
             dependencies: [],
             path: "Sources/GraphQLAST"
+        ),
+        .target(
+            name: "GraphQLWebSocket",
+            dependencies: [],
+            path: "Sources/GraphQLWebSocket"
         ),
         /* Tests */
         .testTarget(

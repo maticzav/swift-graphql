@@ -1,13 +1,27 @@
 import Foundation
 
-// MARK: - GraphQL Result
+// MARK: - GraphQL Execution Result
 
 public struct GraphQLResult<Type, TypeLock> {
     public let data: Type
     public let errors: [GraphQLError]?
 }
 
+public struct GraphQLError: Codable, Equatable {
+    public let message: String
+    public let locations: [Location]?
+//    public let path: [String]?
+
+    public struct Location: Codable, Equatable {
+        public let line: Int
+        public let column: Int
+    }
+}
+
+
 extension GraphQLResult: Equatable where Type: Equatable, TypeLock: Decodable {}
+
+// MARK: - Decoding
 
 extension GraphQLResult where TypeLock: Decodable {
     init(_ response: Data, with selection: Selection<Type, TypeLock?>) throws {
@@ -43,15 +57,3 @@ extension GraphQLResult where TypeLock: Decodable {
     }
 }
 
-// MARK: - GraphQL Error
-
-public struct GraphQLError: Codable, Equatable {
-    let message: String
-    public let locations: [Location]?
-//    public let path: [String]?
-
-    public struct Location: Codable, Equatable {
-        public let line: Int
-        public let column: Int
-    }
-}

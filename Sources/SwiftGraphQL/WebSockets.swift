@@ -1,9 +1,17 @@
 import Foundation
 
+/**
+ This file contains functionality related to WebSockets. It outlines a protocol that makes extending the functionallity easier
+ and provides a default implementation of the graphql-ws protocol specification.
+ 
+ - https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
+ */
+
 public protocol GraphQLEnabledSocket {
-    associatedtype InitParamaters
-    associatedtype New: GraphQLEnabledSocket where New == Self
-    static func create(with params: InitParamaters) -> New
+//    associatedtype InitParamaters
+//    associatedtype New: GraphQLEnabledSocket where New == Self
+    
+//    static func create(with params: InitParamaters) -> New
     
     /// - parameter errorHandler: A closure that receives an Error that indicates an error encountered while sending.
     func send(message: Data, errorHandler: @escaping (Error) -> Void)
@@ -102,6 +110,12 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
         case complete
     }
     
+    /// Creates a new subscription using the socket.
+    ///
+    /// - parameter to: Query we are subscribing to.
+    /// - parameter operationName: The name of the GraphQL query.
+    /// - parameter eventHandler: The function that handles the result processing.
+    ///
     public func subscribe<Type, TypeLock: GraphQLOperation & Decodable>(
         to selection: Selection<Type, TypeLock?>,
         operationName: String? = nil,
@@ -329,17 +343,19 @@ final public class SocketCancellable: Hashable {
     }
 }
 
-#if canImport(Combine)
-import Combine
+//#if canImport(Combine)
+//import Combine
+//
+//extension SocketCancellable {
+//    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+//    public func toAnyCancellable() -> AnyCancellable {
+//        AnyCancellable(_cancel)
+//    }
+//}
+//#endif
 
-extension SocketCancellable {
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    public func toAnyCancellable() -> AnyCancellable {
-        AnyCancellable(_cancel)
-    }
-}
-#endif
 
+// MARK: - URLSessionWebSocketTask
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension URLSessionWebSocketTask: GraphQLEnabledSocket {
@@ -369,6 +385,8 @@ extension URLSessionWebSocketTask: GraphQLEnabledSocket {
         return task
     }
     
+    // MARK: - Events
+    
     public func send(message: Data, errorHandler: @escaping (Error) -> Void) {
         self.send(.data(message), completionHandler: {
             if let error = $0 {
@@ -378,7 +396,6 @@ extension URLSessionWebSocketTask: GraphQLEnabledSocket {
     }
     
     public func receiveMessages(_ handler: @escaping (Result<Data, Error>) -> Void) {
-        print("receiveMessages")
         // Create an event handler.
         func receiveNext(on socket: URLSessionWebSocketTask?) {
             socket?.receive { [weak socket] result in

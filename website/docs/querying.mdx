@@ -3,12 +3,12 @@ title: Queries, Mutations & Subscriptions
 sidebar_label: Queries, Mutations & Subscriptions
 ---
 
-SwiftGraphQL lets you query data, perform mutations and even listen for subscriptions. Since queries and mutations don't differ much on the API level, they share the same method `send`. Subscriptions, on the other hand, use `listen` method. Each of these functions has a type check that makes sure you can actually query what you are querying and mutating what is mutable.
+SwiftGraphQL lets you query data, perform mutations and even listen for subscriptions. Since queries and mutations don't differ much on the API level, they share the same method `send`. Subscriptions, on the other hand, use `subscribe` method. Each of these functions has a type check that makes sure you can actually query what you are querying and mutating what is mutable.
 
 When it comes to the usage flow, all three operations follow the same principle.
 
 1. You create a query selection that tells the client what it should query and how it should decode the result.
-1. Using `send` or `listen` you communicate with the server.
+1. Using `send` or `subscribe` you communicate with the server.
 
 ## Examples
 
@@ -34,14 +34,16 @@ let subscription = Selection.Subscription {
 }
 
 // Start the event.
-let task = listen(for: subscription, on: "ws://localhost:4000/graphql") { result in
+let url = URL(string: "ws://localhost:4000/subscriptions")!
+let session = URLSessionWebSocketTask(url: url, headers: [:])
+let socket = GraphQLSocket(session, autoConnect: true)
+
+
+let cancellable = socket.subscribe(to: subscription) { [weak self] result in
     if let data = try? result.get() {
         print(data)
     }
 }
-
-// To close the socket.
-task.close()
 ```
 
 > ❗️ NOTE: You should handle the closing of sockets. SwiftGraphQL intentionally doesn't handle websocket state and only implements the decoding and sending mechanism.
