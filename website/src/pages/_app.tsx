@@ -152,7 +152,7 @@ const defaultSeo: AppSeoProps = {
   title: 'SwiftGraphQL',
   description: 'A Swift GraphQL client and code generator.',
   logo: {
-    url: 'https://www.swift-graphql.com/swift.png',
+    url: 'https://www.swift-graphql.com/thumbnail.png',
     alt: 'SwiftGraphQL Logo',
   },
   twitter: {},
