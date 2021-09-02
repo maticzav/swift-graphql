@@ -1,15 +1,11 @@
-import 'remark-admonitions/styles/infima.css'
 import 'prism-themes/themes/prism-atom-dark.css'
 import '../../public/style.css'
-import '../../public/admonitions.css'
 
 import { appWithTranslation } from 'next-i18next'
-import { chakra, Code, Box, extendTheme, Text, theme as chakraTheme, UnorderedList, useColorModeValue } from '@chakra-ui/react'
+import { chakra, Code, extendTheme, Text, theme as chakraTheme, UnorderedList, useColorModeValue } from '@chakra-ui/react'
 import { mode } from '@chakra-ui/theme-tools'
 import { AppSeoProps, CombinedThemeProvider, DocsPage, ExtendComponents, handlePushRoute } from '@guild-docs/client'
 import { Footer, Header, Subheader } from '@theguild/components'
-import { CopyToClipboard } from '../components/CopyToClipboard'
-import { PackageInstall } from '../components/PackageInstall'
 
 import type { AppProps } from 'next/app'
 
@@ -41,7 +37,6 @@ ExtendComponents({
     return <Code margin="1px" colorScheme={colorScheme} fontWeight="semibold" fontSize="0.875em" {...props} />
   },
   Text,
-  PackageInstall,
   ul: UnorderedList,
 })
 
