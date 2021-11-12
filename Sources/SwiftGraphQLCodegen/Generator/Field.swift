@@ -50,7 +50,7 @@ extension Field {
 
     private var docs: String {
         if let description = self.description {
-            return "/// \(description)"
+            return description.split(separator: "\n").map { "/// \($0)" }.joined(separator: "\n")
         }
         return ""
     }
