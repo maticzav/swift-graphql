@@ -33,6 +33,7 @@ public struct GraphQLCodegen {
     func generate(schema: Schema) throws -> String {
         let code = """
         // This file was auto-generated using maticzav/swift-graphql. DO NOT EDIT MANUALLY!
+        import Foundation
         import SwiftGraphQL
 
         // MARK: - Operations
