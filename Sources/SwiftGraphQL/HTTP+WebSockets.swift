@@ -286,7 +286,6 @@ public struct GraphQLQueryPayload: Encodable {
 }
 
 
-
 /// Automatically calls `cancel()` when deinitialized.
 final public class SocketCancellable: Hashable {
     public init(_ cancel: @escaping () -> Void) {
