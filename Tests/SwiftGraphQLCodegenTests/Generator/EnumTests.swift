@@ -9,7 +9,7 @@ final class EnumTests: XCTestCase {
 
         let type = EnumType(
             name: "Episodes",
-            description: "Collection of all StarWars episodes.",
+            description: "Collection of all StarWars episodes.\nEarliest trilogy.",
             enumValues: [
                 EnumValue(
                     name: "NEWHOPE",
@@ -19,7 +19,7 @@ final class EnumTests: XCTestCase {
                 ),
                 EnumValue(
                     name: "EMPIRE",
-                    description: nil,
+                    description: "Introduced Yoda.\nConsidered the best.",
                     isDeprecated: false,
                     deprecationReason: nil
                 ),
@@ -43,10 +43,13 @@ final class EnumTests: XCTestCase {
         let expected = try """
         extension Enums {
             /// Collection of all StarWars episodes.
+            /// Earliest trilogy.
             enum Episodes: String, CaseIterable, Codable {
                 /// Released in 1977.
 
                 case newhope = "NEWHOPE"
+                /// Introduced Yoda.
+                /// Considered the best.
 
                 case empire = "EMPIRE"
                 /// Released in 1983.
