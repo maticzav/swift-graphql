@@ -22,7 +22,7 @@ extension EnumType {
     }
 
     private var docs: String {
-        "/// \(description ?? name)"
+        (description ?? name).split(separator: "\n").map { "/// \($0)" }.joined(separator: "\n")
     }
 
     /// Represents possible enum cases.
@@ -44,7 +44,10 @@ extension EnumValue {
     }
 
     private var docs: String {
-        description.map { "/// \($0)" } ?? ""
+        if let description = self.description {
+            return description.split(separator: "\n").map { "/// \($0)" }.joined(separator: "\n")
+        }
+        return ""
     }
 
     private var availability: String {

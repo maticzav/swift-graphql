@@ -6,7 +6,7 @@ final class FieldTests: XCTestCase {
     func testFieldDocs() throws {
         let field = Field(
             name: "id",
-            description: "Object identifier.",
+            description: "Object identifier.\nMultiline.",
             args: [],
             type: .named(.scalar("ID")),
             isDeprecated: true,
@@ -17,6 +17,7 @@ final class FieldTests: XCTestCase {
 
         let expected = try """
         /// Object identifier.
+        /// Multiline.
         @available(*, deprecated, message: "Use ID instead.")
         func id() throws -> String? {
             let field = GraphQLField.leaf(

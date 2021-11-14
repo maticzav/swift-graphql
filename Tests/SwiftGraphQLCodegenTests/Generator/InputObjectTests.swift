@@ -12,7 +12,7 @@ final class InputObjectTests: XCTestCase {
                 /* Scalar, Docs */
                 InputValue(
                     name: "id",
-                    description: "Field description.",
+                    description: "Field description.\nMultiline.",
                     type: .nonNull(.named(.inputObject("AnotherInputObject")))
                 ),
                 /* Scalar, Docs */
@@ -29,6 +29,7 @@ final class InputObjectTests: XCTestCase {
         extension InputObjects {
             struct InputObject: Encodable, Hashable {
                 /// Field description.
+                /// Multiline.
                 var id: InputObjects.AnotherInputObject
 
                 var inputValue: OptionalArgument<ID> = .absent()
