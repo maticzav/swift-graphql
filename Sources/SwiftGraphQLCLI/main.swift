@@ -59,7 +59,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
         // Write to target file or stdout.
         if let outputPath = output {
-            try Folder.current.file(at: outputPath).write(code)
+            try Folder.current.createFile(at: outputPath).write(code)
         } else {
             FileHandle.standardOutput.write(code.data(using: .utf8)!)
         }
