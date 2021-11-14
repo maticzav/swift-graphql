@@ -1,4 +1,4 @@
-@testable import SwiftGraphQLCodegen
+@testable import SwiftGraphQL
 import XCTest
 
 final class StringExtensionsTest: XCTestCase {
@@ -7,6 +7,7 @@ final class StringExtensionsTest: XCTestCase {
         XCTAssertEqual("ENUM".camelCase, "enum")
         XCTAssertEqual("linkToURL".camelCase, "linkToUrl")
         XCTAssertEqual("grandfather_father.son grandson".camelCase, "grandfatherFatherSonGrandson")
+        XCTAssertEqual("GRAndFATHER_Father.son".camelCase, "grAndFatherFatherSon")
     }
 
     func testPascalCase() {

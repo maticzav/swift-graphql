@@ -50,11 +50,22 @@ extension String {
             if lowerCaseRange.lowerBound == nextCharacterAfterDelimiter {
                 continue
             } else {
-                // There was a range of >1 capital letters. Turn those into a word, stopping at the capital before the lower case character.
-                words.append(wordStart ..< lowerCaseRange.lowerBound)
+                // There was a range of >1 capital letters.
 
-                // Next word starts at the capital before the lowercase we just found
-                wordStart = index(after: lowerCaseRange.lowerBound)
+                // If the next character after the capital letters is not a letter, turn all the capital letters into a word.
+                // Else turn all the capital letters up the second last index into a word.
+                if !self[lowerCaseRange.lowerBound].isLetter {
+                    words.append(wordStart ..< lowerCaseRange.lowerBound)
+
+                    // Next word starts after capital letters we just found
+                    wordStart = lowerCaseRange.lowerBound
+                } else {
+                    words.append(wordStart ..< index(before: lowerCaseRange.lowerBound))
+
+                    // Next word starts at the last capital letters we just found
+                    wordStart = index(before: lowerCaseRange.lowerBound)
+                }
+
                 searchRange = wordStart ..< searchRange.upperBound
             }
         }
