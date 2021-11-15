@@ -12,30 +12,45 @@ extension String {
         let lowerDelimiters = CharacterSet().union(specialChars).union(lowerCaseChars)
 
         // This algorithm is heavily inspired by JSONEncoder's `_convertToSnakeCase` function in Swift source code.
+        // You can find the algorithm at https://github.com/apple/swift-corelibs-foundation/blob/558c1d526f14544da43fa77292e6d4155325c4b1/Sources/Foundation/JSONEncoder.swift#L27
+        //
+        // The general ide of this algorithm is to split words on
+        //    - transaction from lower to upper case,
+        //    - on transition of >1 upper case charaters to lowercase
+        //    - on special characters, and
+        //    - on spaces.
+        //
+        // Then, we simply concatanate the words and capitalise the first letter.
+        
         var words = [Range<String.Index>]()
 
         var wordStart = startIndex
         var searchRange: Range<String.Index> = wordStart ..< endIndex
 
-        while let delimiterRange = rangeOfCharacter(from: upperDelimiters, options: [], range: searchRange) {
-            let range = wordStart ..< delimiterRange.lowerBound
+        // Find the next delimiter.
+        while let delimiterRange = self.rangeOfCharacter(from: upperDelimiters, options: [], range: searchRange) {
+            let untilDelimiter = wordStart ..< delimiterRange.lowerBound
 
             // We hit a special character. If there's something to capture, capture it.
-            // Move one up and continue in the next cycle.
+            // Otherwise, leave it, update the range one up and continue in the next loop cycle.
+            //
+            // This makes sure that we capture letter delimiters - not just special characters,
+            // and leave sequences of special characters.
             guard self[delimiterRange.lowerBound].isLetter else {
-                if !range.isEmpty { words.append(range) }
-                wordStart = index(after: range.upperBound)
+                if !untilDelimiter.isEmpty {
+                    words.append(untilDelimiter)
+                }
+                wordStart = index(after: untilDelimiter.upperBound)
                 searchRange = wordStart ..< searchRange.upperBound
                 continue
             }
 
-            // We know that we hit an uppercase character.
-            // Set the word start to that character, and search from the next character onwards.
+            // Set the word start to that character, and search from the next delimiter onwards.
             wordStart = delimiterRange.lowerBound
             searchRange = index(after: wordStart) ..< searchRange.upperBound
 
-            if !range.isEmpty {
-                words.append(range)
+            if !untilDelimiter.isEmpty {
+                words.append(untilDelimiter)
             }
 
             // If there are no more lower delimiters. Just end here and append all the remaining uppercase characters.
