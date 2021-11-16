@@ -3,7 +3,8 @@ import XCTest
 
 final class StringExtensionsTest: XCTestCase {
     func testCamelCase() {
-        XCTAssertEqual("___a very peculiarNameIndeed__wouldNot.you.agree.AMAZING?____".camelCase, "aVeryPeculiarNameIndeedWouldNotYouAgreeAmazing")
+        XCTAssertEqual(".AGREE?_".camelCase, "agree")
+        XCTAssertEqual("___a very peculiarName__wouldNot.you.AGREE?____".camelCase, "aVeryPeculiarNameWouldNotYouAgree")
         XCTAssertEqual("ENUM".camelCase, "enum")
         XCTAssertEqual("linkToURL".camelCase, "linkToUrl")
         XCTAssertEqual("grandfather_father.son grandson".camelCase, "grandfatherFatherSonGrandson")
