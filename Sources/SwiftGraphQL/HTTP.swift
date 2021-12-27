@@ -15,6 +15,7 @@ import Foundation
 /// - parameter headers: A dictionary of key-value header pairs.
 /// - parameter onEvent: Closure that is called each subscription event.
 /// - parameter method: Method to use. (Default to POST).
+/// - parameter session: URLSession to use. (Default to .shared).
 ///
 @discardableResult
 public func send<Type, TypeLock>(
@@ -23,6 +24,7 @@ public func send<Type, TypeLock>(
     operationName: String? = nil,
     headers: HttpHeaders = [:],
     method: HttpMethod = .post,
+    session: URLSession = .shared,
     onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
 ) -> URLSessionDataTask? where TypeLock: GraphQLHttpOperation & Decodable {
     send(
@@ -31,6 +33,7 @@ public func send<Type, TypeLock>(
         endpoint: endpoint,
         headers: headers,
         method: method,
+        session: session,
         completionHandler: completionHandler
     )
 }
@@ -46,6 +49,7 @@ public func send<Type, TypeLock>(
 /// - parameter headers: A dictionary of key-value header pairs.
 /// - parameter onEvent: Closure that is called each subscription event.
 /// - parameter method: Method to use. (Default to POST).
+/// - parameter session: URLSession to use. (Default to .shared).
 ///
 @discardableResult
 public func send<Type, TypeLock>(
@@ -54,6 +58,7 @@ public func send<Type, TypeLock>(
     operationName: String? = nil,
     headers: HttpHeaders = [:],
     method: HttpMethod = .post,
+    session: URLSession = .shared,
     onComplete completionHandler: @escaping (Response<Type, TypeLock>) -> Void
 ) -> URLSessionDataTask? where TypeLock: GraphQLHttpOperation & Decodable {
     send(
@@ -62,6 +67,7 @@ public func send<Type, TypeLock>(
         endpoint: endpoint,
         headers: headers,
         method: method,
+        session: session,
         completionHandler: completionHandler
     )
 }
@@ -74,6 +80,7 @@ private func send<Type, TypeLock>(
     endpoint: String,
     headers: HttpHeaders,
     method: HttpMethod,
+    session: URLSession,
     completionHandler: @escaping (Response<Type, TypeLock>) -> Void
 ) -> URLSessionDataTask? where TypeLock: GraphQLOperation & Decodable {
     // Validate that we got a valid url.
@@ -113,11 +120,11 @@ private func send<Type, TypeLock>(
         return completionHandler(.failure(.badpayload))
     }
 
-    // Construct a session.
-    let session = URLSession.shared.dataTask(with: request, completionHandler: onComplete)
+    // Construct a session data task.
+    let dataTask = session.dataTask(with: request, completionHandler: onComplete)
     
-    session.resume()
-    return session
+    dataTask.resume()
+    return dataTask
     
 }
 
