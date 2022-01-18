@@ -55,6 +55,7 @@ class Model: ObservableObject {
     
     func stopListening() {
         cancellable = nil
+        socket?.stop()
     }
 }
 

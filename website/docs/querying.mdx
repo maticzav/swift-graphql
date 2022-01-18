@@ -50,6 +50,7 @@ cancellable = socket.subscribe(to: subscription) { result in
 
 // Close the socket.
 cancellable = nil
+socket?.stop()
 ```
 
 > ❗️ NOTE: You should handle the closing of sockets. SwiftGraphQL intentionally doesn't handle websocket state and only implements the decoding and sending mechanism.
