@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,10 +6,10 @@ import PackageDescription
 let package = Package(
     name: "swift-graphql",
     platforms: [
-        .iOS(.v13),
+//        .iOS(.v13),
         .macOS(.v10_15),
-        .tvOS(.v13),
-        .watchOS(.v6)
+//        .tvOS(.v13),
+//        .watchOS(.v6)
     ],
     products: [
         /* SwiftGraphQL */
@@ -33,9 +33,9 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
-        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.41.2"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.4"),
+        .package(url: "https://github.com/apple/swift-format", from: "0.50500.0")
     ],
     targets: [
         /* SwiftGraphQL */
@@ -46,10 +46,14 @@ let package = Package(
         ),
         .target(
             name: "SwiftGraphQLCodegen",
-            dependencies: ["SwiftFormat", "GraphQLAST"],
+            dependencies: [
+                .product(name: "SwiftFormat", package: "swift-format"),
+                .product(name: "SwiftFormatConfiguration", package: "swift-format"),
+                "GraphQLAST"
+            ],
             path: "Sources/SwiftGraphQLCodegen"
         ),
-        .target(
+        .executableTarget(
             name: "SwiftGraphQLCLI",
             dependencies: [
                 "SwiftGraphQLCodegen",
@@ -72,7 +76,12 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftGraphQLCodegenTests",
-            dependencies: ["Files", "SwiftGraphQLCodegen", "GraphQLAST"]
+            dependencies: [
+                .product(name: "SwiftFormat", package: "swift-format"),
+                "Files",
+                "SwiftGraphQLCodegen",
+                "GraphQLAST"
+            ]
         ),
         .testTarget(
             name: "GraphQLASTTests",

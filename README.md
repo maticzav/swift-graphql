@@ -37,7 +37,7 @@ struct Human: Identifiable {
 }
 
 // Create a selection.
-let human = Selection.Human {
+let human = Selection.Human<Human> {
     Human(
         id: try $0.id(),
         name: try $0.name(),
@@ -46,7 +46,7 @@ let human = Selection.Human {
 }
 
 // Construct a query.
-let query = Selection.Query {
+let query = Selection.Query<[Human]> {
     try $0.humans(human.list)
 }
 
@@ -60,7 +60,7 @@ send(query, to: "http://swift-graphql.heroku.com") { result in
 
 ## Documentation
 
-You can find detailed documentation on the SwiftGraphQL page at [swift-graphql.vercel.app](https://swift-graphql.vercel.app)
+You can find detailed documentation on the SwiftGraphQL page at [https://www.swift-graphql.com/](https://www.swift-graphql.com/).
 
 ---
 
@@ -72,12 +72,13 @@ I plan to actively maintain it for many upcoming years. Swift seems like a fanta
 
 Feel free to create a pull request with future improvements. Please, document your contributions well, and clearly outline the benefits of the change. It's also very helpful to include the ideas behind changes.
 
-Here's a rough collection of ideas we might tackle next:
-
-- Networking Layer
-- Caching
-
 > PS.: PRs for the above features will be reviewed a lot more quickly!
+
+## Development Setup
+
+This package is best developed using Swift command line tools. It's important that you set the correct version of Swift Command Line Tools when using the package.
+
+To develop new features for the package I suggest you open `examples/StarWars/StarWars.xcworkspace` workspace. There you can find all schemas used to run and test the app as well as the real-world application example.
 
 ## Thank you
 

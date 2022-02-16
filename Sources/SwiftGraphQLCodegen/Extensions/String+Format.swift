@@ -1,5 +1,6 @@
 import Foundation
 import SwiftFormat
+import SwiftFormatConfiguration
 
 extension String {
     /// Formats the given Swift source code.
@@ -7,7 +8,12 @@ extension String {
         let trimmed = trimmingCharacters(
             in: CharacterSet.newlines.union(.whitespaces)
         )
-        let formatted = try SwiftFormat.format(trimmed)
-        return formatted
+        
+        let formatter = SwiftFormatter(configuration: Configuration())
+        
+        var output = ""
+        try formatter.format(source: trimmed, assumingFileURL: nil, to: &output)
+        
+        return output
     }
 }

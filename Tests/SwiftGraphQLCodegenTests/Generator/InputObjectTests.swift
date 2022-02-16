@@ -28,6 +28,7 @@ final class InputObjectTests: XCTestCase {
         let expected = try """
         extension InputObjects {
             struct InputObject: Encodable, Hashable {
+
                 /// Field description.
                 /// Multiline.
                 var id: InputObjects.AnotherInputObject
@@ -41,7 +42,7 @@ final class InputObjectTests: XCTestCase {
                 }
 
                 enum CodingKeys: String, CodingKey {
-                    case id
+                    case id = "id"
                     case inputValue = "input_value"
                 }
             }
@@ -73,6 +74,7 @@ final class InputObjectTests: XCTestCase {
         let expected = try """
         extension InputObjects {
             struct InputObject: Encodable, Hashable {
+
                 /// Field description.
                 var id: Enums.Enum
 

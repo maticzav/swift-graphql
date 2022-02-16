@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  username String @unique
+  password String
+
+  picture File @relation(fields: [fileId], references: [id])
+  fileId  Int
+
+  stars   Star[]
+  Comment Comment[]
+}
+
+model Character {
+  id Int @id @default(autoincrement())
+
+  name        String
+  description String
+  image       String
+
+  comics Comic[]
+}
+
+model Comic {
+  id Int @id @default(autoincrement())
+
+  title       String
+  description String
+  thumbnail   String
+
+  isbn      String
+  pageCount Int
+
+  characters Character[]
+}
+
+model Star {
+  id Int @id @default(autoincrement())
+
+  kind        StarKind
+  referenceId String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+
+  @@unique([userId, referenceId])
+}
+
+enum StarKind {
+  CHARACTER
+  COMIC
+}
+
+model Comment {
+  id Int @id @default(autoincrement())
+
+  message String
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model File {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  contentType String
+  url         String
+
+  User User[]
+}

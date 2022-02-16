@@ -1,5 +1,4 @@
 TOOL_NAME = swift-graphql
-VERSION = $(shell git describe --abbrev=0 --tags)
 
 PREFIX = /usr/local
 INSTALL_PATH = $(PREFIX)/bin/$(TOOL_NAME)
@@ -28,4 +27,4 @@ update_brew:
 	sed -i '' 's|\(sha256 "\)\(.*\)\("\)|\1$(SHA)\3|' Formula/SwiftGraphQL.rb
 
 	git add .
-	git commit -m "Update brew to $(VERSION)"
+	git commit -m "Update HomeBrew Formula to $(VERSION)"

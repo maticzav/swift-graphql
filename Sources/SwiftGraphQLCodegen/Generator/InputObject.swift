@@ -21,6 +21,7 @@ extension InputObjectType {
             \(try inputFields.map { try $0.declaration(scalars: scalars) }.joined(separator: "\n"))
 
             \(inputFields.encoder)
+            
             \(inputFields.codingKeys)
             }
         }
