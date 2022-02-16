@@ -7,6 +7,7 @@ import { resolvers } from './resolvers'
 import { Context } from './lib/sources'
 import { pubsub } from './lib/pubsub'
 import { prisma } from './lib/prisma'
+import { getUserId } from './lib/auth'
 
 // Server
 
@@ -20,7 +21,21 @@ const server = createServer<Context, any>({
   }),
   logging: true,
   maskedErrors: true,
-  plugins: [useExtendContext(() => ({ pubsub, prisma }))],
+  context: (ctx) => {
+    let user: { id: string } | null = null
+
+    const id = getUserId(ctx)
+    if (id) {
+      user = { id }
+    }
+
+    return {
+      ...ctx,
+      prisma: prisma(),
+      pubsub,
+      user: null,
+    }
+  },
 })
 
 // Start

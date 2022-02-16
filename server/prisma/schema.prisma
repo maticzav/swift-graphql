@@ -49,7 +49,7 @@ model Star {
   id Int @id @default(autoincrement())
 
   kind        StarKind
-  referenceId String
+  referenceId Int
   user        User     @relation(fields: [userId], references: [id])
   userId      Int
 

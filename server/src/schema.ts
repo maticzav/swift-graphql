@@ -146,7 +146,7 @@ export const typeDefs = /* GraphQL */ `
     """
     Adds a comment to the shared list of comments.
     """
-    message(id: ID!, comment: String!): SearchResult!
+    comment(id: ID!, message: String!): Comment!
 
     """
     Creates a new upload URL for a file and returns an ID.
@@ -164,6 +164,7 @@ export const typeDefs = /* GraphQL */ `
 
   type AuthPayloadSuccess {
     token: String!
+    user: User!
   }
 
   type AuthPayloadFailure {
