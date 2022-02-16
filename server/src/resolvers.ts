@@ -5,31 +5,71 @@ import { Context } from './lib/sources'
 import { AuthError, getToken } from './lib/auth'
 import { getFileUpload } from './lib/aws'
 
-export const resolvers: IResolvers<{}, Context> = {
+export const resolvers: IResolvers<any, Context> = {
   // Scalars
   DateTime: DateTimeResolver,
 
   // Root Resolvers
   Query: {
     hello: (parent, args, ctx) => 'Hello world!',
-    user: (parent, args, ctx) => {},
+    user: (parent, args, ctx) => {
+      if (!ctx.user?.id) {
+        throw new AuthError()
+      }
+
+      return ctx.prisma.user.findUnique({
+        where: { id: ctx.user.id },
+      })
+    },
+    node: async (parent, args, ctx) => {
+      const id = parseInt(args.id)
+
+      const character = await ctx.prisma.character.findUnique({ where: { id } })
+
+      if (character) {
+        return {
+          __typename: 'Character',
+          ...character,
+        }
+      }
+
+      const comic = await ctx.prisma.comic.findUnique({ where: { id } })
+
+      if (comic) {
+        return {
+          __typename: 'Comic',
+          ...comic,
+        }
+      }
+
+      const user = await ctx.prisma.user.findUnique({ where: { id } })
+
+      if (user) {
+        return {
+          __typename: 'User',
+          ...user,
+        }
+      }
+
+      return null
+    },
     comics: async (parent, args, ctx) => {
-      const { pagination } = args
-      const { offset, limit } = pagination
+      const offset = args?.pagination?.offset ?? 0
+      const limit = args?.pagination?.limit ?? 50
 
       return ctx.prisma.comic.findMany({ skip: offset, take: limit })
     },
     characters: async (parent, args, ctx) => {
-      const { pagination } = args
-      const { offset, limit } = pagination
+      const offset = args?.pagination?.offset ?? 0
+      const limit = args?.pagination?.limit ?? 50
 
       return ctx.prisma.character.findMany({ skip: offset, take: limit })
     },
     search: async (parent, args, ctx) => {
       const { query } = args
 
-      const { pagination } = args
-      const { offset, limit } = pagination
+      const offset = args?.pagination?.offset ?? 0
+      const limit = args?.pagination?.limit ?? 50
 
       const characters = await ctx.prisma.character.findMany({
         where: {
@@ -47,7 +87,10 @@ export const resolvers: IResolvers<{}, Context> = {
         take: limit,
       })
 
-      return [...characters, ...comics]
+      return [
+        ...characters.map((c) => ({ ...c, __typename: 'Character' })),
+        ...comics.map((c) => ({ ...c, __typename: 'Comic' })),
+      ]
     },
   },
   Mutation: {
@@ -157,4 +200,54 @@ export const resolvers: IResolvers<{}, Context> = {
   },
 
   // Types
+
+  Character: {
+    starred: async (parent, args, ctx) => {
+      if (!ctx.user?.id) {
+        return false
+      }
+
+      const n = await ctx.prisma.star.count({
+        where: {
+          kind: 'CHARACTER',
+          referenceId: parent.id,
+          userId: ctx.user.id,
+        },
+      })
+
+      return n > 0
+    },
+    comics: ({ id }, args, ctx) => {
+      return ctx.prisma.character
+        .findUnique({
+          where: { id },
+        })
+        .comics()
+    },
+  },
+
+  Comic: {
+    starred: async (parent, args, ctx) => {
+      if (!ctx.user?.id) {
+        return false
+      }
+
+      const n = await ctx.prisma.star.count({
+        where: {
+          kind: 'COMIC',
+          referenceId: parent.id,
+          userId: ctx.user.id,
+        },
+      })
+
+      return n > 0
+    },
+    characters: ({ id }, args, ctx) => {
+      return ctx.prisma.comic
+        .findUnique({
+          where: { id },
+        })
+        .characters()
+    },
+  },
 }

@@ -20,9 +20,9 @@ const server = createServer<Context, any>({
     },
   }),
   logging: true,
-  maskedErrors: true,
+  maskedErrors: false,
   context: (ctx) => {
-    let user: { id: string } | null = null
+    let user: { id: number } | null = null
 
     const id = getUserId(ctx)
     if (id) {

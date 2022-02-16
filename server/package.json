@@ -2,7 +2,7 @@
   "name": "server",
   "version": "0.0.0",
   "scripts": {
-    "dev": "ts-node-dev src/index.ts",
+    "dev": "ts-node-dev src/index.ts --exit-child --respawn",
     "start": "ts-node src/index.ts",
     "test": "tsc --pretty --noEmit"
   },

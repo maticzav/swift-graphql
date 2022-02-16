@@ -1,6 +1,6 @@
 # Marvel Server
 
-> This demo server is inspired by GraphQL's StarWars example server.
+> This demo server is inspired by GraphQL's StarWars example server. It's an aproximation of a real world application, but not as polished.
 
 The data used in the demo is taken from Marvel's API.
 

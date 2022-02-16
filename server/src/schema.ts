@@ -62,6 +62,16 @@ export const typeDefs = /* GraphQL */ `
     user: User!
 
     """
+    Fetches an object given its ID.
+    """
+    node(
+      """
+      ID of the object.
+      """
+      id: ID!
+    ): Node
+
+    """
     Returns a list of comics from the Marvel universe.
     """
     comics(pagination: Pagination): [Comic!]!
@@ -83,7 +93,11 @@ export const typeDefs = /* GraphQL */ `
 
     name: String!
     description: String!
-    imageURL: String!
+
+    """
+    URL of the character image.
+    """
+    image: String!
 
     """
     Tells whether currently authenticated user has starred this character.
@@ -96,8 +110,6 @@ export const typeDefs = /* GraphQL */ `
     List of comics that this character appears in.
     """
     comics: [Comic!]!
-
-    modified: DateTime!
   }
 
   type Comic implements Node {
@@ -106,11 +118,13 @@ export const typeDefs = /* GraphQL */ `
     title: String!
     description: String!
     isbn: String!
-    thumbnailURL: String!
+
+    """
+    URL of the thumbnail image.
+    """
+    thumbnail: String!
 
     pageCount: Int
-
-    modified: DateTime!
 
     """
     Tells whether currently authenticated user has starred this comic.
