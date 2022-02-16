@@ -17,12 +17,14 @@
     "@prisma/client": "^3.9.2",
     "graphql": "^16.3.0",
     "graphql-scalars": "^1.14.1",
+    "luxon": "^2.3.0",
     "node-fetch": "2.6.7",
     "query-string": "^7.1.1",
     "uuid": "^8.3.2",
     "ws": "^7.5.3"
   },
   "devDependencies": {
+    "@types/luxon": "^2.0.9",
     "@types/node": "^16.7.10",
     "@types/node-fetch": "^2.6.1",
     "@types/uuid": "^8",

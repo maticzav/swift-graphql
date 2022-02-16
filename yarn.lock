@@ -3231,6 +3231,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/luxon@npm:^2.0.9":
+  version: 2.0.9
+  resolution: "@types/luxon@npm:2.0.9"
+  checksum: 42416dfdb2765ad13f4d5b2d292b94a69c3709ebd6fb21bbefbd16076b5848862eb0f1121283e52209aa3e6bb57f0ddda4ac5460368af71474ee81c5cfc045aa
+  languageName: node
+  linkType: hard
+
 "@types/marked@npm:^1.2.2":
   version: 1.2.2
   resolution: "@types/marked@npm:1.2.2"
@@ -7100,6 +7107,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"luxon@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "luxon@npm:2.3.0"
+  checksum: b2472be1d1d14a4012ba9e36c3f9e0839e6a9e0b976ae147ece4ad9fdf393a3da8298cf8976401b6478b19764d7483bb92b1c678cff64005b7dda78d86911c92
+  languageName: node
+  linkType: hard
+
 "make-dir@npm:^3.0.2":
   version: 3.1.0
   resolution: "make-dir@npm:3.1.0"
@@ -9514,12 +9528,14 @@ __metadata:
     "@graphql-tools/utils": ^8.6.1
     "@graphql-yoga/node": alpha
     "@prisma/client": ^3.9.2
+    "@types/luxon": ^2.0.9
     "@types/node": ^16.7.10
     "@types/node-fetch": ^2.6.1
     "@types/uuid": ^8
     "@types/ws": ^7.4.6
     graphql: ^16.3.0
     graphql-scalars: ^1.14.1
+    luxon: ^2.3.0
     node-fetch: 2.6.7
     prisma: ^3.9.2
     query-string: ^7.1.1

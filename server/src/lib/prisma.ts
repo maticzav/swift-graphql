@@ -21,6 +21,7 @@ export const prisma = (): PrismaClient => {
     })
 
     client = new PrismaClient({
+      rejectOnNotFound: false,
       datasources: {
         db: { url: normalizedURL },
       },

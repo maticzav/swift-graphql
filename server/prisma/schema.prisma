@@ -15,8 +15,8 @@ model User {
   username String @unique
   password String
 
-  picture File @relation(fields: [fileId], references: [id])
-  fileId  Int
+  picture File? @relation(fields: [fileId], references: [id])
+  fileId  Int?
 
   stars   Star[]
   Comment Comment[]
