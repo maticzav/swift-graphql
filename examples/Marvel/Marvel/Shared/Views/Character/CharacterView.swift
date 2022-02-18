@@ -82,7 +82,6 @@ struct CharacterView: View {
         
         VisualEffectView(effect: UIBlurEffect(style: .dark))
             .edgesIgnoringSafeArea(.all)
-        
     }
 }
 

@@ -8,18 +8,55 @@ struct HomeTab: View {
         .ironman
     ]
     
+    var comics: [Comic] = [
+        .avangers,
+        .captainamerica,
+        .deadpool
+    ]
+    
     var body: some View {
         NavigationView {
-            List(characters) { character in
-                NavigationLink {
-                    CharacterView(character: character)
-                        .navigationTitle(character.name)
-                } label: {
-                    CharacterRow(character: character)
+            VStack(alignment: .center, spacing: 5) {
+                Text("Characters")
+                List(characters) { character in
+                    NavigationLink {
+                        CharacterView(character: character)
+                            .navigationTitle(character.name)
+                    } label: {
+                        CharacterRow(character: character)
+                    }
+                    .background(Material.thin)
                 }
-                .background(Material.thin)
+                .listStyle(PlainListStyle())
+                .frame(height: 200)
+                
+                Text("Comics")
+                
+                ScrollView(.horizontal) {
+                    HStack {
+                        ForEach(comics) { comic in
+                            NavigationLink {
+                                ComicView(comic: comic)
+                            } label: {
+                                ComicCell(comic: comic)
+                            }
+                            
+                        }
+                    }
+                    }
+                .padding()
+                
+                
+                Spacer()
             }
-            .listStyle(PlainListStyle())
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Image("MarvelLogo")
+                        .resizable()
+                        .scaledToFit()
+                }
+            }
+            
         }
     }
 }
