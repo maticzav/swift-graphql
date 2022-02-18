@@ -61,7 +61,7 @@ public struct Comic: Identifiable {
         id: ComicId(string: "mck-avangers"),
         title: "Avangers",
         description: "The Runaways are here! Giant-Man and Victor, Reptil and Chase, Lightspeed and Karolina. What happens when these two super-charged teams collide?",
-        thumbnail: URL(string: "http://i.annihil.us/u/prod/marvel/i/mg/3/e0/51685ee793f01/portrait_fantastic.jpg")!,
+        thumbnail: URL(string: "https://i.annihil.us/u/prod/marvel/i/mg/3/e0/51685ee793f01/portrait_fantastic.jpg")!,
         characters: [],
         pageCount: 32
     )
@@ -70,7 +70,7 @@ public struct Comic: Identifiable {
         id: ComicId(string: "mck-cptnam"),
         title: "Captain America",
         description: "Is this the next Sentinel of Liberty? Introducing Free Spirit!",
-        thumbnail: URL(string: "http://i.annihil.us/u/prod/marvel/i/mg/4/40/4d948156dc991/portrait_fantastic.jpg")!,
+        thumbnail: URL(string: "https://i.annihil.us/u/prod/marvel/i/mg/4/40/4d948156dc991/portrait_fantastic.jpg")!,
         characters: [],
         pageCount: 36
     )
@@ -79,7 +79,7 @@ public struct Comic: Identifiable {
         id: ComicId(string: "mck-deadpool"),
         title: "Deadpool",
         description: "When Black Tom's men break into Deadpool's favorite bar to kidnap the Merc, Siryn and Banshee show up to help Deadpool out. But with Deadpool's healing factor on the fritz, can he survive?",
-        thumbnail: URL(string: "http://i.annihil.us/u/prod/marvel/i/mg/e/b0/4bb6224caeea5/portrait_fantastic.jpg")!,
+        thumbnail: URL(string: "https://i.annihil.us/u/prod/marvel/i/mg/e/b0/4bb6224caeea5/portrait_fantastic.jpg")!,
         characters: [],
         pageCount: 36
     )
@@ -88,7 +88,7 @@ public struct Comic: Identifiable {
         id: ComicId(string: "mck-starwars"),
         title: "Star Wars",
         description: "The Hero of the Rebellion & the Princess of the Revolution! Luke and Leia finally get some time alone. Unfortunately, it's stranded on a desert island.",
-        thumbnail: URL(string: "http://i.annihil.us/u/prod/marvel/i/mg/9/20/59553b0f25aea/portrait_fantastic.jpg")!,
+        thumbnail: URL(string: "https://i.annihil.us/u/prod/marvel/i/mg/9/20/59553b0f25aea/portrait_fantastic.jpg")!,
         characters: [],
         pageCount: 32
     )
