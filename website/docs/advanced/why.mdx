@@ -5,18 +5,102 @@ sidebar_label: Why SwiftGraphQL?
 
 ## Why SwiftGraphQL?
 
-Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link between backend and your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe. This way, once your app compiles, you know it's going to work.
+Simply put, it's going to save you and your team lots of time. There's a high chance that you are currently writing most of your GraphQL queries by hand. If not, there's probably some part of the link between backend and your frontend that you have to do manually. And as you well know, manual work is error-prone. This library is an end to end type-safe and spec-compliant.
 
-## Why another GraphQL client?
+This way, once your app compiles, you know it's going to work.
 
-There was no other library that would let me fetch my schema, generate the Swift code, build queries in Swift, and easily adapt query results to my model. I was considering using Apollo iOS for my projects, but I couldn't get to the same level of type-safety as with SwiftGraphQL.
+### Structural vs Nominal Types
 
-> This library has been heavily inspired by Dillon Kearns elm-graphql.
+> To understand why we developed SwiftGraphQL it's essential to understand the difference between structural and nominal types.
 
-## Why not Apollo iOS?
+The easiest way to understand the difference is to see an example. In TypeScript, for example, you can write
 
-Apollo iOS code generator lets you write your queries upfront and generates the type annotations for them. Unfortunatelly, it introduces a lot of collisions when _actually_ working with generated types.
+```ts
+type Foo = {
+  a: number
+  b: string
+}
 
-For example, Let's say that there's a Human object type that has a property friends (who are also humans). Because you could select different fields in Human than in friends (sub-Human), Apollo generates two different nested structs for "each" of the humans. In TypeScript and JavaScript this is not a problem, since objects are not "locked" into definition. In Swift, however, this becomes problematic as you probably want to represent all your humans in your model with only one human type.
+type Bar = {
+  a: number
+  b: string
+}
 
-I ended up writing lots of boilerplate just to get it working, and would have to rewrite it in multiple places everytime backend team changed something.
+let foo: Foo = { a: 92, b: 'hey' }
+let bar: Bar = { a: 42, b: 'bye' }
+
+foo = bar // okay.
+```
+
+while in Swift, for example, you can't write
+
+```swift
+struct Foo {
+	var a: Int
+	var b: String
+}
+
+struct Bar {
+	var a: Int
+	var b: String
+}
+
+var foo = Foo(a: 92, b: "hey")
+var bar = Bar(a: 42, b: "bye")
+
+foo = bar // error!
+```
+
+The reason for the difference is that Swift compares structs nominally (i.e. "using their name") while TypeScript compares their structure. Both `Foo` and `Bar` types contain the same values and are therfore the same type in TypeScript.
+
+> This example is not perfect because switching types for classes would result in the same behaviour in TypeScript as in Swift, but you'll see the point soon.
+
+Most widely used SwiftGraphQL alternative is Apollo iOS - a fantastic client by the way! Apollo iOS works by generating Swift types from your GraphQL queries. Consider the following schema and query;
+
+```graphql
+# Schema
+type Query {
+  """
+  Everyone you can find.
+  """
+  people: [Human!]!
+}
+
+type Human {
+  id: ID!
+  name: String!
+  age: Int!
+}
+
+type Mutation {
+  """
+  Creates a new user with your name.
+  """
+  join(name: String!, age: Int!): Human!
+}
+
+# Queries
+query Friends {
+  people {
+    id
+    name
+    age
+  }
+}
+
+mutation Join {
+  join(name: "Matic", age: 21) {
+    id
+    name
+    age
+  }
+}
+```
+
+Apollo iOS takes your schema and your query and generates a Swift representation of your query.
+
+Unfortunatelly, however, it represents the human type returned by `people` query as a different structure than the one returned by the `join` mutation. This behaviour closely matches how Apollo client works in TypeScript except there it works as expected.
+
+If you want to map your GraphQL types to the application model (like we did) this becomes very cumbersome. That's why we created SwiftGraphQL. SwiftGraphQL lets you write a "fragment" for each type and reuse it everywhere. This way, we make sure the same GraphQL types always result in same Swift structures.
+
+> NOTE: This might not be a problem if you only care about checking the returned values.

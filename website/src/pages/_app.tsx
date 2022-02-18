@@ -128,7 +128,7 @@ function AppContent(appProps: AppProps) {
         }}
         ctaProps={{
           style: {
-            background: 'linear-gradient(135.17deg, #F35D41 -7.39%, #FB8950 143.25%);',
+            background: 'linear-gradient(135.17deg, #F35D41 -7.39%, #FB8950 143.25%)',
           },
         }}
       />

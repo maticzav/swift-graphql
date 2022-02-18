@@ -1,13 +1,18 @@
 ---
-title: Programatically writing query selection
-sidebar_label: Writing Queries
+title: Deep Dive into Queries
+sidebar_label: Advanced Queries
 ---
 
 Selection lets you select fields that you want to fetch from the query on a particular type.
 
-SwiftGraphQL has generated phantom types for your operations, objects, interfaces and unions. You can find them by typing `Unions.`/`Interfaces.`/`Objects.`/`Operations.` followed by a name from your GraphQL schema. You plug those into the `Scope` parameter.
+SwiftGraphQL has generated phantom types for your operations, objects, interfaces and unions. You can find them by typing
 
-The other parameter `Type` is what your constructor should return.
+- `Unions.`
+- `Interfaces.`
+- `Objects.`
+- `Operations.`
+
+followed by a name from your GraphQL schema.
 
 > We generate type alias in selection which let you use XCode intellisnse and may infer your return type. They work like `Selection.ObjectName`.
 
@@ -22,7 +27,7 @@ Each selection comes with three calculated properties that let you do that:
 
 ```swift
 // Create a non-nullable selection.
-let human = Selection.Human {
+let human = Selection.Human<Human> {
     Human(
         id: try $0.id(),
         name: try $0.name()

@@ -1,0 +1,52 @@
+---
+title: File Structure
+sidebar_label: File Structure
+---
+
+Checking out the code in the docs may give you an idea how you can use the library. On the other hand, it might still feal strange to actually start using it in your project. This guide aims to give you an idea of how to structure your files and code.
+
+> This is one possible way of structuring your code that makes sense for our projects. Feel free and try other options as well!
+
+## File Structure
+
+We usually start the project by creating a `GraphQL` folder in the root folder of our project. Then, we generate the `API.swift` file inside `GraphQL` folder and add `Scalars`, `Query`, `Mutation` and `Subscription` folders if needed. To prevent any naming collisions we create custom queries in files that follow the pattern of `<structure><action>` (e.g. `HumanQuery.swift` or `HumanSubscription.swift`).
+
+This leaves us with a tree structure resembling
+
+- GraphQL
+  - API.swift
+  - Scalars
+    - DateTime.swift
+    - URL.swift
+  - Query
+    - HumanQuery.swift
+    - CharacterQuery.swift
+  - Mutation
+    - AuthMutation.swift
+  - Subscription
+    - TimeSubscription.swift
+
+## Queries
+
+Inside each query file we follow the principle that queries should extend the referenced struture as static constants. Additionally, we follow the convention of naming "regular mappings" `selection` and methods on root types `query`, `mutation` and `subscription`.
+
+```swift
+extension Human {
+	/// Converts an API Human type into app model.
+	static let selection = Selection.Human<Human> {
+		Human(
+			id: try $0.id(),
+			name: try $0.name()
+		)
+	}
+
+	/// Obtains a Human with a given ID from the server.
+	static func query(id: String) -> Selection.Query<Human?> {
+		let selection = Selection.Query<Human> {
+			try $0.human(id: id)
+		}
+
+		return selection.nullable
+	}
+}
+```

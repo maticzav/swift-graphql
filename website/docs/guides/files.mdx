@@ -1,0 +1,34 @@
+---
+title: Uploading Files
+sidebar_label: Uploading Files
+---
+
+You might be tempted into slamming `scalar Upload` on top of your GraphQL server and processing file uploads through it.
+
+The most prevelant reasons why you shouldn't do it using `scalar Upload`:
+
+- It adds huge network load on your server,
+- It'll cost you more money,
+- SwiftGraphQL doesn't support it out-of-the-box.
+
+This guide explains how to do it better.
+
+> NOTE: You can see a real-world implementation in the Marvel example.
+
+## Server
+
+Instead of consuming all the traffic of file uploads on your server and then streaming it further down to AWS S3, you are going to make sure your clients stream it directly to AWS S3 using signed upload URLs.
+
+Your server is going to be responsible for creating these URLs and your client is going to be responsible for uploads.
+
+## Client
+
+Instead of passing in your file as a GraphQL mutation parameter, you are going to request a file from your GraphQL server and then use native Swift methods to upload your file there. In short, the flow is going to consist of
+
+1. Requesting the `upload_url` and `file_id`,
+1. Uploading the file to `upload_url`,
+1. Using the `file_id` in mutation to link your file to a database model.
+
+```swift
+
+```

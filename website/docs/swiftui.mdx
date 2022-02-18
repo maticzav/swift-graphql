@@ -1,0 +1,93 @@
+---
+title: SwiftGraphQL ❤️ SwiftUI
+sidebar_label: SwiftUI
+---
+
+SwiftGraphQL's client is heavily based on Combine framework. Because Combine is neatly intertwined with SwiftUI, SwiftGraphQL comes with a set of easy to use utility classes and wrappers that let you run your queries.
+
+Start by adding an environment wrapper around your app so you can access SwiftGraphQL client from anywhere in the app.
+
+```swift
+struct App: View {
+	private var client = SwiftGraphQL.shared
+		.withHeaders { _ in
+
+		}
+
+	var body: some View {
+		GraphQLContainer(client: client) {
+			// Your app...
+		}
+	}
+}
+```
+
+### Queries
+
+You may access query results using `GQL` property wrapper. The first argument is the query you want to fetch
+and the second one is the caching mechanism used for displaying the results.
+
+```swift
+struct HumanView: View {
+
+	@Query([Character].query) var characters: QueryResult<[Character]>
+	@Query(query: Human.query, cache: .cacheAndNetwork) var human: QueryResult<Human>
+
+	var body: some View {
+		VStack {
+			if human.loading {
+				ActivityIndicator()
+			}
+
+			if let data = human.data {
+				VStack {
+					Text(data.name)
+						.bold()
+					Text(data.description)
+				}
+			}
+
+			if let error = human.error {
+				Text(error.message)
+			}
+		}
+	}
+}
+```
+
+### Mutations
+
+You may perform mutations and access results using `GQL` property wrapper. It only accepts one parameter - a function that returns a selection.
+
+<!-- NOTE: Autowrapping function parameter! -->
+
+```swift
+struct HumanView: View {
+
+	@Mutation var human: MutationResult<Human>
+
+	var body: some View {
+		VStack {
+			/// The view function...
+		}
+	}
+}
+```
+
+### Subscriptions
+
+You may access query results using `GQL` property wrapper. The first argument is the query you want to fetch
+and the second one is the caching mechanism used for displaying the results.
+
+```swift
+struct HumanView: View {
+
+	@Subscription(subscription: Human.subscription) var human: SubscriptionResult<Human>
+
+	var body: some View {
+		VStack {
+			/// The view function...
+		}
+	}
+}
+```
