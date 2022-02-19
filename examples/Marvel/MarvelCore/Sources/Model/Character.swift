@@ -13,7 +13,7 @@ public struct CharacterId: Hashable {
 		self.id
 	}
 }
-public struct Character: Identifiable {
+public struct Character: Identifiable, Hashable {
 	public var id: CharacterId
 
 	public var name: String

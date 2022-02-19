@@ -12,17 +12,19 @@ struct ComicCell: View {
                 if let image = phase.image {
                     image.resizable()
                 } else {
-                    Color.black
+                    Color.black.aspectRatio(2 / 3, contentMode: .fill)
+                        .shimmer()
                 }
             }
             .scaledToFit()
-            .frame(height: 160)
             .cornerRadius(8.0)
             
             
             Text(comic.title)
                 .lineLimit(1)
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
+                .padding(.horizontal, 4)
+                .foregroundColor(Color.black)
         }
     }
 }
@@ -33,6 +35,7 @@ struct ComicCell: View {
 struct ComicCell_Previews: PreviewProvider {
     static var previews: some View {
         ComicCell(comic: Comic.deadpool)
+            .frame(width: 120, height: 120)
     }
 }
 #endif

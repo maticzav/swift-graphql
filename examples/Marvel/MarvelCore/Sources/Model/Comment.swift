@@ -14,7 +14,7 @@ public struct CommentId: Hashable {
     }
 }
 
-public struct Comment: Identifiable {
+public struct Comment: Identifiable, Equatable {
     public var id: CommentId
     public var message: String
     public var author: User

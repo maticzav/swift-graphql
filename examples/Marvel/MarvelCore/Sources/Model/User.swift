@@ -17,7 +17,7 @@ public struct UserId: Hashable {
     public static let preview = UserId(string: "mck-uid")
 }
 
-public struct User: Identifiable {
+public struct User: Identifiable, Equatable {
     public var id: UserId
     public var username: String
     public var avatar: URL

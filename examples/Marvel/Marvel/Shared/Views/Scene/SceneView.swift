@@ -2,55 +2,82 @@ import SwiftUI
 
 struct SceneView: View {
     
-    @State private var tab: Tab = .home
+    @State private var tab: Tab = .characters
     
     enum Tab: String, CaseIterable {
-        case home = "home"
+        case characters = "characters"
+        case comics = "comics"
         case search = "search"
-        case settings = "settings"
+        case forum = "forum"
         
         var label: Label<Text, Image> {
             switch self {
-            case .home:
-                return Label("Home", systemImage: "house")
+            case .characters:
+                return Label("Home", systemImage: "person.2")
+            case .comics:
+                return Label("Comics", systemImage: "newspaper")
             case .search:
                 return Label("Search", systemImage: "magnifyingglass")
-            case .settings:
-                return Label("Settings", systemImage: "gearshape")
+            case .forum:
+                return Label("Forum", systemImage: "message")
+            }
+        }
+        
+        @ViewBuilder
+        var view: some View {
+            switch self {
+            case .characters:
+                CharactersTab()
+            case .comics:
+                ComicsTab()
+            case .forum:
+                ForumTab()
+            case .search:
+                SearchTab()
             }
         }
     }
     
+    /// Tells which pages have tab-bar hidden.
+    @State private var tabBarHidden = [Tab: Bool]()
+    
     // MARK: - View
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            HomeTab()
-                .opacity(self.tab == .home ? 1 : 0)
-            
-            SearchTab()
-                .opacity(self.tab == .search ? 1 : 0)
-            
-            SettingsTab()
-                .opacity(self.tab == .settings ? 1 : 0)
-            
-            
-            VStack {
-                Spacer()
-                
-                tabBar
-                    .frame(height: 49)
-                    .background {
-                        ZStack(alignment: .top) {
-                            Divider()
-                                .foregroundColor(.gray)
-                                .frame(height: 1)
-
-                            VisualEffectView(effect: UIBlurEffect(style: .regular))
-                        }
-                        .ignoresSafeArea(edges: [.leading, .trailing, .bottom])
+        NavigationView {
+            ZStack(alignment: .bottom) {
+                self.tab.view
+                    .onPreferenceChange(TabBarHiddenKey.self) { newValue in
+                        tabBarHidden[self.tab] = newValue
                     }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                
+                VStack {
+                    Spacer()
+                    
+                    if (tabBarHidden[self.tab] != true) {
+                        tabBar
+                            .frame(height: 49)
+                            .background {
+                                ZStack(alignment: .top) {
+                                    Divider()
+                                        .foregroundColor(.gray)
+                                        .frame(height: 1)
+
+                                    VisualEffectView(effect: UIBlurEffect(style: .regular))
+                                }
+                                .ignoresSafeArea(edges: [.leading, .trailing, .bottom])
+                            }
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Image("MarvelLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(6)
+                }
             }
         }
     }
@@ -75,8 +102,27 @@ struct SceneView: View {
     }
 }
 
+struct TabBarHiddenKey: PreferenceKey {
+    static let defaultValue: Bool = false
+    
+    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+        value = value || nextValue()
+    }
+}
+
+extension View {
+    /// Sets the preference for tab bar visibility of the current view.
+    func tabBarHidden(_ isHidden: Bool = true) -> some View {
+        preference(key: TabBarHiddenKey.self, value: isHidden)
+    }
+}
+
+// MARK: - Previews
+
+#if DEBUG
 struct SceneView_Previews: PreviewProvider {
     static var previews: some View {
         SceneView()
     }
 }
+#endif

@@ -14,7 +14,7 @@ public struct ComicId: Hashable {
     }
 }
 
-public struct Comic: Identifiable {
+public struct Comic: Identifiable, Hashable {
     public var id: ComicId
 
     public var title: String
@@ -91,5 +91,15 @@ public struct Comic: Identifiable {
         thumbnail: URL(string: "https://i.annihil.us/u/prod/marvel/i/mg/9/20/59553b0f25aea/portrait_fantastic.jpg")!,
         characters: [],
         pageCount: 32
+    )
+    
+    public static let silversurfer = Comic(
+        id: ComicId(string: "mock-silversurfer"),
+        title: "Silver Surfer: In Thy Name",
+        description: "Seeking only to help the helpless, the Silver Surfer rids an alien city of a demonic threat and is declared a Savior by its beleaguered inhabitants. As assassinations, political maneuverings and simmering tensions fester in the shadows, the Surfer must question whether a figurehead - even a reluctant one - is responsible for the actions of his disciples...Brewing conflict leaps from the page, as artist Tan Eng Huat (Doom Patrol, Batman) and writer Simon Spurrier (2000AD, Gutsville) step-up a gear in the Surfer's most explosive adventure yet.",
+        thumbnail: URL(string: "https://i.annihil.us/u/prod/marvel/i/mg/1/d0/5eab27b6ec1cb/portrait_fantastic.jpg")!,
+        characters: [],
+        pageCount: 3,
+        starred: true
     )
 }
