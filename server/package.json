@@ -5,7 +5,8 @@
     "dev": "ts-node-dev src/index.ts --exit-child --respawn",
     "start": "ts-node src/index.ts",
     "test": "tsc --pretty --noEmit",
-    "generate": "graphql-codegen"
+    "generate": "graphql-codegen",
+    "postinstall": "yarn prisma generate"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.51.0",
