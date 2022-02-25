@@ -62,9 +62,9 @@ async function main() {
 
     // Create the character
     const res = await prisma.character.upsert({
-      where: { id: character.id },
+      where: { id: character.id.toString() },
       create: {
-        id: character.id,
+        id: character.id.toString(),
         name: character.name,
         description: character.description,
         image: `${character.thumbnail.path}/standard_fantastic.${character.thumbnail.extension}`,
@@ -99,9 +99,9 @@ async function main() {
 
     // Create the character
     const res = await prisma.comic.upsert({
-      where: { id: comic.id },
+      where: { id: comic.id.toString() },
       create: {
-        id: comic.id,
+        id: comic.id.toString(),
         title: comic.title,
         description: comic.description,
         thumbnail: `${comic.thumbnail.path}/portrait_fantastic.${comic.thumbnail.extension}`,
@@ -122,9 +122,9 @@ async function main() {
 
       const res = await prisma.comic
         .update({
-          where: { id: comicid },
+          where: { id: comicid.toString() },
           data: {
-            characters: { connect: { id: character.id } },
+            characters: { connect: { id: character.id.toString() } },
           },
         })
         .catch(() => ({
@@ -141,7 +141,6 @@ async function main() {
         where: { username: user.username },
         create: {
           username: user.username,
-          password: user.password,
         },
         update: {},
       }),

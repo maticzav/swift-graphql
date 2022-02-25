@@ -1,7 +1,9 @@
 import { createServer, useExtendContext } from '@graphql-yoga/node'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 
-import { typeDefs } from './schema'
+import * as fs from 'fs'
+import * as path from 'path'
+
 import { resolvers } from './resolvers'
 
 import { Context } from './lib/sources'
@@ -10,6 +12,8 @@ import { prisma } from './lib/prisma'
 import { getUserId } from './lib/auth'
 
 // Server
+
+const typeDefs = fs.readFileSync(path.resolve(__dirname, './schema.graphql')).toString('utf-8')
 
 const server = createServer<Context, any>({
   schema: makeExecutableSchema({
@@ -22,7 +26,7 @@ const server = createServer<Context, any>({
   logging: true,
   maskedErrors: false,
   context: (ctx) => {
-    let user: { id: number } | null = null
+    let user: { id: string } | null = null
 
     const id = getUserId(ctx)
     if (id) {
@@ -33,7 +37,7 @@ const server = createServer<Context, any>({
       ...ctx,
       prisma: prisma(),
       pubsub,
-      user: null,
+      user,
     }
   },
 })

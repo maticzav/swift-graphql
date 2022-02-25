@@ -8,18 +8,18 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  username String @unique
+  username String
 
   stars    Star[]
   comments Comment[]
 }
 
 model Character {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
 
   name        String
   description String
@@ -29,7 +29,7 @@ model Character {
 }
 
 model Comic {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
 
   title       String
   description String
@@ -42,12 +42,12 @@ model Comic {
 }
 
 model Star {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
 
   kind        StarKind
-  referenceId Int
+  referenceId String
   user        User     @relation(fields: [userId], references: [id])
-  userId      Int
+  userId      String
 
   @@unique([userId, referenceId])
 }
@@ -58,18 +58,18 @@ enum StarKind {
 }
 
 model Comment {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
 
   message String
-  picture File?  @relation(fields: [fileId], references: [id])
-  fileId  Int?
+  picture File?   @relation(fields: [fileId], references: [id])
+  fileId  String?
 
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 }
 
 model File {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 

@@ -3,7 +3,7 @@ CREATE TYPE "StarKind" AS ENUM ('CHARACTER', 'COMIC');
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "username" TEXT NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Character" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "image" TEXT NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE "Character" (
 
 -- CreateTable
 CREATE TABLE "Comic" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "thumbnail" TEXT NOT NULL,
@@ -35,27 +35,27 @@ CREATE TABLE "Comic" (
 
 -- CreateTable
 CREATE TABLE "Star" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "kind" "StarKind" NOT NULL,
     "referenceId" INTEGER NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "Star_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Comment" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "message" TEXT NOT NULL,
-    "fileId" INTEGER,
-    "userId" INTEGER NOT NULL,
+    "fileId" TEXT,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "File" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "contentType" TEXT NOT NULL,
@@ -66,8 +66,8 @@ CREATE TABLE "File" (
 
 -- CreateTable
 CREATE TABLE "_CharacterToComic" (
-    "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
 );
 
 -- CreateIndex

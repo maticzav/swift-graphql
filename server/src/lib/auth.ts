@@ -6,7 +6,7 @@ const SECRET = process.env.APP_SECRET ?? 'sshhh'
 /**
  * Returns an autohrization token if the user is authenticated.
  */
-export function getUserId(ctx: YogaInitialContext): number | null {
+export function getUserId(ctx: YogaInitialContext): string | null {
   const Authorization = ctx.request.headers.get('Authorization')
   if (Authorization) {
     const token = Authorization.replace('Bearer ', '')
@@ -17,9 +17,7 @@ export function getUserId(ctx: YogaInitialContext): number | null {
       | undefined
 
     if (decoded) {
-      try {
-        return parseInt(decoded.userId)
-      } catch {}
+      return decoded.userId
     }
   }
 
@@ -29,7 +27,7 @@ export function getUserId(ctx: YogaInitialContext): number | null {
 /**
  * Creates authentication token from user's ID.
  */
-export function getToken(user: number): string {
+export function getToken(user: string): string {
   return jwt.sign({ userId: user }, SECRET)
 }
 

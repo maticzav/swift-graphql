@@ -18,3 +18,58 @@ export const generateAlphaNumericString = (length: number, characters = 'abcdefg
   }
   return result
 }
+
+// Random English names.
+const NAMES = [
+  'Aaliyah',
+  'Aaron',
+  'Abagail',
+  'Abbey',
+  'Abbie',
+  'Candace',
+  'Cindy',
+  'Cinderella',
+  'Cindy',
+  'Denise',
+  'Denny',
+  'Don',
+  'Donna',
+  'Dora',
+  'George',
+  'Gina',
+  'Ginger',
+  'Harvey',
+  'Irene',
+  'Jack',
+  'Kathy',
+  'Linda',
+  'Mathew',
+  'Molly',
+  'Nancy',
+  'Olivia',
+  'Patty',
+  'Paul',
+  'Randy',
+  'Rita',
+  'Queen',
+  'Sally',
+  'Samantha',
+  'Sandy',
+  'Tina',
+  'Tom',
+  'Ursula',
+  'Vicky',
+  'Vincent',
+  'Violet',
+  'Wendy',
+  'Willie',
+  'Zachary',
+  'Zoe',
+]
+
+/**
+ * Returns a random human name.
+ */
+export function generateRandomName(): string {
+  return NAMES[(Math.random() * NAMES.length) | 0]
+}

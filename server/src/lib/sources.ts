@@ -6,5 +6,5 @@ import { PubSub } from './pubsub'
 export interface Context extends YogaInitialContext {
   pubsub: PubSub
   prisma: PrismaClient
-  user: { id: number } | null
+  user: { id: string } | null
 }

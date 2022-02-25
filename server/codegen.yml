@@ -1,0 +1,10 @@
+schema: ./src/schema.graphql
+generates:
+  ./src/types.ts:
+    plugins:
+      - typescript
+      - typescript-resolvers
+    config: 
+      defaultMapper: Partial<{T}>
+      scalars: 
+        DateTime: Date

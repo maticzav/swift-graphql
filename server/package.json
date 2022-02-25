@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "ts-node-dev src/index.ts --exit-child --respawn",
     "start": "ts-node src/index.ts",
-    "test": "tsc --pretty --noEmit"
+    "test": "tsc --pretty --noEmit",
+    "generate": "graphql-codegen"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.51.0",
@@ -25,6 +26,9 @@
     "ws": "^7.5.3"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^2.6.2",
+    "@graphql-codegen/typescript": "^2.4.5",
+    "@graphql-codegen/typescript-resolvers": "^2.5.2",
     "@types/jsonwebtoken": "^8",
     "@types/luxon": "^2.0.9",
     "@types/node": "^16.7.10",

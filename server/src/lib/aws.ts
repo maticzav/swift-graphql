@@ -36,7 +36,7 @@ export const getFileUploadValues = async ({
   contentType,
   folder,
 }: {
-  extension?: string
+  extension?: string | null
   contentType: string
   folder: string
 }): Promise<{
@@ -85,7 +85,7 @@ export const getFileUploadValues = async ({
   }
 }
 
-export const generateS3Key = ({ folder, extension }: { folder: string; extension?: string }): string => {
+export const generateS3Key = ({ folder, extension }: { folder: string; extension?: string | null }): string => {
   // S3 performance is tied to the file prefix, so by creating more prefixes, we improve S3 perf
   // https://docs.aws.amazon.com/AmazonS3/latest/dev/optimizing-performance.html
   const randomStr = generateAlphaNumericString(2)
