@@ -7,8 +7,6 @@ CREATE TABLE "User" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "username" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
-    "fileId" INTEGER NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -39,7 +37,7 @@ CREATE TABLE "Comic" (
 CREATE TABLE "Star" (
     "id" SERIAL NOT NULL,
     "kind" "StarKind" NOT NULL,
-    "referenceId" TEXT NOT NULL,
+    "referenceId" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
 
     CONSTRAINT "Star_pkey" PRIMARY KEY ("id")
@@ -49,6 +47,7 @@ CREATE TABLE "Star" (
 CREATE TABLE "Comment" (
     "id" SERIAL NOT NULL,
     "message" TEXT NOT NULL,
+    "fileId" INTEGER,
     "userId" INTEGER NOT NULL,
 
     CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")
@@ -84,13 +83,13 @@ CREATE UNIQUE INDEX "_CharacterToComic_AB_unique" ON "_CharacterToComic"("A", "B
 CREATE INDEX "_CharacterToComic_B_index" ON "_CharacterToComic"("B");
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Star" ADD CONSTRAINT "Star_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CharacterToComic" ADD FOREIGN KEY ("A") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;

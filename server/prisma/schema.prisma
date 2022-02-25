@@ -13,13 +13,9 @@ model User {
   updatedAt DateTime @default(now())
 
   username String @unique
-  password String
 
-  picture File? @relation(fields: [fileId], references: [id])
-  fileId  Int?
-
-  stars   Star[]
-  Comment Comment[]
+  stars    Star[]
+  comments Comment[]
 }
 
 model Character {
@@ -65,6 +61,8 @@ model Comment {
   id Int @id @default(autoincrement())
 
   message String
+  picture File?  @relation(fields: [fileId], references: [id])
+  fileId  Int?
 
   user   User @relation(fields: [userId], references: [id])
   userId Int
@@ -78,5 +76,5 @@ model File {
   contentType String
   url         String
 
-  User User[]
+  comments Comment[]
 }

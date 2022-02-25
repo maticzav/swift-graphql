@@ -3,7 +3,7 @@ import { IResolvers } from '@graphql-tools/utils'
 
 import { Context } from './lib/sources'
 import { AuthError, getToken } from './lib/auth'
-import { getFileUpload } from './lib/aws'
+import { getFileUploadValues } from './lib/aws'
 
 export const resolvers: IResolvers<any, Context> = {
   // Scalars
@@ -177,7 +177,7 @@ export const resolvers: IResolvers<any, Context> = {
         throw new AuthError()
       }
 
-      const awsFile = await getFileUpload({
+      const awsFile = await getFileUploadValues({
         contentType: args.contentType,
         extension: args.extension,
         folder: args.folder,

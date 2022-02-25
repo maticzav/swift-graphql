@@ -25,6 +25,7 @@
 		0227B0C027C1654300737C55 /* ComicRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0227B0BE27C1654300737C55 /* ComicRow.swift */; };
 		0227B0C227C1688D00737C55 /* Title.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0227B0C127C1688D00737C55 /* Title.swift */; };
 		0227B0C327C1688D00737C55 /* Title.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0227B0C127C1688D00737C55 /* Title.swift */; };
+		0227B0C627C16ECC00737C55 /* MessageKit in Frameworks */ = {isa = PBXBuildFile; productRef = 0227B0C527C16ECC00737C55 /* MessageKit */; };
 		028CDD3027BFA8ED00355B5A /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028CDD2F27BFA8ED00355B5A /* Tests_iOS.swift */; };
 		028CDD3227BFA8ED00355B5A /* Tests_iOSLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028CDD3127BFA8ED00355B5A /* Tests_iOSLaunchTests.swift */; };
 		028CDD3C27BFA8ED00355B5A /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028CDD3B27BFA8ED00355B5A /* Tests_macOS.swift */; };
@@ -111,6 +112,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0227B0C627C16ECC00737C55 /* MessageKit in Frameworks */,
 				028CDD8127C03E3A00355B5A /* MarvelCore in Frameworks */,
 				028CDD7427BFE75300355B5A /* Valet in Frameworks */,
 			);
@@ -332,6 +334,7 @@
 			packageProductDependencies = (
 				028CDD7327BFE75300355B5A /* Valet */,
 				028CDD8027C03E3A00355B5A /* MarvelCore */,
+				0227B0C527C16ECC00737C55 /* MessageKit */,
 			);
 			productName = "Marvel (iOS)";
 			productReference = 028CDD1E27BFA8ED00355B5A /* Marvel.app */;
@@ -430,6 +433,7 @@
 			mainGroup = 028CDD1127BFA8EB00355B5A;
 			packageReferences = (
 				028CDD7227BFE75300355B5A /* XCRemoteSwiftPackageReference "Valet" */,
+				0227B0C427C16ECC00737C55 /* XCRemoteSwiftPackageReference "MessageKit" */,
 			);
 			productRefGroup = 028CDD1F27BFA8ED00355B5A /* Products */;
 			projectDirPath = "";
@@ -691,6 +695,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -721,6 +726,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -925,6 +931,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0227B0C427C16ECC00737C55 /* XCRemoteSwiftPackageReference "MessageKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MessageKit/MessageKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 		028CDD7227BFE75300355B5A /* XCRemoteSwiftPackageReference "Valet" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/square/Valet";
@@ -936,6 +950,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0227B0C527C16ECC00737C55 /* MessageKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0227B0C427C16ECC00737C55 /* XCRemoteSwiftPackageReference "MessageKit" */;
+			productName = MessageKit;
+		};
 		028CDD7327BFE75300355B5A /* Valet */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 028CDD7227BFE75300355B5A /* XCRemoteSwiftPackageReference "Valet" */;

@@ -86,6 +86,11 @@ export const typeDefs = /* GraphQL */ `
     name starts with the query string.
     """
     search(query: Search!): [SearchResult!]!
+
+    """
+    Lets you see send messages from other people.
+    """
+    messages(pagination: Pagination): [Message!]!
   }
 
   type Character implements Node {
@@ -143,14 +148,9 @@ export const typeDefs = /* GraphQL */ `
 
   type Mutation {
     """
-    Logs in a user if it exists already and signs them up otherwise.
+    Creates a random authentication session.
     """
-    auth(username: String!, password: String): AuthPayload!
-
-    """
-    Updates the avatar of the currently authenticated user.
-    """
-    updateAvatar(id: ID!): User!
+    auth: AuthPayload!
 
     """
     Adds a star to a comic or a character.
@@ -158,15 +158,17 @@ export const typeDefs = /* GraphQL */ `
     star(id: ID!, item: Item): SearchResult!
 
     """
-    Adds a comment to the shared list of comments.
+    Messages the forum.
+
+    NOTE: Image should be the id of the uploaded file.
     """
-    comment(id: ID!, message: String!): Comment!
+    message(message: String!, image: ID): Message!
 
     """
     Creates a new upload URL for a file and returns an ID.
 
     NOTE: The file should be uploaded to the returned URL. If the user is not
-    authenticated, mutation will fail.
+    authenticated, mutation will throw an error.
     """
     uploadFile(contentType: String!, extension: String, folder: String!): File!
   }
@@ -203,12 +205,15 @@ export const typeDefs = /* GraphQL */ `
     """
     Triggered whene a new comment is added to the shared list of comments.
     """
-    commented: Comment!
+    message: Message!
   }
 
-  type Comment implements Node {
+  type Message implements Node {
     id: ID!
+
+    date: DateTime!
     message: String!
+    image: File!
 
     author: User!
   }

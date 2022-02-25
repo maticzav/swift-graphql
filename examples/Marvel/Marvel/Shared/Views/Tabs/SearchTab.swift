@@ -74,12 +74,16 @@ struct SearchResult: View {
                     VStack(alignment: .leading) {
                         ForEach(characters) { character in
                             CharacterRow(character: character)
+                            
+                            Divider()
+                                .edgesIgnoringSafeArea(.trailing)
                         }
                     }
                     .padding(.top)
                 }
             } else {
                 SectionTitle("Results")
+                
                 VStack(alignment: .leading, spacing: 5) {
                     ForEach(results, id: \.self) { result in
                         switch result {

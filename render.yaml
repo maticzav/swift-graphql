@@ -1,0 +1,26 @@
+#####
+# Documentation
+# YAML (all config values): https://render.com/docs/yaml-spec
+#####
+
+services:
+  - name: marvel-api
+    type: web
+    env: node
+    region: frankfurt
+    buildCommand: yarn workspaces focus server
+    startCommand: yarn workspace server start
+    envVars:
+      - key: NODE_VERSION
+        value: 14
+      - key: DATABASE_URL
+        fromDatabase:
+          name: marvel-db
+          property: connectionString
+      - key: APP_SECRET
+        generateValue: true
+      - fromGroup: MarvelGQL
+
+databases:
+  - name: marvel-db
+    region: frankfurt

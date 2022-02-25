@@ -31,7 +31,7 @@ export const getFileURL = ({ fileKey }: { fileKey: string }): string => {
 /**
  * Returns information that you need to upload a file to the walletta CDN.
  */
-export const getFileUpload = async ({
+export const getFileUploadValues = async ({
   extension,
   contentType,
   folder,
