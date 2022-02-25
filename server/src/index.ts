@@ -16,6 +16,7 @@ import { getUserId } from './lib/auth'
 const typeDefs = fs.readFileSync(path.resolve(__dirname, './schema.graphql')).toString('utf-8')
 
 const server = createServer<Context, any>({
+  hostname: '0.0.0.0',
   schema: makeExecutableSchema({
     typeDefs,
     resolvers,
