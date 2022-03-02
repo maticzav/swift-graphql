@@ -38,7 +38,7 @@ public extension NamedTypeProtocol {
 
 // MARK: - Named Types
 
-public struct ScalarType: NamedTypeProtocol, Decodable, Equatable {
+public struct ScalarType: NamedTypeProtocol, Decodable, Hashable {
     public var kind: NamedTypeKind = .scalar
     public let name: String
     public let description: String?
@@ -97,6 +97,7 @@ public enum NamedType: Equatable {
     case `enum`(EnumType)
     case inputObject(InputObjectType)
 
+    /// Returns a name of the named type.
     public var name: String {
         switch self {
         case let .enum(`enum`):

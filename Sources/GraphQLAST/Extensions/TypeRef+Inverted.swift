@@ -1,5 +1,7 @@
 import Foundation
 
+/// Inverted type reference represents a reference using nullable references
+/// instead of required ones. This makes some calculations easier.
 public indirect enum InvertedTypeRef<Type> {
     case named(Type)
     case nullable(InvertedTypeRef)
@@ -9,7 +11,7 @@ public indirect enum InvertedTypeRef<Type> {
 
     /// Returns a nullable instance of self.
     public var nullable: InvertedTypeRef<Type> {
-        inverted.nullable.inverted
+        self.inverted.nullable.inverted
     }
 
     /// Returns a non nullable instance of self.
@@ -40,6 +42,8 @@ extension InvertedTypeRef: Equatable where Type: Equatable {}
 // MARK: - Conversion
 
 public extension TypeRef {
+    /// Turns a regular reference into an inverted reference that presents
+    /// fields as regular (i.e. required) or nullable instead of regular (i.e. nulalble) or required.
     var inverted: InvertedTypeRef<Type> {
         switch self {
         case let .named(named):
@@ -59,6 +63,7 @@ public extension TypeRef {
 }
 
 public extension InvertedTypeRef {
+    /// Turns an inverted reference back into a regular reference.
     var inverted: TypeRef<Type> {
         switch self {
         case let .named(named):

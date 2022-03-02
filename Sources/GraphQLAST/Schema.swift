@@ -46,6 +46,7 @@ public struct Schema: Decodable, Equatable {
 // MARK: - Accessors
 
 public extension Schema {
+
     /// Searches for a type with a given name.
     func type(name: String) -> NamedType? {
         types.first(where: { $0.name == name })
@@ -54,6 +55,16 @@ public extension Schema {
     /// Searches for an object with a given name.
     func object(name: String) -> ObjectType? {
         objects.first(where: { $0.name == name })
+    }
+    
+    /// Searches for an input object with a given name.
+    func inputObject(name: String) -> InputObjectType? {
+        inputObjects.first(where: { $0.name == name })
+    }
+    
+    /// Returns a scalar type with a given name if it exists.
+    func scalar(name: String) -> ScalarType? {
+        scalars.first(where: { $0.name == name })
     }
 
     // MARK: - Operations
@@ -80,6 +91,20 @@ public extension Schema {
     /// Returns operation types in the schema.
     var operations: [Operation] {
         [query, mutation, subscription].compactMap { $0 }
+    }
+    
+    // MARK: - Scalars
+    
+    /// Returns every scalar referenced in the schema.
+    var scalars: [ScalarType] {
+        self.types.compactMap {
+            switch $0 {
+            case .scalar(let scalar):
+                return scalar
+            default:
+                return nil
+            }
+        }
     }
 
     // MARK: - Named types
