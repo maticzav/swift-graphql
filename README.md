@@ -6,6 +6,8 @@
 
 ![CI Tests](https://github.com/maticzav/swift-graphql/workflows/Test/badge.svg)
 
+https://graphql.org/swapi-graphql/
+
 ## Features
 
 - ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
@@ -64,21 +66,9 @@ You can find detailed documentation on the SwiftGraphQL page at [https://www.swi
 
 ---
 
-## Roadmap and Contributing
-
-This library is feature complete for our use case. We are actively using it in our production applications and plan to expand it as our needs change. We'll also publish performance updates and bug fixes that we find.
-
-I plan to actively maintain it for many upcoming years. Swift seems like a fantastic language and I've only started learning it.
-
-Feel free to create a pull request with future improvements. Please, document your contributions well, and clearly outline the benefits of the change. It's also very helpful to include the ideas behind changes.
-
-> PS.: PRs for the above features will be reviewed a lot more quickly!
-
 ## Development Setup
 
-This package is best developed using Swift command line tools. It's important that you set the correct version of Swift Command Line Tools when using the package.
-
-To develop new features for the package I suggest you open `examples/StarWars/StarWars.xcworkspace` workspace. There you can find all schemas used to run and test the app as well as the real-world application example.
+This package is best developed using Swift command line tools. It's important that you set the correct version of Swift Command Line Tools when developing so that the tools match the version of `swift-format` used.
 
 ## Thank you
 

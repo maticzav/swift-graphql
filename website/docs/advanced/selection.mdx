@@ -1,11 +1,11 @@
 ---
-title: Deep Dive into Queries
-sidebar_label: Advanced Queries
+title: Deep Dive into Selection
+sidebar_label: Understanding Selection
 ---
 
 Selection lets you select fields that you want to fetch from the query on a particular type.
 
-SwiftGraphQL has generated phantom types for your operations, objects, interfaces and unions. You can find them by typing
+SwiftGraphQL generates phantom types for your operations, objects, interfaces and unions. You can use these in combination with `Selection` type to generate a concrete type for your selection (e.g. `Selection<String, Objects.Human>`). You can find all generated phantom types by typing
 
 - `Unions.`
 - `Interfaces.`
@@ -14,9 +14,48 @@ SwiftGraphQL has generated phantom types for your operations, objects, interface
 
 followed by a name from your GraphQL schema.
 
-> We generate type alias in selection which let you use XCode intellisnse and may infer your return type. They work like `Selection.ObjectName`.
+Most of the time, however, you should use `Selection.` that contains type-alias for unions, interfaces, objects and operations. In that case, you don't have to specify the type-lock anymore and simply provide the return type (e.g. `Selection.Human<String>`).
 
-##### Nullable, list, and non-nullable fields
+### Selecting Fields
+
+##### `Unions`
+
+When fetching a union you should provide selections for each of the union sub-types. Additionally, all of those selections should resolve to the same type.
+
+```swift
+let union = Selection.CharacterUnion<String> {
+    try $0.on(
+        human: Selection.Human<String> { try $0.funFact() },
+        droid: Selection.Droid<String> { try $0.primaryFunction() }
+    )
+}
+```
+
+You'd usually want to create a Swift enumerator and have different selecitons return different cases.
+
+##### `Interfaces`
+
+Interfaces are very similar to unions. The only difference is that you may query for a common field from the intersection.
+
+```swift
+let interface = Selection.Character<String> {
+
+    /* Common */
+    let name = try $0.name()
+
+    /* Fragments */
+    let about = try $0.on(
+        droid: Selection.Droid<String> { try $0.primaryFunction() },
+        human: Selection.Human<String> { try $0.homePlanet() }
+    )
+
+    return "\(name). \(about)"
+}
+```
+
+### Transforming Selections
+
+##### Nullable, List, and Non-Nullable Selection
 
 Selection packs a collection of utility functions that let you select nullable and list fields using your existing selecitons.
 Each selection comes with three calculated properties that let you do that:
@@ -35,7 +74,7 @@ let human = Selection.Human<Human> {
 }
 
 // Use it with nullable and list fields.
-let query = Selection.Query {
+let query = Selection.Query<Void> {
     let list = try $0.humans(human.list)
     let nullable = try $0.human(id: "100", human.nullable)
 }
@@ -45,8 +84,8 @@ You can achieve the same effect using `Selection` static functions `.list`, `.nu
 
 ```swift
 // Use it with nullable and list fields.
-let query = Selection.Query {
-    let list = try $0.humans(Selection.list(human))
+let query = Selection.Query<[Human]> {
+    try $0.humans(Selection.list(human))
 }
 ```
 
@@ -147,49 +186,52 @@ let human = Selection.Human { select in
 }
 ```
 
-### `Unions`
+### Validating Data
 
-When fetching a union you should provide selections for each of the union sub-types. Additionally, all of those selections should resolve to the same type.
+Since SwiftGraphQL uses functions to create selections, you may validate recieved data before turning it into a Swift structure. This way, you can use more structure to represent your data and make stricter requirements than those imposed by schema.
+
+You can easily terminate resolution by throwing an error inside your selection.
+
+> NOTE: Always make all selection before throwing errors!
 
 ```swift
-let characterUnion = Selection.CharacterUnion {
-    try $0.on(
-        human: .init { try $0.funFact() /* String */ },
-        droid: .init { try $0.primaryFunction() /* String */ }
-    )
+// Model
+enum Animal {
+    // Cat with a name and age.
+    case cat(String, Int)
+    // Dog with a name and isGoodDog flag.
+    case dog(String, Bool)
 }
-```
 
-You'd usually want to create a Swift enumerator and have different selecitons return different cases.
-
-### `Interfaces`
-
-Interfaces are very similar to unions. The only difference is that you may query for a common field from the intersection.
-
-```swift
-let characterInteface = Selection.Character {
-
-    /* Common */
+// Selection
+let animal = Selection.DogOrCat<Animal> {
     let name = try $0.name()
+    let age: Int? = try $0.age()
+    let isGoodDog: Bool? = try $0.isGoodDog()
 
-    /* Fragments */
-    let about = try $0.on(
-        droid: Selection<String, Objects.Droid> { droid in try droid.primaryFunction() /* String */ },
-        human: Selection<String, Objects.Human> { human in try human.homePlanet() /* String */ }
-    )
+    if let age = age {
+        return .cat(name, age)
+    }
 
-    return "\(name). \(about)"
+    if let isGoodDog = isGoodDog {
+        return .dog(name, isGoodDog)
+    }
+
+    throw "Animal should be either cat or dog!"
 }
+
+extension String: Error {}
 ```
 
-You'd usually want to create a Swift enumerator and have different selecitons return different cases.
+> NOTE: `age` and `isGoodDog` values are nullable in our schema but aren't nullable in our model.
 
-### `OptionalArgument`
+### Operations on selection
 
-- `SwiftGraphQL`
+Selections are quite useless on their own - they feel a bit like skeletons. Their true (and only) power comes from the two functions they expose - `query` and `decode`.
 
-GraphQL's `null` value in an input type may be entirely omitted to represent the absence of a value or supplied as `null` to provide `null` value. This comes in especially handy in mutations.
+- `query` returns a spec-compliant GraphQL query and a variable set that you should use in your request.
+- `decode` accepts the body of the response and returns the decoded result.
 
-Because of that, every input object that has an optional property accepts an optional argument that may either be `.present(value)`, `.absent()` or `.null()`. We use functions to support recursive type annotations that GraphQL allows.
+> `query` and `decode` don't actually communicate with the server. To do that, use one of the official clients or create your own.
 
-> NOTE: Every nullable argument is by default absent so you don't have to write boilerplate.
+> Besides `query` and `decode` selection also contains wide range of utility functions that help you understand the structure of a given query. Those functions won't be covered here. You should follow their comments to understand what they do and examine official clients to see how they are used.

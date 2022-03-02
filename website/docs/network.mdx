@@ -1,0 +1,18 @@
+---
+title: Networking
+sidebar_label: Networking
+---
+
+SwiftGraphQL ships with a basic networking client that lets you perform network calls and caches the data.
+
+> For a detailed overview of all client functions examine exposed functions and their comments.
+
+```swift
+let client = GraphQLClient()
+
+client.query(Human.query)
+	.sink { value in
+
+	}
+	.replaceError(nil)
+```

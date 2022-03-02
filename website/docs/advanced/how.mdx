@@ -5,9 +5,9 @@ sidebar_label: How does it work?
 
 ## How does it work?
 
-It seems like the best way to learn how to use SwiftGraphQL is by understanding how it works behind the scenes.
+We think the best way to learn how to use SwiftGraphQL is to understand how it works behind the scenes.
 
-The first concept that you should know about is `Selection`. Selection lets you select which fields you want to query from a certain GraphQL object. The interesting part about Selection is that there's actually only one `Selection` type, but it has generic extensions. Those generic extensions are using _phantom types_ to differentiate which fields you may select in particular object.
+The first concept that you should know about is `Selection`. Selection lets you query fields from a particular structure in your schema. The interesting thing about Selection is that there's _only one_ `Selection` type that behaves differently in different contexts. We define those context by particularizing the generics it accepts. Those generic extensions are using _phantom types_ to differentiate which fields you may select in particular object.
 
 TLDR; Phantom types let you use Generics to constrain methods to specific types. You can see them at work in the funny looking `Selection<Type, Scope>` parts of the code that let you select what you want to query. You can read more about phantom types [here](https://www.swiftbysundell.com/articles/phantom-types-in-swift/), but for now it suffice to understand that we use `Scope` to limit what you may or may not select in a query.
 

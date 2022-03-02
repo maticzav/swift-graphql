@@ -5,7 +5,7 @@ sidebar_label: Using Custom Scalars
 
 > SwiftGraphQL by default ignores all fields that reference unconfigured scalars and emits a warning during generation.
 
-SwiftGraphQL lets you implement custom scalars that your schema uses. You can do that by conforming to the `Codec` protocol. It doesn't matter where you implement the codec, it should only be visible to the API so that your app compiles.
+SwiftGraphQL lets you implement custom scalars that your schema uses. You can convert your scalar to a coded by conforming to the `Codec` protocol.
 
 ```swift
 public protocol Codec: Codable & Hashable {
@@ -14,7 +14,9 @@ public protocol Codec: Codable & Hashable {
 }
 ```
 
-You should provide a codec for every scalar that is not natively supported by GraphQL, or map it to an existing Swift type. You can read more about scalar mappings below, in the generator section of the documentation.
+> It doesn't matter where you implement the codec as long as it's in the same project as the generated code.
+
+You should provide a codec for every scalar that is not natively supported by GraphQL, or map it to an existing Swift type. You can read more about scalar mappings in the [generator section](/guides/generation) of the documentation.
 
 ```swift
 // DateTime Example

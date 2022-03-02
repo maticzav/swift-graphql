@@ -1,17 +1,25 @@
 ---
 title: SwiftGraphQL ❤️ SwiftUI
-sidebar_label: SwiftUI
+sidebar_label: SwiftUI Basics
 ---
 
-SwiftGraphQL's client is heavily based on Combine framework. Because Combine is neatly intertwined with SwiftUI, SwiftGraphQL comes with a set of easy to use utility classes and wrappers that let you run your queries.
+SwiftGraphQL's client is heavily based on Combine framework. Because Combine is neatly intertwined with SwiftUI, SwiftGraphQL comes with a set of easy to use utility classes and wrappers that let you run your queries. Depending on your selection you can choose between three property wrappers
+
+- `@Query`,
+- `@Mutation`, and
+- `@Subscription`.
+
+Lastly, you can use `@GraphQL` wrapper to access the client directly.
+
+## Global Environment
 
 Start by adding an environment wrapper around your app so you can access SwiftGraphQL client from anywhere in the app.
 
 ```swift
 struct App: View {
-	private var client = SwiftGraphQL.shared
-		.withHeaders { _ in
-
+	private var client = GraphQLClient.shared
+		.withHeaders { headers in
+			// auth
 		}
 
 	var body: some View {
@@ -22,16 +30,17 @@ struct App: View {
 }
 ```
 
+## Wrappers
+
 ### Queries
 
-You may access query results using `GQL` property wrapper. The first argument is the query you want to fetch
-and the second one is the caching mechanism used for displaying the results.
+You may access fetch queries by wrapping a property with a `@Query` wrapper. It accepts a query selection object and cache specification as a parameter and returns a hanndful of functions that you may call to manually fetch, reload and read the data.
 
 ```swift
 struct HumanView: View {
 
-	@Query([Character].query) var characters: QueryResult<[Character]>
-	@Query(query: Human.query, cache: .cacheAndNetwork) var human: QueryResult<Human>
+	@Query(selection: [Character].query) var characters: QueryResult<[Character]>
+	@Query(selection: Human.query, cache: .cacheAndNetwork) var human: QueryResult<Human>
 
 	var body: some View {
 		VStack {
@@ -57,18 +66,19 @@ struct HumanView: View {
 
 ### Mutations
 
-You may perform mutations and access results using `GQL` property wrapper. It only accepts one parameter - a function that returns a selection.
-
-<!-- NOTE: Autowrapping function parameter! -->
+Mutations resemble the structure of the queries but are fundamentally different in where you specify the query. Unlike queries that have a set query, you can use any selection that results in the type specified in the `@Mutation` wrapper.
 
 ```swift
-struct HumanView: View {
+struct ProjectView: View {
+	@Mutation private var mutation: MutationResult<Project>
 
-	@Mutation var human: MutationResult<Human>
+	var id: String
 
 	var body: some View {
-		VStack {
-			/// The view function...
+		Button(action: {
+			mutation.mutate(selection: Project.star(id: ~id))
+		}) {
+			Text("Star")
 		}
 	}
 }
@@ -76,17 +86,23 @@ struct HumanView: View {
 
 ### Subscriptions
 
-You may access query results using `GQL` property wrapper. The first argument is the query you want to fetch
-and the second one is the caching mechanism used for displaying the results.
+Subscriptions resemble queries. They accept a selection parameter, but don't have a `cache` parameter. Your view auto refreshes whenever new data arrives.
 
 ```swift
-struct HumanView: View {
+struct ChatView: View {
+	@Subscription(selection: [Chat].subscription(id: ~id)) var messages: SubscriptionResult<[Message]>
 
-	@Subscription(subscription: Human.subscription) var human: SubscriptionResult<Human>
+	/// Id of the channel.
+	var id: String
 
 	var body: some View {
 		VStack {
-			/// The view function...
+			ForEach(messages) { message in
+				HStack {
+					AsyncImage(url: message.sender.avatar)
+					Text(message.message)
+				}
+			}
 		}
 	}
 }

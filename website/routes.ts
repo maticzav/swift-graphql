@@ -5,7 +5,18 @@ export function getRoutes(): IRoutes {
     _: {
       docs: {
         $name: 'Docs',
-        $routes: ['README', 'installation', 'querying', 'swiftui', 'guides', 'advanced', 'reference', 'faq'],
+        $routes: [
+          'README',
+          'installation',
+          'querying',
+          'swiftui',
+          'network',
+          'optionals',
+          'guides',
+          'advanced',
+          'reference',
+          'faq',
+        ],
         _: {
           guides: {
             $name: 'Guides',

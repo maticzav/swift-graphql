@@ -1,0 +1,38 @@
+---
+title: Optional Values
+sidebar_label: Optional Values
+---
+
+GraphQL differentiates between different kinds of absent variables when dealing with inputs. A variable may be
+
+- present (e.g. "21 years old")
+- null (e.g. "we don't know how old a person is")
+- missing (e.g. "we shouldn't change the current value").
+
+To present all cases, SwiftGraphQL uses `OptionalArgument` enumerator.
+
+```swift
+enum OptionalArgument<Value> {
+	case present(Value?)
+	case absent
+}
+```
+
+> NOTE: Every nullable argument is by default absent so you don't have to write boilerplate code.
+
+Because writing `OptionalArgument` is cumbersome, SwiftGraphQL provides a convenience operator `~` that transforms scalar values into present optional arguments.
+
+```swift
+let variable: OptionalArgument<Int> = ~21
+
+let query = Selection.Query<String?> {
+	let user = $0.user(id: ~"uid-17032000", selection: User.selection)
+	return user.name
+}
+
+let mutation = Selection.Mutation<Void> {
+	try $0.createUser(name: ~"John Doe", age: ~nil)
+}
+```
+
+<!-- https://www.avanderlee.com/swift/custom-operators-swift/ -->

@@ -155,8 +155,7 @@ extension OptionalArgument: Encodable where Type: Encodable {
     ///
     /// - Note: You should never encode an absent value. If you try, the encoder
     ///         is going to throw. Instead, you should check `hasValue` property
-    ///         and make sure it's there.
-    ///
+    ///         and make sure it is present.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 

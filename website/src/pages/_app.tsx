@@ -33,10 +33,12 @@ ExtendComponents({
   inlineCode: (props) => {
     const colorScheme = useColorModeValue('blackAlpha', undefined)
 
-    return <Code margin="1px" colorScheme={colorScheme} fontWeight="semibold" fontSize="0.875em" {...props} />
+    return <Code margin="1px" colorScheme={colorScheme} fontWeight="semibold" fontSize="0.875em" display="inline" {...props} />
   },
   Text,
-  ul: UnorderedList,
+  ul: (props) => {
+    return <UnorderedList marginTop="16px" {...props} />
+  },
 })
 
 const styles: typeof chakraTheme['styles'] = {
@@ -149,7 +151,6 @@ const defaultSeo: AppSeoProps = {
     url: 'https://www.swift-graphql.com/thumbnail.png',
     alt: 'SwiftGraphQL Logo',
   },
-  twitter: {},
 }
 
 export default function App(appProps: AppProps) {
