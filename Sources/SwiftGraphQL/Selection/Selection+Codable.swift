@@ -21,10 +21,11 @@ extension Selection  {
     
     /// Builds a structure that may be sent to the server for execution.
     public func encode(operationName: String? = nil) -> ExecutionArgs where TypeLock: GraphQLOperation {
-        let query = self.selection.serialize(for: TypeLock.operation, operationName: operationName)
+        let selection = self.selection()
+        let query = selection.serialize(for: TypeLock.operation, operationName: operationName)
         
         var variables: [String: AnyCodable] = [:]
-        for argument in self.selection.arguments {
+        for argument in selection.arguments {
             variables[argument.hash] = argument.value
         }
         
@@ -33,10 +34,11 @@ extension Selection  {
     
     /// Builds a structure that may be sent to the server for execution for an optional selected type.
     public func encode<UnwrappedTypeLock>(operationName: String? = nil) -> ExecutionArgs where UnwrappedTypeLock: GraphQLOperation, Optional<UnwrappedTypeLock> == TypeLock {
-        let query = self.selection.serialize(for: UnwrappedTypeLock.operation, operationName: operationName)
+        let selection = self.selection()
+        let query = selection.serialize(for: UnwrappedTypeLock.operation, operationName: operationName)
         
         var variables: [String: AnyCodable] = [:]
-        for argument in self.selection.arguments {
+        for argument in selection.arguments {
             variables[argument.hash] = argument.value
         }
         

@@ -40,6 +40,7 @@ public enum GraphQLField {
     public var alias: String? {
         switch self {
         case let .leaf(name, arguments), let .composite(name, _, arguments, _):
+            
             return "\(name.camelCase)_\(arguments.hash)"
         case .fragment:
             return nil
@@ -65,17 +66,33 @@ public enum GraphQLField {
         }
     }
     
-    /// Returns a list of types related to the selection. This may be useful in cache invalidation.
-    var types: [String] {
+    /// Returns a list of types related to the selection.
+    ///
+    /// This may be useful in cache invalidation.
+    ///
+    /// - NOTE: Items in the list may be duplicated.
+    var types: Set<String> {
         switch self {
         case .leaf:
-            return []
+            return Set()
             
         case .composite(_, let type, _, let selection):
-            return ([type] + selection.flatMap { $0.types }).unique(by: { $0 })
+            var types = Set<String>()
+            types.insert(type)
+            for sub in selection {
+                types = types.union(sub.types)
+            }
+            
+            return types
             
         case .fragment(_, let interface, let selection):
-            return ([interface] + selection.flatMap { $0.types }).unique(by: { $0 })
+            var types = Set<String>()
+            types.insert(interface)
+            for sub in selection {
+                types = types.union(sub.types)
+            }
+            
+            return types
         }
     }
 

@@ -116,3 +116,13 @@ extension Collection where Element == Argument {
         return "(\(args))"
     }
 }
+
+// MARK: - Selection Analysis
+
+extension Collection where Element == GraphQLField {
+    
+    /// Returns non-scalar types referenced in the selection.
+    public var types: [String] {
+        self.flatMap { $0.types }
+    }
+}

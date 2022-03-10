@@ -70,9 +70,10 @@ extension Objects.Query: Decodable {
 extension Fields where TypeLock == Objects.Query {
     func droid<Type>(id: String, selection: Selection<Type, Objects.Droid?>) throws -> Type {
         let field = GraphQLField.composite(
-            name: "droid",
+            field: "droid",
+            type: "Droid",
             arguments: [Argument(name: "id", type: "ID!", value: id)],
-            selection: selection.selection
+            selection: selection.selection()
         )
         select(field)
 
@@ -80,15 +81,16 @@ extension Fields where TypeLock == Objects.Query {
         case let .decoding(data):
             return try selection.decode(data: data.droid[field.alias!])
         case .mocking:
-            return selection.mock()
+            return try selection.mock()
         }
     }
 
     func droids<Type>(selection: Selection<Type, [Objects.Droid]>) throws -> Type {
         let field = GraphQLField.composite(
-            name: "droids",
+            field: "droids",
+            type: "Droid",
             arguments: [],
-            selection: selection.selection
+            selection: selection.selection()
         )
         select(field)
 
@@ -99,13 +101,13 @@ extension Fields where TypeLock == Objects.Query {
             }
             throw SelectionError.badpayload
         case .mocking:
-            return selection.mock()
+            return try selection.mock()
         }
     }
     
     func hello() throws -> String {
         let field = GraphQLField.leaf(
-            name: "hello",
+            field: "hello",
             arguments: []
         )
         select(field)
@@ -183,7 +185,7 @@ extension Objects.Droid: Decodable {
 extension Fields where TypeLock == Objects.Droid {
     func id() throws -> String {
         let field = GraphQLField.leaf(
-            name: "id",
+            field: "id",
             arguments: []
         )
         select(field)
@@ -201,7 +203,7 @@ extension Fields where TypeLock == Objects.Droid {
 
     func name() throws -> String {
         let field = GraphQLField.leaf(
-            name: "name",
+            field: "name",
             arguments: []
         )
         select(field)
@@ -219,7 +221,7 @@ extension Fields where TypeLock == Objects.Droid {
 
     func primaryFunction() throws -> String {
         let field = GraphQLField.leaf(
-            name: "primaryFunction",
+            field: "primaryFunction",
             arguments: []
         )
         select(field)

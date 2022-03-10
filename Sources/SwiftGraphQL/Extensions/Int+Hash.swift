@@ -10,6 +10,6 @@ extension Int {
         let hash = String(self, radix: 36)
         let normalized = hash.replacingOccurrences(of: "-", with: "_")
 
-        return "_\(normalized)"
+        return normalized
     }
 }
