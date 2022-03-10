@@ -26,7 +26,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 return data.id[field.alias!]
             case .mocking:
@@ -62,7 +62,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.id[field.alias!] {
                     return data
@@ -99,7 +99,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 return data.id[field.alias!]
             case .mocking:
@@ -133,7 +133,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 return data.ids[field.alias!]
             case .mocking:
@@ -167,7 +167,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.ids[field.alias!] {
                     return data
@@ -206,7 +206,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.episode[field.alias!] {
                     return data
@@ -243,7 +243,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 return data.episode[field.alias!]
             case .mocking:
@@ -275,7 +275,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.episode[field.alias!] {
                     return data
@@ -317,7 +317,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
                     return try selection.decode(data: data)
@@ -355,7 +355,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 return try selection.decode(data: data.hero[field.alias!])
             case .mocking:
@@ -390,7 +390,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
                     return try selection.decode(data: data)
@@ -435,7 +435,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
                     return data
@@ -478,7 +478,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
                     return data
@@ -521,7 +521,7 @@ final class FieldTests: XCTestCase {
             )
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
                     return data

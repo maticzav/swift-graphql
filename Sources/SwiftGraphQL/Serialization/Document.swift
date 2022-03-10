@@ -5,6 +5,7 @@ import Foundation
  */
 
 extension Collection where Element == GraphQLField {
+    
     /// Returns a GraphQL query for the current selection set.
     func serialize(for operationType: String) -> String {
         serialize(for: operationType, operationName: nil)
@@ -22,40 +23,46 @@ extension Collection where Element == GraphQLField {
         // http://spec.graphql.org/June2018/#sec-Selection-Sets
         let query = [
             "\(operationDefinition) {",
-            serialized.indent(by: 2).joined(separator: "\n"),
+            "__typename".indent(by: 2),
+            self.serialized.indent(by: 2).joined(separator: "\n"),
             "}",
         ].joined(separator: "\n")
 
         return query
     }
-}
-
-// MARK: - Private helpers
-
-private extension GraphQLField {
-    var serialized: [String] {
-        switch self {
-        case let .leaf(name, arguments):
-            return ["\(alias!): \(name)\(arguments.serializedForArguments)"]
-        case let .composite(name, arguments, subselection):
-            return
-                ["\(alias!): \(name)\(arguments.serializedForArguments) {",
-                 "__typename".indent(by: 2)] +
-                subselection.serialized.indent(by: 2) +
-                ["}"]
-        case let .fragment(type, subselection):
-            return
-                ["...on \(type) {"] +
-                subselection.serialized.indent(by: 2) +
-                ["}"]
-        }
+    
+    // MARK: - Utils
+    
+    /// Returns a GraphQL query for the current selection set.
+    fileprivate var serialized: [String] {
+        flatMap { $0.serialized }
     }
 }
 
-extension Collection where Element == GraphQLField {
-    /// Returns a GraphQL query for the current selection set.
+fileprivate extension GraphQLField {
+    
+    /// A string representation of the selection.
     var serialized: [String] {
-        flatMap { $0.serialized }
+        var query: [String] = []
+        
+        switch self {
+        case let .leaf(name, arguments):
+            query.append("\(alias!): \(name)\(arguments.serializedForArguments)")
+            
+        case let .composite(name, _, arguments, subselection):
+            query.append("\(alias!): \(name)\(arguments.serializedForArguments) {")
+            query.append("__typename".indent(by: 2))
+            query.append(contentsOf: subselection.serialized.indent(by: 2))
+            query.append("}")
+            
+        case let .fragment(type, _, subselection):
+            query.append("...on \(type) {")
+            query.append("__typename".indent(by: 2))
+            query.append(contentsOf: subselection.serialized.indent(by: 2))
+            query.append("}")
+        }
+        
+        return query
     }
 }
 

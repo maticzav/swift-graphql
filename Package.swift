@@ -6,10 +6,10 @@ import PackageDescription
 let package = Package(
     name: "swift-graphql",
     platforms: [
-//        .iOS(.v13),
-        .macOS(.v10_15),
-//        .tvOS(.v13),
-//        .watchOS(.v6)
+        .iOS(.v13),
+        .macOS(.v11),
+        .tvOS(.v13),
+        .watchOS(.v6)
     ],
     products: [
         /* SwiftGraphQL */
@@ -21,15 +21,24 @@ let package = Package(
             name: "SwiftGraphQLCodegen",
             targets: ["SwiftGraphQLCodegen"]
         ),
+        /* CLI */
         .executable(
             name: "swift-graphql",
             targets: ["SwiftGraphQLCLI"]
         ),
         /* Utilities */
         .library(
+            name: "GraphQL",
+            targets: ["GraphQL"]
+        ),
+        .library(
             name: "GraphQLAST",
             targets: ["GraphQLAST"]
         ),
+        .library(
+            name: "GraphQLWebSocket",
+            targets: ["GraphQLWebSocket"]
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
@@ -41,7 +50,7 @@ let package = Package(
         /* SwiftGraphQL */
         .target(
             name: "SwiftGraphQL",
-            dependencies: [],
+            dependencies: ["GraphQL"],
             path: "Sources/SwiftGraphQL"
         ),
         .target(
@@ -65,9 +74,19 @@ let package = Package(
         ),
         /* Utilities */
         .target(
+            name: "GraphQL",
+            dependencies: [],
+            path: "Sources/GraphQL"
+        ),
+        .target(
             name: "GraphQLAST",
             dependencies: [],
             path: "Sources/GraphQLAST"
+        ),
+        .target(
+            name: "GraphQLWebSocket",
+            dependencies: ["GraphQL"],
+            path: "Sources/GraphQLWebSocket"
         ),
         /* Tests */
         .testTarget(

@@ -78,29 +78,34 @@ public struct OptionalArgument<Type>: OptionalArgumentProtocol {
 // MARK: - Initializers
 
 public extension OptionalArgument {
-    /// Returns a null argument in null and present otherwise.
-    init(_ optional: Type?) {
-        switch optional {
+    
+    /// Converts optional value to an optional argument so that `nil` becomes `null`.
+    init(present value: Type?) {
+        switch value {
         case let .some(value):
-            self.init(.present(value))
+            self = .present(value)
         case .none:
-            self.init(.null)
+            self = .null()
         }
     }
-
-    /// Returns an optional with present value.
-    init(_ value: Type) {
-        self.init(.present(value))
+   
+    /// Maps optional value to an optional argument so that `nil` becomes `absent`.
+    init(absent value: Type? = nil) {
+        switch value {
+        case let .some(value):
+            self = .present(value)
+        case .none:
+            self = .absent()
+        }
+        
     }
+    
+    // MARK: - Static Descriptors
 
-    /// Returns an optional with an absent value.
-    init() {
-        self.init(.absent)
-    }
 
     /// Returns an OptionalArgument with a given value.
     static func present(_ value: Type) -> OptionalArgument<Type> {
-        self.init(value)
+        self.init(.present(value))
     }
 
     /// Returns an OptionalArgument with null value.

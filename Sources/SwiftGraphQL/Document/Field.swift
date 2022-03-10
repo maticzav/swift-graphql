@@ -1,32 +1,15 @@
 import Foundation
 
+/// GraphQLField represents a value in the selection. It contains information about
+/// what the selection should be and what the selected types are.
+///
+/// - NOTE: `interface` field in the `fragment` field may be a union or an interface.
 public enum GraphQLField {
     public typealias SelectionSet = [GraphQLField]
 
-    case composite(String, [Argument], SelectionSet)
-    case leaf(String, [Argument])
-    case fragment(String, SelectionSet)
-
-    // MARK: - Constructors
-
-    /// Returns a leaf field with a given name.
-    public static func leaf(name: String, arguments: [Argument] = []) -> GraphQLField {
-        .leaf(name, arguments)
-    }
-
-    /// Returns a composite GraphQLField.
-    ///
-    /// - Note: This is a shorthand for constructing composite yourself.
-    public static func composite(name: String, arguments: [Argument] = [], selection: SelectionSet) -> GraphQLField {
-        .composite(name, arguments, selection)
-    }
-
-    /// Returns a fragment GraphQLField.
-    ///
-    /// - Note: This is a shorthand for constructing fragment yourself.
-    public static func fragment(type: String, selection: SelectionSet) -> GraphQLField {
-        .fragment(type, selection)
-    }
+    case composite(field: String, type: String, arguments: [Argument], selection: SelectionSet)
+    case leaf(field: String, arguments: [Argument])
+    case fragment(type: String, interface: String, selection: SelectionSet)
 
     // MARK: - Calculated properties
 
@@ -35,9 +18,9 @@ public enum GraphQLField {
     /// - Note: Used inside generated function decoders to know which field to look at.
     public var name: String {
         switch self {
-        case let .composite(name, _, _), let
-            .leaf(name, _), let
-            .fragment(name, _):
+        case .composite(let name, _, _, _),
+                .leaf(let name, _),
+                .fragment(let name, _, _):
             return name
         }
     }
@@ -56,8 +39,7 @@ public enum GraphQLField {
     /// - Note: Fragments don't have alias.
     public var alias: String? {
         switch self {
-        case let .leaf(name, arguments), let
-            .composite(name, arguments, _):
+        case let .leaf(name, arguments), let .composite(name, _, arguments, _):
             return "\(name.camelCase)_\(arguments.hash)"
         case .fragment:
             return nil
@@ -69,17 +51,31 @@ public enum GraphQLField {
         switch self {
         case let .leaf(_, arguments):
             return arguments
-        case .composite(_, var arguments, let selection):
+        case .composite(_, _, var arguments, let selection):
             for subSelection in selection {
                 arguments.append(contentsOf: subSelection.arguments)
             }
             return arguments
-        case let .fragment(_, selection):
+        case let .fragment(_, _, selection):
             var arguments = [Argument]()
             for subSelection in selection {
                 arguments.append(contentsOf: subSelection.arguments)
             }
             return arguments
+        }
+    }
+    
+    /// Returns a list of types related to the selection. This may be useful in cache invalidation.
+    var types: [String] {
+        switch self {
+        case .leaf:
+            return []
+            
+        case .composite(_, let type, _, let selection):
+            return ([type] + selection.flatMap { $0.types }).unique(by: { $0 })
+            
+        case .fragment(_, let interface, let selection):
+            return ([interface] + selection.flatMap { $0.types }).unique(by: { $0 })
         }
     }
 

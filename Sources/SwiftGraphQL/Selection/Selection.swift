@@ -1,4 +1,5 @@
 import Foundation
+import GraphQL
 
 /*
  SwiftGraphQL uses Selection structure to collect data about the
@@ -14,12 +15,29 @@ import Foundation
  */
 
 public final class Fields<TypeLock> {
+    
     // Internal representation of selection.
     private(set) var fields = [GraphQLField]()
-    // Internal representation of the response.
-    //
-    // We use internal definition to prevent public setting.
-    private var _response: Response = .mocking
+    
+    /// State of the selection tells whether we are currently building up the query and mocking the
+    /// response values or performing decoding with returned data.
+//    @available(*, deprecated, message: "This value should only be used by SwiftGraphQL")
+    public private(set) var state: State = .mocking
+    
+    public enum State {
+        case mocking
+        case decoding(TypeLock)
+        
+        /// Tells whether the fields have actual data or not.
+        public var isMocking: Bool {
+            switch self {
+            case .mocking:
+                return true
+            default:
+                return false
+            }
+        }
+    }
 
     // MARK: - Initializers
 
@@ -27,64 +45,56 @@ public final class Fields<TypeLock> {
 
     init(data: TypeLock) {
         /* This initializer is used to decode response into Swift data. */
-        _response = .decoding(data)
+        state = .decoding(data)
     }
 
-    // MARK: - Accessors
-
-    /// Publically accessible response data.
-    ///
-    /// - Note: This function should only be used by the generated code.
-    public var response: Response {
-        _response
-    }
-
-    // MARK: - Methods
+    // MARK: - Selection
 
     /// Lets generated code add a selection to the selection set.
-    ///
-    /// - Note: This function should only be used by the generated code.
+//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
     public func select(_ field: GraphQLField) {
         fields.append(field)
     }
 
     /// Lets generated code add a selection to the selection set.
-    ///
-    /// - Note: This function should only be used by the generated code.
+//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
     public func select(_ fields: [GraphQLField]) {
         self.fields.append(contentsOf: fields)
     }
-
-    // MARK: - Response
-
-    /*
-     Represents a response of the request.
-     */
-    public enum Response {
-        case mocking
-        case decoding(TypeLock)
+    
+    // MARK: - Analysis
+    
+    /// Returns non-scalar types referenced in the selection.
+    var types: [String] {
+        self.fields.flatMap { $0.types }.unique(by: { $0 })
     }
 }
 
-// MARK: - Fields Decoder
-
 extension Fields: Decodable where TypeLock: Decodable {
+    
     public convenience init(from decoder: Decoder) throws {
+        // Fields decoder forwards the JSON decoding part to the
+        // typelock and parses the desired result using internal initializer.
         let data = try TypeLock(from: decoder)
         self.init(data: data)
     }
 }
 
+
 // MARK: - Selection
 
 /// Global type used to wrap the selection.
 public struct Selection<Type, TypeLock> {
-    /* Data */
-
+    
+    /// Fields reference
     private let fields = Fields<TypeLock>()
-    // function used to decode data and populate selection
+    
+    /// Function that SwiftGraphQL uses to generate selection and convert received JSON
+    /// structure into concrete Swift structure.
     private var decoder: (Fields<TypeLock>) throws -> Type
-    private var mocked: Type // mock data
+    
+    /// Mocked data in the request.
+    private var mocked: Type
 
     // MARK: - Initializer
 
@@ -97,8 +107,7 @@ public struct Selection<Type, TypeLock> {
     // MARK: - Accessors
 
     /// Returns a list of selected fields.
-    ///
-    /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
+//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
     public var selection: [GraphQLField] {
         fields.fields
     }
@@ -106,41 +115,24 @@ public struct Selection<Type, TypeLock> {
     // MARK: - Methods
 
     /// Decodes JSON response into a return type of the selection set.
-    ///
-    /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
+//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
     public func decode(data: TypeLock) throws -> Type {
         /* Construct a copy of the selection set, and use the new selection set to decode data. */
         let fields = Fields<TypeLock>(data: data)
-        let data = try decoder(fields)
+        let data = try self.decoder(fields)
         return data
     }
 
     /// Mocks the data of a selection.
-    ///
-    /// - Note: Don't use this function. This function should only be used internally by SwiftGraphQL.
+//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
     public func mock() -> Type {
         mocked
     }
-}
-
-extension Selection  {
-    /// Builds a payload that can be sent to the server
-    public func buildPayload(operationName: String? = nil) -> GraphQLQueryPayload
-    where TypeLock: GraphQLOperation {
-        return GraphQLQueryPayload(
-            selection: self,
-            operationType: TypeLock.self,
-            operationName: operationName
-        )
-    }
     
-    /// Builds a payload that can be sent to the server
-    public func buildPayload<UnwrappedTypeLock>(operationName: String? = nil) -> GraphQLQueryPayload
-    where UnwrappedTypeLock: GraphQLOperation, Optional<UnwrappedTypeLock> == TypeLock {
-        return GraphQLQueryPayload(
-            selection: self,
-            operationType: UnwrappedTypeLock.self,
-            operationName: operationName
-        )
+    // MARK: - Analysis
+    
+    /// Returns non-scalar types referenced in the selection.
+    public var types: [String] {
+        self.fields.types
     }
 }

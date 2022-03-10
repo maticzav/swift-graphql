@@ -15,7 +15,7 @@ public protocol Codec: Codable & Hashable {
 // MARK: - Built-In Codecs
 
 extension String: Codec {
-    public static let mockValue = "Matic Zavadlal"
+    public static let mockValue = "<mock>"
 }
 
 extension Int: Codec {

@@ -14,8 +14,9 @@ final class OptionalArgumentTests: XCTestCase {
     // MARK: - OptionalArgument manipulation
 
     func testFromMaybe() {
-        XCTAssertEqual(OptionalArgument<String>(nil), .null())
-        XCTAssertEqual(OptionalArgument("value"), .present("value"))
+        XCTAssertEqual(OptionalArgument<String>(present: nil), .null())
+        XCTAssertEqual(OptionalArgument<String>(absent: nil), .absent())
+        XCTAssertEqual(OptionalArgument(present: "value"), .present("value"))
     }
 
     func testMapping() {
