@@ -11,20 +11,20 @@ extension InterfaceType: Structure {}
 
 extension InterfaceType {
     /// Returns a code that represents an interface.
-    func declaration(objects: [ObjectType], scalars: ScalarMap) throws -> String {
+    func declaration(objects: [ObjectType], context: Context) throws -> String {
         let name = self.name.pascalCase
 
         return """
         extension Interfaces {
-        \(try self.struct(name: name, objects: objects, scalars: scalars))
+        \(try self.struct(name: name, objects: objects, context: context))
         }
 
         extension Interfaces.\(name): Decodable {
-        \(try allFields(objects: objects).decoder(scalars: scalars, includeTypenameDecoder: true))
+        \(try allFields(objects: objects, context: context).decoders(context: context, includeTypenameDecoder: true))
         }
 
         extension Fields where TypeLock == Interfaces.\(name) {
-        \(try fields.selection(scalars: scalars))
+        \(try fields.getDynamicSelections(context: context))
         }
 
         \(possibleTypes.selection(name: "Interfaces.\(name)", objects: objects))

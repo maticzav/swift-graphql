@@ -12,19 +12,24 @@ extension UnionType: Structure {
 
 extension UnionType {
     /// Returns a declaration of the union type that we add to the generated file.
-    func declaration(objects: [ObjectType], scalars: ScalarMap) throws -> String {
+    func declaration(objects: [ObjectType], context: Context) throws -> String {
         let name = self.name.pascalCase
-
+        let definition = try self.struct(name: name, objects: objects, context: context)
+        let decoders = try allFields(objects: objects, context: context)
+            .decoders(context: context, includeTypenameDecoder: true)
+        
+        let selections = possibleTypes.selection(name: "Unions.\(name)", objects: objects)
+        
         return """
         extension Unions {
-        \(try self.struct(name: name, objects: objects, scalars: scalars))
+        \(definition)
         }
 
         extension Unions.\(name): Decodable {
-        \(try allFields(objects: objects).decoder(scalars: scalars, includeTypenameDecoder: true))
+        \(decoders)
         }
 
-        \(possibleTypes.selection(name: "Unions.\(name)", objects: objects))
+        \(selections)
 
         extension Selection where TypeLock == Never, Type == Never {
             typealias \(name)<T> = Selection<T, Unions.\(name)>

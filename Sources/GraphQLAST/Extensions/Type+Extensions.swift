@@ -3,10 +3,10 @@ import Foundation
 extension NamedType {
     
     /// Returns a list of scalars referenced by a named type and its descendant types.
-    public func scalars(schema: Schema) throws -> Set<ScalarType> {
+    public func scalars(schema: Schema) throws -> Set<String> {
         switch self {
         case .scalar(let scalar):
-            return [scalar]
+            return [scalar.name]
         case .enum:
             return []
         case .union(let union):

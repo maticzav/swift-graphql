@@ -6,12 +6,13 @@ import GraphQLAST
  */
 
 extension Collection where Element == ObjectTypeRef {
-    /// Returns a fragment selection for a given type.
-    func selection(name: String, objects: [ObjectType]) -> String {
+    
+    /// Returns a function that may create fragment selection for a type of a given interface or union.
+    func selection(name type: String, objects: [ObjectType]) -> String {
         """
-        extension Fields where TypeLock == \(name) {
+        extension Fields where TypeLock == \(type) {
             func on<Type>(\(parameters)) throws -> Type {
-                self.select([\(selection)])
+                self.select([\(selection(interface: type))])
 
                 switch self.response {
                 case .decoding(let data):
@@ -19,7 +20,7 @@ extension Collection where Element == ObjectTypeRef {
                     \(decoders(objects: objects))
                     }
                 case .mocking:
-                    return \(mock).mock()
+                    return try \(mock).mock()
                 }
             }
         }
@@ -30,16 +31,21 @@ extension Collection where Element == ObjectTypeRef {
         map { $0.parameter }.joined(separator: ", ")
     }
 
-    private var selection: String {
-        map { $0.fragment }.joined(separator: ", ")
+    /// Creates a field selection variables for the given interface.
+    ///
+    /// - parameter interace: The name of the union or interface.
+    private func selection(interface: String) -> String {
+        map { $0.fragment(interface: interface) }.joined(separator: ",\n")
     }
 
+    /// Functions used to decode response values.
     private func decoders(objects: [ObjectType]) -> String {
         map { $0.decoder(objects: objects) }.lines
     }
 
+    /// Type used to 
     private var mock: String {
-        first!.namedType.name.camelCase
+        self.first!.namedType.name.camelCase
     }
 }
 
@@ -50,8 +56,8 @@ private extension ObjectTypeRef {
     }
 
     /// Returns a SwiftGraphQL Fragment selection.
-    var fragment: String {
-        "GraphQLField.fragment(type: \"\(namedType.name)\", selection: \(namedType.name.camelCase).selection)"
+    func fragment(interface: String) -> String {
+        #"GraphQLField.fragment(type: "\#(namedType.name)", interface: "\#(interface)", selection: \#(namedType.name.camelCase).selection())"#
     }
 
     /// Returns a decoder for a fragment.

@@ -24,12 +24,13 @@ protocol Structure {
 
 extension Structure {
     /// Returns a list of fields shared between all types in the interface.
-    func allFields(objects: [ObjectType]) -> [Field] {
+    func allFields(objects: [ObjectType], context: Context) -> [Field] {
         var shared: [Field] = fields
 
         for object in objects {
             // Skip object if it's not inside possible types.
             guard possibleTypes.contains(where: { $0.name == object.name }) else { continue }
+            
             // Append fields otherwise.
             for field in object.fields {
                 // Make suer fields are unique.
@@ -43,7 +44,7 @@ extension Structure {
 
 extension Structure {
     /// Returns a definition of a struct that represents a given structure.
-    func `struct`(name: String, objects: [ObjectType], scalars: ScalarMap) throws -> String {
+    func `struct`(name: String, objects: [ObjectType], context: Context) throws -> String {
         let typename: String
         if let object = possibleTypes.first, self.possibleTypes.count == 1 {
             typename = "let __typename: TypeName = .\(object.name.camelCase)"
@@ -51,9 +52,9 @@ extension Structure {
             typename = "let __typename: TypeName"
         }
 
-        let properties = try allFields(objects: objects)
+        let properties = try allFields(objects: objects, context: context)
             .sorted(by: { $0.name < $1.name })
-            .map { try $0.declaration(scalars: scalars) }
+            .map { try $0.declaration(context: context) }
             .lines
 
         return """
@@ -69,8 +70,8 @@ extension Structure {
 
 private extension Field {
     /// Return a field variable declaration in the structure.
-    func declaration(scalars: ScalarMap) throws -> String {
-        let type = try self.type.namedType.type(scalars: scalars)
+    func declaration(context: Context) throws -> String {
+        let type = try self.type.namedType.type(scalars: context.scalars)
         let wrappedType = self.type.nonNullable.type(for: type)
 
         return "let \(name.camelCase.normalize): [String: \(wrappedType)]"
@@ -86,8 +87,8 @@ private extension Field {
 
 extension Collection where Element == Field {
     /// Returns a function definition for decoder initializer.
-    func decoder(scalars: ScalarMap, includeTypenameDecoder typename: Bool = false) throws -> String {
-        let cases: String = try map { try $0.decoder(scalars: scalars) }
+    func decoders(context: Context, includeTypenameDecoder typename: Bool = false) throws -> String {
+        let cases: String = try map { try $0.decoder(context: context) }
             .joined(separator: "\n")
         let mappings: String = map { "self.\($0.name.camelCase) = map[\"\($0.name.camelCase)\"]" }
             .joined(separator: "\n")
@@ -125,7 +126,8 @@ extension Collection where Element == Field {
 
 private extension Collection where Element == ObjectTypeRef {
     var typename: String {
-        let types = map { "case \($0.name.camelCase.normalize) = \"\($0.name)\"" }
+        let types = self
+            .map { "case \($0.name.camelCase.normalize) = \"\($0.name)\"" }
             .joined(separator: "\n")
 
         return """
@@ -138,8 +140,8 @@ private extension Collection where Element == ObjectTypeRef {
 
 private extension Field {
     /// Returns a code that we use to decode a field in the response.
-    func decoder(scalars: ScalarMap) throws -> String {
-        let type = try self.type.namedType.type(scalars: scalars)
+    func decoder(context: Context) throws -> String {
+        let type = try self.type.namedType.type(scalars: context.scalars)
         let wrappedType = self.type.nullable.type(for: type)
 
         return """

@@ -13,16 +13,16 @@ import GraphQLAST
 extension InputObjectType {
     /// Returns the code that represents a particular InputObjectType in our schema. It contains
     /// an encoder as well as the function used to add values into it.
-    func declaration(scalars: ScalarMap) throws -> String {
+    func declaration(context: Context) throws -> String {
         """
         extension InputObjects {
-            struct \(name.pascalCase): Encodable, Hashable {
+            struct \(self.name.pascalCase): Encodable, Hashable {
 
-            \(try inputFields.map { try $0.declaration(scalars: scalars) }.joined(separator: "\n"))
+            \(try self.inputFields.map { try $0.declaration(context: context) }.joined(separator: "\n"))
 
-            \(inputFields.encoder)
+            \(self.inputFields.encoder)
             
-            \(inputFields.codingKeys)
+            \(self.inputFields.codingKeys)
             }
         }
         """
@@ -38,10 +38,10 @@ extension InputObjectType {
 
 extension InputValue {
     /// Returns a declaration of the input value (i.e. the property definition, docs and default value.
-    fileprivate func declaration(scalars: ScalarMap) throws -> String {
+    fileprivate func declaration(context: Context) throws -> String {
         """
         \(docs)
-        var \(name.camelCase.normalize): \(try type.type(scalars: scalars)) \(self.default)
+        var \(name.camelCase.normalize): \(try type.type(scalars: context.scalars)) \(self.default)
         """
     }
 

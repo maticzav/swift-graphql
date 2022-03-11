@@ -5,11 +5,8 @@ import XCTest
 final class DocumentTests: XCTestCase {
     
     func testSingleField() {
-        /* Document */
         let fruit = GraphQLField.leaf(field: "fruit", arguments: [])
         let document = [fruit]
-
-        /* Test */
 
         let query = """
         query {
@@ -21,12 +18,9 @@ final class DocumentTests: XCTestCase {
     }
 
     func testMultipleFields() {
-        /* Document */
         let apple = GraphQLField.leaf(field: "apple", arguments: [])
         let banana = GraphQLField.leaf(field: "banana", arguments: [])
         let document = [apple, banana]
-
-        /* Test */
 
         let query = """
         query {
@@ -39,7 +33,6 @@ final class DocumentTests: XCTestCase {
     }
 
     func testNestedFields() {
-        /* Document */
         let fruit = GraphQLField.leaf(field: "fruit", arguments: [])
         let items = GraphQLField.leaf(field: "items", arguments: [])
         let cart = GraphQLField.composite(
@@ -49,8 +42,6 @@ final class DocumentTests: XCTestCase {
             selection: [items]
         )
         let document = [fruit, cart]
-
-        /* Test */
 
         let query = """
         query {
@@ -68,15 +59,12 @@ final class DocumentTests: XCTestCase {
     // MARK: - Arguments
 
     func testSingleFieldWithArgument() {
-        /* Document */
         let argument = Argument(name: "name", type: "String!", value: "\"apple\"")
         let fruit = GraphQLField.leaf(
             field: "fruit",
             arguments: [argument]
         )
         let document = [fruit]
-
-        /* Test */
 
         let query = """
         query ($\(argument.hash): String!) {
@@ -88,7 +76,6 @@ final class DocumentTests: XCTestCase {
     }
 
     func testMultipleSameValueArguments() {
-        /* Document */
         let argumentOne = Argument(name: "one", type: "String!", value: "\"apple\"")
         let argumentTwo = Argument(name: "two", type: "String!", value: "\"apple\"")
         let fruit = GraphQLField.leaf(
@@ -96,8 +83,6 @@ final class DocumentTests: XCTestCase {
             arguments: [argumentOne, argumentTwo]
         )
         let document = [fruit]
-
-        /* Test */
 
         let query = """
         query ($\(argumentOne.hash): String!) {
@@ -109,7 +94,6 @@ final class DocumentTests: XCTestCase {
     }
 
     func testNestedFieldWithArgument() {
-        /* Document */
         let argument = Argument(
             name: "name",
             type: "String!",
@@ -124,8 +108,6 @@ final class DocumentTests: XCTestCase {
             selection: [items]
         )
         let document = [fruit, cart]
-
-        /* Test */
 
         let query = """
         query ($\(argument.hash): String!) {
@@ -143,7 +125,6 @@ final class DocumentTests: XCTestCase {
     // MARK: - Fragments
 
     func testFragment() {
-        /* Document */
         let name = GraphQLField.leaf(field: "name", arguments: [])
         let cart = GraphQLField.composite(
             field: "cart",
@@ -154,8 +135,6 @@ final class DocumentTests: XCTestCase {
             ]
         )
         let document = [cart]
-
-        /* Test */
 
         let query = """
         query {
@@ -176,11 +155,8 @@ final class DocumentTests: XCTestCase {
     // MARK: - Operation Names
 
     func testOperationName() {
-        /* Document */
         let fruit = GraphQLField.leaf(field: "fruit", arguments: [])
         let document = [fruit]
-
-        /* Test */
 
         let query = """
         query Fruit {

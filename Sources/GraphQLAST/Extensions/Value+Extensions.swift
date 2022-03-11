@@ -3,19 +3,19 @@ import Foundation
 extension Field {
     
     /// A list of scalars that are referenced in the arguments and the returned type.
-    public func scalars(schema: Schema) throws -> Set<ScalarType> {
+    public func scalars(schema: Schema) throws -> Set<String> {
         try self.returnTypeScalars(schema: schema).union(self.argsScalars(schema: schema))
     }
     
     // MARK: - Utils
     
     /// Returns scalars that appear in the arguments of the field.
-    private func argsScalars(schema: Schema) throws -> Set<ScalarType> {
+    private func argsScalars(schema: Schema) throws -> Set<String> {
         Set(try args.flatMap { try $0.scalars(schema:schema ) })
     }
     
     /// Returns scalars related to the type returned by the field.
-    private func returnTypeScalars(schema: Schema) throws -> Set<ScalarType> {
+    private func returnTypeScalars(schema: Schema) throws -> Set<String> {
         let returnTypeName = self.type.namedType.name
         guard let namedType = schema.type(name: returnTypeName) else {
             throw ParsingError.unknownType(returnTypeName)
@@ -27,7 +27,7 @@ extension Field {
 
 extension InputValue {
     /// A list of scalars that are referenced in the input fields and their descendants.
-    public func scalars(schema: Schema) throws -> [ScalarType] {
+    public func scalars(schema: Schema) throws -> Set<String> {
         switch self.type.namedType {
         case .enum:
             return []
@@ -35,7 +35,7 @@ extension InputValue {
             guard let scalar = schema.scalar(name: name) else {
                 throw ParsingError.unknownScalar(name)
             }
-            return [scalar]
+            return [scalar.name]
         case .inputObject(let name):
             guard let object = schema.inputObject(name: name) else {
                 throw ParsingError.unknownInputObject(name)
@@ -44,7 +44,7 @@ extension InputValue {
             let scalars = try object.inputFields.flatMap {
                 try $0.scalars(schema: schema)
             }
-            return scalars
+            return Set(scalars)
         }
     }
 }
