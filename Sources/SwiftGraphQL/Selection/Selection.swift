@@ -64,7 +64,7 @@ public final class Fields<TypeLock> {
     
     // MARK: - Analysis
     
-    /// Returns non-scalar types referenced in the selection.
+    /// Returns all types referenced in the fields.
     var types: [String] {
         self.fields.flatMap { $0.types }.unique(by: { $0 })
     }
@@ -106,6 +106,11 @@ public struct Selection<`Type`, TypeLock> {
         } catch {}
         
         return fields.fields
+    }
+    
+    /// Returns all types referenced in the selection.
+    public var types: Set<String> {
+        self.selection().map { $0.types }.reduce(Set(), { $0.union($1) })
     }
 
     // MARK: - Methods

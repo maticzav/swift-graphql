@@ -6,7 +6,13 @@
  */
 
 public protocol GraphQLOperation {
-    static var operation: String { get }
+    static var operation: GraphQLOperationKind { get }
+}
+
+public enum GraphQLOperationKind: String {
+    case query
+    case mutation
+    case subscription
 }
 
 public protocol GraphQLHttpOperation: GraphQLOperation {}

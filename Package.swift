@@ -107,6 +107,10 @@ let package = Package(
             dependencies: ["SwiftGraphQL"]
         ),
         .testTarget(
+            name: "SwiftGraphQLClientTests",
+            dependencies: ["SwiftGraphQLClient"]
+        ),
+        .testTarget(
             name: "SwiftGraphQLCodegenTests",
             dependencies: [ "Files", "SwiftGraphQLCodegen" ]
         ),

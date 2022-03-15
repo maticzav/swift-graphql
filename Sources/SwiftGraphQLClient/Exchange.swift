@@ -3,12 +3,15 @@ import Foundation
 import GraphQL
 
 /// Operation describes a single request that may be processed by multiple exchange along the chain.
-public struct Operation {
+public struct Operation: Identifiable, Equatable {
+    
+    /// Unique identifier used to identify an operation.
+    public var id: String
     
     /// Identifies the operation type.
-    var kind: Kind
+    public var kind: Kind
     
-    enum Kind: String {
+    public enum Kind: String {
         case query
         case mutation
         case subscription
@@ -18,12 +21,12 @@ public struct Operation {
     /// Request that we should use to send this operation.
     ///
     ///  - NOTE: You should extend the request using exchanges.
-    var request: URLRequest
+    public var request: URLRequest
     
     /// Specifies the caching-networking mechanism that exchanges should follow.
-    var policy: Policy
+    public var policy: Policy
     
-    enum Policy {
+    public enum Policy: Hashable {
         case cacheFirst
         case cacheOnly
         case networkOnly
@@ -33,29 +36,29 @@ public struct Operation {
     /// Types that appear in the request.
     ///
     /// - NOTE: This may be used invalidate the cache.
-    var types: [String]
+    public var types: [String]
     
     /// GraphQL parameters for this request.
-    var args: ExecutionArgs
+    public var args: ExecutionArgs
 }
 
 /// A structure describing the result of an operation execution.
-struct OperationResult {
+public struct OperationResult {
     /// Back-reference to the operation that triggered the execution.
-    var operation: Operation
+    public var operation: Operation
     
     /// Data received from the serveer.
-    var data: Data?
+    public var data: Data?
     
     /// Errors accumulated along the execution path.
-    var errors: [CombinedError]
+    public var errors: [CombinedError]
     
     /// Optional stale flag added by exchanges that return stale results.
-    var stale: Bool?
+    public var stale: Bool?
 }
 
 /// An error structure describing an error that may have happened in one of the exchanges.
-enum CombinedError: Error {
+public enum CombinedError: Error {
     
     /// Describes errors that occur on the networking layer.
     case network(Error)

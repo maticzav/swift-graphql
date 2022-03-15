@@ -16,7 +16,7 @@ extension Operation {
     func declaration() -> String {
         """
         extension Objects.\(type.name.pascalCase): \(self.protocol) {
-            static var operation: String { \"\(operation)\" }
+            public static var operation: GraphQLOperationKind { .\(operation) }
         }
         """
     }
