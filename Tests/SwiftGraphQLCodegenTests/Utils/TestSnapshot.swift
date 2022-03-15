@@ -1,4 +1,5 @@
 import Foundation
+import XCTest
 
 /// Creates a snapshot test for a value.
 func assertSnapshot(

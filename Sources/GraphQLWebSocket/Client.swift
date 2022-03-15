@@ -4,7 +4,7 @@ import GraphQL
 import os
 
 /// Protocol that outlines a websocket-compatible structure.
-protocol WebSocket: Publisher where Failure == Error, Output == URLSessionWebSocketTask.Message {
+public protocol WebSocket: Publisher where Failure == Error, Output == URLSessionWebSocketTask.Message {
     /// Sends a WebSocket message, receiving the result in a completion handler.
     func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping (Error?) -> Void)
     
@@ -16,7 +16,7 @@ protocol WebSocket: Publisher where Failure == Error, Output == URLSessionWebSoc
 ///
 /// - NOTE: The client assumes that you'll manually establish the socket connection
 ///         and that it may send requests.
-class GraphQLSubscriptionClient<Socket: WebSocket> {
+public class GraphQLSubscriptionClient<Socket: WebSocket> {
     
     /// Main WebSocket communication channel between the server and the client.
     private let socket: Socket

@@ -14,7 +14,7 @@ import GraphQL
  on the other hand, is final as you can see in the declaration.
  */
 
-public final class Fields<TypeLock: Decodable> {
+public final class Fields<TypeLock> {
     
     // Internal representation of selection.
     private(set) var fields = [GraphQLField]()
@@ -47,13 +47,6 @@ public final class Fields<TypeLock: Decodable> {
         /* This initializer is used to decode response into Swift data. */
         state = .decoding(data)
     }
-    
-    public convenience init(from decoder: Decoder) throws {
-        // Fields decoder forwards the JSON decoding part to the
-        // typelock and parses the desired result using internal initializer.
-        let data = try TypeLock(from: decoder)
-        self.init(data: data)
-    }
 
     // MARK: - Selection
 
@@ -77,10 +70,19 @@ public final class Fields<TypeLock: Decodable> {
     }
 }
 
+extension Fields: Decodable where TypeLock: Decodable {
+    public convenience init(from decoder: Decoder) throws {
+        // Fields decoder forwards the JSON decoding part to the
+        // typelock and parses the desired result using internal initializer.
+        let data = try TypeLock(from: decoder)
+        self.init(data: data)
+    }
+}
+
 // MARK: - Selection
 
 /// Global type used to wrap the selection.
-public struct Selection<`Type`, TypeLock: Decodable> {
+public struct Selection<`Type`, TypeLock> {
     
     /// Function that SwiftGraphQL uses to generate selection and convert received JSON
     /// structure into concrete Swift structure.

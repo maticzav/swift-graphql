@@ -55,13 +55,23 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
         // Generate the code.
         let generator = GraphQLCodegen(scalars: config.scalars)
-        let code = try generator.generate(from: url, withHeaders: headers)
+        let result = try generator.generate(from: url, withHeaders: headers)
 
         // Write to target file or stdout.
         if let outputPath = output {
-            try Folder.current.createFile(at: outputPath).write(code)
+            try Folder.current.createFile(at: outputPath).write(result.code)
         } else {
-            FileHandle.standardOutput.write(code.data(using: .utf8)!)
+            FileHandle.standardOutput.write(result.code.data(using: .utf8)!)
+        }
+        
+        if !result.ignoredScalars.isEmpty {
+            let message = """
+            Some fields may be missing because they rely on unsupported types:
+            
+            \(result.ignoredScalars.map { " - \($0)" }.joined(separator: "\n"))
+            """
+            
+            print(message)
         }
 
         // The end

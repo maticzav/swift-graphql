@@ -2,6 +2,7 @@
 
 import Combine
 import Foundation
+import GraphQLWebSocket
 
 extension URLSession {
     /// Returns a publisher that wrapps a URLSessionWebSocketTask.
@@ -37,12 +38,12 @@ public struct WebSocketTaskPublisher: WebSocket {
     }
     
     /// Sends a WebSocket message, receiving the result in a completion handler.
-    func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping (Error?) -> Void) {
+    public func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping (Error?) -> Void) {
         self.task.send(message, completionHandler: completionHandler)
     }
     
     /// Stops the socket communcation.
-    func close() {
+    public func close() {
         task.cancel()
     }
 }

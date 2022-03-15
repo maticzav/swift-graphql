@@ -49,7 +49,9 @@ final class InputObjectTests: XCTestCase {
         }
         """.format()
 
-        let generated = try type.declaration(scalars: ["ID": "ID"]).format()
+        let generated = try type.declaration(
+            context: Context.from(scalars: ["ID": "ID"])
+        ).format()
 
         XCTAssertEqual(generated, expected)
     }
@@ -90,7 +92,9 @@ final class InputObjectTests: XCTestCase {
         }
         """.format()
 
-        let generated = try type.declaration(scalars: ["ID": "String"]).format()
+        let generated = try type.declaration(
+            context: Context.from(scalars: ["ID": "String"])
+        ).format()
 
         XCTAssertEqual(generated, expected)
     }

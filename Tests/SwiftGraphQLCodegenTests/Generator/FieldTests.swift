@@ -3,6 +3,9 @@
 import XCTest
 
 final class FieldTests: XCTestCase {
+    
+    // MARK: - Tests
+    
     func testFieldDocs() throws {
         let field = Field(
             name: "id",
@@ -13,31 +16,11 @@ final class FieldTests: XCTestCase {
             deprecationReason: "Use ID instead."
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        ).format()
 
-        let expected = try """
-        /// Object identifier.
-        /// Multiline.
-        @available(*, deprecated, message: "Use ID instead.")
-        func id() throws -> String? {
-            let field = GraphQLField.leaf(
-                name: "id",
-                arguments: []
-            )
-            self.select(field)
-
-            switch self.state {
-            case .decoding(let data):
-                return data.id[field.alias!]
-            case .mocking:
-                return nil
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        assertSnapshot(matching: generated)
     }
 
     // MARK: - Scalar
@@ -52,7 +35,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func id() throws -> String {
@@ -89,7 +74,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func id() throws -> String? {
@@ -123,7 +110,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func ids() throws -> [String]? {
@@ -157,7 +146,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func ids() throws -> [String] {
@@ -196,7 +187,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func episode() throws -> Enums.Episode {
@@ -233,7 +226,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func episode() throws -> Enums.Episode? {
@@ -289,7 +284,9 @@ final class FieldTests: XCTestCase {
 
         /* Test */
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         XCTAssertEqual(generated, expected)
     }
@@ -306,7 +303,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func hero<Type>(selection: Selection<Type, Objects.Hero>) throws -> Type {
@@ -344,7 +343,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func hero<Type>(selection: Selection<Type, Objects.Hero?>) throws -> Type {
@@ -379,7 +380,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func hero<Type>(selection: Selection<Type, [Objects.Hero]>) throws -> Type {
@@ -425,7 +428,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func hero(id: String) throws -> String {
@@ -468,7 +473,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func hero(id: OptionalArgument<String> = .absent()) throws -> String {
@@ -511,7 +518,9 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let generated = try field.selection(scalars: ["ID": "String"]).format()
+        let generated = try field.getDynamicSelection(
+            context: Context.from(scalars: ["ID": "String"])
+        )
 
         let expected = try """
         func hero(id: InputObjects.Input) throws -> String {

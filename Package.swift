@@ -18,6 +18,10 @@ let package = Package(
             targets: ["SwiftGraphQL"]
         ),
         .library(
+            name: "SwiftGraphQLClient",
+            targets: ["SwiftGraphQLClient"]
+        ),
+        .library(
             name: "SwiftGraphQLCodegen",
             targets: ["SwiftGraphQLCodegen"]
         ),
@@ -52,6 +56,15 @@ let package = Package(
             name: "SwiftGraphQL",
             dependencies: ["GraphQL"],
             path: "Sources/SwiftGraphQL"
+        ),
+        .target(
+            name: "SwiftGraphQLClient",
+            dependencies: [
+                "GraphQL",
+                "GraphQLWebSocket",
+                "SwiftGraphQL",
+            ],
+            path: "Sources/SwiftGraphQLClient"
         ),
         .target(
             name: "SwiftGraphQLCodegen",
@@ -95,12 +108,7 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftGraphQLCodegenTests",
-            dependencies: [
-                .product(name: "SwiftFormat", package: "swift-format"),
-                "Files",
-                "SwiftGraphQLCodegen",
-                "GraphQLAST"
-            ]
+            dependencies: [ "Files", "SwiftGraphQLCodegen" ]
         ),
         .testTarget(
             name: "GraphQLASTTests",
