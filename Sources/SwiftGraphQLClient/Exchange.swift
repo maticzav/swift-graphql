@@ -45,6 +45,21 @@ public struct Operation: Identifiable, Equatable {
     
     /// GraphQL parameters for this request.
     public var args: ExecutionArgs
+    
+    // MARK: - Methods
+    
+    /// Returns an operation that is exactly the same as the current one, except that it
+    /// signals that its pipeline should be torn down.
+    func teardown() -> Operation {
+        Operation(
+            id: self.id,
+            kind: .teardown,
+            request: self.request,
+            policy: self.policy,
+            types: self.types,
+            args: self.args
+        )
+    }
 }
 
 /// A structure describing the result of an operation execution.

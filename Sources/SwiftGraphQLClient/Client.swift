@@ -21,8 +21,8 @@ public protocol GraphQLClient {
 
 public class Client: GraphQLClient {
     
-    /// Central subject publisher responsible for accepting operation execution requests.
-    private var subject = PassthroughSubject<Operation, Never>()
+    /// The operations stream that lets the client send and listen for them.
+    private var operations = PassthroughSubject<Operation, Never>()
     
     /// Stream of results that may be used as the base for sources.
     private var results: AnyPublisher<OperationResult, Never>
@@ -32,9 +32,6 @@ public class Client: GraphQLClient {
     
     /// Map of currently active sources identified by their operation identifier.
     private var active: [String: Source]
-    
-    /// List of opeartions waiting to be executed.
-    private var queue: [String]
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -46,13 +43,12 @@ public class Client: GraphQLClient {
     ///
     init(exchanges: [Exchange] = []) {
         let exchange = ComposeExchange(exchanges: exchanges)
-        let operations = subject.share().eraseToAnyPublisher()
+        let operations = operations.share().eraseToAnyPublisher()
         
         let noop = Empty<OperationResult, Never>().eraseToAnyPublisher()
         self.results = noop
         
         self.active = [:]
-        self.queue = []
         
         self.results = exchange.register(
             client: self,
@@ -91,10 +87,13 @@ public class Client: GraphQLClient {
             active[operation.id] = source
         }
         
-        
-        
-        
+        // We chain the `onStart` operator outside of the `createResultSource` to make
+        // sure we process the same operation multiple times (i.e. even if the source already exists).
         return source
+            .onStart {
+                self.operations.send(operation)
+            }
+            .eraseToAnyPublisher()
     }
     
     /// Defines how result streams are created.
@@ -104,10 +103,51 @@ public class Client: GraphQLClient {
             .eraseToAnyPublisher()
         
         if operation.kind == .mutation {
-            return source.first().eraseToAnyPublisher()
+            return source
+                .onStart {
+                    self.operations.send(operation)
+                }
+                .first()
+                .eraseToAnyPublisher()
         }
         
-        return source
+        // We create a new source that listenes for events until
+        // a teardown event is sent through the pipeline. When that
+        // happens, we emit a completion event.
+        let torndown = self.operations
+            .map { $0.kind == .teardown && $0.id == operation.id }
+            .eraseToAnyPublisher()
+        
+        let result: AnyPublisher<OperationResult, Never> = source
+            .takeUntil(torndown)
+            .map { result -> AnyPublisher<OperationResult, Never> in
+                // Mark a result as stale when a new operation is sent with the same key.
+                guard operation.kind == .query else {
+                    return Just(result).eraseToAnyPublisher()
+                }
+                
+                // Mark the result as `stale` when a request with the same
+                // key is emitted down the chain.
+                let staleResult: AnyPublisher<OperationResult, Never> = self.operations
+                    .filter { $0.kind == .query && $0.id == operation.id && $0.policy != .cacheOnly }
+                    .first()
+                    .map { operation -> OperationResult in
+                        var copy = result
+                        copy.stale = true
+                        return copy
+                    }
+                    .eraseToAnyPublisher()
+                
+                return staleResult
+            }
+            .switchToLatest()
+            .onEnd {
+                self.active.removeValue(forKey: operation.id)
+                self.operations.send(operation.teardown())
+            }
+            .eraseToAnyPublisher()
+    
+        return result
     }
 }
 

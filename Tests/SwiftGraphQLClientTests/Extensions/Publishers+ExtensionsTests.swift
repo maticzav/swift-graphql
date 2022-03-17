@@ -52,4 +52,33 @@ final class PublishersExtensionsTests: XCTestCase {
         XCTAssertEqual(i, 1)
         XCTAssertEqual(received, [42])
     }
+    
+    func testTakeUntil() throws {
+        var received = [Int]()
+        var completed = false
+        
+        let terminator = PassthroughSubject<Bool, Never>()
+        let publisher = PassthroughSubject<Int, Never>()
+        
+        publisher
+            .takeUntil(terminator.eraseToAnyPublisher())
+            .sink(receiveCompletion: { completion in
+                completed = completion == .finished
+            }, receiveValue: { value in
+                received.append(value)
+            })
+            .store(in: &self.cancellables)
+        
+        publisher.send(1)
+        terminator.send(false)
+        publisher.send(2)
+        terminator.send(true)
+        
+        XCTAssertTrue(completed)
+        
+        publisher.send(3)
+        
+        XCTAssertEqual(received, [1, 2])
+        XCTAssertTrue(completed)
+    }
 }
