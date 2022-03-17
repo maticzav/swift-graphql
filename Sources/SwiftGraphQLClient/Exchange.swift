@@ -31,6 +31,11 @@ public struct Operation: Identifiable, Equatable {
         case cacheOnly
         case networkOnly
         case cacheAndNetwork
+        
+        /// Tells whether the operation requires a network call.
+        public var isNetwork: Bool {
+            self == .networkOnly || self == .cacheAndNetwork
+        }
     }
     
     /// Types that appear in the request.

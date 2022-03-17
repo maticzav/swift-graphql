@@ -7,7 +7,7 @@ import SwiftGraphQL
 
 enum Operations {}
 extension Objects.Query: GraphQLHttpOperation {
-    static var operation: String { "query" }
+    static var operation: GraphQLOperationKind { .query }
 }
 
 // MARK: - Objects
