@@ -5,20 +5,17 @@ extension Publisher {
     
     /// An operator that triggers the handler when the publisher sends the subscription down to the subscriber.
     func onStart(_ handler: @escaping () -> Void) -> Publishers.StatefulPublisher<Self> {
-        Publishers.StatefulPublisher<Self>(
-            upstream: self,
-            onStart: handler,
-            onEnd: {}
-        )
+        Publishers.StatefulPublisher<Self>(upstream: self, onStart: handler)
     }
     
     /// An operator that triggers the handler when the publisher sends the subscription down to the subscriber.
     func onEnd(_ handler: @escaping () -> Void) -> Publishers.StatefulPublisher<Self> {
-        Publishers.StatefulPublisher<Self>(
-            upstream: self,
-            onStart: {},
-            onEnd: handler
-        )
+        Publishers.StatefulPublisher<Self>(upstream: self, onEnd: handler)
+    }
+    
+    /// An operator that triggers the handler everytime the publisher sends a new event.
+    func onPush(_ handler: @escaping (Output) -> Void) -> Publishers.StatefulPublisher<Self> {
+        Publishers.StatefulPublisher<Self>(upstream: self, onPush: handler)
     }
 }
 
@@ -43,6 +40,9 @@ extension Publishers {
         /// A function called when the subscriber receives a completion event.
         private var onEnd: () -> Void
         
+        /// A function that's triggered on every receive call from the publisher.
+        private var onPush: (Output) -> Void
+        
         /// Publisher emitting the values.
         private var upstream: Upstream
         
@@ -50,12 +50,14 @@ extension Publishers {
         
         init(
             upstream: Upstream,
-            onStart: @escaping () -> Void,
-            onEnd: @escaping () -> Void
+            onStart: @escaping () -> Void =  {},
+            onEnd: @escaping () -> Void = {},
+            onPush: @escaping (Output) -> Void = { _ in }
         ) {
             self.upstream = upstream
             self.onStart = onStart
             self.onEnd = onEnd
+            self.onPush = onPush
         }
         
         // MARK: - Publisher
@@ -65,7 +67,8 @@ extension Publishers {
             let sub = Subscriptions.StatefulSubscription(
                 subscriber: subscriber,
                 onStart: self.onStart,
-                onEnd: self.onEnd
+                onEnd: self.onEnd,
+                onPush: self.onPush
             )
             subscriber.receive(subscription: sub)
             self.upstream.receive(subscriber: sub)
@@ -97,14 +100,19 @@ extension Subscriptions {
         /// A function called when the subscriber receives a completion event.
         private var onEnd: () -> Void
         
+        /// A function that's triggered on every receive call from the publisher.
+        private var onPush: (Downstream.Input) -> Void
+        
         init(
             subscriber: Downstream,
             onStart: @escaping () -> Void,
-            onEnd: @escaping () -> Void
+            onEnd: @escaping () -> Void,
+            onPush: @escaping (Downstream.Input) -> Void
         ) {
             self.subscriber = subscriber
             self.onStart = onStart
             self.onEnd = onEnd
+            self.onPush = onPush
         }
         
         // MARK: - Subscriber
@@ -121,7 +129,8 @@ extension Subscriptions {
         }
         
         func receive(_ input: Downstream.Input) -> Subscribers.Demand {
-            self.subscriber.receive(input)
+            self.onPush(input)
+            return self.subscriber.receive(input)
         }
         
         func receive(completion: Subscribers.Completion<Downstream.Failure>) {

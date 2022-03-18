@@ -22,6 +22,13 @@ public struct ExecutionArgs: Codable, Equatable {
     }
 }
 
+extension ExecutionArgs: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(query)
+        hasher.combine(operationName)
+    }
+}
+
 /// The result of GraphQL execution.
 ///
 /// - NOTE:

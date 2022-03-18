@@ -3,7 +3,7 @@ import Foundation
 import GraphQL
 
 /// Operation describes a single request that may be processed by multiple exchange along the chain.
-public struct Operation: Identifiable, Equatable {
+public struct Operation: Identifiable, Equatable, Hashable {
     
     /// Unique identifier used to identify an operation.
     public var id: String
@@ -26,7 +26,7 @@ public struct Operation: Identifiable, Equatable {
     /// Specifies the caching-networking mechanism that exchanges should follow.
     public var policy: Policy
     
-    public enum Policy: Hashable {
+    public enum Policy {
         case cacheFirst
         case cacheOnly
         case networkOnly
@@ -67,13 +67,32 @@ public struct OperationResult {
     /// Back-reference to the operation that triggered the execution.
     public var operation: Operation
     
-    /// Data received from the serveer.
+    /// Data received from the server.
     public var data: Data?
     
     /// Errors accumulated along the execution path.
     public var errors: [CombinedError]
     
     /// Optional stale flag added by exchanges that return stale results.
+    public var stale: Bool?
+}
+
+/// A structure describing decoded result of an operation execution.
+///
+/// - NOTE: Decoded result may include errors from invalid data even if
+///         the response query was correct.
+public struct DecodedOperationResult<T: Decodable> {
+    
+    /// Back-reference to the operation that triggered the execution.
+    public var operation: Operation
+    
+    /// Decoded response.
+    public var data: T?
+    
+    /// Errors from the execution.
+    public var errors: [CombinedError]
+    
+    /// Tells wether the result of the query is ot up-to-date.
     public var stale: Bool?
 }
 
@@ -85,6 +104,9 @@ public enum CombinedError: Error {
     
     /// Describes errors that occured during the GraphQL execution.
     case graphql(GraphQLError)
+    
+    /// Describes errors that occured during the parsing phase on the client.
+    case parsing(Error)
 }
 
 /// Utility type for describing the exchange processor.

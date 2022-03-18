@@ -21,7 +21,7 @@ final class SelectionDecodingTests: XCTestCase {
             }
         }
         
-        let result = try selection.decode(data)
+        let result = try selection.decode(raw: data)
         XCTAssertEqual(result.data, "Hello World!")
         XCTAssertEqual(result.errors, nil)
     }
@@ -42,7 +42,7 @@ final class SelectionDecodingTests: XCTestCase {
             }
         }
         
-        let result = try selection.decode(data)
+        let result = try selection.decode(raw: data)
         XCTAssertEqual(result.data, nil)
         XCTAssertEqual(result.errors, nil)
     }
@@ -109,7 +109,7 @@ final class SelectionDecodingTests: XCTestCase {
             }
         }
 
-        XCTAssertThrowsError(try selection.decode(data)) { (error) -> Void in
+        XCTAssertThrowsError(try selection.decode(raw: data)) { (error) -> Void in
             XCTAssertEqual(error as? CustomError, CustomError.null)
         }
     }

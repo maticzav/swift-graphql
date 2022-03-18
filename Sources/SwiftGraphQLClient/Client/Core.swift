@@ -1,25 +1,12 @@
 import Combine
 import Foundation
 import GraphQL
-import SwiftGraphQL
-import SwiftUI
 
-/// Specifies the minimum requirements of a client to support the execution of queries
-/// composed using SwiftGraphQL.
-public protocol GraphQLClient {
-    
-    /// Log a debug message.
-    func log(message: String) -> Void
-    
-    /// Executes an operation by sending it down the exchange pipeline.
-    ///
-    /// - Returns: A publisher that emits all related exchange results.
-    func executeRequestOperation(operation: Operation) -> AnyPublisher<OperationResult, Never>
-}
-
-// MARK: - Client
-
-public class Client: GraphQLClient {
+/// A built-in implementation of the GraphQLClient specification that may be used with the library.
+///
+/// - NOTE: SwiftUI bindings and Selection interloop aren't bound to the default implementation.
+///         You may use them with a custom implementation as well.
+public class Client: GraphQLClient, ObservableObject {
     
     /// The operations stream that lets the client send and listen for them.
     private var operations = PassthroughSubject<Operation, Never>()
@@ -150,74 +137,3 @@ public class Client: GraphQLClient {
         return result
     }
 }
-
-// MARK: - Selection Bindings
-
-extension GraphQLClient {
-    
-    /// Turns selection into a request operation.
-    public func createRequestOperation<Type, TypeLock>(
-        for selection: Selection<Type, TypeLock>,
-        as operationName: String? = nil,
-        url request: URLRequest,
-        policy: Operation.Policy
-    ) -> Operation where TypeLock: GraphQLOperation {
-        Operation(
-            id: UUID().uuidString,
-            kind: TypeLock.operationKind,
-            request: request,
-            policy: policy,
-            types: Array(selection.types),
-            args: selection.encode(operationName: operationName)
-        )
-    }
-    
-    /// Executes a query against the client and returns a publisher that emits values from relevant exchanges.
-    public func executeQuery<Type, TypeLock>(
-        for selection: Selection<Type, TypeLock>,
-        as operationName: String? = nil,
-        url request: URLRequest,
-        policy: Operation.Policy
-    ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLHttpOperation {
-        let operation = self.createRequestOperation(
-            for: selection,
-           as: operationName,
-           url: request,
-           policy: policy
-        )
-        return self.executeRequestOperation(operation: operation)
-    }
-    
-    /// Executes a mutation against the client and returns a publisher that emits values from relevant exchanges.
-    public func executeMutation<Type, TypeLock>(
-        for selection: Selection<Type, TypeLock>,
-        as operationName: String? = nil,
-        url request: URLRequest,
-        policy: Operation.Policy
-    ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLHttpOperation {
-        let operation = self.createRequestOperation(
-            for: selection,
-           as: operationName,
-           url: request,
-           policy: policy
-        )
-        return self.executeRequestOperation(operation: operation)
-    }
-    
-    /// Executes a mutation against the client and returns a publisher that emits values from relevant exchanges.
-    public func executeSubscription<Type, TypeLock>(
-        to selection: Selection<Type, TypeLock>,
-        as operationName: String? = nil,
-        url request: URLRequest,
-        policy: Operation.Policy
-    ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLWebSocketOperation {
-        let operation = self.createRequestOperation(
-            for: selection,
-           as: operationName,
-           url: request,
-           policy: policy
-        )
-        return self.executeRequestOperation(operation: operation)
-    }
-}
-

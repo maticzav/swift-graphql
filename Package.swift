@@ -25,6 +25,10 @@ let package = Package(
             name: "SwiftGraphQLCodegen",
             targets: ["SwiftGraphQLCodegen"]
         ),
+        .library(
+            name: "SwiftGraphQLUI",
+            targets: ["SwiftGraphQLUI"]
+        ),
         /* CLI */
         .executable(
             name: "swift-graphql",
@@ -74,6 +78,15 @@ let package = Package(
                 "GraphQLAST"
             ],
             path: "Sources/SwiftGraphQLCodegen"
+        ),
+        .target(
+            name: "SwiftGraphQLUI",
+            dependencies: [
+                "GraphQL",
+                "SwiftGraphQL",
+                "SwiftGraphQLClient"
+            ],
+            path: "Sources/SwiftGraphQLUI"
         ),
         .executableTarget(
             name: "SwiftGraphQLCLI",

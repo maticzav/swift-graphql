@@ -53,6 +53,25 @@ final class PublishersExtensionsTests: XCTestCase {
         XCTAssertEqual(received, [42])
     }
     
+    func testOnPushTriggeredCorrectly() throws {
+        var received = [Int]()
+        
+        let subject = PassthroughSubject<Int, Never>()
+        let _ = subject
+            .eraseToAnyPublisher()
+            .onPush { val in
+                received.append(val)
+            }
+            .sink { _ in }
+            .store(in: &self.cancellables)
+        
+        subject.send(17)
+        subject.send(3)
+        subject.send(2000)
+        
+        XCTAssertEqual(received, [17, 3, 2000])
+    }
+    
     func testTakeUntil() throws {
         var received = [Int]()
         var completed = false

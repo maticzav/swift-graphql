@@ -6,7 +6,7 @@ import GraphQL
 extension Selection where TypeLock: Decodable {
     
     /// Decodes received data into selected type.
-    public func decode(_ raw: Data) throws -> (data: Type, errors: [GraphQLError]?) {
+    public func decode(raw: Data) throws -> (data: Type, errors: [GraphQLError]?) {
         let decoder = JSONDecoder()
         let res = try decoder.decode(ExecutionResult<TypeLock>.self, from: raw)
         
