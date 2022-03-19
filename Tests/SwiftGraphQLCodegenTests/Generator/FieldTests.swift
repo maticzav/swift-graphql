@@ -273,7 +273,26 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
 
-        generated.assertInlineSnapshot()
+        generated.assertInlineSnapshot(matching: """
+           func episode() throws -> [Enums.Episode?] {
+             let field = GraphQLField.leaf(
+               field: "episode",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.episodetestType[field.alias!] {
+                 return data
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return []
+             }
+           }
+           """)
     }
 
     // MARK: - Selections
@@ -293,7 +312,28 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
         
-        generated.assertInlineSnapshot()
+        generated.assertInlineSnapshot(matching: """
+           func hero<T>(selection: Selection<T, Objects.Hero>) throws -> T {
+             let field = GraphQLField.composite(
+               field: "hero",
+               parent: "TestType",
+               type: "Hero",
+               arguments: [],
+               selection: selection.__selection()
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.herotestType[field.alias!] {
+                 return try selection.__decode(data: data)
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return try selection.__mock()
+             }
+           }
+           """)
     }
 
     func testNullableSelectionField() throws {
@@ -311,7 +351,25 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
         
-        generated.assertInlineSnapshot()
+        generated.assertInlineSnapshot(matching: """
+           func hero<T>(selection: Selection<T, Objects.Hero?>) throws -> T {
+             let field = GraphQLField.composite(
+               field: "hero",
+               parent: "TestType",
+               type: "Hero",
+               arguments: [],
+               selection: selection.__selection()
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               return try selection.__decode(data: data.herotestType[field.alias!])
+             case .mocking:
+               return try selection.__mock()
+             }
+           }
+           """)
     }
 
     func testListSelectionField() throws {
@@ -329,7 +387,28 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
         
-        generated.assertInlineSnapshot()
+        generated.assertInlineSnapshot(matching: """
+           func hero<T>(selection: Selection<T, [Objects.Hero]>) throws -> T {
+             let field = GraphQLField.composite(
+               field: "hero",
+               parent: "TestType",
+               type: "Hero",
+               arguments: [],
+               selection: selection.__selection()
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.herotestType[field.alias!] {
+                 return try selection.__decode(data: data)
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return try selection.__mock()
+             }
+           }
+           """)
     }
 
     // MARK: - Arguments
@@ -355,7 +434,26 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
         
-        generated.assertInlineSnapshot()
+        generated.assertInlineSnapshot(matching: """
+           func hero(id: String) throws -> String {
+             let field = GraphQLField.leaf(
+               field: "hero",
+               parent: "TestType",
+               arguments: [Argument(name: "id", type: "ID!", value: id)]
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.herotestType[field.alias!] {
+                 return data
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return String.mockValue
+             }
+           }
+           """)
     }
 
     func testFieldWithOptionalArgument() throws {
@@ -379,7 +477,26 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
         
-        generated.assertInlineSnapshot()
+        generated.assertInlineSnapshot(matching: """
+           func hero(id: OptionalArgument<String> = .init()) throws -> String {
+             let field = GraphQLField.leaf(
+               field: "hero",
+               parent: "TestType",
+               arguments: [Argument(name: "id", type: "ID", value: id)]
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.herotestType[field.alias!] {
+                 return data
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return String.mockValue
+             }
+           }
+           """)
     }
 
     func testFieldWithInputObjectArgument() throws {
@@ -403,6 +520,25 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
         
-        generated.assertInlineSnapshot()
+        generated.assertInlineSnapshot(matching: """
+           func hero(id: InputObjects.Input) throws -> String {
+             let field = GraphQLField.leaf(
+               field: "hero",
+               parent: "TestType",
+               arguments: [Argument(name: "id", type: "Input!", value: id)]
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.herotestType[field.alias!] {
+                 return data
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return String.mockValue
+             }
+           }
+           """)
     }
 }
