@@ -2,8 +2,8 @@ import Foundation
 
 extension String {
 
-    // Returns the string PascalCased.
-    var pascalCase: String {
+    /// Returns the string PascalCased.
+    public var pascalCase: String {
         var result = ""
         
         var capitalize = true
@@ -73,8 +73,8 @@ extension String {
         return result
     }
 
-    // Returns the string camelCased.
-    var camelCase: String {
+    /// Returns the string camelCased.
+    public var camelCase: String {
         let pascal = pascalCase
         return pascal[pascal.startIndex].lowercased() + pascal.dropFirst()
     }

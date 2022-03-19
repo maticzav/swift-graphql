@@ -75,7 +75,8 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftFormat", package: "swift-format"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
-                "GraphQLAST"
+                "GraphQLAST",
+                "SwiftGraphQL"
             ],
             path: "Sources/SwiftGraphQLCodegen"
         ),

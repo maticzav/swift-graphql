@@ -1,5 +1,6 @@
 import Foundation
 import GraphQLAST
+import SwiftGraphQL
 
 extension ObjectType: Structure {
     var possibleTypes: [ObjectTypeRef] {

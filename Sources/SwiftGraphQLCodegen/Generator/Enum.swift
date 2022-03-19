@@ -1,5 +1,6 @@
 import Foundation
 import GraphQLAST
+import SwiftGraphQL
 
 /*
  We represent enumerator values as strings. There's nothing

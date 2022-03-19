@@ -1,5 +1,6 @@
 import Foundation
 import GraphQLAST
+import SwiftGraphQL
 
 /*
  This file contains the code that we use to generate interfaces.
