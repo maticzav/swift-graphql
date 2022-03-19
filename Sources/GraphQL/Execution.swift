@@ -38,6 +38,11 @@ extension ExecutionArgs: Hashable {
 public struct ExecutionResult<T> {
     public var data: T
     public var errors: [GraphQLError]?
+    
+    public init(data: T, errors: [GraphQLError]? = nil) {
+        self.data = data
+        self.errors = errors
+    }
 }
 
 
