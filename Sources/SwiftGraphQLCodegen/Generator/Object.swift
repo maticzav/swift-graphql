@@ -30,6 +30,7 @@ extension ObjectType {
         extension Fields where TypeLock == Objects.\(name) {
         \(selection)
         }
+        
         """
         
         guard alias else {
@@ -57,6 +58,7 @@ extension ObjectType {
         extension Objects.\(name) {
         \(selections)
         }
+        
         """
         
         guard alias else {

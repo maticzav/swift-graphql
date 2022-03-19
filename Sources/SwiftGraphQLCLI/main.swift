@@ -2,6 +2,7 @@ import ArgumentParser
 import Files
 import Foundation
 import SwiftGraphQLCodegen
+import System
 import Yams
 
 SwiftGraphQLCLI.main()
@@ -11,7 +12,7 @@ SwiftGraphQLCLI.main()
 struct SwiftGraphQLCLI: ParsableCommand {
     // MARK: - Parameters
 
-    @Argument(help: "GraphQL server endpoint.")
+    @Argument(help: "GraphQL server endpoint or local file path from the current location.")
     var endpoint: String
 
     @Option(help: "Relative path from CWD to your YML config file.")
@@ -32,9 +33,27 @@ struct SwiftGraphQLCLI: ParsableCommand {
     // MARK: - Main
 
     func run() throws {
-        // Make sure we get a valid endpoint to fetch.
-        guard let url = URL(string: endpoint) else {
+        
+        // Make sure we get a valid endpoint file or URL endpoint.
+        guard var url = URL(string: endpoint) else {
             SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.endpoint)
+        }
+        
+        // Covnert relative URLs to absolute ones.
+        if url.scheme == nil {
+            guard #available(macOS 12, *) else {
+                SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.legacy)
+            }
+            
+            var cwd = FilePath(FileManager.default.currentDirectoryPath)
+            if endpoint.starts(with: "/") {
+                cwd = FilePath("/")
+            }
+            
+            guard let fileurl = URL(cwd.appending(endpoint)) else {
+                SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.endpoint)
+            }
+            url = fileurl
         }
 
         // Load configuration if config path is present, otherwise use default.
@@ -67,7 +86,6 @@ struct SwiftGraphQLCLI: ParsableCommand {
         if !result.ignoredScalars.isEmpty {
             let message = """
             Some fields may be missing because they rely on unsupported types:
-            
             \(result.ignoredScalars.map { " - \($0)" }.joined(separator: "\n"))
             """
             
@@ -116,4 +134,5 @@ struct Config: Codable, Equatable {
 
 enum SwiftGraphQLGeneratorError: String, Error {
     case endpoint = "Invalid endpoint!"
+    case legacy = "Please update your MacOS to use schema from a file."
 }

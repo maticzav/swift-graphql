@@ -5,10 +5,7 @@ import SwiftGraphQLClient
 import SwiftUI
 
 /// Lets you perform a query using a SwiftUI binding.
-@propertyWrapper struct Query<
-    Client: GraphQLClient & ObservableObject,
-    T: Decodable
->: DynamicProperty {
+@propertyWrapper struct Query<T: Decodable>: DynamicProperty {
     
     /// Client from the context used to perform operations.
     @EnvironmentObject private var client: Client

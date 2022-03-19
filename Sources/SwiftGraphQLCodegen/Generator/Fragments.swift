@@ -11,10 +11,10 @@ extension Collection where Element == ObjectTypeRef {
     func selection(name type: String, objects: [ObjectType]) -> String {
         """
         extension Fields where TypeLock == \(type) {
-            func on<Type>(\(parameters)) throws -> Type {
+            func on<T>(\(parameters)) throws -> T {
                 self.select([\(selection(interface: type))])
 
-                switch self.response {
+                switch self.state {
                 case .decoding(let data):
                     switch data.__typename {
                     \(decoders(objects: objects))
@@ -52,7 +52,7 @@ extension Collection where Element == ObjectTypeRef {
 private extension ObjectTypeRef {
     /// Returns a parameter definition for a given type reference.
     var parameter: String {
-        "\(namedType.name.camelCase): Selection<Type, Objects.\(namedType.name.pascalCase)>"
+        "\(namedType.name.camelCase): Selection<T, Objects.\(namedType.name.pascalCase)>"
     }
 
     /// Returns a SwiftGraphQL Fragment selection.

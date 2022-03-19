@@ -26,6 +26,10 @@ extension Schema {
                     return type
                 }
             case .object(let object):
+                if object.isInternal {
+                    return type
+                }
+                
                 let fields = try object.fields.filter { try $0.isSupported(in: self, with: scalars) }
                 let filtered = ObjectType(
                     name: object.name,
@@ -36,6 +40,10 @@ extension Schema {
                 
                 return .object(filtered)
             case .interface(let interface):
+                if interface.isInternal {
+                    return type
+                }
+                
                 let fields = try interface.fields.filter { try $0.isSupported(in: self, with: scalars) }
                 let filtered = InterfaceType(
                     name: interface.name,
@@ -47,6 +55,10 @@ extension Schema {
                 
                 return .interface(filtered)
             case .inputObject(let input):
+                if input.isInternal {
+                    return type
+                }
+                
                 let fields = try input.inputFields.filter { try $0.isSupported(in: self, with: scalars) }
                 let filtered = InputObjectType(
                     name: input.name,

@@ -37,7 +37,7 @@ extension Field {
     /// Returns a function that may be used to create dynamic selection (i.e. a special subcase of a type) using SwiftGraphQL.
     func getDynamicSelection(context: Context) throws -> String {
         let parameters = try fParameters(context: context)
-        let output = try type.returnType(context: context)
+        let output = try type.dynamicReturnType(context: context)
         
         let code = """
         \(docs)
@@ -46,7 +46,7 @@ extension Field {
             \(selection)
             self.select(field)
 
-            switch self.response {
+            switch self.state {
             case .decoding(let data):
                 \(decoder)
             case .mocking:
@@ -61,8 +61,8 @@ extension Field {
     /// Returns a function that may be used to select a single field in the object.
     func getStaticSelection(for type: ObjectType, context: Context) throws -> String {
         let parameters = try fParameters(context: context)
-        let typelock = type.name.pascalCase
-        let returnType = try self.type.returnType(context: context)
+        let typelock = "Objects.\(type.name.pascalCase)"
+        let returnType = try self.type.dynamicReturnType(context: context)
         let args = self.args.arguments(field: self, context: context)
         
         let code = """
@@ -135,9 +135,9 @@ private extension Collection where Element == InputValue {
             return "(\(params))"
         default:
             if isEmpty {
-                return "<Type>(selection: Selection<Type, \(typelock)>)"
+                return "<T>(selection: Selection<T, \(typelock)>)"
             }
-            return "<Type>(\(params), selection: Selection<Type, \(typelock)>)"
+            return "<T>(\(params), selection: Selection<T, \(typelock)>)"
         }
     }
     
@@ -199,7 +199,7 @@ private extension Field {
             return """
             let field = GraphQLField.composite(
                  field: "\(name)",
-                 type: "\(self.type.namedType.name)".
+                 type: "\(self.type.namedType.name)",
                  arguments: [ \(args.arguments) ],
                  selection: selection.selection()
             )
@@ -315,6 +315,7 @@ extension OutputTypeRef {
 }
 
 extension InvertedOutputTypeRef {
+    
     /// Returns a mock value wrapped according to ref.
     func mock(value: String) -> String {
         switch self {
@@ -326,6 +327,7 @@ extension InvertedOutputTypeRef {
             return "nil"
         }
     }
+    
 }
 
 // MARK: - Output Types
@@ -336,8 +338,9 @@ extension InvertedOutputTypeRef {
  */
 
 private extension OutputTypeRef {
+    
     /// Returns a return type of a referrable type.
-    func returnType(context: Context) throws -> String {
+    func dynamicReturnType(context: Context) throws -> String {
         switch namedType {
         case let .scalar(scalar):
             let scalar = try context.scalars.scalar(scalar)
@@ -345,12 +348,14 @@ private extension OutputTypeRef {
         case let .enum(enm):
             return type(for: "Enums.\(enm.pascalCase)")
         case .interface, .object, .union:
-            return "Type"
+            return "T"
         }
     }
+    
 }
 
 extension TypeRef {
+    
     /// Returns a wrapped instance of a given type respecting the reference.
     func type(for name: String) -> String {
         inverted.type(for: name)
@@ -358,6 +363,7 @@ extension TypeRef {
 }
 
 extension InvertedTypeRef {
+    
     /// Returns a wrapped instance of a given type respecting the reference.
     func type(for name: String) -> String {
         switch self {

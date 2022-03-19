@@ -40,7 +40,7 @@ public struct GraphQLCodegen {
         let code = try generate(schema: filteredSchema)
         
         let schemaScalars = try schema.scalars()
-        let ignoredScalars: [String] = schemaScalars.filter { scalars.supported.contains($0) }
+        let ignoredScalars: [String] = schemaScalars.filter { !scalars.supported.contains($0) }
         
         return Output(code: code, ignoredScalars: ignoredScalars)
     }
@@ -114,7 +114,7 @@ public struct GraphQLCodegen {
         \(inputObjectDefinitions.lines)
         """
 
-        let source = try code.format()
-        return source
+//        let source = try code.format()
+        return code
     }
 }

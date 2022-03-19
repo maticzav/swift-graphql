@@ -1,7 +1,6 @@
 import Foundation
 
 extension String {
-    // MARK: - Public properties
 
     // Returns the string PascalCased.
     var pascalCase: String {
