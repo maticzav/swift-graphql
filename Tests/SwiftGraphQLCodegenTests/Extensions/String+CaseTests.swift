@@ -9,6 +9,7 @@ final class StringExtensionsTest: XCTestCase {
         XCTAssertEqual("linkToURL".camelCase, "linkToUrl")
         XCTAssertEqual("grandfather_father.son grandson".camelCase, "grandfatherFatherSonGrandson")
         XCTAssertEqual("GRAndFATHER_Father.son".camelCase, "grAndFatherFatherSon")
+        XCTAssertEqual("queryDBShortcuts".camelCase, "queryDbShortcuts")
     }
 
     func testPascalCase() {
