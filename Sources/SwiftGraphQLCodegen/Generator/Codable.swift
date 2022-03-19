@@ -1,50 +1,70 @@
 import Foundation
 import GraphQLAST
 
-/*
- Codable is responsible for generating an intermediate type that
- generated code uses to decode the response.
 
- We first decode the key that references a result and use the type
- engraved in the alias to further decode the result. The result is
- saved into a HashMap structure that groups fields with the same type.
- */
-
-// MARK: - Structure
-
-/*
- This section contains functions that we use to generate the structure
- definition itself.
- */
-
+/// Structure protocol outlines anything that might be made codable (e.g. GraphQL Objects, Interfaces and Unions).
+///
+/// To decode a response we first decode values to an intermediate type. We first decode the key
+/// that references a result and use the  engraved in the alias to further decode the result. The result is
+/// saved into a HashMap structure that groups fields with the same type.
 protocol Structure {
+    
+    /// Name of the GraphQL type that corresponds to this structure
+    var name: String { get }
+    
+    /// Fields that are shared between all types in the structure.
     var fields: [Field] { get }
+    
+    /// References to the type those fields may be part of.
     var possibleTypes: [ObjectTypeRef] { get }
 }
 
 extension Structure {
-    /// Returns a list of fields shared between all types in the interface.
-    func allFields(objects: [ObjectType], context: Context) -> [Field] {
-        var shared: [Field] = fields
+    
+    /// Returns a list of fields that appear in the structure differentiated
+    /// by the type they appear in.
+    ///
+    ///  - parameter parent: Parent type containing already included values.
+    ///  - parameter objects: List of all types that appear in the schema.
+    func fieldsByType(
+        parent: String,
+        objects: [ObjectType],
+        context: Context
+    ) -> [(field: Field, parent: String)] {
+        var union: [(field: Field, parent: String)] = []
+        
+        for field in self.fields {
+            union.append((field: field, parent: parent))
+        }
 
         for object in objects {
             // Skip object if it's not inside possible types.
-            guard possibleTypes.contains(where: { $0.name == object.name }) else { continue }
+            guard possibleTypes.contains(where: { $0.name == object.name }) else {
+                continue
+            }
             
-            // Append fields otherwise.
-            for field in object.fields {
-                // Make suer fields are unique.
-                shared.append(field)
+            for field in object.fields + self.fields {
+                // Skip shared fields.
+                if union.contains(where: {
+                    $0.field.name == field.name && $0.parent == object.name
+                }) {
+                    continue
+                }
+                union.append((field: field, parent: object.name))
             }
         }
 
-        return shared.unique(by: { $0.name }).sorted(by: {$0.name < $1.name})
+        return union
     }
 }
 
 extension Structure {
-    /// Returns a definition of a struct that represents a given structure.
-    func `struct`(name: String, objects: [ObjectType], context: Context) throws -> String {
+    
+    /// Returns a definition of a Swift struct that represents a given GraphQL structure.
+    ///
+    /// - parameter name: The name that the structure should use in the API (not necessarily the same as its GraphQL name).
+    /// - parameter objects: List of all objects that appear in the schema.
+    func definition(name apiName: String, objects: [ObjectType], context: Context) throws -> String {
         let typename: String
         if let object = possibleTypes.first, self.possibleTypes.count == 1 {
             typename = "let __typename: TypeName = .\(object.name.camelCase)"
@@ -52,45 +72,57 @@ extension Structure {
             typename = "let __typename: TypeName"
         }
 
-        let properties = try allFields(objects: objects, context: context)
-            .sorted(by: { $0.name < $1.name })
-            .map { try $0.declaration(context: context) }
+        let properties = try self.fieldsByType(parent: self.name, objects: objects, context: context)
+            .sorted(by: { $0.field.name < $1.field.name })
+            .map { try $0.field.declaration(parent: $0.parent, context: context) }
             .lines
+        
+        let typenamesEnum = possibleTypes.typenamesEnum()
 
         return """
-        struct \(name) {
+        struct \(apiName) {
             \(typename)
             \(properties)
 
-            \(possibleTypes.typename)
+            \(typenamesEnum)
         }
         """
     }
 }
 
 private extension Field {
+    
     /// Return a field variable declaration in the structure.
-    func declaration(context: Context) throws -> String {
+    func declaration(parent: String, context: Context) throws -> String {
         let type = try self.type.namedType.type(scalars: context.scalars)
         let wrappedType = self.type.nonNullable.type(for: type)
+        let alias = "\(name.camelCase)\(parent.camelCase)"
 
-        return "let \(name.camelCase.normalize): [String: \(wrappedType)]"
+        return "let \(alias.normalize): [String: \(wrappedType)]"
     }
 }
 
 // MARK: - Decoder
 
-/*
- This section contains code that we use to generate the decoder for
- given fields.
- */
-
-extension Collection where Element == Field {
-    /// Returns a function definition for decoder initializer.
-    func decoders(context: Context, includeTypenameDecoder typename: Bool = false) throws -> String {
-        let cases: String = try map { try $0.decoder(context: context) }
+extension Collection where Element == (field: Field, parent: String) {
+    
+    /// Returns a function definition for decoder of the fields.
+    ///
+    /// - parameter parent: Type that holds values of the decoders.
+    /// - parameter includeTypeNameDecoder: Tells whether the decoder should contain extra code for decoding typenames of the returned values.
+    func decoders(includeTypenameDecoder: Bool = false, context: Context) throws -> String {
+        let decoders: String = try self
+            .map { try $0.field.decoder(parent: $0.parent, context: context) }
             .joined(separator: "\n")
-        let mappings: String = map { "self.\($0.name.camelCase) = map[\"\($0.name.camelCase)\"]" }
+        
+        // Mappings extract decoded values from HashMaps.
+        // We use field aliases to correctly bind returned values to their fields.
+        //
+        // NOTE: Field alias must match the alias generated by the field alias code
+        //       in the code library.
+        let mappings: String = self
+            .map { "\($0.field.name.camelCase)\($0.parent.camelCase)" }
+            .map { "self.\($0) = map[\"\($0)\"]" }
             .joined(separator: "\n")
 
         return """
@@ -105,7 +137,7 @@ extension Collection where Element == Field {
                 let field = GraphQLField.getFieldNameFromAlias(alias)
 
                 switch field {
-                \(cases)
+                \(decoders)
                 default:
                     throw DecodingError.dataCorrupted(
                         DecodingError.Context(
@@ -116,7 +148,7 @@ extension Collection where Element == Field {
                 }
             }
 
-            \(typename ? #"self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)"# : "")
+            \(includeTypenameDecoder ? #"self.__typename = try container.decode(TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)"# : "")
 
             \(mappings)
         }
@@ -125,7 +157,9 @@ extension Collection where Element == Field {
 }
 
 private extension Collection where Element == ObjectTypeRef {
-    var typename: String {
+    
+    /// Returns an enumerator that we use to decode typename field.
+    func typenamesEnum() -> String {
         let types = self
             .map { "case \($0.name.camelCase.normalize) = \"\($0.name)\"" }
             .joined(separator: "\n")
@@ -139,13 +173,14 @@ private extension Collection where Element == ObjectTypeRef {
 }
 
 private extension Field {
+    
     /// Returns a code that we use to decode a field in the response.
-    func decoder(context: Context) throws -> String {
+    func decoder(parent: String, context: Context) throws -> String {
         let type = try self.type.namedType.type(scalars: context.scalars)
         let wrappedType = self.type.nullable.type(for: type)
 
         return """
-        case \"\(name.camelCase)\":
+        case \"\(name.camelCase)\(parent.camelCase)\":
             if let value = try container.decode(\(wrappedType).self, forKey: codingKey) {
                 map.set(key: field, hash: alias, value: value as Any)
             }
@@ -154,6 +189,7 @@ private extension Field {
 }
 
 extension OutputRef {
+    
     /// Returns an internal reference to the given output type ref.
     func type(scalars: ScalarMap) throws -> String {
         switch self {

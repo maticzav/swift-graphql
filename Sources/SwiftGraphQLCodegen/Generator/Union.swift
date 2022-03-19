@@ -7,16 +7,21 @@ import GraphQLAST
  */
 
 extension UnionType: Structure {
-    var fields: [Field] { [] }
+    var fields: [Field] {
+        // Unions come with no predefined fields.
+        []
+    }
 }
 
 extension UnionType {
+    
     /// Returns a declaration of the union type that we add to the generated file.
+    /// - parameter objects:
     func declaration(objects: [ObjectType], context: Context) throws -> String {
         let name = self.name.pascalCase
-        let definition = try self.struct(name: name, objects: objects, context: context)
-        let decoders = try allFields(objects: objects, context: context)
-            .decoders(context: context, includeTypenameDecoder: true)
+        let definition = try self.definition(name: name, objects: objects, context: context)
+        let decoders = try fieldsByType(parent: self.name, objects: objects, context: context)
+            .decoders(includeTypenameDecoder: true, context: context)
         
         let selections = possibleTypes.selection(name: "Unions.\(name)", objects: objects)
         

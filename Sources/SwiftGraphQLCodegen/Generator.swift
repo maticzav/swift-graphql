@@ -110,11 +110,15 @@ public struct GraphQLCodegen {
         \(enumDefinitions.lines)
 
         // MARK: - Input Objects
+        
+        /// Utility pointer to InputObjects.
+        typealias Inputs = InputObjects
+        
         enum InputObjects {}
         \(inputObjectDefinitions.lines)
         """
 
-//        let source = try code.format()
-        return code
+        let formatted = try code.format()
+        return formatted
     }
 }

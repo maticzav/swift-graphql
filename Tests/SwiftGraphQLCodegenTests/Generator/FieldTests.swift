@@ -4,8 +4,6 @@ import XCTest
 
 final class FieldTests: XCTestCase {
     
-    // MARK: - Tests
-    
     func testFieldDocs() throws {
         let field = Field(
             name: "id",
@@ -17,10 +15,11 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         ).format()
 
-        assertSnapshot(matching: generated)
+        generated.assertInlineSnapshot()
     }
 
     // MARK: - Scalar
@@ -36,6 +35,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -45,9 +45,9 @@ final class FieldTests: XCTestCase {
                 name: "id",
                 arguments: []
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.id[field.alias!] {
                     return data
@@ -75,6 +75,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -84,9 +85,9 @@ final class FieldTests: XCTestCase {
                 name: "id",
                 arguments: []
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 return data.id[field.alias!]
             case .mocking:
@@ -111,6 +112,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -120,9 +122,9 @@ final class FieldTests: XCTestCase {
                 name: "ids",
                 arguments: []
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 return data.ids[field.alias!]
             case .mocking:
@@ -147,6 +149,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -156,9 +159,9 @@ final class FieldTests: XCTestCase {
                 name: "ids",
                 arguments: []
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.ids[field.alias!] {
                     return data
@@ -188,6 +191,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -197,9 +201,9 @@ final class FieldTests: XCTestCase {
                 name: "episode",
                 arguments: []
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.episode[field.alias!] {
                     return data
@@ -227,6 +231,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -236,9 +241,9 @@ final class FieldTests: XCTestCase {
                 name: "episode",
                 arguments: []
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 return data.episode[field.alias!]
             case .mocking:
@@ -268,9 +273,9 @@ final class FieldTests: XCTestCase {
                 name: "episode",
                 arguments: []
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.episode[field.alias!] {
                     return data
@@ -285,6 +290,7 @@ final class FieldTests: XCTestCase {
         /* Test */
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -304,6 +310,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -314,16 +321,16 @@ final class FieldTests: XCTestCase {
                 arguments: [],
                 selection: selection.selection
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
-                    return try selection.decode(data: data)
+                    return try selection.__decode(data: data)
                 }
                 throw HttpError.badpayload
             case .mocking:
-                return selection.mock()
+                return selection.__mock()
             }
         }
         """.format()
@@ -344,6 +351,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -354,13 +362,13 @@ final class FieldTests: XCTestCase {
                 arguments: [],
                 selection: selection.selection
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
-                return try selection.decode(data: data.hero[field.alias!])
+                return try selection.__decode(data: data.hero[field.alias!])
             case .mocking:
-                return selection.mock()
+                return selection.__mock()
             }
         }
         """.format()
@@ -381,6 +389,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -391,16 +400,16 @@ final class FieldTests: XCTestCase {
                 arguments: [],
                 selection: selection.selection
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
-                    return try selection.decode(data: data)
+                    return try selection.__decode(data: data)
                 }
                 throw HttpError.badpayload
             case .mocking:
-                return selection.mock()
+                return selection.__mock()
             }
         }
         """.format()
@@ -429,6 +438,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -438,9 +448,9 @@ final class FieldTests: XCTestCase {
                 name: "hero",
                 arguments: [Argument(name: "id", type: "ID!", value: id)]
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
                     return data
@@ -474,6 +484,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -483,9 +494,9 @@ final class FieldTests: XCTestCase {
                 name: "hero",
                 arguments: [Argument(name: "id", type: "ID", value: id)]
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
                     return data
@@ -519,6 +530,7 @@ final class FieldTests: XCTestCase {
         )
 
         let generated = try field.getDynamicSelection(
+            parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
         )
 
@@ -528,9 +540,9 @@ final class FieldTests: XCTestCase {
                 name: "hero",
                 arguments: [Argument(name: "id", type: "Input!", value: id)]
             )
-            self.select(field)
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
                 if let data = data.hero[field.alias!] {
                     return data

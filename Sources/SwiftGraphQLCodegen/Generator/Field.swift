@@ -22,8 +22,10 @@ import GraphQLAST
 extension Collection where Element == Field {
     
     /// Returns dynamic selection function for every field in the collection.
-    func getDynamicSelections(context: Context) throws -> String {
-        try self.map { try $0.getDynamicSelection(context: context) }.joined(separator: "\n")
+    func getDynamicSelections(parent: String, context: Context) throws -> String {
+        try self
+            .map { try $0.getDynamicSelection(parent: parent, context: context) }
+            .joined(separator: "\n")
     }
     
     /// Returns static selection function for every field in the collection.
@@ -35,7 +37,7 @@ extension Collection where Element == Field {
 extension Field {
     
     /// Returns a function that may be used to create dynamic selection (i.e. a special subcase of a type) using SwiftGraphQL.
-    func getDynamicSelection(context: Context) throws -> String {
+    func getDynamicSelection(parent: String, context: Context) throws -> String {
         let parameters = try fParameters(context: context)
         let output = try type.dynamicReturnType(context: context)
         
@@ -43,12 +45,12 @@ extension Field {
         \(docs)
         \(availability)
         func \(fName)\(parameters) throws -> \(output) {
-            \(selection)
-            self.select(field)
+            \(self.selection(parent: parent))
+            self.__select(field)
 
-            switch self.state {
+            switch self.__state {
             case .decoding(let data):
-                \(decoder)
+                \(self.decoder(parent: parent))
             case .mocking:
                 return \(try type.mock(context: context))
             }
@@ -170,7 +172,7 @@ extension InputValue {
     private var `default`: String {
         switch type.inverted {
         case .nullable:
-            return "= .absent()"
+            return "= .init()"
         default:
             return ""
         }
@@ -185,13 +187,15 @@ extension InputValue {
  */
 
 private extension Field {
+    
     /// Generates an internal leaf definition used for composing selection set.
-    var selection: String {
+    func selection(parent: String) -> String {
         switch type.namedType {
         case .scalar, .enum:
             return """
             let field = GraphQLField.leaf(
                  field: \"\(name)\",
+                 parent: \"\(parent)\",
                  arguments: [ \(args.arguments) ]
             )
             """
@@ -199,9 +203,10 @@ private extension Field {
             return """
             let field = GraphQLField.composite(
                  field: "\(name)",
+                 parent: "\(parent)",
                  type: "\(self.type.namedType.name)",
                  arguments: [ \(args.arguments) ],
-                 selection: selection.selection()
+                 selection: selection.__selection()
             )
             """
         }
@@ -250,9 +255,10 @@ extension InputTypeRef {
  */
 
 private extension Field {
+    
     /// Returns selection decoder for this field.
-    var decoder: String {
-        let name = self.name.camelCase
+    func decoder(parent: String) -> String {
+        let name = "\(self.name.camelCase)\(parent.camelCase)"
 
         switch type.inverted.namedType {
         case .scalar(_), .enum:
@@ -273,12 +279,12 @@ private extension Field {
             switch type.inverted {
             case .nullable:
                 // When decoding a nullable field we simply pass it down to the decoder.
-                return "return try selection.decode(data: data.\(name)[field.alias!])"
+                return "return try selection.__decode(data: data.\(name)[field.alias!])"
             default:
                 // When decoding a non-nullable field, we want to make sure that field is present.
                 return """
                 if let data = data.\(name)[field.alias!] {
-                    return try selection.decode(data: data)
+                    return try selection.__decode(data: data)
                 }
                 throw SelectionError.badpayload
                 """
@@ -304,7 +310,7 @@ extension OutputTypeRef {
         case .enum(let enm):
             return mock(value: "Enums.\(enm.pascalCase).allCases.first!")
         case .interface, .object, .union:
-            return "try selection.mock()"
+            return "try selection.__mock()"
         }
     }
 

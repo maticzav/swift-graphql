@@ -1,27 +1,34 @@
 import Foundation
 
-/*
- OptionalArgument is a utility structure used to denote a possibly
- absent value.
 
- To support not-encoding an absent value, I have created a protocol
- that we use in document parsing to figure out whether we
- should include or skip the argument.
- */
-
+/// Tells whether a concreate type has a value.
+///
+/// To prevent encoding of absent values we use a the OptionalArgumentProtocol
+/// in document parsing to figure out whether we should encode or skip the argument.
 protocol OptionalArgumentProtocol {
+    
     /// Tells whether an optional argument has a value.
     var hasValue: Bool { get }
 }
 
-public struct OptionalArgument<Type>: OptionalArgumentProtocol {
+/// A utility type-alias that reduces the number of characters we need to type.
+public typealias OptArg = OptionalArgument
+
+/// OptionalArgument is a utility structure used to represent possibly absent values.
+public struct OptionalArgument<T>: OptionalArgumentProtocol {
     private var _value: InternalValue
 
     // MARK: - Initializer
 
     public enum Value {
-        indirect case present(Type)
+        
+        /// Argument has given value.
+        indirect case present(T)
+        
+        /// Argument has no value.
         case absent
+        
+        /// Argument has value, that value is `null`.
         case null
     }
 
@@ -45,7 +52,7 @@ public struct OptionalArgument<Type>: OptionalArgumentProtocol {
             - null (there is a value - it's null),
             - present (value and list with a value)
          */
-        case value([Type])
+        case value([T])
         case null
     }
 
@@ -80,50 +87,33 @@ public struct OptionalArgument<Type>: OptionalArgumentProtocol {
 public extension OptionalArgument {
     
     /// Converts optional value to an optional argument so that `nil` becomes `null`.
-    init(present value: Type?) {
+    init(present value: T?) {
         switch value {
         case let .some(value):
-            self = .present(value)
+            self.init(.present(value))
         case .none:
-            self = .null()
+            self.init(.null)
         }
     }
    
     /// Maps optional value to an optional argument so that `nil` becomes `absent`.
-    init(absent value: Type? = nil) {
+    init(absent value: T? = nil) {
         switch value {
         case let .some(value):
-            self = .present(value)
+            self.init(.present(value))
         case .none:
-            self = .absent()
+            self.init(.absent)
         }
         
-    }
-    
-    // MARK: - Static Descriptors
-
-
-    /// Returns an OptionalArgument with a given value.
-    static func present(_ value: Type) -> OptionalArgument<Type> {
-        self.init(.present(value))
-    }
-
-    /// Returns an OptionalArgument with null value.
-    static func null() -> OptionalArgument<Type> {
-        self.init(.null)
-    }
-
-    /// Returns an OptionalArgument with absent value.
-    static func absent() -> OptionalArgument<Type> {
-        self.init(.absent)
     }
 }
 
 // MARK: - Modifier Methods
 
 public extension OptionalArgument {
+    
     /// Maps a value using provided function when present.
-    func map<A>(_ fn: (Type) -> A) -> OptionalArgument<A> {
+    func map<A>(_ fn: (T) -> A) -> OptionalArgument<A> {
         switch value {
         case let .present(value):
             return OptionalArgument<A>(.present(fn(value)))
@@ -135,7 +125,7 @@ public extension OptionalArgument {
     }
 
     /// Lets you bind the value and convert it.
-//    public func andThen<T, V>(_ fn: (Type) -> V) -> OptionalArgument<V> where Type == Optional<T> {
+//    public func andThen<T, V>(_ fn: (T) -> V) -> OptionalArgument<V> where T == Optional<T> {
 //        switch self.value {
 //        case .present(let value):
 //            return OptionalArgument<V>(.present(fn(value)))
@@ -149,13 +139,14 @@ public extension OptionalArgument {
 
 // MARK: - Protocols
 
-extension OptionalArgument.InternalValue: Equatable where Type: Equatable {}
-extension OptionalArgument.InternalValue: Hashable where Type: Hashable {}
+extension OptionalArgument.InternalValue: Equatable where T: Equatable {}
+extension OptionalArgument.InternalValue: Hashable where T: Hashable {}
 
-extension OptionalArgument: Equatable where Type: Equatable {}
-extension OptionalArgument: Hashable where Type: Hashable {}
+extension OptionalArgument: Equatable where T: Equatable {}
+extension OptionalArgument: Hashable where T: Hashable {}
 
-extension OptionalArgument: Encodable where Type: Encodable {
+extension OptionalArgument: Encodable where T: Encodable {
+    
     /// Encodes an optional argument using given encoder.
     ///
     /// - Note: You should never encode an absent value. If you try, the encoder

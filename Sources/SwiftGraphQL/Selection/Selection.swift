@@ -21,8 +21,9 @@ public final class Fields<TypeLock> {
     
     /// State of the selection tells whether we are currently building up the query and mocking the
     /// response values or performing decoding with returned data.
-//    @available(*, deprecated, message: "This value should only be used by SwiftGraphQL")
-    public private(set) var state: State = .mocking
+    ///
+    /// - NOTE: This variable should only be used by the generated code.
+    public private(set) var __state: State = .mocking
     
     public enum State {
         case mocking
@@ -43,22 +44,24 @@ public final class Fields<TypeLock> {
 
     init() {}
 
+    /// Lets you decode response data into Swift structures.
     public init(data: TypeLock) {
-        /* This initializer is used to decode response into Swift data. */
-        state = .decoding(data)
+        __state = .decoding(data)
     }
 
     // MARK: - Selection
 
     /// Lets generated code add a selection to the selection set.
-//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
-    public func select(_ field: GraphQLField) {
+    ///
+    /// - NOTE: This function should only be used by the generated code.
+    public func __select(_ field: GraphQLField) {
         fields.append(field)
     }
 
     /// Lets generated code add a selection to the selection set.
-//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
-    public func select(_ fields: [GraphQLField]) {
+    ///
+    /// - NOTE: This function should only be used by the generated code.
+    public func __select(_ fields: [GraphQLField]) {
         self.fields.append(contentsOf: fields)
     }
     
@@ -97,8 +100,9 @@ public struct Selection<`Type`, TypeLock> {
     // MARK: - Accessors
 
     /// Returns a list of selected fields.
-//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
-    public func selection() -> [GraphQLField] {
+    ///
+    /// - NOTE: This is an internal function that should only be used by the generated code.
+    public func __selection() -> [GraphQLField] {
         let fields = Fields<TypeLock>()
         
         do {
@@ -110,14 +114,15 @@ public struct Selection<`Type`, TypeLock> {
     
     /// Returns all types referenced in the selection.
     public var types: Set<String> {
-        self.selection().map { $0.types }.reduce(Set(), { $0.union($1) })
+        self.__selection().map { $0.types }.reduce(Set(), { $0.union($1) })
     }
 
     // MARK: - Methods
 
     /// Decodes JSON response into a return type of the selection set.
-//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
-    public func decode(data: TypeLock) throws -> Type {
+    ///
+    /// - NOTE: This is an internal function that should only be used by the generated code.
+    public func __decode(data: TypeLock) throws -> Type {
         // Construct a copy of the selection set, and use the new selection set to decode data.
         let fields = Fields<TypeLock>(data: data)
         
@@ -126,8 +131,9 @@ public struct Selection<`Type`, TypeLock> {
     }
 
     /// Mocks the data of a selection.
-//    @available(*, deprecated, message: "This method should only be used by SwiftGraphQL")
-    public func mock() throws -> Type {
+    ///
+    /// - NOTE: This is an internal function that should only be used by the generated code.
+    public func __mock() throws -> Type {
         let fields = Fields<TypeLock>()
         return try decoder(fields)
     }

@@ -10,7 +10,7 @@ extension Selection where TypeLock: Decodable {
         let decoder = JSONDecoder()
         let res = try decoder.decode(ExecutionResult<TypeLock>.self, from: raw)
         
-        let parsed = try self.decode(data: res.data)
+        let parsed = try self.__decode(data: res.data)
         return (parsed, res.errors)
     }
 }
@@ -21,7 +21,7 @@ extension Selection  {
     
     /// Builds a structure that may be sent to the server for execution.
     public func encode(operationName: String? = nil) -> ExecutionArgs where TypeLock: GraphQLOperation {
-        let selection = self.selection()
+        let selection = self.__selection()
         let query = selection.serialize(for: TypeLock.operation.rawValue, operationName: operationName)
         
         var variables: [String: AnyCodable] = [:]
@@ -34,7 +34,7 @@ extension Selection  {
     
     /// Builds a structure that may be sent to the server for execution for an optional selected type.
     public func encode<UnwrappedTypeLock>(operationName: String? = nil) -> ExecutionArgs where UnwrappedTypeLock: GraphQLOperation, Optional<UnwrappedTypeLock> == TypeLock {
-        let selection = self.selection()
+        let selection = self.__selection()
         let query = selection.serialize(for: UnwrappedTypeLock.operation.rawValue, operationName: operationName)
         
         var variables: [String: AnyCodable] = [:]

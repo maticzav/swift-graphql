@@ -56,7 +56,7 @@ extension InputValue {
     private var `default`: String {
         switch type.inverted {
         case .nullable:
-            return " = .absent()"
+            return " = .init()"
         default:
             return ""
         }

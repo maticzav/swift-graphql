@@ -1,26 +1,25 @@
 import Foundation
 import GraphQLAST
 
-/*
- We use fragments' selection to support union and interface types.
- */
-
 extension Collection where Element == ObjectTypeRef {
     
     /// Returns a function that may create fragment selection for a type of a given interface or union.
+    ///
+    /// - parameter name: Name of the fragment this selection is for.
+    /// - parameter objects: List of all objects in the scheama.
     func selection(name type: String, objects: [ObjectType]) -> String {
         """
         extension Fields where TypeLock == \(type) {
             func on<T>(\(parameters)) throws -> T {
-                self.select([\(selection(interface: type))])
+                self.__select([\(selection(interface: type))])
 
-                switch self.state {
+                switch self.__state {
                 case .decoding(let data):
                     switch data.__typename {
-                    \(decoders(objects: objects))
+                    \(self.decoders(objects: objects))
                     }
                 case .mocking:
-                    return try \(mock).mock()
+                    return try \(mock).__mock()
                 }
             }
         }
@@ -57,10 +56,12 @@ private extension ObjectTypeRef {
 
     /// Returns a SwiftGraphQL Fragment selection.
     func fragment(interface: String) -> String {
-        #"GraphQLField.fragment(type: "\#(namedType.name)", interface: "\#(interface)", selection: \#(namedType.name.camelCase).selection())"#
+        #"GraphQLField.fragment(type: "\#(namedType.name)", interface: "\#(interface)", selection: \#(namedType.name.camelCase).__selection())"#
     }
 
     /// Returns a decoder for a fragment.
+    ///
+    /// - parameter objects: List of all objects that appear in the schema.
     func decoder(objects: [ObjectType]) -> String {
         let name = namedType.name
         let object = objects.first { $0.name == name }!
@@ -68,7 +69,7 @@ private extension ObjectTypeRef {
         let fields = object.fields
             .sorted(by: { $0.name < $1.name })
             .map {
-                let name = $0.name.camelCase
+                let name = "\($0.name.camelCase)\(name.camelCase)"
                 return "\(name): data.\(name)"
             }
             .joined(separator: ", ")
@@ -76,7 +77,7 @@ private extension ObjectTypeRef {
         return """
         case .\(name.camelCase):
             let data = Objects.\(name.pascalCase)(\(fields))
-            return try \(name.camelCase).decode(data: data)
+            return try \(name.camelCase).__decode(data: data)
         """
     }
 }

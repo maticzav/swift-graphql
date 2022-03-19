@@ -14,23 +14,23 @@ final class OptionalArgumentTests: XCTestCase {
     // MARK: - OptionalArgument manipulation
 
     func testFromMaybe() {
-        XCTAssertEqual(OptionalArgument<String>(present: nil), .null())
-        XCTAssertEqual(OptionalArgument<String>(absent: nil), .absent())
-        XCTAssertEqual(OptionalArgument(present: "value"), .present("value"))
+        XCTAssertEqual(OptionalArgument<String>(present: nil), .init(present: nil))
+        XCTAssertEqual(OptionalArgument<String>(absent: nil), .init())
+        XCTAssertEqual(OptionalArgument(present: "value"), .init(present: "value"))
     }
 
     func testMapping() {
         XCTAssertEqual(
-            OptionalArgument.present(1).map { $0 + 1 },
-            .present(2)
+            OptionalArgument(present: 1).map { $0 + 1 },
+            .init(present: 2)
         )
         XCTAssertEqual(
-            OptionalArgument.absent().map { $0 + 1 },
-            .absent()
+            OptionalArgument(absent: nil).map { $0 + 1 },
+            .init()
         )
         XCTAssertEqual(
-            OptionalArgument.null().map { $0 + 1 },
-            .null()
+            OptionalArgument(present: nil).map { $0 + 1 },
+            .init(present: nil)
         )
     }
 }

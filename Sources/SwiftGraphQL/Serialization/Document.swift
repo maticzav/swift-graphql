@@ -46,10 +46,10 @@ fileprivate extension GraphQLField {
         var query: [String] = []
         
         switch self {
-        case let .leaf(name, arguments):
+        case let .leaf(name, _, arguments):
             query.append("\(alias!): \(name)\(arguments.serializedForArguments)")
             
-        case let .composite(name, _, arguments, subselection):
+        case let .composite(name, _, _, arguments, subselection):
             query.append("\(alias!): \(name)\(arguments.serializedForArguments) {")
             query.append("__typename".indent(by: 2))
             query.append(contentsOf: subselection.serialized.indent(by: 2))

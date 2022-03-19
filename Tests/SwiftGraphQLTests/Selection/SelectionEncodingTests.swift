@@ -25,9 +25,9 @@ final class SelectionEncodingTests: XCTestCase {
         let execution = selection.encode()
         
         XCTAssertTrue(execution.query.contains("query"))
-        XCTAssertTrue(execution.query.contains("droid_"))
-        XCTAssertTrue(execution.query.contains("id_"))
-        XCTAssertTrue(execution.query.contains("name_"))
+        XCTAssertTrue(execution.query.contains("droidquery_"))
+        XCTAssertTrue(execution.query.contains("iddroid_"))
+        XCTAssertTrue(execution.query.contains("namedroid_"))
     }
     
     enum CustomError: Error {

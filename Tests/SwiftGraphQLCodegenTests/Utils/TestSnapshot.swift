@@ -1,31 +1,75 @@
 import Foundation
 import XCTest
 
-/// Creates a snapshot test for a value.
-func assertSnapshot(
-    matching any: Any,
-    file: StaticString = #file,
-    function: String = #function,
-    line: UInt = #line)
-{
-    var snapshot = ""
-    dump(any, to: &snapshot)
+extension String {
     
-    let snapshotDirectoryUrl = URL(fileURLWithPath: "\(file)")
-        .deletingPathExtension()
+    /// Creates an inline snapshot of a the result.
+    func assertInlineSnapshot(
+        matching: String? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        guard matching == nil else {
+            XCTAssertEqual(self, matching)
+            return
+        }
+        
+        let sourcepath = URL(fileURLWithPath: "\(file)")
+        
+        let source = try! String(contentsOf: sourcepath)
+        let lines = source.split(separator: "\n")
+        
+        var codeWithInlineTest: [String] = []
+        
+        for index in lines.indices {
+            let content = String(lines[index])
+            
+            if index < line {
+                codeWithInlineTest.append(content)
+            }
+            
+            if index == line {
+                let indentation = content.countLeft(characters: CharacterSet.whitespaces) + 3
+                
+                codeWithInlineTest.append(content.replacingOccurrences(
+                    of: ".assertInlineSnapshot()",
+                    with: #".assertInlineSnapshot(""""#
+                ))
+                codeWithInlineTest.append(contentsOf: self
+                    .split(separator: "\n")
+                    .map { String($0) }
+                    .map { $0.indent(by: indentation) })
+                codeWithInlineTest.append(#"""")"#)
+            }
+            
+            if index > line {
+                codeWithInlineTest.append(content)
+            }
+        }
+        
+        let code = codeWithInlineTest.joined(separator: "\n")
+        try! code.write(to: sourcepath, atomically: true, encoding: .utf8)
+        
+        XCTFail("Wrote Inline Snapshot", file: file, line: line)
+    }
+
+    /// Returns the number of characters before reaching a character that's not in a set going left-to-right.
+    func countLeft(characters: CharacterSet) -> Int {
+        var count = 0
+        
+        for char in self {
+            if char.unicodeScalars.allSatisfy({ characters.contains($0) }) {
+                count += 1
+            } else {
+                return count
+            }
+        }
+        
+        return count
+    }
     
-    let snapshotFileUrl = snapshotDirectoryUrl
-        .appendingPathComponent(function)
-        .appendingPathExtension("txt")
-    
-    let fileManager = FileManager.default
-    try! fileManager.createDirectory(at: snapshotDirectoryUrl, withIntermediateDirectories: true)
-    
-    if fileManager.fileExists(atPath: snapshotFileUrl.path) {
-        let reference = try! String(contentsOf: snapshotFileUrl, encoding: .utf8)
-        XCTAssertEqual(reference, snapshot, file: file, line: line)
-    } else {
-        try! snapshot.write(to: snapshotFileUrl, atomically: true, encoding: .utf8)
-        XCTFail("Wrote snapshot:\n\n\(snapshot)", file: file, line: line)
+    /// Returns an indented string by n spaces in front.
+    func indent(by spaces: Int) -> String {
+        "\(String(repeating: " ", count: spaces))\(self)"
     }
 }

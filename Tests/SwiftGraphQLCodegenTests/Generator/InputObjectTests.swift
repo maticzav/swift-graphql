@@ -33,7 +33,7 @@ final class InputObjectTests: XCTestCase {
                 /// Multiline.
                 var id: InputObjects.AnotherInputObject
 
-                var inputValue: OptionalArgument<ID> = .absent()
+                var inputValue: OptionalArgument<ID> = .init()
 
                 func encode(to encoder: Encoder) throws {
                     var container = encoder.container(keyedBy: CodingKeys.self)

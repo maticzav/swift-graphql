@@ -13,7 +13,7 @@ final class SelectionDecodingTests: XCTestCase {
         """.data(using: .utf8)!
 
         let selection = Selection<String, String> {
-            switch $0.state {
+            switch $0.__state {
             case let .decoding(data):
                 return data
             case .mocking:
@@ -34,7 +34,7 @@ final class SelectionDecodingTests: XCTestCase {
         """.data(using: .utf8)!
 
         let selection = Selection<String?, String?> {
-            switch $0.state {
+            switch $0.__state {
             case let .decoding(data):
                 return data
             case .mocking:
@@ -56,7 +56,7 @@ final class SelectionDecodingTests: XCTestCase {
         """.data(using: .utf8)!
         
         let selection = Selection<Int, Int> {
-            switch $0.state {
+            switch $0.__state {
             case let .decoding(data):
                 return data
             case .mocking:
@@ -64,7 +64,7 @@ final class SelectionDecodingTests: XCTestCase {
             }
         }
 
-        let result = try selection.list.decode(data)
+        let result = try selection.list.decode(raw: data)
         XCTAssertEqual(result.data, [1, 2, 3])
         XCTAssertEqual(result.errors, nil)
     }
@@ -77,7 +77,7 @@ final class SelectionDecodingTests: XCTestCase {
         """.data(using: .utf8)!
         
         let selection = Selection<String, String> {
-            switch $0.state {
+            switch $0.__state {
             case let .decoding(data):
                 return data
             case .mocking:
@@ -85,7 +85,7 @@ final class SelectionDecodingTests: XCTestCase {
             }
         }
 
-        XCTAssertThrowsError(try selection.nonNullOrFail.decode(data)) { (error) -> Void in
+        XCTAssertThrowsError(try selection.nonNullOrFail.decode(raw: data)) { (error) -> Void in
             XCTAssertEqual(error as? SelectionError, SelectionError.badpayload)
         }
     }
@@ -98,7 +98,7 @@ final class SelectionDecodingTests: XCTestCase {
         """.data(using: .utf8)!
         
         let selection = Selection<String, String?> {
-            switch $0.state {
+            switch $0.__state {
             case let .decoding(data):
                 guard let data = data else {
                     throw CustomError.null
@@ -128,7 +128,7 @@ final class SelectionDecodingTests: XCTestCase {
         """.data(using: .utf8)!
         
         let selection = Selection<String, String> {
-            switch $0.state {
+            switch $0.__state {
             case let .decoding(data):
                 return data
             case .mocking:
@@ -136,7 +136,7 @@ final class SelectionDecodingTests: XCTestCase {
             }
         }
 
-        let result = try selection.map { $0 == "right" }.decode(data)
+        let result = try selection.map { $0 == "right" }.decode(raw: data)
         XCTAssertEqual(result.data, true)
         XCTAssertEqual(result.errors, nil)
     }
@@ -144,7 +144,7 @@ final class SelectionDecodingTests: XCTestCase {
     // MARK: - Errors
 
     func testResponseWithErrors() throws {
-        let response: Data = """
+        let data: Data = """
         {
           "errors": [
             {
@@ -158,7 +158,7 @@ final class SelectionDecodingTests: XCTestCase {
         """.data(using: .utf8)!
         
         let selection = Selection<String, String> {
-            switch $0.state {
+            switch $0.__state {
             case let .decoding(data):
                 return data
             case .mocking:
@@ -166,7 +166,7 @@ final class SelectionDecodingTests: XCTestCase {
             }
         }
 
-        let result = try selection.decode(response)
+        let result = try selection.decode(raw: data)
         XCTAssertEqual(result.data, "data")
         XCTAssertEqual(result.errors, [
             GraphQLError(

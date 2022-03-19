@@ -10,21 +10,29 @@ import GraphQLAST
 extension InterfaceType: Structure {}
 
 extension InterfaceType {
+    
     /// Returns a code that represents an interface.
+    ///
+    /// - parameter objects: List of all objects in the schema.
     func declaration(objects: [ObjectType], context: Context) throws -> String {
         let name = self.name.pascalCase
+        
+        let definition = try self.definition(name: name, objects: objects, context: context)
+        let codable = try fieldsByType(parent: self.name, objects: objects, context: context)
+            .decoders(includeTypenameDecoder: true, context: context)
+        let fields = try self.fields.getDynamicSelections(parent: self.name, context: context)
 
         return """
         extension Interfaces {
-        \(try self.struct(name: name, objects: objects, context: context))
+        \(definition)
         }
 
         extension Interfaces.\(name): Decodable {
-        \(try allFields(objects: objects, context: context).decoders(context: context, includeTypenameDecoder: true))
+        \(codable)
         }
 
         extension Fields where TypeLock == Interfaces.\(name) {
-        \(try fields.getDynamicSelections(context: context))
+        \(fields)
         }
 
         \(possibleTypes.selection(name: "Interfaces.\(name)", objects: objects))

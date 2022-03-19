@@ -5,7 +5,7 @@ import XCTest
 final class DocumentTests: XCTestCase {
     
     func testSingleField() {
-        let fruit = GraphQLField.leaf(field: "fruit", arguments: [])
+        let fruit = GraphQLField.leaf(field: "fruit", parent: "Query", arguments: [])
         let document = [fruit]
 
         let query = """
@@ -18,8 +18,8 @@ final class DocumentTests: XCTestCase {
     }
 
     func testMultipleFields() {
-        let apple = GraphQLField.leaf(field: "apple", arguments: [])
-        let banana = GraphQLField.leaf(field: "banana", arguments: [])
+        let apple = GraphQLField.leaf(field: "apple", parent: "Query", arguments: [])
+        let banana = GraphQLField.leaf(field: "banana", parent: "Query", arguments: [])
         let document = [apple, banana]
 
         let query = """
@@ -33,10 +33,11 @@ final class DocumentTests: XCTestCase {
     }
 
     func testNestedFields() {
-        let fruit = GraphQLField.leaf(field: "fruit", arguments: [])
-        let items = GraphQLField.leaf(field: "items", arguments: [])
+        let fruit = GraphQLField.leaf(field: "fruit", parent: "Query", arguments: [])
+        let items = GraphQLField.leaf(field: "items", parent: "Cart", arguments: [])
         let cart = GraphQLField.composite(
             field: "cart",
+            parent: "Query",
             type: "Cart",
             arguments: [],
             selection: [items]
@@ -62,6 +63,7 @@ final class DocumentTests: XCTestCase {
         let argument = Argument(name: "name", type: "String!", value: "\"apple\"")
         let fruit = GraphQLField.leaf(
             field: "fruit",
+            parent: "Query",
             arguments: [argument]
         )
         let document = [fruit]
@@ -80,6 +82,7 @@ final class DocumentTests: XCTestCase {
         let argumentTwo = Argument(name: "two", type: "String!", value: "\"apple\"")
         let fruit = GraphQLField.leaf(
             field: "fruit",
+            parent: "Query",
             arguments: [argumentOne, argumentTwo]
         )
         let document = [fruit]
@@ -99,10 +102,11 @@ final class DocumentTests: XCTestCase {
             type: "String!",
             value: "\"apple\""
         )
-        let fruit = GraphQLField.leaf(field: "fruit", arguments: [])
-        let items = GraphQLField.leaf(field: "items", arguments: [])
+        let fruit = GraphQLField.leaf(field: "fruit", parent: "Query", arguments: [])
+        let items = GraphQLField.leaf(field: "items", parent: "Cart", arguments: [])
         let cart = GraphQLField.composite(
             field: "cart",
+            parent: "Query",
             type: "Cart",
             arguments: [argument],
             selection: [items]
@@ -125,9 +129,10 @@ final class DocumentTests: XCTestCase {
     // MARK: - Fragments
 
     func testFragment() {
-        let name = GraphQLField.leaf(field: "name", arguments: [])
+        let name = GraphQLField.leaf(field: "name", parent: "Fruit", arguments: [])
         let cart = GraphQLField.composite(
             field: "cart",
+            parent: "Query",
             type: "Cart",
             arguments: [],
             selection: [
@@ -155,7 +160,7 @@ final class DocumentTests: XCTestCase {
     // MARK: - Operation Names
 
     func testOperationName() {
-        let fruit = GraphQLField.leaf(field: "fruit", arguments: [])
+        let fruit = GraphQLField.leaf(field: "fruit", parent: "Query", arguments: [])
         let document = [fruit]
 
         let query = """

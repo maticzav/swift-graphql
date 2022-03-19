@@ -7,8 +7,18 @@ import Foundation
 public enum GraphQLField {
     public typealias SelectionSet = [GraphQLField]
 
-    case composite(field: String, type: String, arguments: [Argument], selection: SelectionSet)
-    case leaf(field: String, arguments: [Argument])
+    /// Composite field describes a selection on an object an union or an interface.
+    /// - parameter parent: Tells what type holds this field.
+    /// - parameter type: Tells what the return type of the field is.
+    case composite(field: String, parent: String, type: String, arguments: [Argument], selection: SelectionSet)
+    
+    /// Leaf field describes a scalar selection on a given type.
+    /// - parameter parent: Tells what type holds this field.
+    case leaf(field: String, parent: String, arguments: [Argument])
+    
+    /// Fragment selection describes an inline fragment.
+    /// - parameter type: Tells what type we are making a selection for.
+    /// - parameter interface: Tells what union or interface this fragment belongs to.
     case fragment(type: String, interface: String, selection: SelectionSet)
 
     // MARK: - Calculated properties
@@ -18,8 +28,8 @@ public enum GraphQLField {
     /// - Note: Used inside generated function decoders to know which field to look at.
     public var name: String {
         switch self {
-        case .composite(let name, _, _, _),
-                .leaf(let name, _),
+        case .composite(let name, _, _, _, _),
+                .leaf(let name, _, _),
                 .fragment(let name, _, _):
             return name
         }
@@ -39,9 +49,9 @@ public enum GraphQLField {
     /// - Note: Fragments don't have alias.
     public var alias: String? {
         switch self {
-        case let .leaf(name, arguments), let .composite(name, _, arguments, _):
-            
-            return "\(name.camelCase)_\(arguments.hash)"
+        case let .leaf(name, parent, arguments),
+            let .composite(name, parent, _, arguments, _):
+            return "\(name.camelCase)\(parent.camelCase)_\(arguments.hash)"
         case .fragment:
             return nil
         }
@@ -50,9 +60,9 @@ public enum GraphQLField {
     /// Returns the list of all arguments in the selection tree.
     var arguments: [Argument] {
         switch self {
-        case let .leaf(_, arguments):
+        case let .leaf(_, _, arguments):
             return arguments
-        case .composite(_, _, var arguments, let selection):
+        case .composite(_, _, _, var arguments, let selection):
             for subSelection in selection {
                 arguments.append(contentsOf: subSelection.arguments)
             }
@@ -68,15 +78,13 @@ public enum GraphQLField {
     
     /// Returns a list of types related to the selection.
     ///
-    /// This may be useful in cache invalidation.
-    ///
-    /// - NOTE: Items in the list may be duplicated.
+    /// - NOTE: This may be useful in cache invalidation.
     var types: Set<String> {
         switch self {
         case .leaf:
             return Set()
             
-        case .composite(_, let type, _, let selection):
+        case .composite(_, _, let type, _, let selection):
             var types = Set<String>()
             types.insert(type)
             for sub in selection {
@@ -98,7 +106,9 @@ public enum GraphQLField {
 
     // MARK: - Public Utility Functions
 
-    /// Returns the type from field alias.
+    /// Returns the type-field signature from field alias.
+    ///
+    /// - NOTE: We use this to figure out which decoder to use for a parituclar field.
     public static func getFieldNameFromAlias(_ alias: String) -> String {
         let parts = alias.split(separator: "_")
         return String(parts[0])

@@ -8,26 +8,29 @@ extension ObjectType: Structure {
 }
 
 extension ObjectType {
+    
     /// Creates deifnitions used by SwiftGraphQL to make selection and decode a particular object.
     ///
     /// - parameter objects: All objects in the schema.
     /// - parameter alias: Tells whether the generated code should include utility `Selection.Type` alias.
     func declaration(objects: [ObjectType], context: Context, alias: Bool = true) throws -> String {
-        let name = self.name.pascalCase
-        let definition = try self.struct(name: name, objects: objects, context: context)
-        let decoders = try allFields(objects: objects, context: context).decoders(context: context)
-        let selection = try self.fields.getDynamicSelections(context: context)
+        let apiName = self.name.pascalCase
+        
+        let definition = try self.definition(name: apiName, objects: objects, context: context)
+        let decoders = try self.fieldsByType(parent: self.name, objects: objects, context: context)
+            .decoders(context: context)
+        let selection = try self.fields.getDynamicSelections(parent: self.name, context: context)
         
         var code = """
         extension Objects {
         \(definition)
         }
 
-        extension Objects.\(name): Decodable {
+        extension Objects.\(apiName): Decodable {
         \(decoders)
         }
 
-        extension Fields where TypeLock == Objects.\(name) {
+        extension Fields where TypeLock == Objects.\(apiName) {
         \(selection)
         }
         
@@ -40,7 +43,7 @@ extension ObjectType {
         // Adds utility alias for the selection.
         code.append("""
         extension Selection where TypeLock == Never, Type == Never {
-            typealias \(name)<T> = Selection<T, Objects.\(name)>
+            typealias \(apiName)<T> = Selection<T, Objects.\(apiName)>
         }
         """)
         

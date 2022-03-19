@@ -74,7 +74,16 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
         // Generate the code.
         let generator = GraphQLCodegen(scalars: config.scalars)
-        let result = try generator.generate(from: url, withHeaders: headers)
+        let result: GraphQLCodegen.Output
+        
+        do {
+            result = try generator.generate(from: url, withHeaders: headers)
+        } catch CodegenError.formatting(let err) {
+            print(err.localizedDescription)
+            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.formatting)
+        } catch {
+            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.unknown)
+        }
 
         // Write to target file or stdout.
         if let outputPath = output {
@@ -135,4 +144,6 @@ struct Config: Codable, Equatable {
 enum SwiftGraphQLGeneratorError: String, Error {
     case endpoint = "Invalid endpoint!"
     case legacy = "Please update your MacOS to use schema from a file."
+    case formatting = "There was an error formatting the code. Make sure your Swift version (i.e. `swift-format`) matches the `swift-format` version. If you need any help, don't hesitate to open an issue and include the log above!"
+    case unknown = "Something unexpected happened. Please open an issue and we'll help you out!"
 }
