@@ -38,7 +38,6 @@ final class FieldTests: XCTestCase {
                return nil
              }
            }
-           
            """)
     }
 
@@ -57,31 +56,28 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
+        ).format()
 
-        let expected = try """
-        func id() throws -> String {
-            let field = GraphQLField.leaf(
-                name: "id",
-                arguments: []
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.id[field.alias!] {
-                    return data
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return String.mockValue
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        generated.assertInlineSnapshot(matching: """
+           func id() throws -> String {
+             let field = GraphQLField.leaf(
+               field: "id",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.idtestType[field.alias!] {
+                 return data
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return String.mockValue
+             }
+           }
+           """)
     }
 
     func testNullableScalarField() throws {
@@ -97,28 +93,25 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
-
-        let expected = try """
-        func id() throws -> String? {
-            let field = GraphQLField.leaf(
-                name: "id",
-                arguments: []
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                return data.id[field.alias!]
-            case .mocking:
-                return nil
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        ).format()
+        
+        generated.assertInlineSnapshot(matching: """
+           func id() throws -> String? {
+             let field = GraphQLField.leaf(
+               field: "id",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               return data.idtestType[field.alias!]
+             case .mocking:
+               return nil
+             }
+           }
+           """)
     }
 
     func testListScalarField() throws {
@@ -134,28 +127,25 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
+        ).format()
 
-        let expected = try """
-        func ids() throws -> [String]? {
-            let field = GraphQLField.leaf(
-                name: "ids",
-                arguments: []
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                return data.ids[field.alias!]
-            case .mocking:
-                return nil
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        generated.assertInlineSnapshot(matching: """
+           func ids() throws -> [String]? {
+             let field = GraphQLField.leaf(
+               field: "ids",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               return data.idstestType[field.alias!]
+             case .mocking:
+               return nil
+             }
+           }
+           """)
     }
 
     func testGenearateNonNullableListScalarField() throws {
@@ -171,31 +161,28 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
+        ).format()
 
-        let expected = try """
-        func ids() throws -> [String] {
-            let field = GraphQLField.leaf(
-                name: "ids",
-                arguments: []
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.ids[field.alias!] {
-                    return data
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return []
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        generated.assertInlineSnapshot(matching: """
+           func ids() throws -> [String] {
+             let field = GraphQLField.leaf(
+               field: "ids",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.idstestType[field.alias!] {
+                 return data
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return []
+             }
+           }
+           """)
     }
 
     // MARK: - Enumerators
@@ -213,31 +200,28 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
-
-        let expected = try """
-        func episode() throws -> Enums.Episode {
-            let field = GraphQLField.leaf(
-                name: "episode",
-                arguments: []
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.episode[field.alias!] {
-                    return data
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return Enums.Episode.allCases.first!
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        ).format()
+        
+        generated.assertInlineSnapshot(matching: """
+           func episode() throws -> Enums.Episode {
+             let field = GraphQLField.leaf(
+               field: "episode",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               if let data = data.episodetestType[field.alias!] {
+                 return data
+               }
+               throw SelectionError.badpayload
+             case .mocking:
+               return Enums.Episode.allCases.first!
+             }
+           }
+           """)
     }
 
     func testNullableEnumField() throws {
@@ -253,28 +237,25 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
+        ).format()
 
-        let expected = try """
-        func episode() throws -> Enums.Episode? {
-            let field = GraphQLField.leaf(
-                name: "episode",
-                arguments: []
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                return data.episode[field.alias!]
-            case .mocking:
-                return nil
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        generated.assertInlineSnapshot(matching: """
+           func episode() throws -> Enums.Episode? {
+             let field = GraphQLField.leaf(
+               field: "episode",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               return data.episodetestType[field.alias!]
+             case .mocking:
+               return nil
+             }
+           }
+           """)
     }
 
     func testNullableListEnumField() throws {
@@ -287,34 +268,12 @@ final class FieldTests: XCTestCase {
             deprecationReason: nil
         )
 
-        let expected = try """
-        func episode() throws -> [Enums.Episode?] {
-            let field = GraphQLField.leaf(
-                name: "episode",
-                arguments: []
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.episode[field.alias!] {
-                    return data
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return []
-            }
-        }
-        """.format()
-
-        /* Test */
-
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
+        ).format()
 
-        XCTAssertEqual(generated, expected)
+        generated.assertInlineSnapshot()
     }
 
     // MARK: - Selections
@@ -332,32 +291,9 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
-
-        let expected = try """
-        func hero<Type>(selection: Selection<Type, Objects.Hero>) throws -> Type {
-            let field = GraphQLField.composite(
-                name: "hero",
-                arguments: [],
-                selection: selection.selection
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.hero[field.alias!] {
-                    return try selection.__decode(data: data)
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return selection.__mock()
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        ).format()
+        
+        generated.assertInlineSnapshot()
     }
 
     func testNullableSelectionField() throws {
@@ -373,29 +309,9 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
-
-        let expected = try """
-        func hero<Type>(selection: Selection<Type, Objects.Hero?>) throws -> Type {
-            let field = GraphQLField.composite(
-                name: "hero",
-                arguments: [],
-                selection: selection.selection
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                return try selection.__decode(data: data.hero[field.alias!])
-            case .mocking:
-                return selection.__mock()
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        ).format()
+        
+        generated.assertInlineSnapshot()
     }
 
     func testListSelectionField() throws {
@@ -411,32 +327,9 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
-
-        let expected = try """
-        func hero<Type>(selection: Selection<Type, [Objects.Hero]>) throws -> Type {
-            let field = GraphQLField.composite(
-                name: "hero",
-                arguments: [],
-                selection: selection.selection
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.hero[field.alias!] {
-                    return try selection.__decode(data: data)
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return selection.__mock()
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        ).format()
+        
+        generated.assertInlineSnapshot()
     }
 
     // MARK: - Arguments
@@ -460,31 +353,9 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
-
-        let expected = try """
-        func hero(id: String) throws -> String {
-            let field = GraphQLField.leaf(
-                name: "hero",
-                arguments: [Argument(name: "id", type: "ID!", value: id)]
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.hero[field.alias!] {
-                    return data
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return String.mockValue
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        ).format()
+        
+        generated.assertInlineSnapshot()
     }
 
     func testFieldWithOptionalArgument() throws {
@@ -506,31 +377,9 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
-
-        let expected = try """
-        func hero(id: OptionalArgument<String> = .absent()) throws -> String {
-            let field = GraphQLField.leaf(
-                name: "hero",
-                arguments: [Argument(name: "id", type: "ID", value: id)]
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.hero[field.alias!] {
-                    return data
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return String.mockValue
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        ).format()
+        
+        generated.assertInlineSnapshot()
     }
 
     func testFieldWithInputObjectArgument() throws {
@@ -552,30 +401,8 @@ final class FieldTests: XCTestCase {
         let generated = try field.getDynamicSelection(
             parent: "TestType",
             context: Context.from(scalars: ["ID": "String"])
-        )
-
-        let expected = try """
-        func hero(id: InputObjects.Input) throws -> String {
-            let field = GraphQLField.leaf(
-                name: "hero",
-                arguments: [Argument(name: "id", type: "Input!", value: id)]
-            )
-            self.__select(field)
-
-            switch self.__state {
-            case .decoding(let data):
-                if let data = data.hero[field.alias!] {
-                    return data
-                }
-                throw HttpError.badpayload
-            case .mocking:
-                return String.mockValue
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        ).format()
+        
+        generated.assertInlineSnapshot()
     }
 }

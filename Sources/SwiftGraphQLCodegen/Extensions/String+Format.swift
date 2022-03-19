@@ -22,6 +22,7 @@ extension String {
             throw CodegenError.formatting(err)
         }
         
-        return output
+        let blanks = CharacterSet.newlines.union(CharacterSet.whitespaces)
+        return output.trimmingCharacters(in: blanks)
     }
 }
