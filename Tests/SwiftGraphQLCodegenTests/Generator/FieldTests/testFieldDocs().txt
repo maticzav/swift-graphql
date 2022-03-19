@@ -1,1 +1,0 @@
-- "/// Object identifier.\n/// Multiline.\n@available(*, deprecated, message: \"Use ID instead.\")\nfunc id() throws -> String? {\n  let field = GraphQLField.leaf(\n    field: \"id\",\n    arguments: []\n  )\n  self.select(field)\n\n  switch self.response {\n  case .decoding(let data):\n    return data.id[field.alias!]\n  case .mocking:\n    return nil\n  }\n}\n"
