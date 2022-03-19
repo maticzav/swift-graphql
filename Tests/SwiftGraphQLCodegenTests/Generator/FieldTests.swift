@@ -19,7 +19,27 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
 
-        generated.assertInlineSnapshot()
+        generated.assertInlineSnapshot(matching: """
+           /// Object identifier.
+           /// Multiline.
+           @available(*, deprecated, message: "Use ID instead.")
+           func id() throws -> String? {
+             let field = GraphQLField.leaf(
+               field: "id",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding(let data):
+               return data.idtestType[field.alias!]
+             case .mocking:
+               return nil
+             }
+           }
+           
+           """)
     }
 
     // MARK: - Scalar

@@ -17,32 +17,35 @@ extension String {
         let sourcepath = URL(fileURLWithPath: "\(file)")
         
         let source = try! String(contentsOf: sourcepath)
-        let lines = source.split(separator: "\n")
+        let lines = source.split(omittingEmptySubsequences: false, whereSeparator: { $0.isNewline })
         
         var codeWithInlineTest: [String] = []
         
         for index in lines.indices {
+            // Line values start with 1, indexes start with 0.
+            let normalizedIndex = index + 1
+            
             let content = String(lines[index])
             
-            if index < line {
+            if normalizedIndex < line {
                 codeWithInlineTest.append(content)
             }
             
-            if index == line {
+            if normalizedIndex == line {
                 let indentation = content.countLeft(characters: CharacterSet.whitespaces) + 3
                 
                 codeWithInlineTest.append(content.replacingOccurrences(
                     of: ".assertInlineSnapshot()",
-                    with: #".assertInlineSnapshot(""""#
+                    with: #".assertInlineSnapshot(matching: """"#
                 ))
                 codeWithInlineTest.append(contentsOf: self
-                    .split(separator: "\n")
+                    .split(separator: "\n", omittingEmptySubsequences: false)
                     .map { String($0) }
                     .map { $0.indent(by: indentation) })
-                codeWithInlineTest.append(#"""")"#)
+                codeWithInlineTest.append(#"""")"#.indent(by: indentation))
             }
             
-            if index > line {
+            if normalizedIndex > line {
                 codeWithInlineTest.append(content)
             }
         }
