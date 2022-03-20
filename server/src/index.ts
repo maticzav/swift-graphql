@@ -24,7 +24,9 @@ const server = createServer<Context, any>({
       requireResolversToMatchSchema: 'error',
     },
   }),
-  logging: true,
+  logging: {
+    logLevel: 'debug',
+  },
   maskedErrors: false,
   context: (ctx) => {
     let user: { id: string } | null = null

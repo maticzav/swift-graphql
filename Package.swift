@@ -130,7 +130,8 @@ let package = Package(
                 "Files",
                 "SwiftGraphQLCodegen",
                 "SwiftGraphQL"
-            ]
+            ],
+            exclude: ["Integration/schema.json"]
         ),
         .testTarget(
             name: "GraphQLASTTests",

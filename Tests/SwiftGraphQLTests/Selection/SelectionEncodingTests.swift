@@ -6,28 +6,27 @@ import XCTest
 final class SelectionEncodingTests: XCTestCase {
     
     func testValidatingSelection() throws {
-        let droid = Selection.Droid<String> { droid in
-            let id = try droid.id()
-            let name = try droid.name()
+        let comic = Selection.Comic<String> {
+            let id = try $0.id()
+            let title = try $0.title()
             
             guard id == "very complicated id" else {
-                
                 throw CustomError.invaidid
             }
             
-            return name
+            return title
         }
         
-        let selection = Selection.Query<String?> {
-            try $0.droid(id: "mck-id", selection: droid.nullable)
+        let selection = Selection.Query<[String]> {
+            try $0.comics(selection: comic.list)
         }
         
         let execution = selection.encode()
         
         XCTAssertTrue(execution.query.contains("query"))
-        XCTAssertTrue(execution.query.contains("droidquery_"))
-        XCTAssertTrue(execution.query.contains("iddroid_"))
-        XCTAssertTrue(execution.query.contains("namedroid_"))
+        XCTAssertTrue(execution.query.contains("comicsquery_"))
+        XCTAssertTrue(execution.query.contains("idcomic_"))
+        XCTAssertTrue(execution.query.contains("titlecomic_"))
     }
     
     enum CustomError: Error {
