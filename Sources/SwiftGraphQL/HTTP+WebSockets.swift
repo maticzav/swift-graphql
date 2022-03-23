@@ -1,5 +1,12 @@
 import Foundation
 
+import os.log
+
+extension OSLog {
+    private static var subsystem = Bundle.main.bundleIdentifier!
+    static let subscription = OSLog(subsystem: subsystem, category: "subscription")
+}
+
 public protocol GraphQLEnabledSocket {
     associatedtype InitParamaters
     associatedtype New: GraphQLEnabledSocket where New == Self
@@ -58,7 +65,11 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
             lastConnectionParams = AnyCodable(connectionParams)
             let message = Message.connectionInit(connectionParams)
             let messageData = try encoder.encode(message)
-            print(try! JSONSerialization.jsonObject(with: messageData))
+            os_log("Start Connection: %{public}@",
+                   log: OSLog.subscription,
+                   type: .debug,
+                   (String(data: messageData, encoding: .utf8) ?? "Invalid .utf8")
+            )
             state = .started
             socket = S.create(with: initParams)
             socket?.send(message: messageData, errorHandler: { [weak self] in
@@ -68,18 +79,30 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
             socket?.receiveMessages { [weak self] message in
                 switch message {
                 case .success(let data):
-                    let message = try! JSONDecoder().decode(Message.self, from: data)
+                    os_log("Received Data: %{public}@",
+                           log: OSLog.subscription,
+                           type: .debug, (String(data: data, encoding: .utf8) ?? "Invalid .utf8")
+                    )
+                    guard let message = try? JSONDecoder().decode(Message.self, from: data) else {
+                        os_log("Invalid JSON Payload", log: OSLog.subscription, type: .debug)
+                        return
+                    }
                     switch message.type {
                     case .connection_ack:
                         self?.state = .running
-                    case .next, .error, .complete:
+                    case .ka:
+                        self?.state = .running
+                    case .next, .error, .complete, .connection_error, .data:
                         guard let id = message.id else { return }
                         self?.subscriptions[id]?(message)
+                    case .connection_terminate:
+                        self?.stop()
                     case .subscribe, .connection_init:
                         _ = "The server will never send these messages"
                     }
                     
-                case .failure(_):
+                case .failure(let failure):
+                    os_log("Received Error: %{public}@", log: OSLog.subscription, type: .debug, failure.localizedDescription)
                     // Should we send this error to the start errorHandler?
                     // This could happen during the entire lifetime of the socket so
                     // it's not really a start error
@@ -120,11 +143,17 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                 }]
                 start(connectionParams: lastConnectionParams, errorHandler: { print($0) })
             } else {
-                print("GraphQLSocket: Call start first or enable autoConnect")
+                os_log("GraphQLSocket: Call start first or enable autoConnect",
+                       log: OSLog.subscription,
+                       type: .debug
+                )
                 eventHandler(.failure(.notStartedAndNoAutoConnect))
             }
         case .started:
-            print("GraphQLSocket: Still waiting for connection_ack from the server so subscribe is queued")
+            os_log("GraphQLSocket: Still waiting for connection_ack from the server so subscribe is queued",
+                   log: OSLog.subscription,
+                   type: .debug
+            )
             queue += [{ [weak cancellable] in
                 cancellable?.add($0.subscribe(to: selection, operationName: operationName, eventHandler: eventHandler))
             }]
@@ -133,29 +162,37 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                 let payload = selection.buildPayload(operationName: operationName)
                 let message = Message.subscribe(payload, id: id)
                 let messageData = try encoder.encode(message)
+                os_log("Outgoing Data: %{public}@",
+                       log: OSLog.subscription,
+                       type: .debug, (String(data: messageData, encoding: .utf8) ?? "Invalid .utf8")
+                )
                 socket?.send(message: messageData, errorHandler: {
                     eventHandler(.failure(.subscribeFailed($0)))
                 })
                 subscriptions[id] = { message in
                     switch message.type {
-                    case .next:
+                    case .next, .data:
                         do {
                             let result = try GraphQLResult(webSocketMessage: message, with: selection)
                             eventHandler(.success(result))
                         } catch {
                             eventHandler(.failure(.failedToDecodeSelection(error)))
                         }
-                    case .error:
+                    case .error, .connection_error:
                         do {
                             let result: [GraphQLError] = try message.decodePayload()
                             eventHandler(.failure(.errors(result)))
                         } catch {
                             eventHandler(.failure(.failedToDecodeGraphQLErrors(error)))
                         }
+                    case .connection_terminate:
+                        eventHandler(.failure(.complete))
                     case .complete:
                         eventHandler(.failure(.complete))
+                    case .ka: ()
                     case .connection_init, .connection_ack, .subscribe:
-                        fatalError()
+                        os_log("Invalid subscription case %{public}@", log: OSLog.subscription, type: .debug, message.type.rawValue)
+                        assertionFailure()
                     }
                     
                 }
@@ -198,6 +235,10 @@ public struct GraphQLSocketMessage: Codable {
         case next
         case error
         case complete
+        case ka
+        case connection_error
+        case connection_terminate
+        case data
     }
     
     public var type: MessageType
