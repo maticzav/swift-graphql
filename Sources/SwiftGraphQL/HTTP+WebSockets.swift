@@ -14,7 +14,7 @@ public protocol GraphQLEnabledSocket {
     
     /// - parameter errorHandler: A closure that receives an Error that indicates an error encountered while sending.
     func send(message: Data, errorHandler: @escaping (Error) -> Void)
-    func receiveMessages(_ handler: @escaping (Result<Data, Error>) -> Void)
+    func receiveMessages(_ handler: @escaping (Result<Data, Error>, URLSessionWebSocketTask?) -> Void)
 }
 
 /// https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
@@ -76,7 +76,7 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                 self?.stop()
                 errorHandler(.connectionInit(error: $0))
             })
-            socket?.receiveMessages { [weak self] message in
+            socket?.receiveMessages { [weak self] (message, socket) in
                 switch message {
                 case .success(let data):
                     os_log("Received Data: %{public}@",
@@ -103,10 +103,15 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                     
                 case .failure(let failure):
                     os_log("Received Error: %{public}@", log: OSLog.subscription, type: .debug, failure.localizedDescription)
+                    // Retry the start in a couple of seconds.
                     // Should we send this error to the start errorHandler?
                     // This could happen during the entire lifetime of the socket so
                     // it's not really a start error
+                    socket?.suspend()
+                    socket?.cancel(with: .goingAway, reason: nil)
+                    
                     self?.stop()
+                    errorHandler(.connectionInit(error: failure))
                 }
             }
         } catch {
@@ -418,12 +423,11 @@ extension URLSessionWebSocketTask: GraphQLEnabledSocket {
         })
     }
     
-    public func receiveMessages(_ handler: @escaping (Result<Data, Error>) -> Void) {
-        print("receiveMessages")
+    public func receiveMessages(_ handler: @escaping (Result<Data, Error>, URLSessionWebSocketTask?) -> Void) {
         // Create an event handler.
         func receiveNext(on socket: URLSessionWebSocketTask?) {
             socket?.receive { [weak socket] result in
-                handler(result.map(\.data))
+                handler(result.map(\.data), socket)
                 receiveNext(on: socket)
             }
         }
