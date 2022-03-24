@@ -1,4 +1,5 @@
 import Foundation
+import Network
 
 import os.log
 
@@ -7,14 +8,18 @@ extension OSLog {
     static let subscription = OSLog(subsystem: subsystem, category: "subscription")
 }
 
+public typealias URLSessionGraphQLSocket = GraphQLSocket<URLSessionWebSocketTask>
+public typealias NWConnectionGraphQLSocket = GraphQLSocket<NWConnection>
+
 public protocol GraphQLEnabledSocket {
     associatedtype InitParamaters
-    associatedtype New: GraphQLEnabledSocket where New == Self
-    static func create(with params: InitParamaters) -> New
+    associatedtype New where New == Self
+    static func create(with params: InitParamaters, errorHandler: @escaping (GraphQLSocket<New>.SubscribeError) -> Void) -> New
     
     /// - parameter errorHandler: A closure that receives an Error that indicates an error encountered while sending.
     func send(message: Data, errorHandler: @escaping (Error) -> Void)
-    func receiveMessages(_ handler: @escaping (Result<Data, Error>, URLSessionWebSocketTask?) -> Void)
+    /// - returns: On true, will stop listening to the socket
+    func receiveMessages(_ handler: @escaping (Result<Data, Error>) -> Bool)
 }
 
 /// https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
@@ -51,14 +56,14 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
     }
     
     /// Starts a socket without connectionParams.
-    public func start(errorHandler: @escaping (StartError) -> Void) {
+    public func start(errorHandler: @escaping (SubscribeError) -> Void) {
         start(connectionParams: [String: String](), errorHandler: errorHandler)
     }
     
     /// Starts a socket.
-    public func start<P>(connectionParams: P, errorHandler: @escaping (StartError) -> Void) {
+    public func start<P>(connectionParams: P, errorHandler: @escaping (SubscribeError) -> Void) {
         guard state == .notRunning else {
-            return errorHandler(.alreadyStarted)
+            return errorHandler(.startError(.alreadyStarted))
         }
         
         do {
@@ -71,12 +76,12 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                    (String(data: messageData, encoding: .utf8) ?? "Invalid .utf8")
             )
             state = .started
-            socket = S.create(with: initParams)
+            socket = S.create(with: initParams, errorHandler: errorHandler)
             socket?.send(message: messageData, errorHandler: { [weak self] in
                 self?.stop()
-                errorHandler(.connectionInit(error: $0))
+                errorHandler(.startError(.connectionInit(error: $0)))
             })
-            socket?.receiveMessages { [weak self] (message, socket) in
+            socket?.receiveMessages { [weak self] (message) in
                 switch message {
                 case .success(let data):
                     os_log("Received Data: %{public}@",
@@ -85,7 +90,7 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                     )
                     guard let message = try? JSONDecoder().decode(Message.self, from: data) else {
                         os_log("Invalid JSON Payload", log: OSLog.subscription, type: .debug)
-                        return
+                        return false
                     }
                     switch message.type {
                     case .connection_ack:
@@ -93,10 +98,11 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                     case .ka:
                         self?.state = .running
                     case .next, .error, .complete, .connection_error, .data:
-                        guard let id = message.id else { return }
+                        guard let id = message.id else { return false }
                         self?.subscriptions[id]?(message)
                     case .connection_terminate:
                         self?.stop()
+                        return true
                     case .start, .connection_init:
                         _ = "The server will never send these messages"
                     }
@@ -107,15 +113,15 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                     // Should we send this error to the start errorHandler?
                     // This could happen during the entire lifetime of the socket so
                     // it's not really a start error
-                    socket?.suspend()
-                    socket?.cancel(with: .goingAway, reason: nil)
                     
                     self?.stop()
-                    errorHandler(.connectionInit(error: failure))
+                    errorHandler(.startError(.connectionInit(error: failure)))
+                    return true
                 }
+                return false
             }
         } catch {
-            return errorHandler(.failedToEncodeConnectionParams(error: error))
+            return errorHandler(.startError(.failedToEncodeConnectionParams(error: error)))
         }
     }
     
@@ -128,6 +134,7 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
         case errors([GraphQLError])
         case subscribeFailed(Error)
         case complete
+        case startError(StartError)
     }
     
     public func subscribe<Type, TypeLock: GraphQLOperation & Decodable>(
@@ -386,6 +393,98 @@ extension SocketCancellable {
 }
 #endif
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension NWConnection: GraphQLEnabledSocket {
+    public struct InitParamaters {
+        let url: URL
+        let headers: HttpHeaders
+        let queue: DispatchQueue
+        
+        public init(url: URL, headers: HttpHeaders, queue: DispatchQueue) {
+            self.url = url
+            self.headers = headers
+            self.queue = queue
+        }
+    }
+    
+    public typealias New = NWConnection
+    
+    public class func create(with params: InitParamaters, errorHandler: @escaping (GraphQLSocket<NWConnection>.SubscribeError) -> Void) -> NWConnection {
+        
+        let endpoint = NWEndpoint.url(params.url)
+        let parameters: NWParameters = params.url.scheme == "wss" ? .tls : .tcp
+        let websocketOptions = NWProtocolWebSocket.Options()
+        websocketOptions.autoReplyPing = true
+        
+        var headers: [(String, String)] = []
+        for header in params.headers {
+            headers.append((header.key, header.value))
+        }
+        headers.append(("Sec-WebSocket-Protocol", "graphql-transport-ws"))
+        headers.append(("Content-Type", "application/json"))
+        websocketOptions.setAdditionalHeaders(headers)
+        
+        parameters.defaultProtocolStack.applicationProtocols.insert(
+            websocketOptions,
+            at: 0
+        )
+        let connection = NWConnection(to: endpoint, using: parameters)
+        
+        connection.stateUpdateHandler = { state in
+            switch state {
+            case .ready:
+                os_log("Connection Ready", log: OSLog.subscription, type: .debug)
+            case .failed(let error):
+                os_log("Connection Failed: %{public}@",
+                       log: OSLog.subscription,
+                       type: .error,
+                       error.localizedDescription
+                )
+                errorHandler(.subscribeFailed(error))
+            case .waiting(let error):
+                os_log("Waiting Error: %{public}@",
+                       log: OSLog.subscription,
+                       type: .error,
+                       error.localizedDescription
+                )
+                errorHandler(.subscribeFailed(error))
+            default:
+                os_log("Other State Update", log: OSLog.subscription, type: .debug)
+            }
+        }
+        
+        connection.start(queue: params.queue)
+        return connection
+    }
+    
+    public func send(message: Data, errorHandler: @escaping (Error) -> Void) {
+        self.send(content: message, completion: .contentProcessed({ error in
+            guard let error = error else { return }
+            errorHandler(error)
+        }))
+    }
+    
+    public func receiveMessages(_ handler: @escaping (Result<Data, Error>) -> Bool) {
+        // Create an event handler.
+        func receiveNext(on socket: NWConnection?) {
+            socket?.receiveMessage(completion: { completeContent, contentContext, isComplete, error in
+                let cancel: Bool
+                switch (completeContent, error) {
+                case (let content?, _):
+                    cancel = handler(.success(content))
+                case (_, let error?):
+                    cancel = handler(.failure(error))
+                default:
+                    cancel = false
+                }
+                guard cancel == false else { return }
+                receiveNext(on: socket)
+            })
+        }
+        
+        receiveNext(on: self)
+    }
+}
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension URLSessionWebSocketTask: GraphQLEnabledSocket {
@@ -402,7 +501,7 @@ extension URLSessionWebSocketTask: GraphQLEnabledSocket {
     }
     
     public typealias New = URLSessionWebSocketTask
-    public class func create(with params: InitParamaters) -> URLSessionWebSocketTask {
+    public class func create(with params: InitParamaters, errorHandler: @escaping (GraphQLSocket<URLSessionWebSocketTask>.SubscribeError) -> Void) -> URLSessionWebSocketTask {
         var request = URLRequest(url: params.url)
         for header in params.headers {
             request.setValue(header.value, forHTTPHeaderField: header.key)
@@ -423,11 +522,15 @@ extension URLSessionWebSocketTask: GraphQLEnabledSocket {
         })
     }
     
-    public func receiveMessages(_ handler: @escaping (Result<Data, Error>, URLSessionWebSocketTask?) -> Void) {
+    public func receiveMessages(_ handler: @escaping (Result<Data, Error>) -> Bool) {
         // Create an event handler.
         func receiveNext(on socket: URLSessionWebSocketTask?) {
             socket?.receive { [weak socket] result in
-                handler(result.map(\.data), socket)
+                let cancel = handler(result.map(\.data))
+                guard cancel == false else {
+                    socket?.cancel(with: .goingAway, reason: nil)
+                    return
+                }
                 receiveNext(on: socket)
             }
         }
