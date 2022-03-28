@@ -153,7 +153,9 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                 queue += [{ [weak cancellable] in
                     cancellable?.add($0.subscribe(to: selection, operationName: operationName, eventHandler: eventHandler))
                 }]
-                start(connectionParams: lastConnectionParams, errorHandler: { print($0) })
+                start(connectionParams: lastConnectionParams, errorHandler: {
+                    eventHandler(.failure($0))
+                })
             } else {
                 os_log("GraphQLSocket: Call start first or enable autoConnect",
                        log: OSLog.subscription,
@@ -415,6 +417,7 @@ extension NWConnection: GraphQLEnabledSocket {
         let parameters: NWParameters = params.url.scheme == "wss" ? .tls : .tcp
         let websocketOptions = NWProtocolWebSocket.Options()
         websocketOptions.autoReplyPing = true
+        websocketOptions.maximumMessageSize = 1024 * 1024 * 100
         
         var headers: [(String, String)] = []
         for header in params.headers {
@@ -448,8 +451,15 @@ extension NWConnection: GraphQLEnabledSocket {
                        error.localizedDescription
                 )
                 errorHandler(.subscribeFailed(error))
-            default:
-                os_log("Other State Update", log: OSLog.subscription, type: .debug)
+                
+            case .setup:
+                os_log("Setup State Update", log: OSLog.subscription, type: .debug)
+            case .preparing:
+                os_log("Preparing State Update", log: OSLog.subscription, type: .debug)
+            case .cancelled:
+                os_log("Cancelled State Update", log: OSLog.subscription, type: .debug)
+            @unknown default:
+                os_log("Unknown State Update", log: OSLog.subscription, type: .debug)
             }
         }
         
