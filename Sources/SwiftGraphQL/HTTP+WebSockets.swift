@@ -34,6 +34,7 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
     private var socket: S?
     private var initParams: S.InitParamaters
     private var autoConnect: Bool
+    private var pingInterval: TimeInterval?
     private var lastConnectionParams = AnyCodable([String: String]())
     private var state: SocketState = .notRunning {
         didSet { startQueue() }
@@ -44,9 +45,10 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
     private var decoder = JSONDecoder()
     private var encoder = JSONEncoder()
     
-    public init(_ params: S.InitParamaters, autoConnect: Bool = false) {
+    public init(_ params: S.InitParamaters, autoConnect: Bool = false, pingInterval: TimeInterval? = nil) {
         self.initParams = params
         self.autoConnect = autoConnect
+        self.pingInterval = pingInterval
     }
     
     public enum StartError: Error {
@@ -95,6 +97,12 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                     switch message.type {
                     case .connection_ack:
                         self?.state = .running
+                        // If we have a time interval, set up a ping thread
+                        if let pingInterval = self?.pingInterval {
+                            self?.detachedPingQueue(interval: pingInterval, errorHandler: { error in
+                                errorHandler(.pingFailed(error))
+                            })
+                        }
                     case .ka:
                         self?.state = .running
                     case .next, .error, .complete, .connection_error, .data:
@@ -103,7 +111,9 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                     case .connection_terminate:
                         self?.stop()
                         return true
-                    case .start, .connection_init:
+                    case .pong:
+                        self?.state = .running
+                    case .start, .connection_init, .ping:
                         _ = "The server will never send these messages"
                     }
                     
@@ -125,6 +135,27 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
         }
     }
     
+    private func detachedPingQueue(
+        interval: TimeInterval,
+        errorHandler: @escaping (Error) -> Void
+    ) {
+        if state == .notRunning {
+            return
+        }
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + interval) { [weak self] in
+            guard let self = self else { return }
+            do {
+                let message = Message.ping()
+                let messageData = try self.encoder.encode(message)
+                self.socket?.send(message: messageData, errorHandler: errorHandler)
+            } catch let error {
+                errorHandler(error)
+            }
+            // Schedule the next
+            self.detachedPingQueue(interval: interval, errorHandler: errorHandler)
+        }
+    }
+    
     public enum SubscribeError: Error {
         case notStartedAndNoAutoConnect
         case failedToEncodeSelection(Error)
@@ -133,6 +164,7 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
         case failedToDecodeGraphQLErrors(Error)
         case errors([GraphQLError])
         case subscribeFailed(Error)
+        case pingFailed(Error)
         case complete
         case startError(StartError)
     }
@@ -203,8 +235,8 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                         eventHandler(.failure(.complete))
                     case .complete:
                         eventHandler(.failure(.complete))
-                    case .ka: ()
-                    case .connection_init, .connection_ack, .start:
+                    case .ka, .pong: ()
+                    case .connection_init, .connection_ack, .start, .ping:
                         os_log("Invalid subscription case %{public}@", log: OSLog.subscription, type: .debug, message.type.rawValue)
                         assertionFailure()
                     }
@@ -253,6 +285,8 @@ public struct GraphQLSocketMessage: Codable {
         case connection_error
         case connection_terminate
         case data
+        case ping
+        case pong
     }
     
     public var type: MessageType
@@ -303,6 +337,10 @@ extension GraphQLSocketMessage {
 extension GraphQLSocketMessage {
     public static func connectionInit<P>(_ connectionParams: P) -> GraphQLSocketMessage {
         return .init(type: .connection_init, id: nil, addedPayload: AnyCodable(connectionParams))
+    }
+    
+    public static func ping() -> GraphQLSocketMessage {
+        return .init(type: .ping, id: nil, addedPayload: AnyCodable([:]))
     }
     
     /// Requests an operation specified in the message `payload`. This message provides a
@@ -525,6 +563,12 @@ extension URLSessionWebSocketTask: GraphQLEnabledSocket {
     }
     
     public func send(message: Data, errorHandler: @escaping (Error) -> Void) {
+        os_log(
+            "Send data: %{private}@",
+            log: OSLog.subscription,
+            type: .debug,
+            String(data: message, encoding: .utf8) ?? "Invalid Encoding"
+        )
         self.send(.data(message), completionHandler: {
             if let error = $0 {
                 errorHandler(error)
