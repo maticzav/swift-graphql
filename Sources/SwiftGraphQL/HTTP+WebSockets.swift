@@ -113,7 +113,7 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                         return true
                     case .pong:
                         self?.state = .running
-                    case .start, .connection_init, .ping:
+                    case .subscribe, .connection_init, .ping:
                         _ = "The server will never send these messages"
                     }
                     
@@ -236,7 +236,7 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                     case .complete:
                         eventHandler(.failure(.complete))
                     case .ka, .pong: ()
-                    case .connection_init, .connection_ack, .start, .ping:
+                    case .connection_init, .connection_ack, .subscribe, .ping:
                         os_log("Invalid subscription case %{public}@", log: OSLog.subscription, type: .debug, message.type.rawValue)
                         assertionFailure()
                     }
@@ -277,7 +277,7 @@ public struct GraphQLSocketMessage: Codable {
     public enum MessageType: String, Codable {
         case connection_init
         case connection_ack
-        case start
+        case subscribe
         case next
         case error
         case complete
@@ -346,7 +346,7 @@ extension GraphQLSocketMessage {
     /// Requests an operation specified in the message `payload`. This message provides a
     /// unique ID field to connect published messages to the operation requested by this message.
     public static func subscribe<P>(_ payload: P, id: String) -> GraphQLSocketMessage {
-        return .init(type: .start, id: id, addedPayload: AnyCodable(payload))
+        return .init(type: .subscribe, id: id, addedPayload: AnyCodable(payload))
     }
     
     /// Indicates that the client has stopped listening and wants to complete the subscription.
