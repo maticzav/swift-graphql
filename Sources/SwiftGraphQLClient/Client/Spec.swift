@@ -11,9 +11,9 @@ public protocol GraphQLClient {
     /// Executes an operation by sending it down the exchange pipeline.
     ///
     /// - Returns: A publisher that emits all related exchange results.
-    func executeRequestOperation(operation: Operation) -> AnyPublisher<OperationResult, Never>
+    func execute(operation: Operation) -> AnyPublisher<OperationResult, Never>
     
     /// Reexecutes an existing operation and doesn't return anything. Existing
     /// streams are going to receive the update.
-    func reexecuteOperation(_ operation: Operation) -> Void
+    func reexecute(operation: Operation) -> Void
 }

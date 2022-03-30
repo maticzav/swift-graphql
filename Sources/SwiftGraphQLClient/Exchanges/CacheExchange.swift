@@ -97,7 +97,7 @@ class CacheExchange: Exchange {
                         }
                         
                         self.resultCache.removeValue(forKey: opid)
-                        client.reexecuteOperation(cachedResult.operation.with(policy: .networkOnly))
+                        client.reexecute(operation: cachedResult.operation.with(policy: .networkOnly))
                     }
                 }
                 

@@ -17,7 +17,7 @@ public struct FallbackExchange: Exchange {
     ) -> AnyPublisher<OperationResult, Never> {
         operations
             .compactMap { operation -> OperationResult? in
-                if debug {
+                if operation.kind != .teardown && debug {
                     let message = """
                         No exchange has handled operations of kind "\(operation.kind)". \
                         Check whether you've added an exchange responsible for these operations.

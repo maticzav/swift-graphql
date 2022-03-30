@@ -77,7 +77,7 @@ public class Client: GraphQLClient, ObservableObject {
     ///
     /// - NOTE: The operation only re-executes if there are any active subscribers
     ///          to the operation's exchange results.
-    public func reexecuteOperation(_ operation: Operation) {
+    public func reexecute(operation: Operation) {
         // Check that we have an active subscriber.
         guard operation.kind == .mutation && self.active[operation.id] != nil else {
             return
@@ -87,7 +87,7 @@ public class Client: GraphQLClient, ObservableObject {
     }
     
     /// Executes an operation by sending it down the exchange pipeline.
-    public func executeRequestOperation(operation: Operation) -> Source {
+    public func execute(operation: Operation) -> Source {
         
         // Mutations shouldn't have open sources because they are executed once and "discarded".
         if operation.kind == .mutation {

@@ -39,7 +39,7 @@ extension GraphQLClient {
            url: request,
            policy: policy
         )
-        return self.executeRequestOperation(operation: operation)
+        return self.execute(operation: operation)
     }
     
     /// Executes a mutation against the client and returns a publisher that emits values from relevant exchanges.
@@ -55,7 +55,7 @@ extension GraphQLClient {
            url: request,
            policy: policy
         )
-        return self.executeRequestOperation(operation: operation)
+        return self.execute(operation: operation)
     }
     
     /// Executes a mutation against the client and returns a publisher that emits values from relevant exchanges.
@@ -71,7 +71,7 @@ extension GraphQLClient {
            url: request,
            policy: policy
         )
-        return self.executeRequestOperation(operation: operation)
+        return self.execute(operation: operation)
     }
     
     // MARK: - Decoders
