@@ -15,5 +15,5 @@ public protocol GraphQLClient {
     
     /// Reexecutes an existing operation and doesn't return anything. Existing
     /// streams are going to receive the update.
-    func reexecuteOperation(operation: Operation) -> Void
+    func reexecuteOperation(_ operation: Operation) -> Void
 }

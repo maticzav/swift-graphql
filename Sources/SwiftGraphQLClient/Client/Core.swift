@@ -8,11 +8,15 @@ import GraphQL
 ///         You may use them with a custom implementation as well.
 public class Client: GraphQLClient, ObservableObject {
     
+    // MARK: - Exchange Pipeline
+    
     /// The operations stream that lets the client send and listen for them.
     private var operations = PassthroughSubject<Operation, Never>()
     
     /// Stream of results that may be used as the base for sources.
     private var results: AnyPublisher<OperationResult, Never>
+    
+    // MARK: - Sources
     
     /// Stream of results related to a given operation.
     public typealias Source = AnyPublisher<OperationResult, Never>
@@ -28,7 +32,7 @@ public class Client: GraphQLClient, ObservableObject {
     ///
     /// - parameter exchanges: List of exchanges that process each operation left-to-right.
     ///
-    init(exchanges: [Exchange] = []) {
+    init(exchanges: [Exchange]) {
         let exchange = ComposeExchange(exchanges: exchanges)
         let operations = operations.share().eraseToAnyPublisher()
         
@@ -51,6 +55,17 @@ public class Client: GraphQLClient, ObservableObject {
             .store(in: &self.cancellables)
     }
     
+    /// Creates a new GraphQL Client using default exchanges, ready to go and be used.
+    convenience init() {
+        let exchanges: [Exchange] = [
+            DedupExchange(),
+            CacheExchange(),
+            FetchExchange()
+        ]
+        
+        self.init(exchanges: exchanges)
+    }
+    
     // MARK: - Methods
     
     /// Log a debug message.
@@ -62,7 +77,7 @@ public class Client: GraphQLClient, ObservableObject {
     ///
     /// - NOTE: The operation only re-executes if there are any active subscribers
     ///          to the operation's exchange results.
-    public func reexecuteOperation(operation: Operation) {
+    public func reexecuteOperation(_ operation: Operation) {
         // Check that we have an active subscriber.
         guard operation.kind == .mutation && self.active[operation.id] != nil else {
             return
@@ -87,8 +102,22 @@ public class Client: GraphQLClient, ObservableObject {
             active[operation.id] = source
         }
         
-        // We chain the `onStart` operator outside of the `createResultSource` to make
-        // sure we process the same operation multiple times (i.e. even if the source already exists).
+        // We chain the `onStart` operator outside of the `createResultSource`
+        // to send a new operation down the exchange chain even if the
+        // source already exists.
+        //
+        // Additionally, we have considered the following cases in deciding how
+        // to handle concurrent operations:
+        //  - A and B request the same operation at about the same time:
+        //      the chain should de-duplicate the second response because it hasn't
+        //      received a reply to the first one yet and both sources should receive
+        //      the result once server replies.
+        //  - A requests an operation, receives the response and then
+        //    B requests the same operation:
+        //      depending on the request policy, exchanges should either send the cached
+        //      response immediately or wait for the result to come back.
+        //
+        // To sum up both cases, client shouldn't handle processing of the operations.
         return source
             .onStart {
                 self.operations.send(operation)
@@ -102,6 +131,9 @@ public class Client: GraphQLClient, ObservableObject {
             .filter { $0.operation.kind == operation.kind && $0.operation.id == operation.id }
             .eraseToAnyPublisher()
         
+        // We aren't interested in composing a full-blown
+        // pipeline for mutations because we only get a single result
+        // (i.e. the result of the mutation).
         if operation.kind == .mutation {
             return source
                 .onStart {

@@ -81,6 +81,15 @@ public struct OperationResult {
     public var stale: Bool?
 }
 
+extension OperationResult {
+    /// Changes the `stale` value fo the operation result on a copy of the current instance.
+    func with(stale: Bool) -> OperationResult {
+        var copy = self
+        copy.stale = stale
+        return copy
+    }
+}
+
 /// A structure describing decoded result of an operation execution.
 ///
 /// - NOTE: Decoded result may include errors from invalid data even if
