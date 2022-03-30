@@ -12,4 +12,8 @@ public protocol GraphQLClient {
     ///
     /// - Returns: A publisher that emits all related exchange results.
     func executeRequestOperation(operation: Operation) -> AnyPublisher<OperationResult, Never>
+    
+    /// Reexecutes an existing operation and doesn't return anything. Existing
+    /// streams are going to receive the update.
+    func reexecuteOperation(operation: Operation) -> Void
 }

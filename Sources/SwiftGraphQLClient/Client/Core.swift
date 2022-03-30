@@ -58,6 +58,19 @@ public class Client: GraphQLClient, ObservableObject {
         print(message)
     }
     
+    /// Reexecutes an operation by sending it down the exchange pipeline.
+    ///
+    /// - NOTE: The operation only re-executes if there are any active subscribers
+    ///          to the operation's exchange results.
+    public func reexecuteOperation(operation: Operation) {
+        // Check that we have an active subscriber.
+        guard operation.kind == .mutation && self.active[operation.id] != nil else {
+            return
+        }
+        
+        self.operations.send(operation)
+    }
+    
     /// Executes an operation by sending it down the exchange pipeline.
     public func executeRequestOperation(operation: Operation) -> Source {
         
@@ -130,7 +143,7 @@ public class Client: GraphQLClient, ObservableObject {
             .switchToLatest()
             .onEnd {
                 self.active.removeValue(forKey: operation.id)
-                self.operations.send(operation.teardown())
+                self.operations.send(operation.with(kind: .teardown))
             }
             .eraseToAnyPublisher()
     

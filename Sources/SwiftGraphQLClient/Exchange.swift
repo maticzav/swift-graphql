@@ -27,9 +27,17 @@ public struct Operation: Identifiable, Equatable, Hashable {
     public var policy: Policy
     
     public enum Policy {
+        
+        /// Prefers cached results and falls back to sending an API request when there are no prior results.
         case cacheFirst
+        
+        /// Will always return cached results or null.
         case cacheOnly
+        
+        /// Will always send a network request and ignore cached values.
         case networkOnly
+        
+        /// Returns cached results but also always sends an API request.
         case cacheAndNetwork
         
         /// Tells whether the operation requires a network call.
@@ -45,20 +53,16 @@ public struct Operation: Identifiable, Equatable, Hashable {
     
     /// GraphQL parameters for this request.
     public var args: ExecutionArgs
+}
+
+extension Operation {
     
-    // MARK: - Methods
-    
-    /// Returns an operation that is exactly the same as the current one, except that it
-    /// signals that its pipeline should be torn down.
-    func teardown() -> Operation {
-        Operation(
-            id: self.id,
-            kind: .teardown,
-            request: self.request,
-            policy: self.policy,
-            types: self.types,
-            args: self.args
-        )
+    /// Returns an operation that is exactly the same as the current one and has
+    /// an updated kind value.
+    func with(kind: Operation.Kind) -> Operation {
+        var copy = self
+        copy.kind = kind
+        return copy
     }
 }
 
