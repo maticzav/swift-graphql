@@ -33,7 +33,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
-        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.41.2"),
+        .package(url: "https://github.com/nicklockwood/SwiftFormat", .exact("0.49.4")),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.4"),
     ],
