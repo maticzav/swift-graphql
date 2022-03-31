@@ -61,7 +61,7 @@ final class DedupExchangeTests: XCTestCase {
         }
         .sink { result in
             let op = result.operation
-            trace.append("received: \(op.id) (\(op.kind.rawValue))")
+            trace.append("resulted: \(op.id) (\(op.kind.rawValue))")
         }
         .store(in: &self.cancellables)
         
@@ -105,7 +105,7 @@ final class DedupExchangeTests: XCTestCase {
         
         XCTAssertEqual(trace, [
             "requested: mck-id (query)",
-            "received: mck-id (query)",
+            "resulted: mck-id (query)",
             "requested: mck-id (query)",
         ])
     }

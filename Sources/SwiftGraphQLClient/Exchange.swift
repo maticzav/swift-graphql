@@ -26,19 +26,21 @@ public struct Operation: Identifiable, Equatable, Hashable {
     /// Specifies the caching-networking mechanism that exchanges should follow.
     public var policy: Policy
     
-    public enum Policy {
+    public enum Policy: String {
         
         /// Prefers cached results and falls back to sending an API request when there are no prior results.
-        case cacheFirst
+        case cacheFirst = "cache-first"
         
-        /// Will always return cached results or null.
-        case cacheOnly
+        /// Only uses cached results in results.
+        ///
+        /// - NOTE: Query might not return if there's nothing in the cache.
+        case cacheOnly = "cache-only"
         
         /// Will always send a network request and ignore cached values.
-        case networkOnly
+        case networkOnly = "network-only"
         
         /// Returns cached results but also always sends an API request.
-        case cacheAndNetwork
+        case cacheAndNetwork = "cache-and-network"
         
         /// Tells whether the operation requires a network call.
         public var isNetwork: Bool {
@@ -62,6 +64,13 @@ extension Operation {
     func with(kind: Operation.Kind) -> Operation {
         var copy = self
         copy.kind = kind
+        return copy
+    }
+    
+    /// Returns a new operation that has a modified policy.
+    func with(policy: Operation.Policy) -> Operation {
+        var copy = self
+        copy.policy = policy
         return copy
     }
 }
