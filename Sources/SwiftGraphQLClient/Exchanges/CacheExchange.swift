@@ -102,7 +102,7 @@ class CacheExchange: Exchange {
                     }
                 }
                 
-                // Caches the result and operation references.
+                // Cache query result and operation references.
                 if let _ = result.data, result.operation.kind == .query {
                     self.resultCache[result.operation.id] = result
                     

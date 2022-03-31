@@ -35,9 +35,9 @@ extension GraphQLClient {
     ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLHttpOperation {
         let operation = self.createRequestOperation(
             for: selection,
-           as: operationName,
-           url: request,
-           policy: policy
+            as: operationName,
+            url: request,
+            policy: policy
         )
         return self.execute(operation: operation)
     }
@@ -51,9 +51,9 @@ extension GraphQLClient {
     ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLHttpOperation {
         let operation = self.createRequestOperation(
             for: selection,
-           as: operationName,
-           url: request,
-           policy: policy
+            as: operationName,
+            url: request,
+            policy: policy
         )
         return self.execute(operation: operation)
     }
@@ -67,9 +67,9 @@ extension GraphQLClient {
     ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLWebSocketOperation {
         let operation = self.createRequestOperation(
             for: selection,
-           as: operationName,
-           url: request,
-           policy: policy
+            as: operationName,
+            url: request,
+            policy: policy
         )
         return self.execute(operation: operation)
     }
@@ -129,7 +129,7 @@ extension OperationResult {
         guard let data = self.data else {
             return decoded
         }
-    
+        
         do {
             let (result, errors) = try selection.decode(raw: data)
             

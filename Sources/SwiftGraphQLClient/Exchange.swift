@@ -76,7 +76,7 @@ extension Operation {
 }
 
 /// A structure describing the result of an operation execution.
-public struct OperationResult {
+public struct OperationResult: Equatable {
     /// Back-reference to the operation that triggered the execution.
     public var operation: Operation
     
@@ -96,6 +96,14 @@ extension OperationResult {
         var copy = self
         copy.stale = stale
         return copy
+    }
+}
+
+extension OperationResult: Identifiable {
+    
+    /// Id of the operation related to this result.
+    public var id: String {
+        self.operation.id
     }
 }
 
@@ -122,13 +130,26 @@ public struct DecodedOperationResult<T: Decodable> {
 public enum CombinedError: Error {
     
     /// Describes errors that occur on the networking layer.
-    case network(Error)
+    case network(URLError)
     
     /// Describes errors that occured during the GraphQL execution.
     case graphql(GraphQLError)
     
     /// Describes errors that occured during the parsing phase on the client.
     case parsing(Error)
+}
+
+extension CombinedError: Equatable {
+    public static func == (lhs: CombinedError, rhs: CombinedError) -> Bool {
+        switch (lhs, rhs) {
+        case let (.graphql(l), .graphql(r)):
+            return l == r
+        case let (.network(l), .network(r)):
+            return l == r
+        default:
+            return false
+        }
+    }
 }
 
 /// Utility type for describing the exchange processor.
