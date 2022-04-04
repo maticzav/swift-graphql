@@ -4,10 +4,8 @@ import Combine
 import Foundation
 import GraphQL
 
-/// Exchange that lets you perform GraphQL subscription queries.
+/// Exchange that lets you perform GraphQL operations over WebSocket connection.
 public class SubscriptionExchange: Exchange {
-    
-    
     
     // MARK: - Methods
     
