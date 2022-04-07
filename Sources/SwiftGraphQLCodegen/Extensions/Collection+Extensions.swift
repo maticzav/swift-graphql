@@ -14,4 +14,9 @@ extension Collection {
 
         return [Element](dict.values)
     }
+    
+    /// Returns a mapped instance of each value.
+    func indexMap<T>(fn: ((offset: Int, element: Self.Element)) throws -> T) rethrows -> [T] {
+        try enumerated().map(fn)
+    }
 }

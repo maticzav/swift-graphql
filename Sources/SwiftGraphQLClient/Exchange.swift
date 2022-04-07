@@ -81,7 +81,7 @@ public struct OperationResult: Equatable {
     public var operation: Operation
     
     /// Data received from the server.
-    public var data: Data?
+    public var data: AnyCodable
     
     /// Errors accumulated along the execution path.
     public var errors: [CombinedError]

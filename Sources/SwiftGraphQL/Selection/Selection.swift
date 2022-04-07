@@ -1,19 +1,8 @@
 import Foundation
 import GraphQL
 
-/*
- SwiftGraphQL uses Selection structure to collect data about the
- fields a query should fetch. To do that, it passes around a Fields
- class reference. Generated code later calls `select` method on Fields
- to add a subfield to the selection.
-
- Fields also holds information about the response that the generated
- code uses to populate user-defined models.
-
- Generated code extends Select structure using Phantom types. Fields,
- on the other hand, is final as you can see in the declaration.
- */
-
+/// Fields is a class that selection passes around to collect information about the selection
+/// of a query and also aids the decoding process.
 public final class Fields<TypeLock> {
     
     // Internal representation of selection.
@@ -23,16 +12,20 @@ public final class Fields<TypeLock> {
     /// response values or performing decoding with returned data.
     ///
     /// - NOTE: This variable should only be used by the generated code.
-    public private(set) var __state: State = .mocking
+    public private(set) var __state: State = .selecting
     
     public enum State {
-        case mocking
-        case decoding(TypeLock)
+        
+        /// Selection is collection data about the query.
+        case selecting
+        
+        /// Selection is trying to parse the received data into a desired value.
+        case decoding(AnyCodable)
         
         /// Tells whether the fields have actual data or not.
         public var isMocking: Bool {
             switch self {
-            case .mocking:
+            case .selecting:
                 return true
             default:
                 return false
@@ -45,8 +38,8 @@ public final class Fields<TypeLock> {
     init() {}
 
     /// Lets you decode response data into Swift structures.
-    public init(data: TypeLock) {
-        __state = .decoding(data)
+    public init(data: AnyCodable) {
+        self.__state = .decoding(data)
     }
 
     // MARK: - Selection
@@ -60,9 +53,33 @@ public final class Fields<TypeLock> {
 
     /// Lets generated code add a selection to the selection set.
     ///
-    /// - NOTE: This function should only be used by the generated code.
+    /// - NOTE: This function should only be used by the generated code!
     public func __select(_ fields: [GraphQLField]) {
         self.fields.append(contentsOf: fields)
+    }
+    
+    // MARK: - Decoding
+    
+    /// Tries to decode a field from an object selection.
+    ///
+    /// - NOTE: This function should only be used by the generated code!
+    public func __decode<T>(field: String, decoder: (AnyCodable) throws -> T) throws -> T {
+        switch self.__state {
+        case .decoding(let codable):
+            switch codable.value {
+            case let dict as [String: Any]:
+                // We replce `nil` values with Void AnyCodable values for
+                // cleaner protocol declaration.
+                return try decoder(AnyCodable(dict[field]))
+            default:
+                throw ObjectDecodingError.unexpectedObjectType(
+                    expected: "Dictionary",
+                    received: codable.value
+                )
+            }
+        default:
+            throw ObjectDecodingError.decodingWhileSelecting
+        }
     }
     
     // MARK: - Analysis
@@ -73,18 +90,12 @@ public final class Fields<TypeLock> {
     }
 }
 
-extension Fields: Decodable where TypeLock: Decodable {
-    public convenience init(from decoder: Decoder) throws {
-        // Fields decoder forwards the JSON decoding part to the
-        // typelock and parses the desired result using internal initializer.
-        let data = try TypeLock(from: decoder)
-        self.init(data: data)
-    }
-}
-
 // MARK: - Selection
 
-/// Global type used to wrap the selection.
+/// SwiftGraphQL uses Selection structure to collect data about the
+/// fields a query should fetch. To do that, it passes around a Fields
+/// class reference. Generated code later calls `select` method on Fields
+/// to add a subfield to the selection.
 public struct Selection<`Type`, TypeLock> {
     
     /// Function that SwiftGraphQL uses to generate selection and convert received JSON
@@ -92,7 +103,7 @@ public struct Selection<`Type`, TypeLock> {
     private var decoder: (Fields<TypeLock>) throws -> Type
     
     // MARK: - Initializer
-
+    
     public init(decoder: @escaping (Fields<TypeLock>) throws -> Type) {
         self.decoder = decoder
     }
@@ -122,7 +133,7 @@ public struct Selection<`Type`, TypeLock> {
     /// Decodes JSON response into a return type of the selection set.
     ///
     /// - NOTE: This is an internal function that should only be used by the generated code.
-    public func __decode(data: TypeLock) throws -> Type {
+    public func __decode(data: AnyCodable) throws -> Type {
         // Construct a copy of the selection set, and use the new selection set to decode data.
         let fields = Fields<TypeLock>(data: data)
         
@@ -132,9 +143,39 @@ public struct Selection<`Type`, TypeLock> {
 
     /// Mocks the data of a selection.
     ///
-    /// - NOTE: This is an internal function that should only be used by the generated code.
+    /// - NOTE: This is an internal function that should only be used by the generated code!
     public func __mock() throws -> Type {
         let fields = Fields<TypeLock>()
         return try decoder(fields)
     }
+}
+
+// MARK: - Error
+
+public enum ObjectDecodingError: Error, Equatable {
+    public static func == (lhs: ObjectDecodingError, rhs: ObjectDecodingError) -> Bool {
+        switch (lhs, rhs) {
+        case (.unexpectedNilValue, .unexpectedNilValue):
+            return true
+        case (.decodingWhileSelecting, .decodingWhileSelecting):
+            return true
+        case let (.unknownInterfaceType(interface: lint, typename: ltype), .unknownInterfaceType(interface: rint, typename: rtype)):
+            return lint == rint && ltype == rtype
+        default:
+            return false
+        }
+    }
+    
+    
+    /// Object expected a given type but received a value of a different type.
+    case unexpectedObjectType(expected: String, received: Any)
+    
+    /// Expected a value but received a nil value.
+    case unexpectedNilValue
+    
+    /// Decoding function has been called during the selection process.
+    case decodingWhileSelecting
+    
+    /// Interface received a type it did not expect.
+    case unknownInterfaceType(interface: String, typename: String?)
 }

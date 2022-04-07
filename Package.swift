@@ -134,6 +134,10 @@ let package = Package(
             exclude: ["Integration/schema.json"]
         ),
         .testTarget(
+            name: "GraphQLTests",
+            dependencies: ["GraphQL"]
+        ),
+        .testTarget(
             name: "GraphQLASTTests",
             dependencies: ["GraphQLAST"]
         ),

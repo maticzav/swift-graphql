@@ -32,9 +32,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               return data.idtestType[field.alias!]
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try String?(from: $0) }
+             case .selecting:
                return nil
              }
            }
@@ -68,12 +68,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.idtestType[field.alias!] {
-                 return data
-               }
-               throw SelectionError.badpayload
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try String(from: $0) }
+             case .selecting:
                return String.mockValue
              }
            }
@@ -105,9 +102,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               return data.idtestType[field.alias!]
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try String?(from: $0) }
+             case .selecting:
                return nil
              }
            }
@@ -139,9 +136,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               return data.idstestType[field.alias!]
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try [String]?(from: $0) }
+             case .selecting:
                return nil
              }
            }
@@ -173,12 +170,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.idstestType[field.alias!] {
-                 return data
-               }
-               throw SelectionError.badpayload
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try [String](from: $0) }
+             case .selecting:
                return []
              }
            }
@@ -212,13 +206,10 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.episodetestType[field.alias!] {
-                 return data
-               }
-               throw SelectionError.badpayload
-             case .mocking:
-               return Enums.Episode.allCases.first!
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try Enums.Episode(from: $0) }
+             case .selecting:
+               return Enums.Episode.mockValue
              }
            }
            """)
@@ -249,9 +240,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               return data.episodetestType[field.alias!]
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try Enums.Episode?(from: $0) }
+             case .selecting:
                return nil
              }
            }
@@ -283,12 +274,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.episodetestType[field.alias!] {
-                 return data
-               }
-               throw SelectionError.badpayload
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try [Enums.Episode?](from: $0) }
+             case .selecting:
                return []
              }
            }
@@ -324,12 +312,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.herotestType[field.alias!] {
-                 return try selection.__decode(data: data)
-               }
-               throw SelectionError.badpayload
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+             case .selecting:
                return try selection.__mock()
              }
            }
@@ -363,9 +348,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               return try selection.__decode(data: data.herotestType[field.alias!])
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+             case .selecting:
                return try selection.__mock()
              }
            }
@@ -399,12 +384,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.herotestType[field.alias!] {
-                 return try selection.__decode(data: data)
-               }
-               throw SelectionError.badpayload
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+             case .selecting:
                return try selection.__mock()
              }
            }
@@ -444,12 +426,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.herotestType[field.alias!] {
-                 return data
-               }
-               throw SelectionError.badpayload
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try String(from: $0) }
+             case .selecting:
                return String.mockValue
              }
            }
@@ -487,12 +466,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.herotestType[field.alias!] {
-                 return data
-               }
-               throw SelectionError.badpayload
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try String(from: $0) }
+             case .selecting:
                return String.mockValue
              }
            }
@@ -530,12 +506,9 @@ final class FieldTests: XCTestCase {
              self.__select(field)
            
              switch self.__state {
-             case .decoding(let data):
-               if let data = data.herotestType[field.alias!] {
-                 return data
-               }
-               throw SelectionError.badpayload
-             case .mocking:
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try String(from: $0) }
+             case .selecting:
                return String.mockValue
              }
            }

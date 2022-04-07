@@ -49,9 +49,9 @@ extension Field {
             self.__select(field)
 
             switch self.__state {
-            case .decoding(let data):
-                \(self.decoder(parent: parent))
-            case .mocking:
+            case .decoding:
+                \(try self.decoder(parent: parent, context: context))
+            case .selecting:
                 return \(try type.mock(context: context))
             }
         }
@@ -257,38 +257,16 @@ extension InputTypeRef {
 private extension Field {
     
     /// Returns selection decoder for this field.
-    func decoder(parent: String) -> String {
-        let name = "\(self.name.camelCase)\(parent.camelCase)"
+    func decoder(parent: String, context: Context) throws -> String {
+        let internalType = try self.type.namedType.type(scalars: context.scalars)
+        let wrappedType = self.type.type(for: internalType)
 
-        switch type.inverted.namedType {
-        case .scalar(_), .enum:
-            switch type.inverted {
-            case .nullable:
-                // When decoding a nullable scalar, we just return the value.
-                return "return data.\(name)[field.alias!]"
-            default:
-                // In list value and non-optional scalars we want to make sure that value is present.
-                return """
-                if let data = data.\(name)[field.alias!] {
-                    return data
-                }
-                throw SelectionError.badpayload
-                """
-            }
+        switch self.type.namedType {
+        case .scalar, .enum:
+            return "return try self.__decode(field: field.alias!) { try \(wrappedType)(from: $0) }"
+            
         case .interface, .object, .union:
-            switch type.inverted {
-            case .nullable:
-                // When decoding a nullable field we simply pass it down to the decoder.
-                return "return try selection.__decode(data: data.\(name)[field.alias!])"
-            default:
-                // When decoding a non-nullable field, we want to make sure that field is present.
-                return """
-                if let data = data.\(name)[field.alias!] {
-                    return try selection.__decode(data: data)
-                }
-                throw SelectionError.badpayload
-                """
-            }
+            return "return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }"
         }
     }
 }
@@ -308,7 +286,7 @@ extension OutputTypeRef {
             let type = try context.scalars.scalar(scalar)
             return mock(value: "\(type).mockValue")
         case .enum(let enm):
-            return mock(value: "Enums.\(enm.pascalCase).allCases.first!")
+            return mock(value: "Enums.\(enm.pascalCase).mockValue")
         case .interface, .object, .union:
             return "try selection.__mock()"
         }

@@ -4,7 +4,7 @@ import GraphQL
 import XCTest
 
 final class FetchExchangeTests: XCTestCase {
-    struct MockURLSession: FetchSession {
+    struct MockURLSession: HttpURLSession {
         
         /// Mock handler used to create a mock data response of the request.
         var handler: (URLRequest) -> MockResponse

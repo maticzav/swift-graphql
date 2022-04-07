@@ -2,8 +2,7 @@ import Combine
 import Foundation
 import GraphQL
 
-/// Protocol that outlines methods that are required by fetch exchange
-/// to operate as expected.
+/// Protocol that outlines methods that are required by fetch exchange to operate as expected.
 public protocol FetchSession {
     
     /// Returns a publisher that wraps a URL session data task for a given URL request.
@@ -60,10 +59,13 @@ public class FetchExchange: Exchange {
             })
             .flatMap({ operation in
                 self.session.dataTaskPublisher(for: operation.request)
-                    .map { (data, response) in
-                        OperationResult(
+                    .decode(type: ExecutionResult.self, decoder: decoder)
+                    .map { result in
+                        //* TODO: Process errors!
+                        
+                        return OperationResult(
                             operation: operation,
-                            data: data,
+                            data: result.data,
                             errors: [],
                             stale: false
                         )

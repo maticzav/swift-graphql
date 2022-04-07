@@ -1,5 +1,6 @@
 // This file was auto-generated using maticzav/swift-graphql. DO NOT EDIT MANUALLY!
 import Foundation
+import GraphQL
 import SwiftGraphQL
 
 // MARK: - Operations
@@ -19,47 +20,10 @@ enum Objects {}
 extension Objects {
   struct User {
     let __typename: TypeName = .user
-    let iduser: [String: String]
-    let usernameuser: [String: String]
 
     enum TypeName: String, Codable {
       case user = "User"
     }
-  }
-}
-
-extension Objects.User: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "iduser":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "usernameuser":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.iduser = map["iduser"]
-    self.usernameuser = map["usernameuser"]
   }
 }
 
@@ -74,12 +38,9 @@ extension Fields where TypeLock == Objects.User {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.iduser[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -94,12 +55,9 @@ extension Fields where TypeLock == Objects.User {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.usernameuser[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -110,65 +68,10 @@ extension Selection where TypeLock == Never, Type == Never {
 extension Objects {
   struct Query {
     let __typename: TypeName = .query
-    let charactersquery: [String: [Objects.Character]]
-    let comicsquery: [String: [Objects.Comic]]
-    let helloquery: [String: String]
-    let searchquery: [String: [Unions.SearchResult]]
-    let userquery: [String: Objects.User]
 
     enum TypeName: String, Codable {
       case query = "Query"
     }
-  }
-}
-
-extension Objects.Query: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "helloquery":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "userquery":
-        if let value = try container.decode(Objects.User?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "comicsquery":
-        if let value = try container.decode([Objects.Comic]?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "charactersquery":
-        if let value = try container.decode([Objects.Character]?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "searchquery":
-        if let value = try container.decode([Unions.SearchResult]?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.helloquery = map["helloquery"]
-    self.userquery = map["userquery"]
-    self.comicsquery = map["comicsquery"]
-    self.charactersquery = map["charactersquery"]
-    self.searchquery = map["searchquery"]
   }
 }
 
@@ -184,12 +87,9 @@ extension Fields where TypeLock == Objects.Query {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.helloquery[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -206,12 +106,28 @@ extension Fields where TypeLock == Objects.Query {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.userquery[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
+      return try selection.__mock()
+    }
+  }
+  /// Fetches an object given its ID.
+
+  func node<T>(id: String, selection: Selection<T, Interfaces.Node?>) throws -> T {
+    let field = GraphQLField.composite(
+      field: "node",
+      parent: "Query",
+      type: "Node",
+      arguments: [Argument(name: "id", type: "ID!", value: id)],
+      selection: selection.__selection()
+    )
+    self.__select(field)
+
+    switch self.__state {
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -231,12 +147,9 @@ extension Fields where TypeLock == Objects.Query {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.comicsquery[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -256,12 +169,9 @@ extension Fields where TypeLock == Objects.Query {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.charactersquery[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -285,12 +195,31 @@ extension Fields where TypeLock == Objects.Query {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.searchquery[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
+      return try selection.__mock()
+    }
+  }
+  /// Lets you see send messages from other people.
+
+  func messages<T>(
+    pagination: OptionalArgument<InputObjects.Pagination> = .init(),
+    selection: Selection<T, [Objects.Message]>
+  ) throws -> T {
+    let field = GraphQLField.composite(
+      field: "messages",
+      parent: "Query",
+      type: "Message",
+      arguments: [Argument(name: "pagination", type: "Pagination", value: pagination)],
+      selection: selection.__selection()
+    )
+    self.__select(field)
+
+    switch self.__state {
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -301,65 +230,10 @@ extension Selection where TypeLock == Never, Type == Never {
 extension Objects {
   struct Character {
     let __typename: TypeName = .character
-    let descriptioncharacter: [String: String]
-    let idcharacter: [String: String]
-    let imagecharacter: [String: String]
-    let namecharacter: [String: String]
-    let starredcharacter: [String: Bool]
 
     enum TypeName: String, Codable {
       case character = "Character"
     }
-  }
-}
-
-extension Objects.Character: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "idcharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "namecharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "descriptioncharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "imagecharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "starredcharacter":
-        if let value = try container.decode(Bool?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.idcharacter = map["idcharacter"]
-    self.namecharacter = map["namecharacter"]
-    self.descriptioncharacter = map["descriptioncharacter"]
-    self.imagecharacter = map["imagecharacter"]
-    self.starredcharacter = map["starredcharacter"]
   }
 }
 
@@ -374,12 +248,9 @@ extension Fields where TypeLock == Objects.Character {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.idcharacter[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -393,12 +264,9 @@ extension Fields where TypeLock == Objects.Character {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.namecharacter[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -412,12 +280,9 @@ extension Fields where TypeLock == Objects.Character {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.descriptioncharacter[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -432,12 +297,9 @@ extension Fields where TypeLock == Objects.Character {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.imagecharacter[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -453,12 +315,9 @@ extension Fields where TypeLock == Objects.Character {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.starredcharacter[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try Bool(from: $0) }
+    case .selecting:
       return Bool.mockValue
     }
   }
@@ -469,77 +328,10 @@ extension Selection where TypeLock == Never, Type == Never {
 extension Objects {
   struct Comic {
     let __typename: TypeName = .comic
-    let descriptioncomic: [String: String]
-    let idcomic: [String: String]
-    let isbncomic: [String: String]
-    let pageCountcomic: [String: Int]
-    let starredcomic: [String: Bool]
-    let thumbnailcomic: [String: String]
-    let titlecomic: [String: String]
 
     enum TypeName: String, Codable {
       case comic = "Comic"
     }
-  }
-}
-
-extension Objects.Comic: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "idcomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "titlecomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "descriptioncomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "isbncomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "thumbnailcomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "pageCountcomic":
-        if let value = try container.decode(Int?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "starredcomic":
-        if let value = try container.decode(Bool?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.idcomic = map["idcomic"]
-    self.titlecomic = map["titlecomic"]
-    self.descriptioncomic = map["descriptioncomic"]
-    self.isbncomic = map["isbncomic"]
-    self.thumbnailcomic = map["thumbnailcomic"]
-    self.pageCountcomic = map["pageCountcomic"]
-    self.starredcomic = map["starredcomic"]
   }
 }
 
@@ -554,12 +346,9 @@ extension Fields where TypeLock == Objects.Comic {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.idcomic[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -573,12 +362,9 @@ extension Fields where TypeLock == Objects.Comic {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.titlecomic[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -592,12 +378,9 @@ extension Fields where TypeLock == Objects.Comic {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.descriptioncomic[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -611,12 +394,9 @@ extension Fields where TypeLock == Objects.Comic {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.isbncomic[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -631,12 +411,9 @@ extension Fields where TypeLock == Objects.Comic {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.thumbnailcomic[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -650,9 +427,9 @@ extension Fields where TypeLock == Objects.Comic {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      return data.pageCountcomic[field.alias!]
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try Int?(from: $0) }
+    case .selecting:
       return nil
     }
   }
@@ -667,12 +444,9 @@ extension Fields where TypeLock == Objects.Comic {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.starredcomic[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try Bool(from: $0) }
+    case .selecting:
       return Bool.mockValue
     }
   }
@@ -683,53 +457,10 @@ extension Selection where TypeLock == Never, Type == Never {
 extension Objects {
   struct Mutation {
     let __typename: TypeName = .mutation
-    let authmutation: [String: Unions.AuthPayload]
-    let starmutation: [String: Unions.SearchResult]
-    let uploadFilemutation: [String: Objects.File]
 
     enum TypeName: String, Codable {
       case mutation = "Mutation"
     }
-  }
-}
-
-extension Objects.Mutation: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "authmutation":
-        if let value = try container.decode(Unions.AuthPayload?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "starmutation":
-        if let value = try container.decode(Unions.SearchResult?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "uploadFilemutation":
-        if let value = try container.decode(Objects.File?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.authmutation = map["authmutation"]
-    self.starmutation = map["starmutation"]
-    self.uploadFilemutation = map["uploadFilemutation"]
   }
 }
 
@@ -747,12 +478,9 @@ extension Fields where TypeLock == Objects.Mutation {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.authmutation[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -774,12 +502,35 @@ extension Fields where TypeLock == Objects.Mutation {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.starmutation[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
+      return try selection.__mock()
+    }
+  }
+  /// Messages the forum.
+  /// NOTE: Image should be the id of the uploaded file.
+
+  func message<T>(
+    message: String, image: OptionalArgument<String> = .init(),
+    selection: Selection<T, Objects.Message>
+  ) throws -> T {
+    let field = GraphQLField.composite(
+      field: "message",
+      parent: "Mutation",
+      type: "Message",
+      arguments: [
+        Argument(name: "message", type: "String!", value: message),
+        Argument(name: "image", type: "ID", value: image),
+      ],
+      selection: selection.__selection()
+    )
+    self.__select(field)
+
+    switch self.__state {
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -805,12 +556,9 @@ extension Fields where TypeLock == Objects.Mutation {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.uploadFilemutation[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -821,47 +569,10 @@ extension Selection where TypeLock == Never, Type == Never {
 extension Objects {
   struct AuthPayloadSuccess {
     let __typename: TypeName = .authPayloadSuccess
-    let tokenauthPayloadSuccess: [String: String]
-    let userauthPayloadSuccess: [String: Objects.User]
 
     enum TypeName: String, Codable {
       case authPayloadSuccess = "AuthPayloadSuccess"
     }
-  }
-}
-
-extension Objects.AuthPayloadSuccess: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "tokenauthPayloadSuccess":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "userauthPayloadSuccess":
-        if let value = try container.decode(Objects.User?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.tokenauthPayloadSuccess = map["tokenauthPayloadSuccess"]
-    self.userauthPayloadSuccess = map["userauthPayloadSuccess"]
   }
 }
 
@@ -876,12 +587,9 @@ extension Fields where TypeLock == Objects.AuthPayloadSuccess {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.tokenauthPayloadSuccess[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -897,12 +605,9 @@ extension Fields where TypeLock == Objects.AuthPayloadSuccess {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.userauthPayloadSuccess[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -913,41 +618,10 @@ extension Selection where TypeLock == Never, Type == Never {
 extension Objects {
   struct AuthPayloadFailure {
     let __typename: TypeName = .authPayloadFailure
-    let messageauthPayloadFailure: [String: String]
 
     enum TypeName: String, Codable {
       case authPayloadFailure = "AuthPayloadFailure"
     }
-  }
-}
-
-extension Objects.AuthPayloadFailure: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "messageauthPayloadFailure":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.messageauthPayloadFailure = map["messageauthPayloadFailure"]
   }
 }
 
@@ -962,12 +636,9 @@ extension Fields where TypeLock == Objects.AuthPayloadFailure {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.messageauthPayloadFailure[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -978,53 +649,10 @@ extension Selection where TypeLock == Never, Type == Never {
 extension Objects {
   struct File {
     let __typename: TypeName = .file
-    let idfile: [String: String]
-    let publicUrlfile: [String: String]
-    let uploadUrlfile: [String: String]
 
     enum TypeName: String, Codable {
       case file = "File"
     }
-  }
-}
-
-extension Objects.File: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "idfile":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "uploadUrlfile":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "publicUrlfile":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.idfile = map["idfile"]
-    self.uploadUrlfile = map["uploadUrlfile"]
-    self.publicUrlfile = map["publicUrlfile"]
   }
 }
 
@@ -1039,12 +667,9 @@ extension Fields where TypeLock == Objects.File {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.idfile[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -1059,12 +684,9 @@ extension Fields where TypeLock == Objects.File {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.uploadUrlfile[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -1079,12 +701,9 @@ extension Fields where TypeLock == Objects.File {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.publicUrlfile[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -1102,92 +721,52 @@ extension Objects {
   }
 }
 
-extension Objects.Subscription: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-  }
-}
-
 extension Fields where TypeLock == Objects.Subscription {
+  /// Returns the current time from the server and refreshes every second.
 
+  func time() throws -> Date {
+    let field = GraphQLField.leaf(
+      field: "time",
+      parent: "Subscription",
+      arguments: []
+    )
+    self.__select(field)
+
+    switch self.__state {
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try Date(from: $0) }
+    case .selecting:
+      return Date.mockValue
+    }
+  }
+  /// Triggered whene a new comment is added to the shared list of comments.
+
+  func message<T>(selection: Selection<T, Objects.Message>) throws -> T {
+    let field = GraphQLField.composite(
+      field: "message",
+      parent: "Subscription",
+      type: "Message",
+      arguments: [],
+      selection: selection.__selection()
+    )
+    self.__select(field)
+
+    switch self.__state {
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
+      return try selection.__mock()
+    }
+  }
 }
 
 extension Objects {
   struct Message {
     let __typename: TypeName = .message
-    let authormessage: [String: Objects.User]
-    let idmessage: [String: String]
-    let imagemessage: [String: Objects.File]
-    let messagemessage: [String: String]
 
     enum TypeName: String, Codable {
       case message = "Message"
     }
-  }
-}
-
-extension Objects.Message: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "idmessage":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "messagemessage":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "imagemessage":
-        if let value = try container.decode(Objects.File?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "authormessage":
-        if let value = try container.decode(Objects.User?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.idmessage = map["idmessage"]
-    self.messagemessage = map["messagemessage"]
-    self.imagemessage = map["imagemessage"]
-    self.authormessage = map["authormessage"]
   }
 }
 
@@ -1202,13 +781,26 @@ extension Fields where TypeLock == Objects.Message {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.idmessage[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
+    }
+  }
+
+  func date() throws -> Date {
+    let field = GraphQLField.leaf(
+      field: "date",
+      parent: "Message",
+      arguments: []
+    )
+    self.__select(field)
+
+    switch self.__state {
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try Date(from: $0) }
+    case .selecting:
+      return Date.mockValue
     }
   }
 
@@ -1221,12 +813,9 @@ extension Fields where TypeLock == Objects.Message {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.messagemessage[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -1242,12 +831,9 @@ extension Fields where TypeLock == Objects.Message {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.imagemessage[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -1263,12 +849,9 @@ extension Fields where TypeLock == Objects.Message {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.authormessage[field.alias!] {
-        return try selection.__decode(data: data)
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }
+    case .selecting:
       return try selection.__mock()
     }
   }
@@ -1307,6 +890,15 @@ extension Objects.Query {
       try $0.user(selection: selection)
     }
   }
+  /// Fetches an object given its ID.
+
+  static func node<T>(id: String, selection: Selection<T, Interfaces.Node?>) throws -> Selection<
+    T, Objects.Query
+  > {
+    Selection<T, Objects.Query> {
+      try $0.node(id: id, selection: selection)
+    }
+  }
   /// Returns a list of comics from the Marvel universe.
 
   static func comics<T>(
@@ -1336,6 +928,16 @@ extension Objects.Query {
   ) throws -> Selection<T, Objects.Query> {
     Selection<T, Objects.Query> {
       try $0.search(query: query, pagination: pagination, selection: selection)
+    }
+  }
+  /// Lets you see send messages from other people.
+
+  static func messages<T>(
+    pagination: OptionalArgument<InputObjects.Pagination> = .init(),
+    selection: Selection<T, [Objects.Message]>
+  ) throws -> Selection<T, Objects.Query> {
+    Selection<T, Objects.Query> {
+      try $0.messages(pagination: pagination, selection: selection)
     }
   }
 }
@@ -1442,6 +1044,17 @@ extension Objects.Mutation {
       try $0.star(id: id, item: item, selection: selection)
     }
   }
+  /// Messages the forum.
+  /// NOTE: Image should be the id of the uploaded file.
+
+  static func message<T>(
+    message: String, image: OptionalArgument<String> = .init(),
+    selection: Selection<T, Objects.Message>
+  ) throws -> Selection<T, Objects.Mutation> {
+    Selection<T, Objects.Mutation> {
+      try $0.message(message: message, image: image, selection: selection)
+    }
+  }
   /// Creates a new upload URL for a file and returns an ID.
   /// NOTE: The file should be uploaded to the returned URL. If the user is not
   /// authenticated, mutation will throw an error.
@@ -1507,7 +1120,22 @@ extension Objects.File {
 }
 
 extension Objects.Subscription {
+  /// Returns the current time from the server and refreshes every second.
 
+  static func time() throws -> Selection<Date, Objects.Subscription> {
+    Selection<Date, Objects.Subscription> {
+      try $0.time()
+    }
+  }
+  /// Triggered whene a new comment is added to the shared list of comments.
+
+  static func message<T>(selection: Selection<T, Objects.Message>) throws -> Selection<
+    T, Objects.Subscription
+  > {
+    Selection<T, Objects.Subscription> {
+      try $0.message(selection: selection)
+    }
+  }
 }
 extension Selection where TypeLock == Never, Type == Never {
   typealias Subscription = Objects.Subscription
@@ -1517,6 +1145,12 @@ extension Objects.Message {
   static func id() throws -> Selection<String, Objects.Message> {
     Selection<String, Objects.Message> {
       try $0.id()
+    }
+  }
+
+  static func date() throws -> Selection<Date, Objects.Message> {
+    Selection<Date, Objects.Message> {
+      try $0.date()
     }
   }
 
@@ -1548,28 +1182,6 @@ enum Interfaces {}
 extension Interfaces {
   struct Node {
     let __typename: TypeName
-    let authormessage: [String: Objects.User]
-    let descriptioncharacter: [String: String]
-    let descriptioncomic: [String: String]
-    let idnode: [String: String]
-    let iduser: [String: String]
-    let idcharacter: [String: String]
-    let idcomic: [String: String]
-    let idfile: [String: String]
-    let idmessage: [String: String]
-    let imagecharacter: [String: String]
-    let imagemessage: [String: Objects.File]
-    let isbncomic: [String: String]
-    let messagemessage: [String: String]
-    let namecharacter: [String: String]
-    let pageCountcomic: [String: Int]
-    let publicUrlfile: [String: String]
-    let starredcharacter: [String: Bool]
-    let starredcomic: [String: Bool]
-    let thumbnailcomic: [String: String]
-    let titlecomic: [String: String]
-    let uploadUrlfile: [String: String]
-    let usernameuser: [String: String]
 
     enum TypeName: String, Codable {
       case user = "User"
@@ -1578,144 +1190,6 @@ extension Interfaces {
       case file = "File"
       case message = "Message"
     }
-  }
-}
-
-extension Interfaces.Node: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "idnode":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "iduser":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "usernameuser":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "idcharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "namecharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "descriptioncharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "imagecharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "starredcharacter":
-        if let value = try container.decode(Bool?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "idcomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "titlecomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "descriptioncomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "isbncomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "thumbnailcomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "pageCountcomic":
-        if let value = try container.decode(Int?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "starredcomic":
-        if let value = try container.decode(Bool?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "idfile":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "uploadUrlfile":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "publicUrlfile":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "idmessage":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "messagemessage":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "imagemessage":
-        if let value = try container.decode(Objects.File?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "authormessage":
-        if let value = try container.decode(Objects.User?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.__typename = try container.decode(
-      TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
-
-    self.idnode = map["idnode"]
-    self.iduser = map["iduser"]
-    self.usernameuser = map["usernameuser"]
-    self.idcharacter = map["idcharacter"]
-    self.namecharacter = map["namecharacter"]
-    self.descriptioncharacter = map["descriptioncharacter"]
-    self.imagecharacter = map["imagecharacter"]
-    self.starredcharacter = map["starredcharacter"]
-    self.idcomic = map["idcomic"]
-    self.titlecomic = map["titlecomic"]
-    self.descriptioncomic = map["descriptioncomic"]
-    self.isbncomic = map["isbncomic"]
-    self.thumbnailcomic = map["thumbnailcomic"]
-    self.pageCountcomic = map["pageCountcomic"]
-    self.starredcomic = map["starredcomic"]
-    self.idfile = map["idfile"]
-    self.uploadUrlfile = map["uploadUrlfile"]
-    self.publicUrlfile = map["publicUrlfile"]
-    self.idmessage = map["idmessage"]
-    self.messagemessage = map["messagemessage"]
-    self.imagemessage = map["imagemessage"]
-    self.authormessage = map["authormessage"]
   }
 }
 
@@ -1731,12 +1205,9 @@ extension Fields where TypeLock == Interfaces.Node {
     self.__select(field)
 
     switch self.__state {
-    case .decoding(let data):
-      if let data = data.idnode[field.alias!] {
-        return data
-      }
-      throw SelectionError.badpayload
-    case .mocking:
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
       return String.mockValue
     }
   }
@@ -1763,33 +1234,23 @@ extension Fields where TypeLock == Interfaces.Node {
 
     switch self.__state {
     case .decoding(let data):
-      switch data.__typename {
-      case .user:
-        let data = Objects.User(iduser: data.iduser, usernameuser: data.usernameuser)
+      let typename = try self.__decode(field: "__typename") { $0.value as? String }
+      switch typename {
+      case "User":
         return try user.__decode(data: data)
-      case .character:
-        let data = Objects.Character(
-          descriptioncharacter: data.descriptioncharacter, idcharacter: data.idcharacter,
-          imagecharacter: data.imagecharacter, namecharacter: data.namecharacter,
-          starredcharacter: data.starredcharacter)
+      case "Character":
         return try character.__decode(data: data)
-      case .comic:
-        let data = Objects.Comic(
-          descriptioncomic: data.descriptioncomic, idcomic: data.idcomic, isbncomic: data.isbncomic,
-          pageCountcomic: data.pageCountcomic, starredcomic: data.starredcomic,
-          thumbnailcomic: data.thumbnailcomic, titlecomic: data.titlecomic)
+      case "Comic":
         return try comic.__decode(data: data)
-      case .file:
-        let data = Objects.File(
-          idfile: data.idfile, publicUrlfile: data.publicUrlfile, uploadUrlfile: data.uploadUrlfile)
+      case "File":
         return try file.__decode(data: data)
-      case .message:
-        let data = Objects.Message(
-          authormessage: data.authormessage, idmessage: data.idmessage,
-          imagemessage: data.imagemessage, messagemessage: data.messagemessage)
+      case "Message":
         return try message.__decode(data: data)
+      default:
+        throw ObjectDecodingError.unknownInterfaceType(
+          interface: "Interfaces.Node", typename: typename)
       }
-    case .mocking:
+    case .selecting:
       return try user.__mock()
     }
   }
@@ -1804,111 +1265,11 @@ enum Unions {}
 extension Unions {
   struct SearchResult {
     let __typename: TypeName
-    let descriptioncharacter: [String: String]
-    let descriptioncomic: [String: String]
-    let idcharacter: [String: String]
-    let idcomic: [String: String]
-    let imagecharacter: [String: String]
-    let isbncomic: [String: String]
-    let namecharacter: [String: String]
-    let pageCountcomic: [String: Int]
-    let starredcharacter: [String: Bool]
-    let starredcomic: [String: Bool]
-    let thumbnailcomic: [String: String]
-    let titlecomic: [String: String]
 
     enum TypeName: String, Codable {
       case character = "Character"
       case comic = "Comic"
     }
-  }
-}
-
-extension Unions.SearchResult: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "idcharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "namecharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "descriptioncharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "imagecharacter":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "starredcharacter":
-        if let value = try container.decode(Bool?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "idcomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "titlecomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "descriptioncomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "isbncomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "thumbnailcomic":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "pageCountcomic":
-        if let value = try container.decode(Int?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "starredcomic":
-        if let value = try container.decode(Bool?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.__typename = try container.decode(
-      TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
-
-    self.idcharacter = map["idcharacter"]
-    self.namecharacter = map["namecharacter"]
-    self.descriptioncharacter = map["descriptioncharacter"]
-    self.imagecharacter = map["imagecharacter"]
-    self.starredcharacter = map["starredcharacter"]
-    self.idcomic = map["idcomic"]
-    self.titlecomic = map["titlecomic"]
-    self.descriptioncomic = map["descriptioncomic"]
-    self.isbncomic = map["isbncomic"]
-    self.thumbnailcomic = map["thumbnailcomic"]
-    self.pageCountcomic = map["pageCountcomic"]
-    self.starredcomic = map["starredcomic"]
   }
 }
 
@@ -1925,21 +1286,17 @@ extension Fields where TypeLock == Unions.SearchResult {
 
     switch self.__state {
     case .decoding(let data):
-      switch data.__typename {
-      case .character:
-        let data = Objects.Character(
-          descriptioncharacter: data.descriptioncharacter, idcharacter: data.idcharacter,
-          imagecharacter: data.imagecharacter, namecharacter: data.namecharacter,
-          starredcharacter: data.starredcharacter)
+      let typename = try self.__decode(field: "__typename") { $0.value as? String }
+      switch typename {
+      case "Character":
         return try character.__decode(data: data)
-      case .comic:
-        let data = Objects.Comic(
-          descriptioncomic: data.descriptioncomic, idcomic: data.idcomic, isbncomic: data.isbncomic,
-          pageCountcomic: data.pageCountcomic, starredcomic: data.starredcomic,
-          thumbnailcomic: data.thumbnailcomic, titlecomic: data.titlecomic)
+      case "Comic":
         return try comic.__decode(data: data)
+      default:
+        throw ObjectDecodingError.unknownInterfaceType(
+          interface: "Unions.SearchResult", typename: typename)
       }
-    case .mocking:
+    case .selecting:
       return try character.__mock()
     }
   }
@@ -1951,57 +1308,11 @@ extension Selection where TypeLock == Never, Type == Never {
 extension Unions {
   struct AuthPayload {
     let __typename: TypeName
-    let messageauthPayloadFailure: [String: String]
-    let tokenauthPayloadSuccess: [String: String]
-    let userauthPayloadSuccess: [String: Objects.User]
 
     enum TypeName: String, Codable {
       case authPayloadSuccess = "AuthPayloadSuccess"
       case authPayloadFailure = "AuthPayloadFailure"
     }
-  }
-}
-
-extension Unions.AuthPayload: Decodable {
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-
-    var map = HashMap()
-    for codingKey in container.allKeys {
-      if codingKey.isTypenameKey { continue }
-
-      let alias = codingKey.stringValue
-      let field = GraphQLField.getFieldNameFromAlias(alias)
-
-      switch field {
-      case "tokenauthPayloadSuccess":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "userauthPayloadSuccess":
-        if let value = try container.decode(Objects.User?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      case "messageauthPayloadFailure":
-        if let value = try container.decode(String?.self, forKey: codingKey) {
-          map.set(key: field, hash: alias, value: value as Any)
-        }
-      default:
-        throw DecodingError.dataCorrupted(
-          DecodingError.Context(
-            codingPath: decoder.codingPath,
-            debugDescription: "Unknown key \(field)."
-          )
-        )
-      }
-    }
-
-    self.__typename = try container.decode(
-      TypeName.self, forKey: DynamicCodingKeys(stringValue: "__typename")!)
-
-    self.tokenauthPayloadSuccess = map["tokenauthPayloadSuccess"]
-    self.userauthPayloadSuccess = map["userauthPayloadSuccess"]
-    self.messageauthPayloadFailure = map["messageauthPayloadFailure"]
   }
 }
 
@@ -2021,18 +1332,17 @@ extension Fields where TypeLock == Unions.AuthPayload {
 
     switch self.__state {
     case .decoding(let data):
-      switch data.__typename {
-      case .authPayloadSuccess:
-        let data = Objects.AuthPayloadSuccess(
-          tokenauthPayloadSuccess: data.tokenauthPayloadSuccess,
-          userauthPayloadSuccess: data.userauthPayloadSuccess)
+      let typename = try self.__decode(field: "__typename") { $0.value as? String }
+      switch typename {
+      case "AuthPayloadSuccess":
         return try authPayloadSuccess.__decode(data: data)
-      case .authPayloadFailure:
-        let data = Objects.AuthPayloadFailure(
-          messageauthPayloadFailure: data.messageauthPayloadFailure)
+      case "AuthPayloadFailure":
         return try authPayloadFailure.__decode(data: data)
+      default:
+        throw ObjectDecodingError.unknownInterfaceType(
+          interface: "Unions.AuthPayload", typename: typename)
       }
-    case .mocking:
+    case .selecting:
       return try authPayloadSuccess.__mock()
     }
   }
@@ -2052,6 +1362,26 @@ extension Enums {
 
     case comic = "COMIC"
   }
+}
+
+extension Enums.Item: GraphQLScalar {
+  init(from data: AnyCodable) throws {
+    switch data.value {
+    case let string as String:
+      if let value = Enums.Item(rawValue: string) {
+        self = value
+      } else {
+        throw ScalarDecodingError.unknownEnumCase(value: string)
+      }
+    default:
+      throw ScalarDecodingError.unexpectedScalarType(
+        expected: "Item",
+        received: data.value
+      )
+    }
+  }
+
+  static var mockValue = Self.character
 }
 
 // MARK: - Input Objects

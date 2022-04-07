@@ -2,7 +2,6 @@
 
 import Combine
 import Foundation
-import GraphQLWebSocket
 
 extension URLSession {
     /// Returns a publisher that wrapps a URLSessionWebSocketTask.
@@ -13,7 +12,7 @@ extension URLSession {
 
 // MARK: - Publisher
 
-public struct WebSocketTaskPublisher: WebSocket {
+public struct WebSocketTaskPublisher {
     
     public typealias Output = URLSessionWebSocketTask.Message
     public typealias Failure = Error

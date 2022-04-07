@@ -12,6 +12,8 @@ import Foundation
  You can encode or decode mixed-type or unknown values in dictionaries
  and other collections that require `Encodable` or `Decodable` conformance
  by declaring their contained type to be `AnyCodable`.
+ 
+ - NOTE: `nil` values are represented as Void values.
  */
 public struct AnyCodable {
     public let value: Any
@@ -198,4 +200,15 @@ extension Optional: Flattenable {
     case .none: return nil
     }
   }
+}
+
+extension Optional {
+    init(_ anyCodable: AnyCodable) {
+        switch anyCodable.value {
+        case is Void:
+            self = nil
+        default:
+            self = anyCodable as? Wrapped
+        }
+    }
 }

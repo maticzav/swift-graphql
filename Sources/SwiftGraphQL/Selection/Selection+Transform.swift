@@ -1,13 +1,9 @@
 import Foundation
-
-/*
- This file contains utility functions that we generally use when writing queries
- using SwiftGraphQL.
- */
+import GraphQL
 
 // MARK: - Selection Transformation
 
-public extension Selection where TypeLock: Decodable {
+public extension Selection {
     
     /// Lets you convert a type selection into a list selection.
     var list: Selection<[Type], [TypeLock]> {
@@ -17,10 +13,13 @@ public extension Selection where TypeLock: Decodable {
             
             switch fields.__state {
             case let .decoding(data):
-                return try data.map {
-                    try self.__decode(data: $0)
+                switch data.value {
+                case let array as [Any]:
+                    return try array.map { try self.__decode(data: AnyCodable($0)) }
+                default:
+                    throw ObjectDecodingError.unexpectedObjectType(expected: "Array", received: data.value)
                 }
-            case .mocking:
+            case .selecting:
                 let item = try self.__mock()
                 return [item]
             }
@@ -35,8 +34,13 @@ public extension Selection where TypeLock: Decodable {
 
             switch fields.__state {
             case let .decoding(data):
-                return try data.map { try self.__decode(data: $0) }
-            case .mocking:
+                switch data.value {
+                case is Void:
+                    return nil
+                default:
+                    return try self.__decode(data: data)
+                }
+            case .selecting:
                 return try self.__mock()
             }
         }
@@ -50,17 +54,19 @@ public extension Selection where TypeLock: Decodable {
             
             switch fields.__state {
             case let .decoding(data):
-                if let data = data {
+                switch data.value {
+                case is Void:
+                    throw ObjectDecodingError.unexpectedNilValue
+                default:
                     return try self.__decode(data: data)
                 }
-                throw SelectionError.badpayload
-            case .mocking:
+            case .selecting:
                 return try self.__mock()
             }
         }
     }
     
-    /// Lets you make a failable (nullable) decoder comply accept nullable values.
+    /// Lets you make a failable (nullable) decoder accept nullable values.
     func optional<T>() -> Selection<Type, TypeLock?> where Type == T? {
         Selection<Type, TypeLock?> { fields in
             let selection = self.__selection()
@@ -68,19 +74,15 @@ public extension Selection where TypeLock: Decodable {
 
             switch fields.__state {
             case let .decoding(data):
-                return try data.map { try self.__decode(data: $0) }.flatMap { $0 }
-            case .mocking:
+                return try Optional(data).map { try self.__decode(data: $0) }.flatMap { $0 }
+            case .selecting:
                 return try self.__mock()
             }
         }
     }
 }
 
-/*
- Selection mapping functions.
- */
-
-public extension Selection where TypeLock: Decodable {
+public extension Selection {
     
     /// Maps selection's return value into a new value using provided mapping function.
     func map<MappedType>(_ fn: @escaping (Type) -> MappedType) -> Selection<MappedType, TypeLock> {
@@ -91,7 +93,7 @@ public extension Selection where TypeLock: Decodable {
             switch fields.__state {
             case let .decoding(data):
                 return fn(try self.__decode(data: data))
-            case .mocking:
+            case .selecting:
                 return fn(try self.__mock())
             }
         }
@@ -110,7 +112,7 @@ public extension Fields {
         switch __state {
         case let .decoding(data):
             return try selection.__decode(data: data)
-        case .mocking:
+        case .selecting:
             return try selection.__mock()
         }
     }
@@ -120,7 +122,7 @@ public extension Fields {
  Helper functions that let you make changes upfront.
  */
 
-public extension Selection where TypeLock: Decodable {
+public extension Selection {
     
     /// Lets you provide non-list selection for list field.
     static func list<NonListType, NonListTypeLock>(
@@ -136,4 +138,3 @@ public extension Selection where TypeLock: Decodable {
         selection.nullable
     }
 }
-

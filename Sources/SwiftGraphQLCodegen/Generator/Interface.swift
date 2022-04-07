@@ -19,17 +19,11 @@ extension InterfaceType {
         let name = self.name.pascalCase
         
         let definition = try self.definition(name: name, objects: objects, context: context)
-        let codable = try fieldsByType(parent: self.name, objects: objects, context: context)
-            .decoders(includeTypenameDecoder: true, context: context)
         let fields = try self.fields.getDynamicSelections(parent: self.name, context: context)
 
         return """
         extension Interfaces {
         \(definition)
-        }
-
-        extension Interfaces.\(name): Decodable {
-        \(codable)
         }
 
         extension Fields where TypeLock == Interfaces.\(name) {

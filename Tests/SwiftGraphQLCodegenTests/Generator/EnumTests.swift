@@ -60,6 +60,26 @@ final class EnumTests: XCTestCase {
                case skywalker = "SKYWALKER"
              }
            }
+           
+           extension Enums.Episodes: GraphQLScalar {
+             init(from data: AnyCodable) throws {
+               switch data.value {
+               case let string as String:
+                 if let value = Enums.Episodes(rawValue: string) {
+                   self = value
+                 } else {
+                   throw ScalarDecodingError.unknownEnumCase(value: string)
+                 }
+               default:
+                 throw ScalarDecodingError.unexpectedScalarType(
+                   expected: "Episodes",
+                   received: data.value
+                 )
+               }
+             }
+           
+             static var mockValue = Self.newhope
+           }
            """)
     }
 }

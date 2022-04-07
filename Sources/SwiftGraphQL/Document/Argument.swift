@@ -39,7 +39,7 @@ public struct Argument: Hashable {
     // MARK: - Initializer
 
     /// Returns a new argument with the given value.
-    public init<T: Encodable & Hashable>(name: String, type: String, value: T) {
+    public init<S: Hashable>(name: String, type: String, value: S) {
         // Argument information
         self.name = name
         self.type = type
@@ -60,14 +60,14 @@ public struct Argument: Hashable {
 
     /*
      We use hashable value struct to make sure that fields with same values
-     but different type annotations don't collide in the variables.
+     but different paths or names don't collide in the variables.
 
      Hash takes into account the type of the parameter and its value. It may
      happen that two unrelated fields with same values share a value, even
      though they are completely unrelated in business logic.
      */
-    struct HashableValue<Value: Hashable>: Hashable {
-        let value: Value
+    struct HashableValue<S: Hashable>: Hashable {
+        let value: S
         let type: String
     }
     

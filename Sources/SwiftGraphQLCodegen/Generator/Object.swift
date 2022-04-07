@@ -18,17 +18,11 @@ extension ObjectType {
         let apiName = self.name.pascalCase
         
         let definition = try self.definition(name: apiName, objects: objects, context: context)
-        let decoders = try self.fieldsByType(parent: self.name, objects: objects, context: context)
-            .decoders(context: context)
         let selection = try self.fields.getDynamicSelections(parent: self.name, context: context)
         
         var code = """
         extension Objects {
         \(definition)
-        }
-
-        extension Objects.\(apiName): Decodable {
-        \(decoders)
         }
 
         extension Fields where TypeLock == Objects.\(apiName) {

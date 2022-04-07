@@ -86,6 +86,7 @@ public struct GraphQLCodegen {
         let code = """
         // This file was auto-generated using maticzav/swift-graphql. DO NOT EDIT MANUALLY!
         import Foundation
+        import GraphQL
         import SwiftGraphQL
 
         // MARK: - Operations
@@ -118,6 +119,7 @@ public struct GraphQLCodegen {
         \(inputObjectDefinitions.lines)
         """
 
+//        return code
         let formatted = try code.format()
         return formatted
     }

@@ -3,8 +3,6 @@
 import Foundation
 import GraphQL
 
-
-
 /// Represents any messange that may be sent from a client.
 protocol ClientMessageInterface: Encodable, Equatable {}
 
@@ -163,7 +161,7 @@ public enum ClientMessage: Encodable {
 protocol ServerMessageInterface: Decodable, Equatable {}
  
 /// Messsages that originate on the server and are sent to the client.
-enum ServerMessage<SubscriptionPayload: Decodable & Equatable>: Decodable {
+enum ServerMessage: Decodable {
     case acknowledge(ConnectionAck)
     
     /// A biderctional message used for detailing connection's health.
@@ -230,7 +228,7 @@ enum ServerMessage<SubscriptionPayload: Decodable & Equatable>: Decodable {
     public struct Next: ServerMessageInterface, Identifiable {
         public var type: Type = .next
         public var id: String
-        public var payload: ExecutionResult<SubscriptionPayload>
+        public var payload: ExecutionResult
     }
 
     /// Operation execution error(s) triggered by the next message happening before the
@@ -286,3 +284,26 @@ enum ServerMessage<SubscriptionPayload: Decodable & Equatable>: Decodable {
         case type
     }
 }
+
+// MARK: - Close Code
+
+/// Standard close codes of the GraphQLWS protocol.
+public enum CloseCode: Int, CaseIterable {
+    case internalServerError = 4500
+    case internalClientError = 4005
+    case badRequest = 4400
+    case badResponse = 4404
+    
+    /// Tried subscribing before connection was acknowledged.
+    case unauthorized = 4401
+    case forbidden = 4403
+    case subprotocolNotAcceptable = 4406
+    case connectionInitialisationTimeout = 4408
+    case connectionAcknowledgementTimeout = 4504
+    
+    case subscriberAlreadyExists = 4409
+    case tooManyInitialisationRequests = 4429
+}
+
+/// The WebSocket sub-protocol used for the GraphQL over WebSocket protocol
+public let graphqlTransportWSProtocol = "graphql-transport-ws"

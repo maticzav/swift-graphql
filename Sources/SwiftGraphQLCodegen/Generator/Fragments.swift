@@ -15,10 +15,13 @@ extension Collection where Element == ObjectTypeRef {
 
                 switch self.__state {
                 case .decoding(let data):
-                    switch data.__typename {
+                    let typename = try self.__decode(field: "__typename") { $0.value as? String }
+                    switch typename {
                     \(self.decoders(objects: objects))
+                    default:
+                        throw ObjectDecodingError.unknownInterfaceType(interface: "\(type)", typename: typename)
                     }
-                case .mocking:
+                case .selecting:
                     return try \(mock).__mock()
                 }
             }
@@ -64,19 +67,8 @@ private extension ObjectTypeRef {
     /// - parameter objects: List of all objects that appear in the schema.
     func decoder(objects: [ObjectType]) -> String {
         let name = namedType.name
-        let object = objects.first { $0.name == name }!
-
-        let fields = object.fields
-            .sorted(by: { $0.name < $1.name })
-            .map {
-                let name = "\($0.name.camelCase)\(name.camelCase)"
-                return "\(name): data.\(name)"
-            }
-            .joined(separator: ", ")
-
         return """
-        case .\(name.camelCase):
-            let data = Objects.\(name.pascalCase)(\(fields))
+        case "\(name)":
             return try \(name.camelCase).__decode(data: data)
         """
     }

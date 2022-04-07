@@ -29,7 +29,7 @@ extension URLRequest {
     public mutating func query<T, TypeLock>(
         _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil
-    ) where TypeLock: GraphQLOperation & Decodable {
+    ) where TypeLock: GraphQLOperation {
         self.httpMethod = "POST"
         self.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
@@ -45,7 +45,7 @@ extension URLRequest {
     public func querying<T, TypeLock>(
         _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil
-    ) -> URLRequest where TypeLock: GraphQLOperation & Decodable {
+    ) -> URLRequest where TypeLock: GraphQLOperation {
         var copy = self
         copy.query(selection, as: operationName)
         return copy
@@ -57,8 +57,11 @@ extension Data {
     /// Decodes the response of a request made using SwiftGraphQL selection.
     func decode<T, TypeLock>(
         _ selection: Selection<T, TypeLock>
-    ) throws -> ExecutionResult<T> where TypeLock: GraphQLOperation & Decodable {
-        let (data, errors) = try selection.decode(raw: self)
-        return ExecutionResult(data: data, errors: errors)
+    ) throws -> (data: T, errors: [GraphQLError]?) where TypeLock: GraphQLOperation {
+        let decoder = JSONDecoder()
+        let result = try decoder.decode(ExecutionResult.self, from: self)
+        let data = try selection.decode(raw: result.data)
+        
+        return (data, result.errors)
     }
 }

@@ -6,110 +6,107 @@ import XCTest
 final class SelectionDecodingTests: XCTestCase {
     
     func testRegular() throws {
-        let data: Data = """
-        {
-          "data": "Hello World!"
-        }
-        """.data(using: .utf8)!
+        let result: ExecutionResult = """
+            {
+              "data": "Hello World!"
+            }
+            """.execution()
 
         let selection = Selection<String, String> {
             switch $0.__state {
             case let .decoding(data):
-                return data
-            case .mocking:
+                return try String(from: data)
+            case .selecting:
                 return "wrong"
             }
         }
         
-        let result = try selection.decode(raw: data)
-        XCTAssertEqual(result.data, "Hello World!")
+        let decoded = try selection.decode(raw: result.data)
+        XCTAssertEqual(decoded, "Hello World!")
         XCTAssertEqual(result.errors, nil)
     }
 
     func testNullable() throws {
-        let data: Data = """
-        {
-          "data": null
-        }
-        """.data(using: .utf8)!
+        let result: ExecutionResult = """
+            {
+              "data": null
+            }
+            """.execution()
 
         let selection = Selection<String?, String?> {
             switch $0.__state {
             case let .decoding(data):
-                return data
-            case .mocking:
+                return try String?(from: data)
+            case .selecting:
                 return "wrong"
             }
         }
         
-        let result = try selection.decode(raw: data)
-        XCTAssertEqual(result.data, nil)
+        let decoded = try selection.decode(raw: result.data)
+        XCTAssertEqual(decoded, nil)
         XCTAssertEqual(result.errors, nil)
     }
 
     func testList() throws {
         
-        let data: Data = """
-        {
-          "data": [1, 2, 3]
-        }
-        """.data(using: .utf8)!
+        let result: ExecutionResult = """
+            {
+              "data": [1, 2, 3]
+            }
+            """.execution()
         
         let selection = Selection<Int, Int> {
             switch $0.__state {
             case let .decoding(data):
-                return data
-            case .mocking:
+                return try Int(from: data)
+            case .selecting:
                 return 0
             }
         }
 
-        let result = try selection.list.decode(raw: data)
-        XCTAssertEqual(result.data, [1, 2, 3])
+        let decoded = try selection.list.decode(raw: result.data)
+        XCTAssertEqual(decoded, [1, 2, 3])
         XCTAssertEqual(result.errors, nil)
     }
     
     func testNonNullableOrError() throws {
-        let data: Data = """
-        {
-          "data": null
-        }
-        """.data(using: .utf8)!
+        let result: ExecutionResult = """
+            {
+              "data": null
+            }
+            """.execution()
         
         let selection = Selection<String, String> {
             switch $0.__state {
             case let .decoding(data):
-                return data
-            case .mocking:
+                return try String(from: data)
+            case .selecting:
                 return "wrong"
             }
         }
 
-        XCTAssertThrowsError(try selection.nonNullOrFail.decode(raw: data)) { (error) -> Void in
-            XCTAssertEqual(error as? SelectionError, SelectionError.badpayload)
+        XCTAssertThrowsError(try selection.nonNullOrFail.decode(raw: result.data)) { (error) -> Void in
+            XCTAssertEqual(error as! ObjectDecodingError, ObjectDecodingError.unexpectedNilValue)
         }
     }
 
     func testCustomError() throws {
-        let data: Data = """
-        {
-          "data": null
-        }
-        """.data(using: .utf8)!
+        let result: ExecutionResult = """
+            {
+              "data": null
+            }
+            """.execution()
         
         let selection = Selection<String, String?> {
             switch $0.__state {
-            case let .decoding(data):
-                guard let data = data else {
-                    throw CustomError.null
-                }
-                return data
-            case .mocking:
+            case .decoding:
+                throw CustomError.null
+            case .selecting:
                 return "wrong"
             }
         }
 
-        XCTAssertThrowsError(try selection.decode(raw: data)) { (error) -> Void in
+        XCTAssertThrowsError(try selection.decode(raw: result.data)) { (error) -> Void in
             XCTAssertEqual(error as? CustomError, CustomError.null)
         }
     }
@@ -121,53 +118,53 @@ final class SelectionDecodingTests: XCTestCase {
     // MARK: - Mapping
 
     func testSelectionMapping() throws {
-        let data: Data = """
+        let result: ExecutionResult = """
         {
           "data": "right"
         }
-        """.data(using: .utf8)!
+        """.execution()
         
         let selection = Selection<String, String> {
             switch $0.__state {
             case let .decoding(data):
-                return data
-            case .mocking:
+                return try String(from: data)
+            case .selecting:
                 return "wrong"
             }
         }
 
-        let result = try selection.map { $0 == "right" }.decode(raw: data)
-        XCTAssertEqual(result.data, true)
+        let decoded = try selection.map { $0 == "right" }.decode(raw: result.data)
+        XCTAssertEqual(decoded, true)
         XCTAssertEqual(result.errors, nil)
     }
     
     // MARK: - Errors
 
     func testResponseWithErrors() throws {
-        let data: Data = """
-        {
-          "errors": [
+        let result: ExecutionResult = """
             {
-              "message": "Message.",
-              "locations": [ { "line": 6, "column": 7 } ],
-              "path": [ "hero", "heroFriends", 1, "name" ]
+              "errors": [
+                {
+                  "message": "Message.",
+                  "locations": [ { "line": 6, "column": 7 } ],
+                  "path": [ "hero", "heroFriends", 1, "name" ]
+                }
+              ],
+              "data": "data"
             }
-          ],
-          "data": "data"
-        }
-        """.data(using: .utf8)!
+            """.execution()
         
         let selection = Selection<String, String> {
             switch $0.__state {
             case let .decoding(data):
-                return data
-            case .mocking:
+                return try String(from: data)
+            case .selecting:
                 return "wrong"
             }
         }
 
-        let result = try selection.decode(raw: data)
-        XCTAssertEqual(result.data, "data")
+        let decoded = try selection.decode(raw: result.data)
+        XCTAssertEqual(decoded, "data")
         XCTAssertEqual(result.errors, [
             GraphQLError(
                 message: "Message.",
@@ -175,5 +172,15 @@ final class SelectionDecodingTests: XCTestCase {
                 path: [.path("hero"), .path("heroFriends"), .index(1), .path("name")]
             ),
         ])
+    }
+}
+
+extension String {
+    
+    /// Converts a string representation of a GraphQL result into the execution result that may be used to
+    /// test selection result..
+    fileprivate func execution() -> ExecutionResult {
+        let decoder = JSONDecoder()
+        return try! decoder.decode(ExecutionResult.self, from: self.data(using: .utf8)!)
     }
 }

@@ -3,15 +3,11 @@ import GraphQL
 
 // MARK: - Decoding
 
-extension Selection where TypeLock: Decodable {
+extension Selection {
     
-    /// Decodes received data into selected type.
-    public func decode(raw: Data) throws -> (data: Type, errors: [GraphQLError]?) {
-        let decoder = JSONDecoder()
-        let res = try decoder.decode(ExecutionResult<TypeLock>.self, from: raw)
-        
-        let parsed = try self.__decode(data: res.data)
-        return (parsed, res.errors)
+    /// Decodes `data` field of the received response of a GraphQL query execution.
+    public func decode(raw: AnyCodable) throws -> Type {
+        try self.__decode(data: raw)
     }
 }
 

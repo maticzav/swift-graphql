@@ -6,6 +6,7 @@ public struct ExecutionArgs: Codable, Equatable {
     /// Stringified GraphQL selection.
     public var query: String
     
+    /// Variables forwarded to the client in the JSON body.
     public var variables: [String: AnyCodable]
     
     /// Name that should be used to identify the operation.
@@ -29,23 +30,25 @@ extension ExecutionArgs: Hashable {
     }
 }
 
-/// The result of GraphQL execution.
-///
-/// - NOTE:
-///   - `errors` is included when any errors occurred as a non-empty array.
-///   - `data` is the result of a successful execution of the query.
-///   - `extensions` is reserved for adding non-standard properties.
-public struct ExecutionResult<T> {
-    public var data: T
+public struct ExecutionResult {
+    
+    /// Result of a successfull execution of a query.
+    public var data: AnyCodable
+    
+    /// Any errors that occurred during the GraphQL execution of the server.
     public var errors: [GraphQLError]?
     
-    public init(data: T, errors: [GraphQLError]? = nil) {
+    /// Optional parameter indicating that there are more values following this one.
+    public var hasNext: Bool?
+    
+    public init(data: AnyCodable, errors: [GraphQLError]? = nil, hasNext: Bool? = nil) {
         self.data = data
         self.errors = errors
+        self.hasNext = hasNext
     }
 }
 
 
-extension ExecutionResult: Equatable where T: Equatable {}
-extension ExecutionResult: Encodable where T: Encodable {}
-extension ExecutionResult: Decodable where T: Decodable {}
+extension ExecutionResult: Equatable  {}
+extension ExecutionResult: Encodable  {}
+extension ExecutionResult: Decodable  {}
