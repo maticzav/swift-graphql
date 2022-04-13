@@ -8,7 +8,7 @@ extension Publisher {
         Publishers.StatefulPublisher<Self>(upstream: self, onStart: handler)
     }
     
-    /// An operator that triggers the handler when the publisher sends the subscription down to the subscriber.
+    /// An operator that triggers the handler when the publisher sends the completion event down to the subscriber.
     func onEnd(_ handler: @escaping () -> Void) -> Publishers.StatefulPublisher<Self> {
         Publishers.StatefulPublisher<Self>(upstream: self, onEnd: handler)
     }
@@ -202,14 +202,16 @@ extension Publishers {
         // MARK: - Publisher
         
         func receive<S>(subscriber: S) where S : Subscriber, Failure == S.Failure, Output == S.Input {
+            
             // Wraps the actual subscriber inside a custom subscribers
             // and subscribes to the upstream publisher with it.
-            let sub = Subscriptions.TakeUntilSubscription(
+            let takeUntilSubscription = Subscriptions.TakeUntilSubscription(
                 subscriber: subscriber,
                 predicate: self.predicate
             )
-            subscriber.receive(subscription: sub)
-            self.upstream.receive(subscriber: sub)
+            
+            subscriber.receive(subscription: takeUntilSubscription)
+            self.upstream.receive(subscriber: takeUntilSubscription)
         }
         
     }

@@ -126,17 +126,8 @@ extension OperationResult {
             stale: self.stale
         )
         
-        guard let data = self.data else {
-            return decoded
-        }
-        
         do {
-            let (result, errors) = try selection.decode(raw: data)
-            
-            decoded.data = result
-            if let errors = errors {
-                decoded.errors.append(contentsOf: errors.map { CombinedError.graphql($0) })
-            }
+            decoded.data = try selection.decode(raw: self.data)
         } catch(let err) {
             decoded.errors.append(CombinedError.parsing(err))
         }

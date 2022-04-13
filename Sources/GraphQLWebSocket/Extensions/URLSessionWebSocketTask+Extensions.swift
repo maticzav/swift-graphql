@@ -4,34 +4,36 @@ import Combine
 import Foundation
 
 extension URLSession {
-    /// Returns a publisher that wrapps a URLSessionWebSocketTask.
+    
+    /// Creates a new WebSocket task on this URLSession and returns
+    /// a publisher that emits response received events.
     func websocketTaskPublisher(for request: URLRequest) -> WebSocketTaskPublisher {
-        WebSocketTaskPublisher(with: request, session: self)
+        WebSocketTaskPublisher(request: request, session: self)
     }
 }
 
 // MARK: - Publisher
 
-public struct WebSocketTaskPublisher {
+struct WebSocketTaskPublisher: Publisher {
     
-    public typealias Output = URLSessionWebSocketTask.Message
-    public typealias Failure = Error
+    typealias Output = URLSessionWebSocketTask.Message
+    typealias Failure = Error
     
     /// The websocket task we are observing.
-    let task: URLSessionWebSocketTask
+    private let task: URLSessionWebSocketTask
     
-    /// Creates a WebSocket task publisher from the provided URL and URL session.
+    /// Creates a WebSocket task publisher from the provided request on the given URL session.
+    ///
+    /// - parameter request: The URL request to use as connection provider.
+    /// - parameter session: The session to bundle the task with.
     ///
     /// - NOTE: The provided url must use a `ws` or `wss` scheme!
-    /// - Parameters:
-    ///     - url: The WebSocket URL to connect to.
-    ///     - session: The URLSession to use to create a task.
-    public init(with request: URLRequest, session: URLSession = URLSession.shared) {
+    init(request: URLRequest, session: URLSession) {
         self.task = session.webSocketTask(with: request)
     }
     
     /// Tells the subscriber that it has successfully subscribed to the publisher and may request items.
-    public func receive<S>(subscriber: S) where S : Subscriber, Error == S.Failure, URLSessionWebSocketTask.Message == S.Input {
+    func receive<S>(subscriber: S) where S : Subscriber, Error == S.Failure, URLSessionWebSocketTask.Message == S.Input {
         let subscription = Subscription(task: self.task, target: subscriber)
         subscriber.receive(subscription: subscription)
     }
@@ -48,9 +50,12 @@ public struct WebSocketTaskPublisher {
 }
 
 extension WebSocketTaskPublisher {
-    class Subscription<Target: Subscriber>: Combine.Subscription where Target.Input == Output, Target.Failure == Failure {
+    fileprivate class Subscription<Target: Subscriber>: Combine.Subscription where Target.Input == Output, Target.Failure == Failure {
         
+        /// Task to use in the subscription.
         let task: URLSessionWebSocketTask
+        
+        /// Subscriber to this publisher.
         var target: Target?
         
         init(task: URLSessionWebSocketTask, target: Target) {

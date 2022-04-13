@@ -59,24 +59,21 @@ public class FetchExchange: Exchange {
             })
             .flatMap({ operation in
                 self.session.dataTaskPublisher(for: operation.request)
-                    .decode(type: ExecutionResult.self, decoder: decoder)
-                    .map { result in
-                        //* TODO: Process errors!
-                        
-                        return OperationResult(
-                            operation: operation,
-                            data: result.data,
-                            errors: [],
-                            stale: false
-                        )
+                    .map { (data, _) -> OperationResult in
+                        do {
+                            let result = try self.decoder.decode(ExecutionResult.self, from: data)
+                            
+                            if let errors = result.errors {
+                                return OperationResult(operation: operation, data: result.data, errors: [.graphql(errors)], stale: false)
+                            }
+                            
+                            return OperationResult(operation: operation, data: result.data, errors: [], stale: false)
+                        } catch(let err) {
+                            return OperationResult(operation: operation, data: AnyCodable(()), errors: [.parsing(err)], stale: false)
+                        }
                     }
-                    .catch { error -> AnyPublisher<OperationResult, Never> in
-                        let result = OperationResult(
-                            operation: operation,
-                            data: nil,
-                            errors: [.network(error)],
-                            stale: false
-                        )
+                    .catch { (error: URLError) -> AnyPublisher<OperationResult, Never> in
+                        let result = OperationResult(operation: operation, data: nil, errors: [.network(error)], stale: false)
                         
                         return Just(result).eraseToAnyPublisher()
                     }

@@ -103,7 +103,8 @@ class CacheExchange: Exchange {
                 }
                 
                 // Cache query result and operation references.
-                if let _ = result.data, result.operation.kind == .query {
+                // NOTE: AnyCodable represents nil values as Void objects.
+                if !(result.data.value is Void), result.operation.kind == .query {
                     self.resultCache[result.operation.id] = result
                     
                     // NOTE: CacheOnly operations never receive data from the

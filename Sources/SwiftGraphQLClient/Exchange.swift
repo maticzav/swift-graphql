@@ -129,14 +129,17 @@ public struct DecodedOperationResult<T: Decodable> {
 /// An error structure describing an error that may have happened in one of the exchanges.
 public enum CombinedError: Error {
     
-    /// Describes errors that occur on the networking layer.
+    /// Describes an error that occured on the networking layer.
     case network(URLError)
     
     /// Describes errors that occured during the GraphQL execution.
-    case graphql(GraphQLError)
+    case graphql([GraphQLError])
     
-    /// Describes errors that occured during the parsing phase on the client.
+    /// Describes an error that occured during the parsing phase on the client.
     case parsing(Error)
+    
+    /// An error occured and it's not clear why.
+    case unknown(Error)
 }
 
 extension CombinedError: Equatable {
