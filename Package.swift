@@ -141,5 +141,9 @@ let package = Package(
             name: "GraphQLASTTests",
             dependencies: ["GraphQLAST"]
         ),
+        .testTarget(
+            name: "GraphQLWebSocketTests",
+            dependencies: ["GraphQLWebSocket"]
+        ),
     ]
 )

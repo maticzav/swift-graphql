@@ -1,230 +1,382 @@
+// This file is heavily inspired by https://github.com/enisdenjo/graphql-ws.
+
 import Foundation
 import Combine
 import GraphQL
 import os
 
-/// Protocol that outlines a websocket-compatible structure.
-public protocol WebSocket: Publisher where Failure == Error, Output == URLSessionWebSocketTask.Message {
-    /// Sends a WebSocket message, receiving the result in a completion handler.
-    func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping (Error?) -> Void)
-    
-    /// Stops the communication channel.
-    func close() -> Void
-}
-
 /// A GraphQL client that lets you send queries over WebSocket protocol.
 ///
 /// - NOTE: The client assumes that you'll manually establish the socket connection
 ///         and that it may send requests.
-public class GraphQLSubscriptionClient<Socket: WebSocket> {
+public class GraphQLWebSocket {
     
-    /// Main WebSocket communication channel between the server and the client.
-    private let socket: Socket
-    
-    /// Publisher of the stream
-    private var stream: AnyPublisher<Data, Error>
-    
-    /// Connection is a connection within the established socket describing a channel through which the operation requests will be communicated.
+    /// Optional parameters, passed through the `payload` field with the `ConnectionInit` message,
+    /// that the client specifies when establishing a connection with the sever.
     ///
-    /// - NOTE: All connections share the same socket and each subscription creates
-    ///         a new connection.
-    struct Connection<TypeLock>: Identifiable {
-        var id: UUID
+    /// You can use this for securely passing arguments for authentication.
+    public var connectionParams: [String: AnyCodable]? = nil
     
-        var status: Status
+    /// Controls when the client should establish a connection with the server.
+    public var behaviour: Behaviour = .lazy(closeTimeout: 0)
+    
+    public enum Behaviour {
+        // https://stackoverflow.com/questions/5427949/what-is-the-opposite-of-lazy-loading
         
-        enum Status {
-            /// Client has successfully subscribed to the server events.
-            case subscribed
-            
-            /// Client or server has ended the communication.
-            case closed
-        }
+        /// Client immediately establishes a connection.
+        case eager
         
-        /// Stream of payloads for a given subscription.
-        var publisher: AnyPublisher<TypeLock, Error>
+        
+        /// Establishes a connection on first subscribe and close on last unsubscribe.
+        ///
+        /// - parameter closeTimeout: Tells how long the client should wait before closing the socket after the last operation has completed.
+        case lazy(closeTimeout: Int)
     }
     
-    private var cancellables = Set<AnyCancellable>()
+    /// Timeout between dispatched keep-alive messages (i.e. server pings). The client internally
+    /// dispatches the `PingMessage` type to the server and expects a `PongMessage` in response.
+    ///
+    /// Timeout countdown starts from the moment the socket was opened and subsequently after every received `PongMessage`.
+    ///
+    ///
+    public var keepAlive: Int = 0
+    
+    /// How many times should the client try to reconnect on abnormal socket closure before it errors out?
+    ///
+    /// The library classifies the following close events as fatal:
+    /// - _All internal WebSocket fatal close codes (check `isFatalInternalCloseCode` in `src/client.ts` for exact list)_
+    /// - `4500: Internal server error`
+    /// - `4005: Internal client error`
+    /// - `4400: Bad request`
+    /// - `4004: Bad response`
+    /// - `4401: Unauthorized` _tried subscribing before connect ack_
+    /// - `4406: Subprotocol not acceptable`
+    /// - `4409: Subscriber for <id> already exists` _distinction is very important_
+    /// - `4429: Too many initialisation requests`
+    ///
+    /// These events are reported immediately and the client will not reconnect.
+    public var retryAttempts: Int = 5
+    
+    /// Custom function that returns the wait time in milliseconds after a given number of retries.
+    public var retryWait: (Int) -> Int = { i in
+        // random exponantial backoff
+        1000 * 2 ^ i + Int.random(in: 300..<3000)
+    }
+    
+    /// Session that should be used to create a WebSocket task.
+    public var session: URLSession
+    
+    /// Connection parameters for the task.
+    public var request: URLRequest
+    
+    /// Shared encoder used to encode the request.
+    public var encoder: JSONEncoder = JSONEncoder()
+    
+    /// Shared decoder used for decoding responses.
+    public var decoder: JSONDecoder = JSONDecoder()
+    
+    /// Logger that we use to communitcate state changes inside the WebSocket.
+    public var logger: Logger = Logger(subsystem: "graphql", category: "socket")
+    
+    // MARK: - State
+    
+    /// Holds information about the connection health and what the client is doing about it.
+    private var health: Health = .connecting
+
+    // socket ---> connect (retries, connection ack, init) ----> subscriptions
+    
+    private enum Health {
+
+        /// Connection is healthy and client can communicate with the server using a given task.
+        case active(publisher: WebSocketTaskPublisher)
+
+        /// Connection with the server hasn't been established yet.
+        case connecting
+
+//        /// Server is unreachable and client is trying to reconnect.
+//        case reconnecting(retry: Int)
+    }
+    
+    /// Tells whether the server has been disposed.
+    ///
+    /// - NOTE: Server may be in any of the states when it's disposing, that's why it's not a separate health case.
+    private var disposed: Bool = false
+    
+    /// Listeners identified by the id of the pipeline.
+    ///
+    /// - NOTE: When the subscriber no longer listens for the events of the listener
+    ///         it should remove it from the dictionary.
+    private var listeners = [String: DisposablePublisher<StateEvent, Never>]()
     
     /// Queue of messages that should be sent to the server.
     ///
     /// - NOTE: The first message to be sent has index zero.
     private var queue = [ClientMessage]()
     
-    enum State {
-        /// Client has sent an initialisation
-        case notestablished
+    public enum StateEvent {
+        /// Client started connecting.
+        case connecting
         
-        /// The server has sent initialisation request but hasn't received reply yet.
-        case initialising
+        /// WebSocket has opened.
+        case opened(socket: URLSessionWebSocketTask)
         
-        /// Server has acknowledge the connection and we can start subscribing.
-        case active
+        /// Open WebSocket connection has been acknowledged
+        case connected(socket: URLSessionWebSocketTask, payload: [String: AnyCodable]?)
         
-        /// Server hasn't responded for a while.
-        case lost
+        /// Ping message has been received or sent.
+        ///
+        /// - parameter received: Tells whether the ping was received from the server. If `false` the client sent the ping.
+        case ping(received: Bool, payload: [String: AnyCodable]?)
+        
+        /// Pong message has been received or sent.
+        ///
+        /// - parameter received: Tells whether the pong was received from the server. If `false` the client sent the event.
+        case pong(received: Bool, payload: [String: AnyCodable]?)
+        
+        /// A message from the server has been received.
+        case message(ServerMessage)
+        
+        /// WebSocket connection has closed.
+        case closed
+        
+        /// WebSocket connection had an error or client had an internal error.
+        case error(Error)
     }
     
-    /// Tells whether the server has acknowledge the connection.
-    private var state: State = .notestablished {
-        didSet {
-            try? self.flush()
-        }
-    }
+    /// Holds references to pipelines created by subscriptions. Each pipeline is identified by the
+    /// query id of the subscription that created a pipeline.
+    ///
+    /// - NOTE: We also use pipelines to tell how many ongoing connections the client is managing.
+    private var pipelines = [String: AnyCancellable]()
     
-    /// Shared encoder used to encode the request.
-    private var encoder: JSONEncoder = JSONEncoder()
-    
-    /// Shared decoder used for decoding responses.
-    private var decoder: JSONDecoder = JSONDecoder()
-    
-    /// Logger that we use to communitcate state changes inside the WebSocket.
-    private var logger: Logger = Logger(subsystem: "graphql", category: "socket")
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initializer
     
     /// Creates a new GraphQL WebSocket client from the given connection.
     ///
     /// - parameter timeout: Number of seconds before a ping request is sent.
-    init(
-        socket: Socket,
-        timeout: Double
-    ) {
-        self.socket = socket
-        
-        self.stream = self.socket
-            .compactMap({ message in
-                switch message {
-                case .data(let data):
-                    return data
-                default:
-                    return nil
-                }
-            })
-            .share()
-            .eraseToAnyPublisher()
-        
-        // We debounce for a given interval before sending a ping request.
-        // This results in us sending a ping request after the timeout.
-        self.socket
-            .debounce(for: .seconds(timeout), scheduler: RunLoop.main)
-            .sink { _ in } receiveValue: { _ in
-                try? self.send(message: ClientMessage.ping())
-            }
-            .store(in: &self.cancellables)
+    public init(session: URLSession, request: URLRequest) {
+        self.session = session
+        self.request = request
+    }
 
-    }
-    
-    // MARK: - Methods
-    
-    /// Creates a subscription stream for a given query.
-    func subscribe<TypeLock: Decodable & Equatable>(_ args: ExecutionArgs) throws -> AnyPublisher<ExecutionResult<TypeLock>, Error> {
-        let id = UUID()
-        
-        let subject = PassthroughSubject<ExecutionResult<TypeLock>, Error>()
-        let connection = Connection<ExecutionResult<TypeLock>>(
-            id: id,
-            status: .subscribed,
-            publisher: subject.eraseToAnyPublisher()
-        )
-        
-        logger.log("new subscription: \(id)")
-        
-        // Set up event handler.
-        self.stream
-            .decode(type: ServerMessage<TypeLock>.self, decoder: self.decoder)
-            .tryFilter({ [weak self] message in
-                // Process internal requests and filter the ones relevant to the subscriber.
-                
-                guard let self = self else {
-                    return false
-                }
-                
-                switch message {
-                case .acknowledge:
-                    self.logger.debug("server acknowledged")
-                    
-                    self.state = .active
-                    return false
-                case .ping(let msg):
-                    self.logger.debug("server pinged")
-                    
-                    try self.send(message: ClientMessage.pong(payload: msg.payload))
-                    return false
-                case .pong:
-                    self.logger.debug("server ponged")
-                    
-                    self.state = .active
-                    return false
-                case .error(let msg):
-                    self.logger.debug("server errored")
-                    
-                    throw msg.payload
-                case .next, .complete:
-                    return true
-                }
-            })
-            .sink(receiveCompletion: { completion in
-                self.logger.log("connection torn down")
-                
-                subject.send(completion: completion)
-            }, receiveValue: { message in
-                switch message {
-                case .next(let msg):
-                    self.logger.log("received next message")
-                    
-                    subject.send(msg.payload)
-                    break
-                case .complete:
-                    self.logger.log("received completion")
-                    
-                    subject.send(completion: .finished)
-                    break
-                default:
-                    break
-                }
-            })
-            .store(in: &self.cancellables)
-    
-        // Start the socket if necessary.
-        if self.state == .notestablished {
-            self.state = .initialising
-            try self.send(message: ClientMessage.initalise(payload: nil))
-        }
-        
-        // Create the connection.
-        let message = ClientMessage.subscribe(id: id.uuidString, payload: args)
-        if self.state != .active {
-            self.queue.append(message)
-        } else {
-            try self.send(message: message)
-        }
-        
-        return connection.publisher
-    }
-    
     // MARK: - Internals
     
     /// Sends a message using the websocket transport.
-    private func send(message: ClientMessage) throws {
-        let data = try self.encoder.encode(message)
+    private func send(message: ClientMessage) {
+        let data = try! self.encoder.encode(message)
         let message: URLSessionWebSocketTask.Message = .data(data)
         
-        self.socket.send(message) { [weak self] error in
-            guard let error = error, let self = self else {
-                return
-            }
-            
-            self.logger.log("error sending message: \(error.localizedDescription)")
-        }
+        
     }
     
     /// Flushes the queue one message at a time.
     private func flush() throws {
-        while !self.queue.isEmpty, self.state == .active {
-            try self.send(message: self.queue.removeFirst())
+        while !self.queue.isEmpty {
+            self.send(message: self.queue.removeFirst())
         }
     }
+    
+    /// Establishes a connection with the server and connects event listeners to the server stream.
+    /// In case the server failed to reconnect on error, we dispose of all listeners.
+    private func connect(id: String) -> DisposablePublisher<StateEvent, Never> {
+        switch self.health {
+        case .active:
+            ()
+        case .connecting:
+            let publisher = self.session.websocketTaskPublisher(for: self.request)
+            
+            publisher
+                .map { message in
+                    switch message {
+                    case .string(let str):
+                        return Data(str.utf8)
+                    case .data(let data):
+                        return data
+                    @unknown default:
+                        fatalError()
+                    }
+                }
+                .decode(type: ServerMessage.self, decoder: self.decoder)
+                .map { msg -> StateEvent in
+                    .message(msg)
+                }
+                .catch({ err -> AnyPublisher<StateEvent, Never> in
+                    Just(.error(err)).eraseToAnyPublisher()
+                })
+                .sink { completion in
+                    for listener in self.listeners {
+                        listener.value.send(completion: completion)
+                    }
+                } receiveValue: { value in
+                    for listener in self.listeners {
+                        listener.value.send(value)
+                    }
+                }
+                .store(in: &self.cancellables)
+        }
+        
+        let listener = DisposablePublisher<StateEvent, Never>() {
+            self.listeners.removeValue(forKey: id)
+        }
+        
+        self.listeners[id] = listener
+        
+        return listener
+    }
+    
+    /// Releases the connection with the server for an operation with a given id.
+    private func release(id: String) {
+        self.listeners[id]?.dispose()
+        
+        // Check that we haven't disposed the connection already.
+        if let pipeline = self.pipelines[id] {
+            self.send(message: ClientMessage.complete(id: id))
+        }
+        
+        self.pipelines.removeValue(forKey: id)
+    }
+    
+    // MARK: - Calculations
+    
+    /// Tells whether the provided close code is unrecoverable by the client.
+    private static func isFatalInternalCloseCode(code: Int) -> Bool {
+        let recoverable = [
+            1000, // Normal Closure is not an erroneous close code
+            1001, // Going Away
+            1006, // Abnormal Closure
+            1005, // No Status Received
+            1012, // Service Restart
+            1013, // Try Again Later
+            1013, // Bad Gateway
+        ]
+        
+        if recoverable.contains(code) {
+            return false
+        }
+        return 1000 <= code && code <= 1999
+    }
+    
+    enum TerminationEvent {
+        /// Server has sent a close event with a given code
+        case closeEvent(code: Int)
+    }
+    
+    /// Checks the state of the client and tells whether the client should try reconnecting to the
+    /// server given the received event.
+    private func shouldRetryToConnect(event: TerminationEvent) -> Bool {
+        
+        // Client was disposed and we shouldn't retry to reconnect.
+        if self.disposed {
+            return false
+        }
+        
+        switch (event) {
+        case let .closeEvent(code):
+            let isTerminatingCloseCode = [
+                CloseCode.internalServerError.rawValue,
+                CloseCode.internalClientError.rawValue,
+                CloseCode.badRequest.rawValue,
+                CloseCode.badResponse.rawValue,
+                CloseCode.unauthorized.rawValue,
+                
+                CloseCode.subprotocolNotAcceptable.rawValue,
+                
+                CloseCode.subscriberAlreadyExists.rawValue,
+                CloseCode.tooManyInitialisationRequests.rawValue
+            ]
+                .contains(code)
+            
+            if Self.isFatalInternalCloseCode(code: code) || isTerminatingCloseCode {
+                return false
+            }
+            
+            // Check that all locks have been released when receiving a regular closure.
+            if (code == 1000) {
+                return self.pipelines.count > 0
+            }
+            
+//            if case let .reconnecting(retries) = self.health, retries >= self.retryAttempts {
+//                return false
+//            }
+        }
+        
+        return true
+    }
+    
+    // MARK: - Methods
+    
+    /// Returns a stream of events that get triggered when the client's state changes.
+    public func onEvent() -> DisposablePublisher<StateEvent, Never> {
+        let id = UUID().uuidString
+        return self.connect(id: id)
+    }
+    
+    /// Creates a subscription stream for a given query.
+    public func subscribe(_ args: ExecutionArgs) -> DisposablePublisher<ExecutionResult, Error> {
+        let id = UUID().uuidString
+        
+        // We create a new publisher that is bound to the pipeline
+        // that watches server events and forwards them to the subscriber.
+        let subject = DisposablePublisher<ExecutionResult, Error> {
+            self.release(id: id)
+        }
+        
+        let pipeline = self.connect(id: id).share()
+            .compactMap({ state -> ServerMessage? in
+                switch state {
+                case .message(let message):
+                    return message
+                default:
+                    return nil
+                }
+            })
+            .filter({ message in
+                switch message {
+                case .next(let msg):
+                    return msg.id == id
+                case .complete(let msg):
+                    return msg.id == id
+                case .error(let msg):
+                    return msg.id == id
+                default:
+                    return true
+                }
+            })
+            .sink { message in
+                switch message {
+                case .next(let payload):
+                    // NOTE: Payload may include execution errors alongside the
+                    // data that don't result in stream termination.
+                    subject.send(payload.payload)
+                    
+                case .error(let payload):
+                    // NOTE: We send validation errors return in a standalone
+                    // server message as possibly terminating events down the stream
+                    // since we don't expect to receive any other events.
+                    subject.send(completion: .failure(payload.payload))
+                    
+                case .complete:
+                    subject.send(completion: .finished)
+                default:
+                    ()
+                }
+            }
+        
+        self.pipelines[id] = pipeline
+        self.send(message: ClientMessage.subscribe(id: id, payload: args))
+        
+        return subject
+    }
+    
+    ///
+    func dispose() {
+        self.disposed = true
+        if case .connecting = health {
+            
+        }
+    }
+    
 }
 

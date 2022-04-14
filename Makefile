@@ -23,8 +23,8 @@ format:
 	swiftformat .
 
 update_brew:
-	sed -i '' 's|\(url ".*/archive/\)\(.*\)\(.tar\)|\1$(VERSION)\3|' Formula/SwiftGraphQL.rb
-	sed -i '' 's|\(sha256 "\)\(.*\)\("\)|\1$(SHA)\3|' Formula/SwiftGraphQL.rb
+	sed -i '' 's|\(url ".*/archive/\)\(.*\)\(.tar\)|\1$(VERSION)\3|' Formula/swiftgraphql.rb
+	sed -i '' 's|\(sha256 "\)\(.*\)\("\)|\1$(SHA)\3|' Formula/swiftgraphql.rb
 
 	git add .
 	git commit -m "Update HomeBrew Formula to $(VERSION)"

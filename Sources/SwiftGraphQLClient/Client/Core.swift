@@ -174,6 +174,9 @@ public class Client: GraphQLClient, ObservableObject {
             }
             .switchToLatest()
             .onEnd {
+                // Once the publisher stops the stream (i.e. the stream ended because we
+                // received all relevant results), we dismantle the pipeline by sending
+                // the teardown event to all exchanges in the chain.
                 self.active.removeValue(forKey: operation.id)
                 self.operations.send(operation.with(kind: .teardown))
             }

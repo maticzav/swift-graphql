@@ -100,4 +100,5 @@ final class PublishersExtensionsTests: XCTestCase {
         XCTAssertEqual(received, [1, 2])
         XCTAssertTrue(completed)
     }
+    
 }

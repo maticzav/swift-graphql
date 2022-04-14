@@ -249,14 +249,17 @@ extension Subscriptions {
         func receive(subscription: Subscription) {
             self.subscription = subscription
             
-            if demand > 0 {
+            if self.demand > 0 {
                 self.subscription?.request(self.demand)
+            }
+            
+            if self.demand < .unlimited {
                 self.demand = .none
             }
         }
         
         func receive(_ input: Downstream.Input) -> Subscribers.Demand {
-            let result = predicate(input)
+            let result = self.predicate(input)
             
             // NOTE: Predicate may only evaluate once we have received some values from
             // the publisher (i.e. from the subscription). If there's no subscription,

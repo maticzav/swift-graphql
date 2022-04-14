@@ -93,6 +93,10 @@ public class WebSocketExchange: Exchange {
                 
                 return self.createSubscriptionSource(operation: operation)
                     .onEnd {
+                        
+                        // Once the subscription ends (either because user stopped it
+                        // or because the server ended the transmission), we inform
+                        // the client-pipeline that it should be dismantled.
                         client.reexecute(operation: operation.with(kind: .teardown))
                     }
                     .takeUntil(torndown)

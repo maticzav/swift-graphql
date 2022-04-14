@@ -11,6 +11,8 @@ enum ShouldRetry {
     case no
 }
 
+// MARK: - Retry Publisher
+
 extension Publisher {
     
     /**
@@ -89,6 +91,137 @@ extension Publisher {
         }
         
         return wrapped.eraseToAnyPublisher()
+    }
+    
+}
+
+// MARK: - Counting Publisher
+
+extension Publisher {
+    
+    /// Returns a publisher that shares results from the upstream publisher with all subscribers and counts how many there are.
+    func counter(
+        onConnect: @escaping (Int) -> Void,
+        onDisconnect: @escaping (Int) -> Void
+    ) -> Publishers.CountingPublisher<Self> {
+        Publishers.CountingPublisher(upstream: self, onConnect: onConnect, onDisconnect: onDisconnect)
+    }
+}
+
+extension Publishers {
+    
+    /// Publisher that keeps track of the number of subscriptions and shares the values.
+    class CountingPublisher<Upstream: Publisher>: Publisher {
+        
+        typealias Output = Upstream.Output
+        typealias Failure = Upstream.Failure
+        
+        /// Publisher that is emitting the values.
+        private var upstream: Upstream
+        
+        /// Function that gets called when a new subscriber connects to the publisher.
+        private var onConnect: (_ total: Int) -> Void
+        
+        /// Function that gets called when the subscription is released.
+        private var onDisconnect: (_ remaining: Int) -> Void
+        
+        /// Number of connected subscribers.
+        private var subscribersCount: Int = 0
+        
+        init(
+            upstream: Upstream,
+            onConnect: @escaping (Int) -> Void,
+            onDisconnect: @escaping (Int) -> Void
+        ) {
+            self.upstream = upstream
+            self.onConnect = onConnect
+            self.onDisconnect = onDisconnect
+        }
+        
+        // MARK: - Methods
+        
+        func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input {
+            self.subscribersCount += 1
+            
+            self.onConnect(self.subscribersCount)
+            
+            let subscription = Subscriptions.CountingSubscription(subscriber: subscriber) {
+                self.subscribersCount -= 1
+                self.onDisconnect(self.subscribersCount)
+            }
+            
+            subscriber.receive(subscription: subscription)
+            self.upstream.receive(subscriber: subscription)
+        }
+    }
+    
+}
+
+extension Subscriptions {
+    
+    final class CountingSubscription<Downstream: Subscriber>: Subscription, Subscriber {
+        
+        typealias Input = Downstream.Input
+        typealias Failure = Downstream.Failure
+        
+        /// Function that gets called when the subscription is released.
+        private var onDisconnect: () -> Void
+        
+        // MARK: - State
+        
+        /// Subscription that yields values we use to stream down to our subscriber.
+        private var subscription: Subscription?
+        
+        /// Tells how much events downstream has already requested from the upstream.
+        private var demand: Subscribers.Demand = .none
+        
+        /// The subscriber of the publisher which we are forwarding to.
+        private var subscriber: Downstream
+        
+        init(subscriber: Downstream, _ onDisconnect: @escaping () -> Void) {
+            self.subscriber = subscriber
+            self.onDisconnect = onDisconnect
+        }
+        
+        // MARK: - Subscriber
+        
+        func receive(subscription: Subscription) {
+            self.subscription = subscription
+            
+            if self.demand > 0 {
+                self.subscription?.request(self.demand)
+            }
+            
+            if self.demand < .unlimited {
+                self.demand = .none
+            }
+        }
+        
+        func receive(_ input: Downstream.Input) -> Subscribers.Demand {
+            self.subscriber.receive(input)
+        }
+        
+        func receive(completion: Subscribers.Completion<Downstream.Failure>) {
+            self.subscriber.receive(completion: completion)
+        }
+        
+        // MARK: - Subscription
+        
+        func request(_ demand: Subscribers.Demand) {
+            guard let subscription = subscription else {
+                self.demand += demand
+                return
+            }
+            
+            subscription.request(demand)
+        }
+        
+        func cancel() {
+            self.subscription?.cancel()
+            self.subscription = nil
+            
+            self.onDisconnect()
+        }
     }
     
 }
