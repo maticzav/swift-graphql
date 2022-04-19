@@ -113,8 +113,15 @@ private func send<Type, TypeLock>(
         }
 
         // Try to serialize the response.
-        if let data = data, let result = try? GraphQLResult(data, with: selection) {
-            return completionHandler(.success(result))
+        if let data = data {
+            do {
+                let result = try GraphQLResult(data, with: selection)
+                return completionHandler(.success(result))
+            } catch let error as HttpError {
+                return completionHandler(.failure(error))
+            } catch let error {
+                return completionHandler(.failure(.decodingError(error)))
+            }
         }
 
         return completionHandler(.failure(.badpayload))
@@ -139,6 +146,7 @@ public enum HttpError: Error {
     case badpayload
     case badstatus
     case cancelled
+    case decodingError(Error)
 }
 
 extension HttpError: Equatable {
@@ -146,9 +154,12 @@ extension HttpError: Equatable {
         // Equals if they are of the same type, different otherwise.
         switch (lhs, rhs) {
         case (.badURL, badURL),
-             (.timeout, .timeout),
-             (.badpayload, .badpayload),
-             (.badstatus, .badstatus):
+            (.timeout, .timeout),
+            (.badpayload, .badpayload),
+            (.badstatus, .badstatus),
+            (.cancelled, .cancelled),
+            (.network, network),
+            (.decodingError, decodingError):
             return true
         default:
             return false
