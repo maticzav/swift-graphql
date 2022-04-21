@@ -12,14 +12,20 @@ extension GraphQLResult: Equatable where Type: Equatable, TypeLock: Decodable {}
 extension GraphQLResult where TypeLock: Decodable {
     init(_ response: Data, with selection: Selection<Type, TypeLock?>) throws {
         // Decodes the data using provided selection.
+        var errors: [GraphQLError]? = nil
         do {
             let decoder = JSONDecoder()
             let response = try decoder.decode(GraphQLResponse.self, from: response)
+            errors = response.errors
             self.data = try selection.decode(data: response.data)
-            self.errors = response.errors
+            self.errors = errors
         } catch let error {
-            // Catches all errors and turns them into a bad payload SwiftGraphQL error.
-            throw HttpError.decodingError(error)
+            // If we have specific errors, use them
+            if let errors = errors, !errors.isEmpty {
+                throw HttpError.graphQLErrors(errors)
+            } else {
+                throw HttpError.decodingError(error)
+            }
         }
     }
 

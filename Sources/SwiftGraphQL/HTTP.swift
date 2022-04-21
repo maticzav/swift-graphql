@@ -147,6 +147,7 @@ public enum HttpError: Error {
     case badstatus
     case cancelled
     case decodingError(Error)
+    case graphQLErrors([GraphQLError])
 }
 
 extension HttpError: Equatable {
@@ -158,8 +159,9 @@ extension HttpError: Equatable {
             (.badpayload, .badpayload),
             (.badstatus, .badstatus),
             (.cancelled, .cancelled),
-            (.network, network),
-            (.decodingError, decodingError):
+            (.network, .network),
+            (.decodingError, .decodingError),
+            (.graphQLErrors, .graphQLErrors):
             return true
         default:
             return false
@@ -209,7 +211,13 @@ private func createGraphQLRequest<Type, TypeLock>(
     // Construct HTTP body.
     let encoder = JSONEncoder()
     let payload = selection.buildPayload(operationName: operationName)
-    request.httpBody = try! encoder.encode(payload)
+    #if DEBUG
+    #if targetEnvironment(simulator)
+    try? payload.query.write(toFile: "/tmp/\(operationName ?? "query").graphql", atomically: true, encoding: .utf8)
+    #endif
+    #endif
+    let encoded = try! encoder.encode(payload)
+    request.httpBody = encoded
 
     return request
 }
