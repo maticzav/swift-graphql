@@ -214,8 +214,13 @@ private func createGraphQLRequest<Type, TypeLock>(
     
     #if DEBUG
     #if targetEnvironment(simulator)
+    // Write the query
     let filename = operationName ?? "\(Int(Date().timeIntervalSince1970))"
     try? payload.query.write(toFile: "/tmp/query_\(filename).graphql", atomically: true, encoding: .utf8)
+    // Write the variables
+    if let variables = try? encoder.encode(payload.variables) {
+        try? variables.write(to: URL(fileURLWithPath: "/tmp/query_variables_\(filename).json"))
+    }
     #endif
     #endif
     let encoded = try! encoder.encode(payload)
