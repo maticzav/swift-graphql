@@ -34,8 +34,15 @@ extension Array: GraphQLScalar where Element: GraphQLScalar {
 
 extension Optional: GraphQLScalar where Wrapped: GraphQLScalar {
     public init(from codable: AnyCodable) throws {
+        
         switch(codable.value) {
-        case is Void:
+        #if canImport(Foundation)
+        case is NSNull:
+            self = nil
+        #endif
+        case is Void, nil:
+            self = nil
+        case Optional<AnyDecodable>.none:
             self = nil
         default:
             self = try Wrapped(from: codable)
@@ -153,6 +160,19 @@ public enum ScalarDecodingError: Error {
     
     /// Code is trying to decode an input value.
     case decodingInputValue
+}
+
+extension ScalarDecodingError: Equatable {
+    public static func == (lhs: ScalarDecodingError, rhs: ScalarDecodingError) -> Bool {
+        switch (lhs, rhs) {
+        case (.decodingInputValue, .decodingInputValue):
+            return true
+        case let (.unknownEnumCase(value: lval), .unknownEnumCase(value: rval)):
+            return lval == rval
+        default:
+            return false
+        }
+    }
 }
 
 public enum ScalarEncodingError: Error {

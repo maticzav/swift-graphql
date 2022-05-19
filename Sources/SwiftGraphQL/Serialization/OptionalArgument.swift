@@ -108,11 +108,11 @@ public extension OptionalArgument {
     }
 }
 
-// MARK: - Modifier Methods
+// MARK: - Transforming Optional Arguments
 
 public extension OptionalArgument {
     
-    /// Maps a value using provided function when present.
+    /// Maps a value using provided function when the value is present.
     func map<A>(_ fn: (T) -> A) -> OptionalArgument<A> {
         switch value {
         case let .present(value):
@@ -124,20 +124,58 @@ public extension OptionalArgument {
         }
     }
 
-    /// Lets you bind the value and convert it.
-//    public func andThen<T, V>(_ fn: (T) -> V) -> OptionalArgument<V> where T == Optional<T> {
-//        switch self.value {
-//        case .present(let value):
-//            return OptionalArgument<V>(.present(fn(value)))
-//        case .absent:
-//            return OptionalArgument<V>(.absent)
-//        case .null:
-//            return OptionalArgument<V>(.null)
-//        }
-//    }
+    /// Chain together multple transformations that each may fail.
+    func andThen<V>(_ fn: (T) -> OptArg<V>) -> OptArg<V> {
+        switch self.value {
+        case .present(let value):
+            return fn(value)
+        case .null:
+            return OptionalArgument<V>(.null)
+            
+        // If there's no value we don't do anything with it.
+        case .absent:
+            return OptionalArgument<V>(.absent)
+        }
+    }
 }
 
-// MARK: - Protocols
+// MARK: - Protocols Conformances
+
+extension OptionalArgument: ExpressibleByNilLiteral {
+    public init(nilLiteral: ()) {
+        self.init(.null)
+    }
+}
+extension OptionalArgument: ExpressibleByBooleanLiteral where T == Bool {
+    public init(booleanLiteral: Bool) {
+        self.init(.present(booleanLiteral))
+    }
+}
+extension OptionalArgument: ExpressibleByIntegerLiteral where T == Int {
+    public init(integerLiteral: Int) {
+        self.init(.present(integerLiteral))
+    }
+}
+extension OptionalArgument: ExpressibleByFloatLiteral where T == Float {
+    public init(floatLiteral: Float) {
+        self.init(.present(floatLiteral))
+    }
+}
+
+extension OptionalArgument: ExpressibleByUnicodeScalarLiteral, ExpressibleByStringLiteral, ExpressibleByExtendedGraphemeClusterLiteral where T == String {
+    public init(unicodeScalarLiteral value: String) {
+        self.init(present: value)
+    }
+    
+    public init(extendedGraphemeClusterLiteral value: String) {
+        self.init(.present(value))
+    }
+
+    public init(stringLiteral value: String) {
+        self.init(.present(value))
+    }
+
+}
 
 extension OptionalArgument.InternalValue: Equatable where T: Equatable {}
 extension OptionalArgument.InternalValue: Hashable where T: Hashable {}

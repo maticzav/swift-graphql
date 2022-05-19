@@ -1,8 +1,8 @@
 // This file is heavily inspired by https://github.com/enisdenjo/graphql-ws.
 
-import Foundation
 import Combine
 import GraphQL
+import Foundation
 import os
 
 /// A GraphQL client that lets you send queries over WebSocket protocol.

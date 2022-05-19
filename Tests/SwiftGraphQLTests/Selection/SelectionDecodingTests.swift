@@ -86,7 +86,12 @@ final class SelectionDecodingTests: XCTestCase {
         }
 
         XCTAssertThrowsError(try selection.nonNullOrFail.decode(raw: result.data)) { (error) -> Void in
-            XCTAssertEqual(error as! ObjectDecodingError, ObjectDecodingError.unexpectedNilValue)
+            switch error {
+            case let ScalarDecodingError.unexpectedScalarType(expected: expected, received: _):
+                XCTAssertEqual(expected, "String")
+            default:
+                XCTFail()
+            } 
         }
     }
 
