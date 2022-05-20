@@ -34,11 +34,12 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
     }
     
     /// Timeout between dispatched keep-alive messages (i.e. server pings). The client internally
-    /// dispatches the `PingMessage` type to the server and expects a `PongMessage` in response.
+    /// dispatches the `PingMessage` type to the server and expects a `PongMessage` in response or any
+    /// other valid sign of running connection.
     ///
-    /// Timeout countdown starts from the moment the socket was opened and subsequently after every received `PongMessage`.
-    ///
-    ///
+    /// Timeout countdown starts from the moment the socket was opened and subsequently after every received `PongMessage`
+    /// or any other regular message. If the server doesn't reply in `3 x keepAlive` time, the client considers
+    /// that a connection dropped.
     public var keepAlive: Int = 0
     
     /// How many times should the client try to reconnect on abnormal socket closure before it errors out?
@@ -162,6 +163,9 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
     /// Timer that starts the disconnect procedure when there are no more listeners.
     weak private var lazyCloseTimer: Timer?
     
+    /// Timer that fires off when the server hasn't replyed with PONG for too long.
+    weak private var connectionDroppedTimer: Timer?
+    
     /// Holds references to pipelines created by subscriptions. Each pipeline is identified by the
     /// query id of the subscription that created a pipeline.
     ///
@@ -218,9 +222,20 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
         didCloseWith closeCode: URLSessionWebSocketTask.CloseCode,
         reason: Data?
     ) {
+        self.logger.debug("Connection with the server closed!")
+        
         // The server shouldn't reconnect, we tell all listeners to stop listening.
         guard shouldRetryToConnect(code: closeCode) else {
             self.emitter.send(Event.closed)
+            
+            self.pingTimer = nil
+            self.lazyCloseTimer = nil
+            self.ackTimer = nil
+            self.reconnectTimer = nil
+            self.connectionDroppedTimer = nil
+            
+            self.logger.debug("Terminated connection and cleared timers!")
+            
             return
         }
         
@@ -228,6 +243,8 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
         if case .reconnecting(let attempt) = health {
             retry = attempt
         }
+        
+        self.logger.debug("Reconnecting to the server...")
         
         self.reconnectTimer = Timer.scheduledTimer(
             withTimeInterval: TimeInterval(self.retryWait(retry)),
@@ -239,24 +256,31 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
                     return
                 }
                 
+                self.logger.debug("Reconnection in progress...")
+                
                 self.connect()
             })
     }
     
     /// Creates a new socket connection and kicks-off the communication with the server.
     private func connect() {
+        self.logger.debug("Started connecting to the server...")
+        
         // Prevent the timer from closing the socket because
         // a new pipeline was created.
         self.lazyCloseTimer?.invalidate()
         
         switch self.health {
         case .acknowledged:
+            self.logger.debug("Connection already established, skipping!")
             return
         default:
             let socket = self.session.webSocketTask(with: self.request)
             
             socket.delegate = self
             self.socket = socket
+            
+            self.logger.debug("Socket created!")
             
             socket.resume()
         }
@@ -268,6 +292,8 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
             return
         }
         
+        self.logger.debug("Disconnecting from the server...")
+        
         self.lazyCloseTimer = Timer.scheduledTimer(
             withTimeInterval: TimeInterval(timeout),
             repeats: false,
@@ -276,6 +302,8 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
                     return
                 }
                 
+                self.logger.debug("Closing the connection!")
+                
                 let message = Data("Normal Closure".utf8)
                 self.socket?.cancel(with: URLSessionWebSocketTask.CloseCode.normalClosure, reason: message)
             })
@@ -283,18 +311,25 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
     
     /// Decodes the next socket message received from the server and forwards it to the handler.
     private func receive(handler: @escaping (Result<ServerMessage, Error>) -> Void) {
+        self.logger.debug("Waiting for new message from the server...")
+        
         self.socket?.receive { [weak self] result in
             guard let self = self else {
                 return
             }
             
+            self.logger.debug("Received a new message from the server!")
+            
             var message: ServerMessage? = nil
             switch result {
             case .success(.string(let str)):
+                self.logger.debug("Got 'string' message from the server.")
                 message = try? self.decoder.decode(ServerMessage.self, from: Data(str.utf8))
             case .success(.data(let data)):
+                self.logger.debug("Got 'data' message from the server.")
                 message = try? self.decoder.decode(ServerMessage.self, from: data)
             case .failure(let error):
+                self.logger.debug("Got invalid response from the server.")
                 handler(.failure(error))
                 return
             @unknown default:
@@ -302,6 +337,7 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
             }
             
             if let message = message {
+                self.logger.debug("Successfully decoded message!")
                 handler(.success(message))
             }
         }
@@ -309,7 +345,9 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
     
     /// Sends a message using the websocket transport.
     private func send(message: ClientMessage) {
+        self.logger.debug("Sending a new message to the server.")
         guard let socket = self.socket, socket.state == .running else {
+            self.logger.debug("Socket not ready, queueing message...")
             self.queue.append(message)
             return
         }
@@ -320,6 +358,7 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
                 self.emitter.send(Event.error(err))
             }
         }
+        self.logger.debug("Message sent to the server!")
     }
     
     /// Empties the message queue if possible.
@@ -327,10 +366,14 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
         guard self.socket?.state == .running else {
             return
         }
+        
+        self.logger.debug("Flushing queue...")
 
         while !self.queue.isEmpty {
            self.send(message: self.queue.removeFirst())
         }
+        
+        self.logger.debug("Queue flushed!")
     }
     
     /// Processes a management message from the server and forwards data message
@@ -341,32 +384,56 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
                 return
             }
             
+            self.connectionDroppedTimer?.invalidate()
+            self.logger.debug("Processing new server message...")
+            
             switch (self.health, result) {
                 
             case (.connecting,.success(.acknowledge(let msg))):
+                self.logger.debug("Received ACK message!")
+                
                 self.emitter.send(Event.message(.acknowledge(msg)))
                 self.emitter.send(Event.connected(payload: msg.payload))
                 
                 self.health = .acknowledged
                 self.ackTimer?.invalidate()
                 
-                if self.keepAlive > 0 {
-                    self.pingTimer = Timer.scheduledTimer(
-                        withTimeInterval: TimeInterval(self.keepAlive),
-                        repeats: true,
-                        block: { [weak self] _ in
-                            guard let self = self else {
-                                return
-                            }
-                            
-                            self.send(message: ClientMessage.ping())
-                            self.emitter.send(Event.ping(received: false, payload: nil))
-                        }
-                    )
+                guard self.keepAlive > 0 else {
+                    break
                 }
+                
+                self.logger.debug("Creating a ping timer.")
+                
+                self.pingTimer = Timer.scheduledTimer(
+                    withTimeInterval: TimeInterval(self.keepAlive),
+                    repeats: true,
+                    block: { [weak self] _ in
+                        guard let self = self else {
+                            return
+                        }
+                        
+                        self.send(message: ClientMessage.ping())
+                        self.emitter.send(Event.ping(received: false, payload: nil))
+                        self.logger.debug("Emitted a PING message!")
+                    })
+                
+                self.connectionDroppedTimer = Timer.scheduledTimer(
+                    withTimeInterval: TimeInterval(3 * self.keepAlive),
+                    repeats: true,
+                    block: { [weak self] _ in
+                        guard let self = self else {
+                            return
+                        }
+                        self.socket?.cancel(
+                            with: .noStatusReceived,
+                            reason: Data("Received no PONG reply".utf8)
+                        )
+                    })
                 break
             
             case (.connecting, .success(_)):
+                self.logger.debug("Received an invalid first message. Closing socket!")
+                
                 // If the previous statement didn't catch this message, we got an invalid
                 // message before acknowledgement.
                 let message = Data("First message has to be ACK".utf8)
@@ -374,16 +441,24 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
                 return
                 
             case (_, .success(.ping(let msg))):
+                self.logger.debug("Received a PING request...")
+                
                 self.emitter.send(Event.message(.ping(msg)))
                 
                 self.emitter.send(Event.ping(received: true, payload: nil))
                 self.send(message: ClientMessage.pong(payload: msg.payload))
                 self.emitter.send(Event.pong(received: false, payload: msg.payload))
+                
+                self.logger.debug("Sent a PONG response!")
+                
                 break
                 
             case (_, .success(.pong(let msg))):
+                self.logger.debug("Processing a PONG message...")
+                
                 self.emitter.send(Event.message(.pong(msg)))
                 self.emitter.send(Event.pong(received: true, payload: msg.payload))
+                
                 break
             
             case (_, .success(let msg)):
