@@ -87,7 +87,10 @@ let package = Package(
                 "SwiftGraphQLClient"
             ],
             path: "Tests",
-            exclude: ["Integration/schema.json"]
+            exclude: [
+                "SwiftGraphQLCodegenTests/Integration/schema.json",
+                "SwiftGraphQLCodegenTests/Integration/swiftgraphql.yml",
+            ]
         )
     ]
 )

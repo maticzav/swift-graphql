@@ -161,7 +161,7 @@ public enum ClientMessage: Encodable {
 protocol ServerMessageInterface: Decodable, Equatable {}
  
 /// Messsages that originate on the server and are sent to the client.
-public enum ServerMessage: Decodable {
+public enum ServerMessage: Equatable, Decodable {
     case acknowledge(ConnectionAck)
     
     /// A biderctional message used for detailing connection's health.

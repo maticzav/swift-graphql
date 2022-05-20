@@ -7,6 +7,7 @@ import GraphQLWebSocket
 ///
 /// - NOTE: By default WebSocketExchange only handles subscription operations
 ///         but you may configure it to handle all operations equally.
+@available(macOS 12, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 public class WebSocketExchange: Exchange {
     
     /// Reference to the client that actually establishes the WebSocket connection with the server.

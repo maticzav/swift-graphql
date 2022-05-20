@@ -4,7 +4,7 @@ import GraphQL
 import XCTest
 
 final class FetchExchangeTests: XCTestCase {
-    struct MockURLSession: HttpURLSession {
+    struct MockURLSession: FetchSession {
         
         /// Mock handler used to create a mock data response of the request.
         var handler: (URLRequest) -> MockResponse
@@ -70,7 +70,7 @@ final class FetchExchangeTests: XCTestCase {
         let operations = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
         
         let client = MockClient()
-        let session = MockURLSession { _ in .succcess("hello") }
+        let session = MockURLSession { _ in .succcess("{ \"data\": \"hello\" }") }
         
         let exchange = FetchExchange(session: session)
         exchange.register(
@@ -87,7 +87,7 @@ final class FetchExchangeTests: XCTestCase {
         .sink { result in
             XCTAssertEqual(result, OperationResult(
                 operation: result.operation,
-                data: Data("hello".utf8),
+                data: AnyCodable("hello"),
                 errors: [],
                 stale: false)
             )

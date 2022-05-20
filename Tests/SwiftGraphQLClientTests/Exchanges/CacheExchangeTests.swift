@@ -49,12 +49,9 @@ final class CacheExchangeTests: XCTestCase {
         .sink { result in
             let op = result.operation
             let stale = result.stale ?? false
-            if let data = result.data {
-                let value = String(decoding: data, as: UTF8.self)
-                trace.append("resulted (\(stale)): \(op.id) \(value) (\(op.kind.rawValue))")
-            } else {
-                trace.append("resulted (\(stale)): \(op.id) (\(op.kind.rawValue))")
-            }
+            let value = result.data
+            
+            trace.append("resulted (\(stale)): \(op.id) \(value) (\(op.kind.rawValue))")
         }
         .store(in: &self.cancellables)
         
@@ -115,7 +112,7 @@ final class CacheExchangeTests: XCTestCase {
             operations.send(op)
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
-                data: Data("hello".utf8),
+                data: AnyCodable("hello"),
                 errors: [],
                 stale: false
             ))
@@ -138,14 +135,14 @@ final class CacheExchangeTests: XCTestCase {
             operations.send(op)
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
-                data: Data("hello".utf8),
+                data: AnyCodable("hello"),
                 errors: [],
                 stale: false
             ))
             operations.send(op)
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
-                data: Data("world".utf8),
+                data: AnyCodable("world"),
                 errors: [],
                 stale: false
             ))
@@ -177,7 +174,7 @@ final class CacheExchangeTests: XCTestCase {
             // randomly, unexplicably receive the result
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
-                data: Data("hello".utf8),
+                data: AnyCodable("hello"),
                 errors: [],
                 stale: false
             ))
@@ -203,7 +200,7 @@ final class CacheExchangeTests: XCTestCase {
             // randomly, unexplicably receive the result
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
-                data: Data("hello".utf8),
+                data: AnyCodable("hello"),
                 errors: [],
                 stale: false
             ))
@@ -245,7 +242,7 @@ final class CacheExchangeTests: XCTestCase {
             
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
-                data: Data("hello".utf8),
+                data: AnyCodable("hello"),
                 errors: [],
                 stale: false
             ))
@@ -253,7 +250,7 @@ final class CacheExchangeTests: XCTestCase {
             // somehow receive mutation result
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: CacheExchangeTests.mutationOperation,
-                data: Data("many data".utf8),
+                data: AnyCodable("much data"),
                 errors: [],
                 stale: false
             ))
@@ -265,7 +262,7 @@ final class CacheExchangeTests: XCTestCase {
             "forwarded: qur-id (query, cache-and-network)",
             "resulted (false): qur-id hello (query)",
             "reexecuted: qur-id (query, network-only)",
-            "resulted (false): mut-id many data (mutation)",
+            "resulted (false): mut-id much data (mutation)",
             // reexecute of mock client doesn't re-enter operation into the pipeline
         ])
     }

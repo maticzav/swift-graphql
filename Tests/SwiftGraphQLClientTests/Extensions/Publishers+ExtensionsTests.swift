@@ -28,7 +28,7 @@ final class PublishersExtensionsTests: XCTestCase {
     
     var cancellables = Set<AnyCancellable>()
     
-    func testOnEndTriggeredCorrectly() throws {
+    func testOnEndTriggeredWhenPublisherEnds() throws {
         var i = 0
         var received = [Int]()
         
@@ -48,6 +48,30 @@ final class PublishersExtensionsTests: XCTestCase {
         XCTAssertEqual(i, 0)
         
         subject.send(completion: .finished)
+        
+        XCTAssertEqual(i, 1)
+        XCTAssertEqual(received, [42])
+    }
+    
+    func testOnEndTriggeredWhenSubscriberUnsubscribes() throws {
+        var i = 0
+        var received = [Int]()
+        
+        let subject = PassthroughSubject<Int, Never>()
+        let cancellable = subject
+            .eraseToAnyPublisher()
+            .onEnd {
+                i += 1
+            }
+            .sink { val in
+                received.append(val)
+            }
+        
+        subject.send(42)
+        
+        XCTAssertEqual(i, 0)
+        
+        cancellable.cancel()
         
         XCTAssertEqual(i, 1)
         XCTAssertEqual(received, [42])
