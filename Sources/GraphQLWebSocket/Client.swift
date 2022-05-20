@@ -207,10 +207,9 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
                 self.socket?.cancel(with: .goingAway, reason: message)
             })
         
+        self.tick()
         self.send(message: ClientMessage.initalise(payload: self.connectionParams))
         self.flushQueue()
-        
-        self.tick()
     }
     
     public func urlSession(
@@ -283,7 +282,7 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
     }
     
     /// Decodes the next socket message received from the server and forwards it to the handler.
-    private func receiveServerMessage(handler: @escaping (Result<ServerMessage, Error>) -> Void) {
+    private func receive(handler: @escaping (Result<ServerMessage, Error>) -> Void) {
         self.socket?.receive { [weak self] result in
             guard let self = self else {
                 return
@@ -323,7 +322,7 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
         }
     }
     
-    /// Empties the queue if possible.
+    /// Empties the message queue if possible.
     private func flushQueue() {
         guard self.socket?.state == .running else {
             return
@@ -337,7 +336,7 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
     /// Processes a management message from the server and forwards data message
     /// to event listeners.
     private func tick() {
-        self.receiveServerMessage { [weak self] result in
+        self.receive { [weak self] result in
             guard let self = self else {
                 return
             }
@@ -345,6 +344,7 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
             switch (self.health, result) {
                 
             case (.connecting,.success(.acknowledge(let msg))):
+                self.emitter.send(Event.message(.acknowledge(msg)))
                 self.emitter.send(Event.connected(payload: msg.payload))
                 
                 self.health = .acknowledged
@@ -366,24 +366,28 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
                 }
                 break
             
-            case (.connecting, .success):
+            case (.connecting, .success(_)):
+                // If the previous statement didn't catch this message, we got an invalid
+                // message before acknowledgement.
                 let message = Data("First message has to be ACK".utf8)
                 self.socket?.cancel(with: URLSessionWebSocketTask.CloseCode.policyViolation, reason: message)
                 return
                 
             case (_, .success(.ping(let msg))):
+                self.emitter.send(Event.message(.ping(msg)))
+                
                 self.emitter.send(Event.ping(received: true, payload: nil))
                 self.send(message: ClientMessage.pong(payload: msg.payload))
                 self.emitter.send(Event.pong(received: false, payload: msg.payload))
                 break
                 
             case (_, .success(.pong(let msg))):
+                self.emitter.send(Event.message(.pong(msg)))
                 self.emitter.send(Event.pong(received: true, payload: msg.payload))
                 break
             
             case (_, .success(let msg)):
                 self.emitter.send(Event.message(msg))
-                break
                 
             case (_, .failure(let err)):
                 // As soon as the reading of the message fails, emit an error and stop
