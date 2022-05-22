@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-      - next
+    paths:
+      - "Sources/**/*"
 
 jobs:
   build:

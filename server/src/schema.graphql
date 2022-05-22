@@ -1,167 +1,74 @@
 scalar DateTime
 
-"""
-An object with an ID.
-"""
-interface Node {
-  """
-  ID of the object.
-  """
-  id: ID!
-}
-
-type User implements Node {
-  id: ID!
-
-  """
-  A nickname user has picked for themself.
-  """
-  username: String!
-}
-
-input Pagination {
-  offset: Int
-
-  """
-  Number of items in a list that should be returned.
-
-  NOTE: Maximum is 20 items.
-  """
-  take: Int
-}
-
-input Search {
-  """
-  String used to compare the name of the item to.
-  """
-  query: String!
-
-  pagination: Pagination
-}
-
-# Query
-
 type Query {
   """
-  Simple field that always returns "Hello world!".
+  Simple query that says "Hello World!".
   """
   hello: String!
 
   """
-  Returns currently authenticated user and errors if there's no authenticated user.
+  A query that returns a value only when user is authenticated.
   """
-  user: User!
+  secret: String
 
   """
-  Fetches an object given its ID.
+  A query that echos the selected enumerator back to the client.
   """
-  node(
-    """
-    ID of the object.
-    """
-    id: ID!
-  ): Node
+  oneOf(option: Option!): Option!
 
   """
-  Returns a list of comics from the Marvel universe.
+  A sample list of random strings.
   """
-  comics(pagination: Pagination): [Comic!]!
+  list: [String!]!
 
   """
-  Returns a list of characters from the Marvel universe.
+  Query that returns the current date.
   """
-  characters(pagination: Pagination): [Character!]!
-
-  """
-  Searches all characters and comics by name and returns those whose
-  name starts with the query string.
-  """
-  search(query: Search!, pagination: Pagination): [SearchResult!]!
-
-  """
-  Lets you see send messages from other people.
-  """
-  messages(pagination: Pagination): [Message!]!
+  date: DateTime
 }
 
-type Character implements Node {
-  id: ID!
-
-  name: String!
-  description: String!
-
-  """
-  URL of the character image.
-  """
-  image: String!
-
-  """
-  Tells whether currently authenticated user has starred this character.
-
-  NOTE: If there's no authenticated user, this field will always return false.
-  """
-  starred: Boolean!
+enum Option {
+  ONE
+  TWO
+  THREE
 }
-
-type Comic implements Node {
-  id: ID!
-
-  title: String!
-  description: String!
-  isbn: String!
-
-  """
-  URL of the thumbnail image.
-  """
-  thumbnail: String!
-
-  pageCount: Int
-
-  """
-  Tells whether currently authenticated user has starred this comic.
-  """
-  starred: Boolean!
-}
-
-union SearchResult = Character | Comic
-
-# Mutation
 
 type Mutation {
   """
-  Creates a random authentication session.
+  A mutation that returns the token that may be used to authenticate the user.
   """
-  auth: AuthPayload!
+  login(name: String!): AuthPayload!
 
   """
-  Adds a star to a comic or a character.
+  A sample mutation that mimics a complex form and returns a
   """
-  star(id: ID!, item: Item!): SearchResult!
-
-  """
-  Messages the forum.
-
-  NOTE: Image should be the id of the uploaded file.
-  """
-  message(message: String!, image: ID): Message!
-
-  """
-  Creates a new upload URL for a file and returns an ID.
-
-  NOTE: The file should be uploaded to the returned URL. If the user is not
-  authenticated, mutation will throw an error.
-  """
-  uploadFile(contentType: String!, extension: String, folder: String!): File!
+  form(params: FormParams!): Human!
 }
 
-enum Item {
-  CHARACTER
-  COMIC
+input FormParams {
+  name: String!
+  master: String
+  age: Int!
+}
+
+interface Human {
+  name: String!
+}
+
+type Master implements Human {
+  name: String!
+  age: Int!
+}
+
+type Padawan implements Human {
+  name: String!
+  age: Int!
+  master: Master!
 }
 
 type AuthPayloadSuccess {
   token: String!
-  user: User!
+  name: String!
 }
 
 type AuthPayloadFailure {
@@ -170,38 +77,14 @@ type AuthPayloadFailure {
 
 union AuthPayload = AuthPayloadSuccess | AuthPayloadFailure
 
-type File implements Node {
-  id: ID!
-  """
-  Signed URL that should be used to upload the file.
-  """
-  uploadUrl: String!
-  """
-  URL that may be used to access the file.
-  """
-  publicUrl: String!
-}
-
-# Subscription
-
 type Subscription {
   """
-  Returns the current time from the server and refreshes every second.
+  A query that counts from a given value up/down to (excluding) target value.
   """
-  time: DateTime!
+  count(from: Int!, to: Int!): Int!
 
   """
-  Triggered whene a new comment is added to the shared list of comments.
+  Countsdown from a given value to (including) 0 if you are authenticated.
   """
-  message: Message!
-}
-
-type Message implements Node {
-  id: ID!
-
-  date: DateTime!
-  message: String!
-  image: File!
-
-  author: User!
+  secret(from: Int!): Int!
 }

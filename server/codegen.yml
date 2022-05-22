@@ -4,7 +4,7 @@ generates:
     plugins:
       - typescript
       - typescript-resolvers
-    config: 
+    config:
       defaultMapper: Partial<{T}>
-      scalars: 
+      scalars:
         DateTime: Date

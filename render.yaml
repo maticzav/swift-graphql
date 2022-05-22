@@ -13,14 +13,3 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 16
-      - key: DATABASE_URL
-        fromDatabase:
-          name: marvel-db
-          property: connectionString
-      - key: APP_SECRET
-        generateValue: true
-      - fromGroup: MarvelGQL
-
-databases:
-  - name: marvel-db
-    region: frankfurt

@@ -29,6 +29,21 @@ public enum ClientMessage: Encodable {
     /// Indicates that the client has stopped listening and wants to complete the subscription
     case complete(Complete)
     
+    public var description: String {
+        switch self {
+        case .ping:
+            return "PING"
+        case .pong:
+            return "PONG"
+        case .initialise:
+            return "INIT"
+        case .subscribe:
+            return "SUBSCRIBE"
+        case .complete:
+            return "COMPLETE"
+        }
+    }
+    
     // MARK: - Static Utilities
     
     /// Returns an init message with a given payload.

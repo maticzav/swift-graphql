@@ -11,13 +11,29 @@ import GraphQLWebSocket
 public class WebSocketExchange: Exchange {
     
     /// Reference to the client that actually establishes the WebSocket connection with the server.
-    var client: GraphQLWebSocket
+    private var client: GraphQLWebSocket
     
     /// Tells whether the exchange should handle query and mutation operations as well as subscriptions.
-    var handleAllOperations: Bool = false
+    private var handleAllOperations: Bool = false
     
-    init(request: URLRequest, session: URLSession = URLSession.shared) {
-        self.client = GraphQLWebSocket(session: session, request: request)
+    convenience init(
+        request: URLRequest,
+        session: URLSession = URLSession.shared,
+        config: GraphQLWebSocket.Config = GraphQLWebSocket.Config(),
+        handleAllOperations: Bool = false
+    ) {
+        let client = GraphQLWebSocket(
+            request: request,
+            config: config,
+            session: session
+        )
+        
+        self.init(client: client, handleAllOperations: handleAllOperations)
+    }
+    
+    init(client: GraphQLWebSocket, handleAllOperations: Bool = false) {
+        self.client = client
+        self.handleAllOperations = handleAllOperations
     }
     
     // MARK: - Methods

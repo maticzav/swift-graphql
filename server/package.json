@@ -5,26 +5,19 @@
     "dev": "ts-node-dev src/index.ts --exit-child --respawn",
     "start": "ts-node src/index.ts",
     "test": "tsc --pretty --noEmit",
-    "generate": "graphql-codegen",
-    "postinstall": "yarn prisma generate"
+    "generate": "graphql-codegen"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.51.0",
-    "@aws-sdk/s3-request-presigner": "^3.51.0",
     "@graphql-tools/graphql-file-loader": "^7.3.3",
     "@graphql-tools/load": "^7.5.1",
     "@graphql-tools/schema": "^8.3.1",
     "@graphql-tools/utils": "^8.6.1",
-    "@graphql-yoga/node": "alpha",
-    "@prisma/client": "^3.9.2",
-    "graphql": "^16.3.0",
     "graphql-scalars": "^1.14.1",
+    "graphql-ws": "^5.8.2",
     "jsonwebtoken": "^8.5.1",
     "luxon": "^2.3.0",
     "node-fetch": "2.6.7",
-    "query-string": "^7.1.1",
-    "uuid": "^8.3.2",
-    "ws": "^7.5.3"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.6.2",
@@ -35,13 +28,8 @@
     "@types/node": "^16.7.10",
     "@types/node-fetch": "^2.6.1",
     "@types/uuid": "^8",
-    "@types/ws": "^7.4.6",
-    "prisma": "^3.9.2",
     "ts-node": "^10.2.1",
     "ts-node-dev": "^1.1.8",
     "typescript": "4.3.5"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
   }
 }

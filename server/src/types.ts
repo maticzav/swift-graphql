@@ -24,185 +24,93 @@ export type AuthPayloadFailure = {
 
 export type AuthPayloadSuccess = {
   __typename?: 'AuthPayloadSuccess';
-  token: Scalars['String'];
-  user: User;
-};
-
-export type Character = Node & {
-  __typename?: 'Character';
-  description: Scalars['String'];
-  id: Scalars['ID'];
-  /** URL of the character image. */
-  image: Scalars['String'];
   name: Scalars['String'];
-  /**
-   * Tells whether currently authenticated user has starred this character.
-   *
-   * NOTE: If there's no authenticated user, this field will always return false.
-   */
-  starred: Scalars['Boolean'];
+  token: Scalars['String'];
 };
 
-export type Comic = Node & {
-  __typename?: 'Comic';
-  description: Scalars['String'];
-  id: Scalars['ID'];
-  isbn: Scalars['String'];
-  pageCount?: Maybe<Scalars['Int']>;
-  /** Tells whether currently authenticated user has starred this comic. */
-  starred: Scalars['Boolean'];
-  /** URL of the thumbnail image. */
-  thumbnail: Scalars['String'];
-  title: Scalars['String'];
+export type FormParams = {
+  age: Scalars['Int'];
+  master?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
 };
 
-export type File = Node & {
-  __typename?: 'File';
-  id: Scalars['ID'];
-  /** URL that may be used to access the file. */
-  publicUrl: Scalars['String'];
-  /** Signed URL that should be used to upload the file. */
-  uploadUrl: Scalars['String'];
+export type Human = {
+  name: Scalars['String'];
 };
 
-export enum Item {
-  Character = 'CHARACTER',
-  Comic = 'COMIC'
-}
-
-export type Message = Node & {
-  __typename?: 'Message';
-  author: User;
-  date: Scalars['DateTime'];
-  id: Scalars['ID'];
-  image: File;
-  message: Scalars['String'];
+export type Master = Human & {
+  __typename?: 'Master';
+  age: Scalars['Int'];
+  name: Scalars['String'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  /** Creates a random authentication session. */
-  auth: AuthPayload;
-  /**
-   * Messages the forum.
-   *
-   * NOTE: Image should be the id of the uploaded file.
-   */
-  message: Message;
-  /** Adds a star to a comic or a character. */
-  star: SearchResult;
-  /**
-   * Creates a new upload URL for a file and returns an ID.
-   *
-   * NOTE: The file should be uploaded to the returned URL. If the user is not
-   * authenticated, mutation will throw an error.
-   */
-  uploadFile: File;
+  /** A sample mutation that mimics a complex form and returns a */
+  form: Human;
+  /** A mutation that returns the token that may be used to authenticate the user. */
+  login: AuthPayload;
 };
 
 
-export type MutationMessageArgs = {
-  image?: InputMaybe<Scalars['ID']>;
-  message: Scalars['String'];
+export type MutationFormArgs = {
+  params: FormParams;
 };
 
 
-export type MutationStarArgs = {
-  id: Scalars['ID'];
-  item: Item;
+export type MutationLoginArgs = {
+  name: Scalars['String'];
 };
 
+export enum Option {
+  One = 'ONE',
+  Three = 'THREE',
+  Two = 'TWO'
+}
 
-export type MutationUploadFileArgs = {
-  contentType: Scalars['String'];
-  extension?: InputMaybe<Scalars['String']>;
-  folder: Scalars['String'];
-};
-
-/** An object with an ID. */
-export type Node = {
-  /** ID of the object. */
-  id: Scalars['ID'];
-};
-
-export type Pagination = {
-  offset?: InputMaybe<Scalars['Int']>;
-  /**
-   * Number of items in a list that should be returned.
-   *
-   * NOTE: Maximum is 20 items.
-   */
-  take?: InputMaybe<Scalars['Int']>;
+export type Padawan = Human & {
+  __typename?: 'Padawan';
+  age: Scalars['Int'];
+  master: Master;
+  name: Scalars['String'];
 };
 
 export type Query = {
   __typename?: 'Query';
-  /** Returns a list of characters from the Marvel universe. */
-  characters: Array<Character>;
-  /** Returns a list of comics from the Marvel universe. */
-  comics: Array<Comic>;
-  /** Simple field that always returns "Hello world!". */
+  /** Query that returns the current date. */
+  date?: Maybe<Scalars['DateTime']>;
+  /** Simple query that says "Hello World!". */
   hello: Scalars['String'];
-  /** Lets you see send messages from other people. */
-  messages: Array<Message>;
-  /** Fetches an object given its ID. */
-  node?: Maybe<Node>;
-  /**
-   * Searches all characters and comics by name and returns those whose
-   * name starts with the query string.
-   */
-  search: Array<SearchResult>;
-  /** Returns currently authenticated user and errors if there's no authenticated user. */
-  user: User;
+  /** A sample list of random strings. */
+  list: Array<Scalars['String']>;
+  /** A query that echos the selected enumerator back to the client. */
+  oneOf: Option;
+  /** A query that returns a value only when user is authenticated. */
+  secret?: Maybe<Scalars['String']>;
 };
 
 
-export type QueryCharactersArgs = {
-  pagination?: InputMaybe<Pagination>;
+export type QueryOneOfArgs = {
+  option: Option;
 };
-
-
-export type QueryComicsArgs = {
-  pagination?: InputMaybe<Pagination>;
-};
-
-
-export type QueryMessagesArgs = {
-  pagination?: InputMaybe<Pagination>;
-};
-
-
-export type QueryNodeArgs = {
-  id: Scalars['ID'];
-};
-
-
-export type QuerySearchArgs = {
-  pagination?: InputMaybe<Pagination>;
-  query: Search;
-};
-
-export type Search = {
-  pagination?: InputMaybe<Pagination>;
-  /** String used to compare the name of the item to. */
-  query: Scalars['String'];
-};
-
-export type SearchResult = Character | Comic;
 
 export type Subscription = {
   __typename?: 'Subscription';
-  /** Triggered whene a new comment is added to the shared list of comments. */
-  message: Message;
-  /** Returns the current time from the server and refreshes every second. */
-  time: Scalars['DateTime'];
+  /** A query that counts from a given value up/down to (excluding) target value. */
+  count: Scalars['Int'];
+  /** Countsdown from a given value to (including) 0 if you are authenticated. */
+  secret: Scalars['Int'];
 };
 
-export type User = Node & {
-  __typename?: 'User';
-  id: Scalars['ID'];
-  /** A nickname user has picked for themself. */
-  username: Scalars['String'];
+
+export type SubscriptionCountArgs = {
+  from: Scalars['Int'];
+  to: Scalars['Int'];
+};
+
+
+export type SubscriptionSecretArgs = {
+  from: Scalars['Int'];
 };
 
 
@@ -278,23 +186,17 @@ export type ResolversTypes = {
   AuthPayloadFailure: ResolverTypeWrapper<Partial<AuthPayloadFailure>>;
   AuthPayloadSuccess: ResolverTypeWrapper<Partial<AuthPayloadSuccess>>;
   Boolean: ResolverTypeWrapper<Partial<Scalars['Boolean']>>;
-  Character: ResolverTypeWrapper<Partial<Character>>;
-  Comic: ResolverTypeWrapper<Partial<Comic>>;
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']>>;
-  File: ResolverTypeWrapper<Partial<File>>;
-  ID: ResolverTypeWrapper<Partial<Scalars['ID']>>;
+  FormParams: ResolverTypeWrapper<Partial<FormParams>>;
+  Human: ResolversTypes['Master'] | ResolversTypes['Padawan'];
   Int: ResolverTypeWrapper<Partial<Scalars['Int']>>;
-  Item: ResolverTypeWrapper<Partial<Item>>;
-  Message: ResolverTypeWrapper<Partial<Message>>;
+  Master: ResolverTypeWrapper<Partial<Master>>;
   Mutation: ResolverTypeWrapper<{}>;
-  Node: ResolversTypes['Character'] | ResolversTypes['Comic'] | ResolversTypes['File'] | ResolversTypes['Message'] | ResolversTypes['User'];
-  Pagination: ResolverTypeWrapper<Partial<Pagination>>;
+  Option: ResolverTypeWrapper<Partial<Option>>;
+  Padawan: ResolverTypeWrapper<Partial<Padawan>>;
   Query: ResolverTypeWrapper<{}>;
-  Search: ResolverTypeWrapper<Partial<Search>>;
-  SearchResult: Partial<ResolversTypes['Character'] | ResolversTypes['Comic']>;
   String: ResolverTypeWrapper<Partial<Scalars['String']>>;
   Subscription: ResolverTypeWrapper<{}>;
-  User: ResolverTypeWrapper<Partial<User>>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -303,22 +205,16 @@ export type ResolversParentTypes = {
   AuthPayloadFailure: Partial<AuthPayloadFailure>;
   AuthPayloadSuccess: Partial<AuthPayloadSuccess>;
   Boolean: Partial<Scalars['Boolean']>;
-  Character: Partial<Character>;
-  Comic: Partial<Comic>;
   DateTime: Partial<Scalars['DateTime']>;
-  File: Partial<File>;
-  ID: Partial<Scalars['ID']>;
+  FormParams: Partial<FormParams>;
+  Human: ResolversParentTypes['Master'] | ResolversParentTypes['Padawan'];
   Int: Partial<Scalars['Int']>;
-  Message: Partial<Message>;
+  Master: Partial<Master>;
   Mutation: {};
-  Node: ResolversParentTypes['Character'] | ResolversParentTypes['Comic'] | ResolversParentTypes['File'] | ResolversParentTypes['Message'] | ResolversParentTypes['User'];
-  Pagination: Partial<Pagination>;
+  Padawan: Partial<Padawan>;
   Query: {};
-  Search: Partial<Search>;
-  SearchResult: Partial<ResolversParentTypes['Character'] | ResolversParentTypes['Comic']>;
   String: Partial<Scalars['String']>;
   Subscription: {};
-  User: Partial<User>;
 };
 
 export type AuthPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['AuthPayload'] = ResolversParentTypes['AuthPayload']> = {
@@ -331,28 +227,8 @@ export type AuthPayloadFailureResolvers<ContextType = any, ParentType extends Re
 };
 
 export type AuthPayloadSuccessResolvers<ContextType = any, ParentType extends ResolversParentTypes['AuthPayloadSuccess'] = ResolversParentTypes['AuthPayloadSuccess']> = {
-  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type CharacterResolvers<ContextType = any, ParentType extends ResolversParentTypes['Character'] = ResolversParentTypes['Character']> = {
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  image?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  starred?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type ComicResolvers<ContextType = any, ParentType extends ResolversParentTypes['Comic'] = ResolversParentTypes['Comic']> = {
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  isbn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  pageCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  starred?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  thumbnail?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -360,73 +236,52 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
   name: 'DateTime';
 }
 
-export type FileResolvers<ContextType = any, ParentType extends ResolversParentTypes['File'] = ResolversParentTypes['File']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  publicUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  uploadUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+export type HumanResolvers<ContextType = any, ParentType extends ResolversParentTypes['Human'] = ResolversParentTypes['Human']> = {
+  __resolveType: TypeResolveFn<'Master' | 'Padawan', ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type MessageResolvers<ContextType = any, ParentType extends ResolversParentTypes['Message'] = ResolversParentTypes['Message']> = {
-  author?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  date?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  image?: Resolver<ResolversTypes['File'], ParentType, ContextType>;
-  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+export type MasterResolvers<ContextType = any, ParentType extends ResolversParentTypes['Master'] = ResolversParentTypes['Master']> = {
+  age?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  auth?: Resolver<ResolversTypes['AuthPayload'], ParentType, ContextType>;
-  message?: Resolver<ResolversTypes['Message'], ParentType, ContextType, RequireFields<MutationMessageArgs, 'message'>>;
-  star?: Resolver<ResolversTypes['SearchResult'], ParentType, ContextType, RequireFields<MutationStarArgs, 'id' | 'item'>>;
-  uploadFile?: Resolver<ResolversTypes['File'], ParentType, ContextType, RequireFields<MutationUploadFileArgs, 'contentType' | 'folder'>>;
+  form?: Resolver<ResolversTypes['Human'], ParentType, ContextType, RequireFields<MutationFormArgs, 'params'>>;
+  login?: Resolver<ResolversTypes['AuthPayload'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'name'>>;
 };
 
-export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'Character' | 'Comic' | 'File' | 'Message' | 'User', ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+export type PadawanResolvers<ContextType = any, ParentType extends ResolversParentTypes['Padawan'] = ResolversParentTypes['Padawan']> = {
+  age?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  master?: Resolver<ResolversTypes['Master'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  characters?: Resolver<Array<ResolversTypes['Character']>, ParentType, ContextType, Partial<QueryCharactersArgs>>;
-  comics?: Resolver<Array<ResolversTypes['Comic']>, ParentType, ContextType, Partial<QueryComicsArgs>>;
+  date?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   hello?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  messages?: Resolver<Array<ResolversTypes['Message']>, ParentType, ContextType, Partial<QueryMessagesArgs>>;
-  node?: Resolver<Maybe<ResolversTypes['Node']>, ParentType, ContextType, RequireFields<QueryNodeArgs, 'id'>>;
-  search?: Resolver<Array<ResolversTypes['SearchResult']>, ParentType, ContextType, RequireFields<QuerySearchArgs, 'query'>>;
-  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-};
-
-export type SearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['SearchResult'] = ResolversParentTypes['SearchResult']> = {
-  __resolveType: TypeResolveFn<'Character' | 'Comic', ParentType, ContextType>;
+  list?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  oneOf?: Resolver<ResolversTypes['Option'], ParentType, ContextType, RequireFields<QueryOneOfArgs, 'option'>>;
+  secret?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
 export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
-  message?: SubscriptionResolver<ResolversTypes['Message'], "message", ParentType, ContextType>;
-  time?: SubscriptionResolver<ResolversTypes['DateTime'], "time", ParentType, ContextType>;
-};
-
-export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  count?: SubscriptionResolver<ResolversTypes['Int'], "count", ParentType, ContextType, RequireFields<SubscriptionCountArgs, 'from' | 'to'>>;
+  secret?: SubscriptionResolver<ResolversTypes['Int'], "secret", ParentType, ContextType, RequireFields<SubscriptionSecretArgs, 'from'>>;
 };
 
 export type Resolvers<ContextType = any> = {
   AuthPayload?: AuthPayloadResolvers<ContextType>;
   AuthPayloadFailure?: AuthPayloadFailureResolvers<ContextType>;
   AuthPayloadSuccess?: AuthPayloadSuccessResolvers<ContextType>;
-  Character?: CharacterResolvers<ContextType>;
-  Comic?: ComicResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
-  File?: FileResolvers<ContextType>;
-  Message?: MessageResolvers<ContextType>;
+  Human?: HumanResolvers<ContextType>;
+  Master?: MasterResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
-  Node?: NodeResolvers<ContextType>;
+  Padawan?: PadawanResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
-  SearchResult?: SearchResultResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
-  User?: UserResolvers<ContextType>;
 };
 
