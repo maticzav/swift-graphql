@@ -13,16 +13,16 @@ import os
 public class GraphQLWebSocket: WebSocketDelegate {
     
     /// Configuration of the behaviour of the client.
-    private var config: GraphQLWebSocketConfiguration
+    private let config: GraphQLWebSocketConfiguration
     
     /// Connection parameters for the task.
-    private var request: URLRequest
+    private let request: URLRequest
     
     /// Shared encoder used to encode the request.
-    private var encoder: JSONEncoder = JSONEncoder()
+    private let encoder: JSONEncoder = JSONEncoder()
     
     /// Shared decoder used for decoding responses.
-    private var decoder: JSONDecoder = JSONDecoder()
+    private let decoder: JSONDecoder = JSONDecoder()
     
     // MARK: - State
     
@@ -107,7 +107,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     }
     
     /// The central subject that publishes all events to the pipelines.
-    private var emitter = PassthroughSubject<Event, Never>()
+    private let emitter = PassthroughSubject<Event, Never>()
     
     /// A timer reference responsible for checking that the server has ACK the connection in timely manner.
     /// https://stackoverflow.com/a/26808801/2946444
@@ -296,16 +296,20 @@ public class GraphQLWebSocket: WebSocketDelegate {
             self.reconnectTimer = nil
             self.connectionDroppedTimer = nil
             
+            self.health = .notconnected
+            
             self.config.logger.debug("Terminated connection and cleared timers!")
             
             return
         }
         
         self.config.logger.debug("Reconnecting...")
-        var retry: Int = 0
+        var retry: Int = 1
         if case .reconnecting(let attempt) = health {
             retry = attempt
         }
+        
+        self.health = .reconnecting(retry: retry + 1)
         
         self.config.logger.debug("Scheduling \(retry)-th connect retry!")
         self.reconnectTimer = Timer.scheduledTimer(

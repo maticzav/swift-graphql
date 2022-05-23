@@ -8,6 +8,9 @@ import GraphQL
 ///         You may use them with a custom implementation as well.
 public class Client: GraphQLClient, ObservableObject {
     
+    /// A configuration for the client behaviour.
+    private let config: ClientConfiguration
+    
     // MARK: - Exchange Pipeline
     
     /// The operations stream that lets the client send and listen for them.
@@ -32,7 +35,12 @@ public class Client: GraphQLClient, ObservableObject {
     ///
     /// - parameter exchanges: List of exchanges that process each operation left-to-right.
     ///
-    init(exchanges: [Exchange]) {
+    init(
+        exchanges: [Exchange],
+        config: ClientConfiguration = ClientConfiguration()
+    ) {
+        self.config = config
+        
         let exchange = ComposeExchange(exchanges: exchanges)
         let operations = operations.share().eraseToAnyPublisher()
         
@@ -56,21 +64,21 @@ public class Client: GraphQLClient, ObservableObject {
     }
     
     /// Creates a new GraphQL Client using default exchanges, ready to go and be used.
-    convenience init() {
+    convenience init(config: ClientConfiguration = ClientConfiguration()) {
         let exchanges: [Exchange] = [
             DedupExchange(),
             CacheExchange(),
             FetchExchange()
         ]
         
-        self.init(exchanges: exchanges)
+        self.init(exchanges: exchanges, config: config)
     }
     
     // MARK: - Methods
     
     /// Log a debug message.
     public func log(message: String) {
-        print(message)
+        self.config.logger.debug("\(message)")
     }
     
     /// Reexecutes an operation by sending it down the exchange pipeline.
@@ -83,6 +91,7 @@ public class Client: GraphQLClient, ObservableObject {
             return
         }
         
+        self.config.logger.debug("Reexecuting operation \(operation.id)...")
         self.operations.send(operation)
     }
     
