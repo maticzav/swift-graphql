@@ -29,12 +29,17 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.4"),
         .package(url: "https://github.com/apple/swift-format", from: "0.50600.0"),
+        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.0")
     ],
     targets: [
         // Utility Targets
         .target(name: "GraphQL", dependencies: [], path: "Sources/GraphQL"),
         .target(name: "GraphQLAST", dependencies: [], path: "Sources/GraphQLAST"),
-        .target(name: "GraphQLWebSocket", dependencies: ["GraphQL"], path: "Sources/GraphQLWebSocket"),
+        .target(
+            name: "GraphQLWebSocket",
+            dependencies: ["GraphQL", "Starscream"],
+            path: "Sources/GraphQLWebSocket"
+        ),
         // SwiftGraphQL
         .target(name: "SwiftGraphQL", dependencies: ["GraphQL"], path: "Sources/SwiftGraphQL"),
         .target(

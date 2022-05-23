@@ -51,10 +51,6 @@ async function main() {
     path: server.getAddressInfo().endpoint,
   })
 
-  wsServer.on('connection', (ws, request) => {
-    console.log('Received Request!')
-  })
-
   // Integrate Yoga's Envelop instance and NodeJS server with graphql-ws
   useServer(
     {
@@ -63,11 +59,32 @@ async function main() {
       onConnect(ctx) {
         console.log('connection created')
         console.log({ ctx })
+
+        ctx.extra.socket.on('message', (data) => {
+          console.log(String(data))
+        })
+      },
+      onDisconnect(ctx) {
+        console.log('connection disconnected')
+        console.log({ ctx })
       },
       onClose(ctx) {
         console.log('connection closed')
         console.log({ ctx })
       },
+      onOperation(ctx) {
+        console.log('operation started')
+        console.log({ ctx })
+      },
+      onComplete(ctx) {
+        console.log('operation completed')
+        console.log({ ctx })
+      },
+      onNext(ctx) {
+        console.log('operation next')
+        console.log({ ctx })
+      },
+      connectionInitWaitTimeout: 5000,
       onError(ctx, message) {
         console.log('error in connection')
         console.log({ ctx })

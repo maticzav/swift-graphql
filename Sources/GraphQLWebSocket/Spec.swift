@@ -14,6 +14,9 @@ protocol ClientMessageInterface: Encodable, Equatable {}
 ///
 public enum ClientMessage: Encodable {
     
+    /// The WebSocket sub-protocol used for the GraphQL over WebSocket protocol
+    public static let PROTOCOL = "graphql-transport-ws"
+    
     /// Indicates that the client wants to establish a connection within the existing socket.
     ///
     /// - NOTE: If the server receives more than one `ConnectionInit` message at any given time,
@@ -100,7 +103,7 @@ public enum ClientMessage: Encodable {
 
     /// Message specification for subscription request.
     public struct Subscribe: ClientMessageInterface, Identifiable {
-        public var type: Type = .connection_init
+        public var type: Type = .subscribe
         
         /// Unique operation id used to identify the connection channel.
         public var id: String
@@ -303,7 +306,14 @@ public enum ServerMessage: Equatable, Decodable {
 // MARK: - Close Code
 
 /// Standard close codes of the GraphQLWS protocol.
-public enum CloseCode: Int, CaseIterable {
+public enum CloseCode: UInt16, CaseIterable {
+    case normalClosure = 1000
+    case goingAway = 1001
+    case noStatusReceived = 1005
+    case abnormalClosure = 1006
+    case serviceRestart = 1012
+    case tryAgainLater = 1013
+    
     case internalServerError = 4500
     case internalClientError = 4005
     case badRequest = 4400
@@ -318,7 +328,42 @@ public enum CloseCode: Int, CaseIterable {
     
     case subscriberAlreadyExists = 4409
     case tooManyInitialisationRequests = 4429
+    
+    /// Tells whether the provided close code is unrecoverable by the client.
+    static func isFatalInternalCloseCode(code: UInt16) -> Bool {
+        let recoverable: [UInt16] = [
+            CloseCode.normalClosure.rawValue,
+            CloseCode.goingAway.rawValue,
+            CloseCode.abnormalClosure.rawValue,
+            CloseCode.noStatusReceived.rawValue,
+            CloseCode.serviceRestart.rawValue,
+            CloseCode.tryAgainLater.rawValue,
+        ]
+        
+        if recoverable.contains(code) {
+            return false
+        }
+        
+        // All other internal errors are fatal.
+        return 1000 <= code && code <= 1999
+    }
+    
+    static func isTerminatingCloseCode(code: UInt16) -> Bool {
+        let terminatingCloseCodes = [
+            CloseCode.internalServerError.rawValue,
+            CloseCode.internalClientError.rawValue,
+            CloseCode.badRequest.rawValue,
+            CloseCode.badResponse.rawValue,
+            CloseCode.unauthorized.rawValue,
+            
+            CloseCode.subprotocolNotAcceptable.rawValue,
+            
+            CloseCode.subscriberAlreadyExists.rawValue,
+            CloseCode.tooManyInitialisationRequests.rawValue
+        ]
+        
+        return terminatingCloseCodes.contains(code)
+    }
 }
 
-/// The WebSocket sub-protocol used for the GraphQL over WebSocket protocol
-public let graphqlTransportWSProtocol = "graphql-transport-ws"
+

@@ -10,23 +10,33 @@ final class ClientTests: XCTestCase {
     
     private var cancellables = Set<AnyCancellable>()
     
-    func testWebSocketConnectsAndEmitsEvents() throws {
-        let expectation = expectation(description: "Subscription Closed")
-        
-        let request = URLRequest(url: URL(string: "ws://localhost:4000/graphql")!)
-        let client = GraphQLWebSocket(request: request)
-        
+    /// Returns the execution arguments for the counter subscription.
+    private func count(from: Int, to: Int) -> ExecutionArgs {
         let args = ExecutionArgs(
             query: """
             subscription Counter {
-                count(from: 10, to: 5)
+                count(from: \(from), to: \(to))
             }
             """,
             variables: [:]
         )
         
+        return args
+    }
+    
+    /// Decodes a subscription result into an integer.
+    private func decode(_ result: ExecutionResult) -> Int {
+        (result.data.value as! [String: Int])["count"]!
+    }
+    
+    // MARK: - Tests
+    
+    func testWebSocketConnectsAndEmitsEvents() throws {
+        let xsexpect = expectation(description: "xs complete")
+        let ysexpect = expectation(description: "ys complete")
         
-        var values = [Int]()
+        let request = URLRequest(url: URL(string: "ws://127.0.0.1:4000/graphql")!)
+        let client = GraphQLWebSocket(request: request)
         
         client.onEvent()
             .compactMap({ msg -> Error? in
@@ -38,23 +48,39 @@ final class ClientTests: XCTestCase {
                 }
             })
             .sink { err in
-                print("ERR", err)
                 XCTFail()
             }
             .store(in: &self.cancellables)
         
-        client.subscribe(args)
+        var xs = [Int]()
+        var ys = [Int]()
+        
+        // We parallely check two GraphQL subscriptions.
+        client.subscribe(self.count(from: 10, to: 5))
             .sink { completion in
-                expectation.fulfill()
+                xsexpect.fulfill()
             } receiveValue: { result in
-                let n = (result.data.value as! [String: Int])["count"]!
-                values.append(n)
+                xs.append(self.decode(result))
             }
             .store(in: &self.cancellables)
         
-        waitForExpectations(timeout: 15)
+        client.subscribe(self.count(from: 100, to: 105))
+            .sink { completion in
+                ysexpect.fulfill()
+            } receiveValue: { result in
+                ys.append(self.decode(result))
+            }
+            .store(in: &self.cancellables)
         
-        XCTAssertEqual([10, 9, 8, 7, 6], values)
-
+        waitForExpectations(timeout: 5)
+        
+        XCTAssertEqual([10, 9, 8, 7, 6], xs)
+        XCTAssertEqual([100, 101, 102, 103, 104], ys)
     }
+    
+    
+    
+    
+    
+    
 }
