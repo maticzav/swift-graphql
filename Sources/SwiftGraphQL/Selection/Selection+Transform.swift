@@ -6,8 +6,8 @@ import GraphQL
 public extension Selection {
     
     /// Lets you convert a type selection into a list selection.
-    var list: Selection<[Type], [TypeLock]> {
-        Selection<[Type], [TypeLock]> { fields in
+    var list: Selection<[T], [TypeLock]> {
+        Selection<[T], [TypeLock]> { fields in
             let selection = self.__selection()
             fields.__select(selection)
             
@@ -27,8 +27,8 @@ public extension Selection {
     }
     
     /// Lets you decode nullable values.
-    var nullable: Selection<Type?, TypeLock?> {
-        Selection<Type?, TypeLock?> { fields in
+    var nullable: Selection<T?, TypeLock?> {
+        Selection<T?, TypeLock?> { fields in
             let selection = self.__selection()
             fields.__select(selection)
 
@@ -47,8 +47,8 @@ public extension Selection {
     }
     
     /// Lets you decode nullable values into non-null ones.
-    var nonNullOrFail: Selection<Type, TypeLock?> {
-        Selection<Type, TypeLock?> { fields in
+    var nonNullOrFail: Selection<T, TypeLock?> {
+        Selection<T, TypeLock?> { fields in
             let selection = self.__selection()
             fields.__select(selection)
             
@@ -67,8 +67,8 @@ public extension Selection {
     }
     
     /// Lets you make a failable (nullable) decoder accept nullable values.
-    func optional<T>() -> Selection<Type, TypeLock?> where Type == T? {
-        Selection<Type, TypeLock?> { fields in
+    func optional<UnwrappedT>() -> Selection<T, TypeLock?> where T == UnwrappedT? {
+        Selection<T, TypeLock?> { fields in
             let selection = self.__selection()
             fields.__select(selection)
 
@@ -85,7 +85,7 @@ public extension Selection {
 public extension Selection {
     
     /// Maps selection's return value into a new value using provided mapping function.
-    func map<MappedType>(_ fn: @escaping (Type) -> MappedType) -> Selection<MappedType, TypeLock> {
+    func map<MappedType>(_ fn: @escaping (T) -> MappedType) -> Selection<MappedType, TypeLock> {
         Selection<MappedType, TypeLock> { fields in
             let selection = self.__selection()
             fields.__select(selection)
@@ -127,14 +127,14 @@ public extension Selection {
     /// Lets you provide non-list selection for list field.
     static func list<NonListType, NonListTypeLock>(
         _ selection: Selection<NonListType, NonListTypeLock>
-    ) -> Selection<Type, TypeLock> where Type == [NonListType], TypeLock == [NonListTypeLock] {
+    ) -> Selection<T, TypeLock> where T == [NonListType], TypeLock == [NonListTypeLock] {
         selection.list
     }
 
     /// Lets you provide non-nullable selection for nullable field.
     static func nullable<NonNullType, NonNullTypeLock>(
         _ selection: Selection<NonNullType, NonNullTypeLock>
-    ) -> Selection<Type, TypeLock> where Type == NonNullType?, TypeLock == NonNullTypeLock? {
+    ) -> Selection<T, TypeLock> where T == NonNullType?, TypeLock == NonNullTypeLock? {
         selection.nullable
     }
 }

@@ -37,7 +37,7 @@ extension ObjectType {
         
         // Adds utility alias for the selection.
         code.append("""
-        extension Selection where TypeLock == Never, Type == Never {
+        extension Selection where T == Never, TypeLock == Never {
             typealias \(apiName)<T> = Selection<T, Objects.\(apiName)>
         }
         """)
@@ -65,7 +65,7 @@ extension ObjectType {
         
         // Adds utility alias for the selection.
         code.append("""
-        extension Selection where TypeLock == Never, Type == Never {
+        extension Selection where T == Never, TypeLock == Never {
             typealias \(name) = Objects.\(name)
         }
         """)

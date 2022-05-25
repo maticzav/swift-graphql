@@ -5,6 +5,9 @@ import Foundation
 /// composed using SwiftGraphQL.
 public protocol GraphQLClient {
     
+    /// Request to use to perform the operation.
+    var request: URLRequest { get }
+    
     /// Log a debug message.
     func log(message: String) -> Void
     

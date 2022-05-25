@@ -722,23 +722,6 @@ extension Objects {
 }
 
 extension Fields where TypeLock == Objects.Subscription {
-  /// Returns the current time from the server and refreshes every second.
-
-  func time() throws -> Date {
-    let field = GraphQLField.leaf(
-      field: "time",
-      parent: "Subscription",
-      arguments: []
-    )
-    self.__select(field)
-
-    switch self.__state {
-    case .decoding:
-      return try self.__decode(field: field.alias!) { try Date(from: $0) }
-    case .selecting:
-      return Date.mockValue
-    }
-  }
   /// Triggered whene a new comment is added to the shared list of comments.
 
   func message<T>(selection: Selection<T, Objects.Message>) throws -> T {
@@ -785,22 +768,6 @@ extension Fields where TypeLock == Objects.Message {
       return try self.__decode(field: field.alias!) { try String(from: $0) }
     case .selecting:
       return String.mockValue
-    }
-  }
-
-  func date() throws -> Date {
-    let field = GraphQLField.leaf(
-      field: "date",
-      parent: "Message",
-      arguments: []
-    )
-    self.__select(field)
-
-    switch self.__state {
-    case .decoding:
-      return try self.__decode(field: field.alias!) { try Date(from: $0) }
-    case .selecting:
-      return Date.mockValue
     }
   }
 
@@ -1120,13 +1087,6 @@ extension Objects.File {
 }
 
 extension Objects.Subscription {
-  /// Returns the current time from the server and refreshes every second.
-
-  static func time() throws -> Selection<Date, Objects.Subscription> {
-    Selection<Date, Objects.Subscription> {
-      try $0.time()
-    }
-  }
   /// Triggered whene a new comment is added to the shared list of comments.
 
   static func message<T>(selection: Selection<T, Objects.Message>) throws -> Selection<
@@ -1147,13 +1107,7 @@ extension Objects.Message {
       try $0.id()
     }
   }
-
-  static func date() throws -> Selection<Date, Objects.Message> {
-    Selection<Date, Objects.Message> {
-      try $0.date()
-    }
-  }
-
+    
   static func message() throws -> Selection<String, Objects.Message> {
     Selection<String, Objects.Message> {
       try $0.message()

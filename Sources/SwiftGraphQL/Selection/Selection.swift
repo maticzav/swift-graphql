@@ -96,15 +96,15 @@ public final class Fields<TypeLock> {
 /// fields a query should fetch. To do that, it passes around a Fields
 /// class reference. Generated code later calls `select` method on Fields
 /// to add a subfield to the selection.
-public struct Selection<`Type`, TypeLock> {
+public struct Selection<T, TypeLock> {
     
     /// Function that SwiftGraphQL uses to generate selection and convert received JSON
     /// structure into concrete Swift structure.
-    private var decoder: (Fields<TypeLock>) throws -> Type
+    private var decoder: (Fields<TypeLock>) throws -> T
     
     // MARK: - Initializer
     
-    public init(decoder: @escaping (Fields<TypeLock>) throws -> Type) {
+    public init(decoder: @escaping (Fields<TypeLock>) throws -> T) {
         self.decoder = decoder
     }
 
@@ -133,7 +133,7 @@ public struct Selection<`Type`, TypeLock> {
     /// Decodes JSON response into a return type of the selection set.
     ///
     /// - NOTE: This is an internal function that should only be used by the generated code.
-    public func __decode(data: AnyCodable) throws -> Type {
+    public func __decode(data: AnyCodable) throws -> T {
         // Construct a copy of the selection set, and use the new selection set to decode data.
         let fields = Fields<TypeLock>(data: data)
         
@@ -144,7 +144,7 @@ public struct Selection<`Type`, TypeLock> {
     /// Mocks the data of a selection.
     ///
     /// - NOTE: This is an internal function that should only be used by the generated code!
-    public func __mock() throws -> Type {
+    public func __mock() throws -> T {
         let fields = Fields<TypeLock>()
         return try decoder(fields)
     }

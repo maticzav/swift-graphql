@@ -8,16 +8,16 @@ import SwiftGraphQL
 extension GraphQLClient {
     
     /// Turns selection into a request operation.
-    public func createRequestOperation<T, TypeLock>(
+    private func createRequestOperation<T, TypeLock>(
         for selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest,
+        url request: URLRequest? = nil,
         policy: Operation.Policy
     ) -> Operation where TypeLock: GraphQLOperation {
         Operation(
             id: UUID().uuidString,
             kind: TypeLock.operationKind,
-            request: request,
+            request: request ?? self.request,
             policy: policy,
             types: Array(selection.types),
             args: selection.encode(operationName: operationName)
@@ -30,7 +30,7 @@ extension GraphQLClient {
     public func executeQuery<T, TypeLock>(
         for selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest,
+        url request: URLRequest? = nil,
         policy: Operation.Policy
     ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLHttpOperation {
         let operation = self.createRequestOperation(
@@ -46,7 +46,7 @@ extension GraphQLClient {
     public func executeMutation<T, TypeLock>(
         for selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest,
+        url request: URLRequest? = nil,
         policy: Operation.Policy
     ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLHttpOperation {
         let operation = self.createRequestOperation(
@@ -62,7 +62,7 @@ extension GraphQLClient {
     public func executeSubscription<T, TypeLock>(
         of selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest,
+        url request: URLRequest? = nil,
         policy: Operation.Policy
     ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLWebSocketOperation {
         let operation = self.createRequestOperation(
@@ -80,9 +80,9 @@ extension GraphQLClient {
     public func query<T, TypeLock>(
         for selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest,
+        url request: URLRequest? = nil,
         policy: Operation.Policy
-    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where T: Decodable, TypeLock: GraphQLHttpOperation & Decodable {
+    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLHttpOperation {
         self.executeQuery(for: selection, as: operationName, url: request, policy: policy)
             .map { result in result.decode(selection: selection) }
             .eraseToAnyPublisher()
@@ -92,9 +92,9 @@ extension GraphQLClient {
     public func mutate<T, TypeLock>(
         for selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest,
+        url request: URLRequest? = nil,
         policy: Operation.Policy
-    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where T: Decodable, TypeLock: GraphQLHttpOperation & Decodable {
+    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLHttpOperation {
         self.executeMutation(for: selection, as: operationName, url: request, policy: policy)
             .map { result in result.decode(selection: selection) }
             .eraseToAnyPublisher()
@@ -104,9 +104,9 @@ extension GraphQLClient {
     public func subscribe<T, TypeLock>(
         to selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest,
+        url request: URLRequest? = nil,
         policy: Operation.Policy
-    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where T: Decodable, TypeLock: GraphQLWebSocketOperation & Decodable {
+    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLWebSocketOperation & Decodable {
         self.executeSubscription(of: selection, as: operationName, url: request, policy: policy)
             .map { result in result.decode(selection: selection) }
             .eraseToAnyPublisher()
@@ -116,7 +116,7 @@ extension GraphQLClient {
 extension OperationResult {
     
     /// Decodes data in operation result using the selection decoder.
-    fileprivate func decode<T: Decodable, TypeLock: Decodable>(
+    fileprivate func decode<T, TypeLock>(
         selection: Selection<T, TypeLock>
     ) -> DecodedOperationResult<T> {
         var decoded = DecodedOperationResult<T>(

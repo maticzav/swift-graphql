@@ -31,7 +31,7 @@ extension UnionType {
 
         \(selections)
 
-        extension Selection where TypeLock == Never, Type == Never {
+        extension Selection where T == Never, TypeLock == Never {
             typealias \(name)<T> = Selection<T, Unions.\(name)>
         }
         """

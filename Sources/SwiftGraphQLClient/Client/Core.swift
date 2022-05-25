@@ -8,6 +8,9 @@ import GraphQL
 ///         You may use them with a custom implementation as well.
 public class Client: GraphQLClient, ObservableObject {
     
+    /// Request to use to perform operations.
+    public let request: URLRequest
+    
     /// A configuration for the client behaviour.
     private let config: ClientConfiguration
     
@@ -36,9 +39,11 @@ public class Client: GraphQLClient, ObservableObject {
     /// - parameter exchanges: List of exchanges that process each operation left-to-right.
     ///
     init(
+        url request: URLRequest,
         exchanges: [Exchange],
         config: ClientConfiguration = ClientConfiguration()
     ) {
+        self.request = request
         self.config = config
         
         let exchange = ComposeExchange(exchanges: exchanges)
@@ -64,14 +69,14 @@ public class Client: GraphQLClient, ObservableObject {
     }
     
     /// Creates a new GraphQL Client using default exchanges, ready to go and be used.
-    convenience init(config: ClientConfiguration = ClientConfiguration()) {
+    convenience init(url request: URLRequest, config: ClientConfiguration = ClientConfiguration()) {
         let exchanges: [Exchange] = [
             DedupExchange(),
             CacheExchange(),
             FetchExchange()
         ]
         
-        self.init(exchanges: exchanges, config: config)
+        self.init(url: request, exchanges: exchanges, config: config)
     }
     
     // MARK: - Methods

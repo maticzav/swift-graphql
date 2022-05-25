@@ -6,7 +6,7 @@ import GraphQL
 extension Selection {
     
     /// Decodes `data` field of the received response of a GraphQL query execution.
-    public func decode(raw: AnyCodable) throws -> Type {
+    public func decode(raw: AnyCodable) throws -> T {
         try self.__decode(data: raw)
     }
 }
