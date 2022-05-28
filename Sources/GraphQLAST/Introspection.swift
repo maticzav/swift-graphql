@@ -200,7 +200,7 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
         }
     }.resume()
 
-    /* Result */
+    // Result
     _ = semaphore.wait(wallTimeout: .distantFuture)
 
     switch result {
@@ -213,7 +213,7 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
     }
 }
 
-enum IntrospectionError: Error {
+public enum IntrospectionError: Error {
     
     /// There was an error during the execution.
     case error(Error)

@@ -130,7 +130,7 @@ struct Example: View {
     private class Loader: ObservableObject {
         
         /// Current data received from the server.
-        @Published var result: Result<T> = .loading
+        @Published var result: Result = .loading
         
         /// Saved reference to the pipeline emitting new values.
         private var pipeline: AnyCancellable?

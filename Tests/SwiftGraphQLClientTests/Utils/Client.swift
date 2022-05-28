@@ -4,6 +4,7 @@ import SwiftGraphQLClient
 
 /// A client that you can use to perform tests on exchanges.
 class MockClient: GraphQLClient {
+    var request: URLRequest
     
     private var customLog: ((String) -> Void)?
     
@@ -18,6 +19,7 @@ class MockClient: GraphQLClient {
         customExecute: ((SwiftGraphQLClient.Operation) -> AnyPublisher<OperationResult, Never>)? = nil,
         customReexecute: ((SwiftGraphQLClient.Operation) -> Void)? = nil
     ) {
+        self.request = URLRequest(url: URL(string: "https://demo.com")!)
         self.customLog = customLog
         self.customExecute = customExecute
         self.customReexecute = customReexecute

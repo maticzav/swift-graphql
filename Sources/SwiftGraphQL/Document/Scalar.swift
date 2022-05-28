@@ -146,6 +146,14 @@ extension Double: GraphQLScalar {
     public static let mockValue = 3.14
 }
 
+extension AnyCodable: GraphQLScalar {
+    public init(from codable: AnyCodable) throws {
+        self = codable
+    }
+    
+    public static let mockValue = AnyCodable(())
+}
+
 
 
 // MARK: - Error

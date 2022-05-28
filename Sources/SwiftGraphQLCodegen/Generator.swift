@@ -35,11 +35,9 @@ public struct GraphQLCodegen {
     /// - parameter from: GraphQL server endpoint.
     public func generate(from endpoint: URL, withHeaders headers: [String: String] = [:]) throws -> Output {
         let schema = try Schema(from: endpoint, withHeaders: headers)
-        let filteredSchema = try schema.filter(with: scalars.supported)
+        let code = try generate(schema: schema)
         
-        let code = try generate(schema: filteredSchema)
-        
-        let schemaScalars = try schema.scalars()
+        let schemaScalars = try schema.usedScalars()
         let ignoredScalars: [String] = schemaScalars.filter { !scalars.supported.contains($0) }
         
         return Output(code: code, ignoredScalars: ignoredScalars)

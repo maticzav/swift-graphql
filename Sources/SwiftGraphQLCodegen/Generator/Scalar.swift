@@ -13,7 +13,7 @@ extension ScalarMap {
         if let mapping = self[name] {
             return mapping
         }
-        fatalError("Unknown scalar \"\(name)\". Please open an issue and attach a copy of your schema!")
+        return "AnyCodable"
     }
     
     /// List of GraphQL scalars that the scalar map supports.

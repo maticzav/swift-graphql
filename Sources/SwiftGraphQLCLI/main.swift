@@ -1,6 +1,7 @@
 import ArgumentParser
 import Files
 import Foundation
+import GraphQLAST
 import SwiftGraphQLCodegen
 import System
 import Yams
@@ -67,7 +68,6 @@ struct SwiftGraphQLCLI: ParsableCommand {
         }
         
         var headers: [String: String] = [:]
-        
         if let authorization = authorization {
             headers["Authorization"] = authorization
         }
@@ -76,11 +76,21 @@ struct SwiftGraphQLCLI: ParsableCommand {
         let generator = GraphQLCodegen(scalars: config.scalars)
         let result: GraphQLCodegen.Output
         
+        print("Fetching your schema and generating API...")
+        
         do {
             result = try generator.generate(from: url, withHeaders: headers)
         } catch CodegenError.formatting(let err) {
             print(err.localizedDescription)
             SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.formatting)
+        } catch IntrospectionError.emptyfile, IntrospectionError.unknown {
+            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.introspection)
+        } catch IntrospectionError.statusCode(let code) {
+            print("Received status code \(code) while introspecting the schema...")
+            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.introspection)
+        } catch IntrospectionError.error(let err) {
+            print(err.localizedDescription)
+            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.introspection)
         } catch {
             SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.unknown)
         }
@@ -92,10 +102,15 @@ struct SwiftGraphQLCLI: ParsableCommand {
             FileHandle.standardOutput.write(result.code.data(using: .utf8)!)
         }
         
+        print("API generated successfully!")
+        
         if !result.ignoredScalars.isEmpty {
             let message = """
-            Some fields may be missing because they rely on unsupported types:
+            Your schema contains some unknown scalars:
+            
             \(result.ignoredScalars.map { " - \($0)" }.joined(separator: "\n"))
+            
+            Add them to the config to get better type support!
             """
             
             print(message)
@@ -146,4 +161,14 @@ enum SwiftGraphQLGeneratorError: String, Error {
     case legacy = "Please update your MacOS to use schema from a file."
     case formatting = "There was an error formatting the code. Make sure your Swift version (i.e. `swift-format`) matches the `swift-format` version. If you need any help, don't hesitate to open an issue and include the log above!"
     case unknown = "Something unexpected happened. Please open an issue and we'll help you out!"
+    case introspection = "Couldn't introspect the schema."
+}
+
+extension String: Error {}
+
+extension ParsableCommand {
+    /// Exits the program with an internal error.
+    static func exit(withError error: SwiftGraphQLGeneratorError? = nil) -> Never {
+        Self.exit(withError: error?.rawValue)
+    }
 }
