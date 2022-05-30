@@ -10,16 +10,16 @@ Additionally, the library exports all the tools you need to fine grain the gener
 ### Command Line Utility
 
 ```
-USAGE: swift-graphql <endpoint> [--config <config>] [--output <output>] [--authorization <auth>]
+USAGE: swift-graphql <endpoint> [--config <config>] [--output <output>] [--header <header> ...]
 
 ARGUMENTS:
-  <endpoint>              GraphQL server endpoint.
+  <endpoint>              GraphQL server endpoint or local file path from the current location.
 
 OPTIONS:
   --config <config>       Relative path from CWD to your YML config file.
   -o, --output <output>   Relative path from CWD to the output file.
+  -h, --header <header>   Custom headers to include in the request in format "Header: Value"
   -h, --help              Show help information.
-  --authorization <auth>  Authorization header to be used in the request.
 ```
 
 To run the generator, type `swift-graphql`. If you are using any custom scalars, you should create a configuration file called `swiftgraphql.yml` and put in data-type mappings as a key-value dictionary like this. Keys should be GraphQL types, and values should be SwiftGraphQL Codecs.

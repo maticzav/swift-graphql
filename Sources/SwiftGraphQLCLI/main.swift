@@ -22,8 +22,11 @@ struct SwiftGraphQLCLI: ParsableCommand {
     @Option(name: .shortAndLong, help: "Relative path from CWD to the output file.")
     var output: String?
     
-    @Option(help: "Include this Authorization header in the request to the endpoint.")
-    var authorization: String?
+    @Option(
+        name: .shortAndLong,
+        help: "Custom headers to include in the request in format \"Header: Value\""
+    )
+    var header: [String] = []
     
     // MARK: - Configuration
     
@@ -37,13 +40,13 @@ struct SwiftGraphQLCLI: ParsableCommand {
         
         // Make sure we get a valid endpoint file or URL endpoint.
         guard var url = URL(string: endpoint) else {
-            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.endpoint)
+            SwiftGraphQLCLI.exit(withError: .endpoint)
         }
         
         // Covnert relative URLs to absolute ones.
         if url.scheme == nil {
             guard #available(macOS 12, *) else {
-                SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.legacy)
+                SwiftGraphQLCLI.exit(withError: .legacy)
             }
             
             var cwd = FilePath(FileManager.default.currentDirectoryPath)
@@ -52,7 +55,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
             }
             
             guard let fileurl = URL(cwd.appending(endpoint)) else {
-                SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.endpoint)
+                SwiftGraphQLCLI.exit(withError: .endpoint)
             }
             url = fileurl
         }
@@ -67,10 +70,20 @@ struct SwiftGraphQLCLI: ParsableCommand {
             config = Config()
         }
         
+        // Add headers to the request.
         var headers: [String: String] = [:]
-        if let authorization = authorization {
-            headers["Authorization"] = authorization
+        for header in self.header {
+            // Each header is split into two parts on the `: `
+            // separator as in cURL spec.
+            let parts = header.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: true)
+            guard parts.count == 2 else {
+                SwiftGraphQLCLI.exit(withError: .header)
+            }
+            
+            headers[String(parts[0])] = parts[1].trimmingCharacters(in: CharacterSet.whitespaces)
         }
+        
+        print(headers)
 
         // Generate the code.
         let generator = GraphQLCodegen(scalars: config.scalars)
@@ -82,17 +95,17 @@ struct SwiftGraphQLCLI: ParsableCommand {
             result = try generator.generate(from: url, withHeaders: headers)
         } catch CodegenError.formatting(let err) {
             print(err.localizedDescription)
-            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.formatting)
+            SwiftGraphQLCLI.exit(withError: .formatting)
         } catch IntrospectionError.emptyfile, IntrospectionError.unknown {
-            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.introspection)
+            SwiftGraphQLCLI.exit(withError: .introspection)
         } catch IntrospectionError.statusCode(let code) {
             print("Received status code \(code) while introspecting the schema...")
-            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.introspection)
+            SwiftGraphQLCLI.exit(withError: .introspection)
         } catch IntrospectionError.error(let err) {
             print(err.localizedDescription)
-            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.introspection)
+            SwiftGraphQLCLI.exit(withError: .introspection)
         } catch {
-            SwiftGraphQLCLI.exit(withError: SwiftGraphQLGeneratorError.unknown)
+            SwiftGraphQLCLI.exit(withError: .unknown)
         }
 
         // Write to target file or stdout.
@@ -162,6 +175,7 @@ enum SwiftGraphQLGeneratorError: String, Error {
     case formatting = "There was an error formatting the code. Make sure your Swift version (i.e. `swift-format`) matches the `swift-format` version. If you need any help, don't hesitate to open an issue and include the log above!"
     case unknown = "Something unexpected happened. Please open an issue and we'll help you out!"
     case introspection = "Couldn't introspect the schema."
+    case header = "Invalid header format. Use `Header: Value` to specify a single header."
 }
 
 extension String: Error {}
