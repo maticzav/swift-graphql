@@ -120,7 +120,7 @@ private func send<Type, TypeLock>(
             } catch let error as HttpError {
                 return completionHandler(.failure(error))
             } catch let error {
-                return completionHandler(.failure(.decodingError(error)))
+                return completionHandler(.failure(.decodingError(error, extensions: nil)))
             }
         }
 
@@ -146,8 +146,8 @@ public enum HttpError: Error {
     case badpayload
     case badstatus
     case cancelled
-    case decodingError(Error)
-    case graphQLErrors([GraphQLError])
+    case decodingError(Error, extensions: [String: AnyCodable]?)
+    case graphQLErrors([GraphQLError], extensions: [String: AnyCodable]?)
 }
 
 extension HttpError: Equatable {
