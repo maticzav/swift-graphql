@@ -72,10 +72,10 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
             lastConnectionParams = AnyCodable(connectionParams)
             let message = Message.connectionInit(connectionParams)
             let messageData = try encoder.encode(message)
-            os_log("Start Connection: %{public}@",
-                   log: OSLog.subscription,
-                   type: .debug,
-                   (String(data: messageData, encoding: .utf8) ?? "Invalid .utf8")
+//            os_log("Start Connection: %{public}@",
+//                   log: OSLog.subscription,
+//                   type: .debug,
+//                   (String(data: messageData, encoding: .utf8) ?? "Invalid .utf8")
             )
             state = .started
             socket = S.create(with: initParams, errorHandler: errorHandler)
@@ -86,10 +86,10 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
             socket?.receiveMessages { [weak self] (message) in
                 switch message {
                 case .success(let data):
-                    os_log("Received Data: %{public}@",
-                           log: OSLog.subscription,
-                           type: .debug, (String(data: data, encoding: .utf8) ?? "Invalid .utf8")
-                    )
+//                    os_log("Received Data: %{public}@",
+//                           log: OSLog.subscription,
+//                           type: .debug, (String(data: data, encoding: .utf8) ?? "Invalid .utf8")
+//                    )
                     guard let message = try? JSONDecoder().decode(Message.self, from: data) else {
                         os_log("Invalid JSON Payload", log: OSLog.subscription, type: .debug)
                         return false
@@ -208,10 +208,10 @@ public class GraphQLSocket<S: GraphQLEnabledSocket> {
                 let payload = selection.buildPayload(operationName: operationName)
                 let message = Message.subscribe(payload, id: id)
                 let messageData = try encoder.encode(message)
-                os_log("Outgoing Data: %{public}@",
-                       log: OSLog.subscription,
-                       type: .debug, (String(data: messageData, encoding: .utf8) ?? "Invalid .utf8")
-                )
+//                os_log("Outgoing Data: %{public}@",
+//                       log: OSLog.subscription,
+//                       type: .debug, (String(data: messageData, encoding: .utf8) ?? "Invalid .utf8")
+//                )
                 socket?.send(message: messageData, errorHandler: {
                     eventHandler(.failure(.subscribeFailed($0)))
                 })
@@ -491,9 +491,11 @@ extension NWConnection: GraphQLEnabledSocket {
                 errorHandler(.subscribeFailed(error))
                 
             case .setup:
-                os_log("Setup State Update", log: OSLog.subscription, type: .debug)
+//                os_log("Setup State Update", log: OSLog.subscription, type: .debug)
+                ()
             case .preparing:
-                os_log("Preparing State Update", log: OSLog.subscription, type: .debug)
+//                os_log("Preparing State Update", log: OSLog.subscription, type: .debug)
+                ()
             case .cancelled:
                 os_log("Cancelled State Update", log: OSLog.subscription, type: .debug)
             @unknown default:
@@ -563,12 +565,12 @@ extension URLSessionWebSocketTask: GraphQLEnabledSocket {
     }
     
     public func send(message: Data, errorHandler: @escaping (Error) -> Void) {
-        os_log(
-            "Send data: %{private}@",
-            log: OSLog.subscription,
-            type: .debug,
-            String(data: message, encoding: .utf8) ?? "Invalid Encoding"
-        )
+//        os_log(
+//            "Send data: %{private}@",
+//            log: OSLog.subscription,
+//            type: .debug,
+//            String(data: message, encoding: .utf8) ?? "Invalid Encoding"
+//        )
         self.send(.data(message), completionHandler: {
             if let error = $0 {
                 errorHandler(error)
