@@ -1,7 +1,7 @@
 import GraphQL
 import Foundation
 
-import os
+import Logging
 
 /// Structure that lets you configure WebSocket's behaviour.
 public struct GraphQLWebSocketConfiguration {
@@ -64,7 +64,7 @@ public struct GraphQLWebSocketConfiguration {
     public var connectionAckTimeout: Int = 0
     
     /// Logger that we use to communitcate state changes inside the WebSocket.
-    public var logger: Logger = Logger(subsystem: "graphql", category: "socket")
+    public var logger: Logger = Logger(label: "graphql.socket")
     
     /// Creates a new WebSocket configuration with default values for all parameters.
     public init() {}

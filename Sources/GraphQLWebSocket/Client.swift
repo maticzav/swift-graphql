@@ -4,7 +4,6 @@ import Combine
 import GraphQL
 import Foundation
 import Starscream
-import os
 
 /// A GraphQL client that lets you send queries over WebSocket protocol.
 ///
@@ -128,7 +127,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     weak private var connectionDroppedTimer: Timer?
     
     /// Holds references to pipelines created by subscriptions. Each pipeline is identified by the
-    /// query id of the subscription that created a pipeline.
+    /// query identifier that the client used to identify the subscription.
     ///
     /// - NOTE: We also use pipelines to tell how many ongoing connections the client is managing.
     private var pipelines = [String: AnyCancellable]()
@@ -318,7 +317,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
             block: { [weak self] _ in
                 // A reconnect should always happen if the client connects eagerly,
                 // even if we have no current listeners.
-                guard let self = self, !self.pipelines.isEmpty, self.config.behaviour != .eager else {
+                guard let self = self, !self.pipelines.isEmpty || self.config.behaviour == .eager else {
                     return
                 }
                 
@@ -406,9 +405,12 @@ public class GraphQLWebSocket: WebSocketDelegate {
             }
             
             self.config.logger.debug("Scheduling a ping timer.")
+            
+            // We override the old timer and drop it. This way, the client
+            // only sends ping event when the server hasn't replied in a while.
             self.pingTimer = Timer.scheduledTimer(
                 withTimeInterval: TimeInterval(self.config.keepAlive),
-                repeats: true,
+                repeats: false,
                 block: { [weak self] _ in
                     guard let self = self else { return }
                     self.ping()

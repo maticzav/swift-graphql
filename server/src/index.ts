@@ -1,4 +1,5 @@
 import { createServer, YogaInitialContext } from '@graphql-yoga/node'
+import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 
 import { Server as WebSocketServer } from 'ws'
@@ -25,6 +26,7 @@ async function main() {
         requireResolversToMatchSchema: 'error',
       },
     }),
+    renderGraphiQL,
     graphiql: {
       subscriptionsProtocol: 'WS',
     },

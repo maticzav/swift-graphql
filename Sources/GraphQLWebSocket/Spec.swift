@@ -81,7 +81,7 @@ public enum ClientMessage: Encodable {
     
     // MARK: - Interfaces
     
-    public enum `Type`: String, CaseIterable, Codable {
+    public enum MessageType: String, CaseIterable, Codable {
         case connection_init = "connection_init"
         case ping = "ping", pong = "pong"
         case subscribe = "subscribe"
@@ -93,7 +93,7 @@ public enum ClientMessage: Encodable {
     /// - NOTE: This connection is not the actual WebSocket communication channel, but is rather
     ///         a frame within it asking the server to allow future operation requests.
     public struct ConnectionInit: ClientMessageInterface, Codable {
-        public var type: Type = .connection_init
+        public var type: MessageType = .connection_init
         public var payload: [String: AnyCodable]?
         
         public init(payload: [String: AnyCodable]? = nil) {
@@ -103,7 +103,7 @@ public enum ClientMessage: Encodable {
 
     /// Message specification for subscription request.
     public struct Subscribe: ClientMessageInterface, Identifiable {
-        public var type: Type = .subscribe
+        public var type: MessageType = .subscribe
         
         /// Unique operation id used to identify the connection channel.
         public var id: String
@@ -123,7 +123,7 @@ public enum ClientMessage: Encodable {
     ///
     /// - NOTE: No further events, relevant to the original subscription, should be sent through the communication channel.
     public struct Complete: ClientMessageInterface, Identifiable {
-        public var type: Type = .complete
+        public var type: MessageType = .complete
         
         /// Id identifying the connection channel.
         public var id: String
@@ -137,7 +137,7 @@ public enum ClientMessage: Encodable {
     ///
     ///  - NOTE: A Pong message must be sent in response from the receiving party as soon as possible.
     public struct Ping: ClientMessageInterface, Codable {
-        public var type: Type = .ping
+        public var type: MessageType = .ping
         public var payload: [String: AnyCodable]?
         
         public init(payload: [String: AnyCodable]? = nil) {
@@ -150,7 +150,7 @@ public enum ClientMessage: Encodable {
     /// - NOTE: The pong message can be sent at any time within the established socket. Furthermore,
     ///         the pong message may even be sent unsolicited as an unidirectional heartbeat.
     public struct Pong: ClientMessageInterface, Codable {
-        public var type: Type = .pong
+        public var type: MessageType = .pong
         public var payload: [String: AnyCodable]?
         
         public init(payload: [String: AnyCodable]? = nil) {
@@ -196,7 +196,7 @@ public enum ServerMessage: Equatable, Decodable {
     
     // MARK: - Interfaces
     
-    public enum `Type`: String, CaseIterable, Codable {
+    public enum MessageType: String, CaseIterable, Codable {
         case connection_ack = "connection_ack"
         case ping = "ping", pong = "pong"
         case next = "next"
@@ -207,7 +207,7 @@ public enum ServerMessage: Equatable, Decodable {
     /// Expected response to the ConnectionInit message from the client acknowledging a connection may
     /// successfully be created. The client is now ready to request a new subscription.
     public struct ConnectionAck: ServerMessageInterface, Codable {
-        public var type: Type = .connection_ack
+        public var type: MessageType = .connection_ack
         public var payload: [String: AnyCodable]?
         
         public init(payload: [String: AnyCodable]? = nil) {
@@ -219,7 +219,7 @@ public enum ServerMessage: Equatable, Decodable {
     ///
     ///  - NOTE: A Pong message must be sent in response from the receiving party as soon as possible.
     public struct Ping: ServerMessageInterface, Codable {
-        public var type: Type = .ping
+        public var type: MessageType = .ping
         public var payload: [String: AnyCodable]?
         
         public init(payload: [String: AnyCodable]? = nil) {
@@ -232,7 +232,7 @@ public enum ServerMessage: Equatable, Decodable {
     /// - NOTE: The pong message can be sent at any time within the established socket. Furthermore,
     ///         the pong message may even be sent unsolicited as an unidirectional heartbeat.
     public struct Pong: ServerMessageInterface, Codable {
-        public var type: Type = .pong
+        public var type: MessageType = .pong
         public var payload: [String: AnyCodable]?
         
         public init(payload: [String: AnyCodable]? = nil) {
@@ -244,7 +244,7 @@ public enum ServerMessage: Equatable, Decodable {
     ///
     /// - NOTE: After all results have been emitted, the completion message will follow indicating stream completion.
     public struct Next: ServerMessageInterface, Identifiable {
-        public var type: Type = .next
+        public var type: MessageType = .next
         public var id: String
         public var payload: ExecutionResult
     }
@@ -252,7 +252,7 @@ public enum ServerMessage: Equatable, Decodable {
     /// Operation execution error(s) triggered by the next message happening before the
     /// actual execution, usually due to validation errors.
     public struct Error: ServerMessageInterface, Identifiable {
-        public var type: Type = .error
+        public var type: MessageType = .error
         
         /// Unique identifier of the connection in the socket.
         public var id: String
@@ -266,7 +266,7 @@ public enum ServerMessage: Equatable, Decodable {
     
     /// Message indicating that the requested operation execution has completed.
     public struct Complete: ServerMessageInterface, Identifiable {
-        public var type: Type = .complete
+        public var type: MessageType = .complete
         
         /// Id identifying the connection channel.
         public var id: String
@@ -280,7 +280,7 @@ public enum ServerMessage: Equatable, Decodable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(Type.self, forKey: .type)
+        let type = try container.decode(MessageType.self, forKey: .type)
 
         switch type {
         case .connection_ack:

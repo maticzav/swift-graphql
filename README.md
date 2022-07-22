@@ -68,7 +68,13 @@ You can find detailed documentation on the SwiftGraphQL page at [https://www.swi
 
 ## Development Setup
 
-This package is best developed using Swift command line tools. It's important that you set the correct version of Swift Command Line Tools when developing so that the tools match the version of `swift-format` used.
+This package is best developed using Swift command line tools. 
+
+SwiftGraphQL depends on `swift-format` that relies on `SwiftSyntax` that is distributed as part of the Swift toolchain. It's important that you set the correct version of Swift Command Line Tools when developing so that the tools match the version of `swift-format` used.
+
+```sh
+swift package tools-version --set 5.5
+```
 
 ## Thank you
 

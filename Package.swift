@@ -7,7 +7,7 @@ let package = Package(
     name: "swift-graphql",
     platforms: [
         .iOS(.v13),
-        .macOS(.v11),
+        .macOS(.v10_15),
         .tvOS(.v13),
         .watchOS(.v6)
     ],
@@ -16,7 +16,6 @@ let package = Package(
         .library(name: "SwiftGraphQL", targets: ["SwiftGraphQL"]),
         .library(name: "SwiftGraphQLClient", targets: ["SwiftGraphQLClient"]),
         .library(name: "SwiftGraphQLCodegen", targets: ["SwiftGraphQLCodegen"]),
-        .library(name: "SwiftGraphQLUI", targets: ["SwiftGraphQLUI"]),
         // CLI
         .executable( name: "swift-graphql", targets: ["SwiftGraphQLCLI"]),
         // Utilities
@@ -25,11 +24,12 @@ let package = Package(
         .library(name: "GraphQLWebSocket", targets: ["GraphQLWebSocket"])
     ],
     dependencies: [
-        .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-format", from: "0.50600.1"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.0"),
+        .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.4"),
-        .package(url: "https://github.com/apple/swift-format", from: "0.50600.0"),
-        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.0")
     ],
     targets: [
         // Utility Targets
@@ -37,8 +37,15 @@ let package = Package(
         .target(name: "GraphQLAST", dependencies: [], path: "Sources/GraphQLAST"),
         .target(
             name: "GraphQLWebSocket",
-            dependencies: ["GraphQL", "Starscream"],
-            path: "Sources/GraphQLWebSocket"
+            dependencies: [
+                "GraphQL",
+                .product(name: "Logging", package: "swift-log"),
+                "Starscream"
+            ],
+            path: "Sources/GraphQLWebSocket",
+            exclude: [
+                "README.md"
+            ]
         ),
         // SwiftGraphQL
         .target(name: "SwiftGraphQL", dependencies: ["GraphQL"], path: "Sources/SwiftGraphQL"),
@@ -47,6 +54,7 @@ let package = Package(
             dependencies: [
                 "GraphQL",
                 "GraphQLWebSocket",
+                .product(name: "Logging", package: "swift-log"),
                 "SwiftGraphQL",
             ],
             path: "Sources/SwiftGraphQLClient"
@@ -60,15 +68,6 @@ let package = Package(
                 .byName(name: "SwiftGraphQL"),
             ],
             path: "Sources/SwiftGraphQLCodegen"
-        ),
-        .target(
-            name: "SwiftGraphQLUI",
-            dependencies: [
-                .byName(name: "GraphQL"),
-                .byName(name: "SwiftGraphQL"),
-                .byName(name: "SwiftGraphQLClient"),
-            ],
-            path: "Sources/SwiftGraphQLUI"
         ),
         .executableTarget(
             name: "SwiftGraphQLCLI",

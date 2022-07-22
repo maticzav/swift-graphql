@@ -24,9 +24,5 @@
   },
   "resolutions": {
     "typescript": "4.3.5"
-  },
-  "dependencies": {
-    "@graphql-yoga/node": "^2.6.0",
-    "graphql": "^16.5.0"
   }
 }
