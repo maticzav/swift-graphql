@@ -2,15 +2,16 @@ import { createServer, YogaInitialContext } from '@graphql-yoga/node'
 import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 
-import { Server as WebSocketServer } from 'ws'
-import { useServer } from 'graphql-ws/lib/use/ws'
-
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { resolvers } from './resolvers'
+import { Server as HTTPServer } from 'http'
+import { Server as WebSocketServer } from 'ws'
+import { useServer } from 'graphql-ws/lib/use/ws'
+
 import { getUserName } from './lib/auth'
 import { Context } from './lib/context'
+import { resolvers } from './resolvers'
 
 // Server
 
@@ -26,10 +27,10 @@ async function main() {
         requireResolversToMatchSchema: 'error',
       },
     }),
-    renderGraphiQL,
     graphiql: {
       subscriptionsProtocol: 'WS',
     },
+    renderGraphiQL,
     logging: true,
     maskedErrors: false,
     context: async (ctx: YogaInitialContext): Promise<Context> => {
@@ -45,7 +46,7 @@ async function main() {
   })
 
   // Get NodeJS Server from Yoga
-  const httpServer = await server.start()
+  const httpServer: HTTPServer = await server.start()
 
   // Create WebSocket server instance from our Node server
   const wsServer = new WebSocketServer({

@@ -32,7 +32,9 @@ jobs:
       - name: Start Test Server
         run: yarn workspace server start &
       - name: Wait for Server to Start
-        run: sleep 5
+        run: |
+          sleep 5
+          jobs
 
       # Perform Tests
       - name: Test Package
@@ -40,4 +42,6 @@ jobs:
 
       # Cleanup
       - name: Stop Test Server
-        run: kill $(jobs -p)
+        run: |
+          jobs
+          kill $(jobs -p)
