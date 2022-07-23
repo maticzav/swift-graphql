@@ -30,6 +30,7 @@ extension ExecutionArgs: Hashable {
     }
 }
 
+/// GraphQL execution result as outlined in the [GraphQL Spec](http://spec.graphql.org/October2021/#sec-Response-Format).
 public struct ExecutionResult {
     
     /// Result of a successfull execution of a query.
@@ -41,10 +42,19 @@ public struct ExecutionResult {
     /// Optional parameter indicating that there are more values following this one.
     public var hasNext: Bool?
     
-    public init(data: AnyCodable, errors: [GraphQLError]? = nil, hasNext: Bool? = nil) {
+    /// Reserved entry for implementors to extend the protocol however they see fit.
+    public let extensions: [String: AnyCodable]?
+    
+    public init(
+        data: AnyCodable,
+        errors: [GraphQLError]? = nil,
+        hasNext: Bool? = nil,
+        extensions: [String: AnyCodable]? = nil
+    ) {
         self.data = data
         self.errors = errors
         self.hasNext = hasNext
+        self.extensions = extensions
     }
 }
 

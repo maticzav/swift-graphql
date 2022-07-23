@@ -32,13 +32,11 @@ jobs:
       - name: Start Test Server
         run: yarn workspace server start &
       - name: Wait for Server to Start
-        run: yarn dlx wait-on http://127.0.0.1:4000/graphql
+        run: sleep 5
 
       # Perform Tests
       - name: Test Package
         run: swift test
-        env:
-          GH_KEY: ${{ secrets.GH_KEY }}
 
       # Cleanup
       - name: Stop Test Server
