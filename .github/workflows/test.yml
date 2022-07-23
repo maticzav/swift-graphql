@@ -37,6 +37,8 @@ jobs:
       # Perform Tests
       - name: Test Package
         run: swift test
+        env:
+          GH_KEY: ${{ secrets.GH_KEY }}
 
       # Cleanup
       - name: Stop Test Server
