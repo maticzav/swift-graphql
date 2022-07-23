@@ -4,7 +4,7 @@ title: Getting Started
 
 ## Overview
 
-SwiftGraphQL is a Swift code generator and a GraphQL client. It lets you create queries using Swift, and guarantees that every query you create is valid and GraphQL spec-compliant.
+SwiftGraphQL is a GraphQL Client that ships with a type-safe query builder. It lets you perform queries, mutations and listen for subscriptions. The query builder guarantees that every query you _can_ create is valid and complies with the GraphQL spec.
 
 The library is centered around three core principles:
 
@@ -12,37 +12,34 @@ The library is centered around three core principles:
 - 🦉 Use Swift in favour of GraphQL wherever possible.
 - 🌳 Your application model should be independent of your schema.
 
-Here's a short preview of the SwiftGraphQL code
+Here's how you can create a query:
 
 ```swift
 import SwiftGraphQL
+
+enum Planet: String {
+    case earth
+}
 
 // Define a Swift model.
 struct Human: Identifiable {
     let id: String
     let name: String
-    let homePlanet: String?
+    let planet: Planet?
 }
 
 // Create a selection.
 let human = Selection.Human<Human> {
-    Human(
-        id: try $0.id(),
-        name: try $0.name(),
-        homePlanet: try $0.homePlanet()
-    )
-}
+    let id: String = try $0.id()
+    let name: String = try $0.name()
 
-// Construct a query.
-let query = Selection.Query {
-    try $0.humans(human.list)
-}
-
-// Perform the query.
-send(query, to: "http://swift-graphql.heroku.com") { result in
-    if let data = try? result.get() {
-        print(data) // [Human]
+    // Represent the planet using different Swift type.
+    let rawPlanet: String? = try $0.planet()
+    guard let homePlanet = Planet(rawValue: rawPlanet) else {
+        throw "Invalid planet"
     }
+
+    return Human(id: id, name: name, homePlanet: homePlanet)
 }
 ```
 
@@ -50,5 +47,5 @@ send(query, to: "http://swift-graphql.heroku.com") { result in
 
 Depending on how confident you are about using SwiftGraphQL I recommend reading either
 
-- Why SwiftGraphQL document, or
-- Installation instructions
+- _Why SwiftGraphQL_ to learn what pain points it solves, or
+- _Installation instructions_ to start using it.

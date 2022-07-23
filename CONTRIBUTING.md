@@ -2,6 +2,14 @@
 
 Hey :wave:! This library is a collaborative effort of many people. We are very excited to see you here. This file will help you navigate around more easily and make sure your pull requests receive attention they deserve.
 
+This package is best developed using Swift command line tools.
+
+SwiftGraphQL depends on `swift-format` that relies on `SwiftSyntax` that is distributed as part of the Swift toolchain. It's important that you set the correct version of Swift Command Line Tools when developing so that the tools match the version of `swift-format` used.
+
+```sh
+swift package tools-version --set 5.5
+```
+
 ## Code Organization
 
 SwiftGraphQL is split into multiple packages that serve different purposes.
@@ -22,9 +30,12 @@ Every PR should follow the next set of guidelines
 1. The first comment should clearly outline what you've changed and, if necessary, why.
 1. Make sure that comments in the PR and in the code are grammatically correct.
 1. Check _all_ your changes in GitHub files tab before _again_ before requesting a review.
+1. Suggest a release type (e.g. patch, minor, major) for your change.
 
 ## Building Binary
 
 ```sh
-swift build -c release --product swift-graphql --disable-sandbox
+swift build -c release --product swift-graphql --disable-sandbox --arch arm64 --arch x86_64
 ```
+
+> To verify that built binary contains both architectures use `lipo -info` (https://liamnichols.eu/2020/08/01/building-swift-packages-as-a-universal-binary.html).

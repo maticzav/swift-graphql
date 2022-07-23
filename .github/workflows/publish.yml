@@ -14,15 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Test
-      - name: Perform unit tests.
-        run: |
-          swift package resolve
-          swift build
-          swift test
-      - name: Tests integrations from examples.
-        run: ./scripts/test.sh
-
       # Release
       - name: Bump version and push tag
         id: tag_version
@@ -30,10 +21,9 @@ jobs:
         with:
           # Relevant Branches
           release_branches: main
-          pre_release_branches: next
           # Tag configuration
           tag_prefix: ''
-          default_bump: false
+          default_bump: 'patch'
           # Credentials
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -47,9 +37,13 @@ jobs:
           body: ${{ steps.tag_version.outputs.changelog }}
         if: steps.tag_version.outputs.new_tag != null
 
-      - name: Create Homebrew release
+      - name: Create Release
         run: |
-          make update_brew
+          make update_brew_formula
+          make update_podspec
+
+          git add .
+          git commit -m "Update Formula and PodSpec to $(VERSION)"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

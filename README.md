@@ -18,63 +18,30 @@ https://graphql.org/swapi-graphql/
 
 ## Overview
 
-SwiftGraphQL is a Swift code generator and a lightweight GraphQL client. It lets you create queries using Swift, and guarantees that every query you create is valid.
+SwiftGraphQL is a GraphQL Client that ships with a type-safe query builder. It lets you perform queries, mutations and listen for subscriptions. The query builder guarantees that every query you _can_ create is valid and complies with the GraphQL spec.
 
 The library is centered around three core principles:
 
 - 🚀 If your project compiles, your queries work.
 - 🦉 Use Swift in favour of GraphQL wherever possible.
 - 🌳 Your application model should be independent of your schema.
+- 🕊 Packages shouldn't lock you in to the "framework".
 
-Here's a short preview of the SwiftGraphQL code
-
-```swift
-import SwiftGraphQL
-
-// Define a Swift model.
-struct Human: Identifiable {
-    let id: String
-    let name: String
-    let homePlanet: String?
-}
-
-// Create a selection.
-let human = Selection.Human<Human> {
-    Human(
-        id: try $0.id(),
-        name: try $0.name(),
-        homePlanet: try $0.homePlanet()
-    )
-}
-
-// Construct a query.
-let query = Selection.Query<[Human]> {
-    try $0.humans(human.list)
-}
-
-// Perform the query.
-send(query, to: "http://swift-graphql.heroku.com") { result in
-    if let data = try? result.get() {
-        print(data) // [Human]
-    }
-}
-```
+> You can use only parts of SwiftGraphQL that are useful to you (e.g. use GraphQLWebSocket implementation but not the query builder, or WebSocket but not the client).
 
 ## Documentation
 
 You can find detailed documentation on the SwiftGraphQL page at [https://www.swift-graphql.com/](https://www.swift-graphql.com/).
 
+### Other Libraries
+
+SwiftGraphQL solves a set of specific problems but it doesn't solve _every_ problem. Depending on your needs, you may also want to check out
+
+- https://github.com/relay-tools/Relay.swift
+- https://github.com/apollographql/apollo-ios
+- https://github.com/nerdsupremacist/Graphaello
+
 ---
-
-## Development Setup
-
-This package is best developed using Swift command line tools. 
-
-SwiftGraphQL depends on `swift-format` that relies on `SwiftSyntax` that is distributed as part of the Swift toolchain. It's important that you set the correct version of Swift Command Line Tools when developing so that the tools match the version of `swift-format` used.
-
-```sh
-swift package tools-version --set 5.5
-```
 
 ## Thank you
 
@@ -91,6 +58,5 @@ Thank you! 🙌
 ## License
 
 MIT @ Matic Zavadlal
-
 
 https://steipete.com/posts/logging-in-swift/

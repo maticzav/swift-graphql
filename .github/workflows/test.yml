@@ -34,14 +34,7 @@ jobs:
       - name: Wait for Server to Start
         run: |
           sleep 5
-          jobs
 
       # Perform Tests
       - name: Test Package
         run: swift test
-
-      # Cleanup
-      - name: Stop Test Server
-        run: |
-          jobs
-          kill $(jobs -p)

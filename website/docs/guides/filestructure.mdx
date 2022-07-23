@@ -3,11 +3,15 @@ title: File Structure
 sidebar_label: File Structure
 ---
 
-Checking out the code in the docs may give you an idea how you can use the library. On the other hand, it might still feal strange to actually start using it in your project. This guide aims to give you an idea of how to structure your files and code.
+Checking out the code in the docs may give you an idea how you can use the library. On the other hand, it might still feal strange to actually start using it in your project.
 
-> This is one possible way of structuring your code that makes sense for our projects. Feel free and try other options as well!
+This guide aims to give you an idea of how to structure your code and files depending on your needs.
 
-## File Structure
+> These are examples of what we've seen in the wild. Feel free and try other options and share them with us!
+
+## Model Bound Queries
+
+> Queries extend Swift model as static constants.
 
 We usually start the project by creating a `GraphQL` folder in the root folder of our project. Then, we generate the `API.swift` file inside `GraphQL` folder and add `Scalars`, `Query`, `Mutation` and `Subscription` folders if needed. To prevent any naming collisions we create custom queries in files that follow the pattern of `<structure><action>` (e.g. `HumanQuery.swift` or `HumanSubscription.swift`).
 
@@ -26,9 +30,10 @@ This leaves us with a tree structure resembling
   - Subscription
     - TimeSubscription.swift
 
-## Queries
+Inside each query file we follow the principle that queries should extend the referenced struture as static constants. Additionally, we follow the naming convention that
 
-Inside each query file we follow the principle that queries should extend the referenced struture as static constants. Additionally, we follow the convention of naming "regular mappings" `selection` and methods on root types `query`, `mutation` and `subscription`.
+- "regular mappings" use `selection` variable, and
+- methods on root types (i.e. `query`, `mutation` and `subscription`) should be called `query` and `mutation` and `subscription` respectively.
 
 ```swift
 extension Human {
@@ -42,11 +47,19 @@ extension Human {
 
 	/// Obtains a Human with a given ID from the server.
 	static func query(id: String) -> Selection.Query<Human?> {
-		let selection = Selection.Query<Human> {
-			try $0.human(id: id)
+		let query = Selection.Query<Human> {
+			try $0.human(id: id, selection: Human.selection)
 		}
 
-		return selection.nullable
+		return query.nullable
 	}
 }
 ```
+
+## View Bound Queries
+
+> Queries extend SwiftUI views as static variables.
+
+Each SwiftUI component that relies on GraphQL data exports a query as a static value that can be used to obtain the data.
+
+Parent components then hoist selections from their children and create a query request to the server.

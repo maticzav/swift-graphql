@@ -6,15 +6,15 @@ export function getRoutes(): IRoutes {
       docs: {
         $name: 'Docs',
         $routes: [
+          //
           'README',
           'installation',
-          'querying',
-          'swiftui',
           'network',
-          'optionals',
+          'querying',
+          'subscriptions',
           'guides',
+          ['www.google.com', 'Reference'],
           'advanced',
-          'reference',
           'faq',
         ],
         _: {
@@ -25,10 +25,6 @@ export function getRoutes(): IRoutes {
           advanced: {
             $name: 'Advanced',
             $routes: ['selection', 'cache', 'codecs', 'why', 'how'],
-          },
-          reference: {
-            $name: 'Reference',
-            $routes: ['client', 'generator'],
           },
         },
       },
