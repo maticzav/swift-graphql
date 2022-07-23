@@ -1,11 +1,11 @@
-name: Create a GitHub release
+name: Create GitHub Release
 
 on:
   push:
     branches:
       - main
     paths:
-      - "Sources/**/*"
+      - 'Sources/**/*'
 
 jobs:
   build:
@@ -45,7 +45,7 @@ jobs:
           release_name: SwiftGraphQL ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
         if: steps.tag_version.outputs.new_tag != null
-      
+
       - name: Create Homebrew release
         run: |
           make update_brew
@@ -54,4 +54,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.tag_version.outputs.new_version }}
         if: steps.tag_version.outputs.new_tag != null
-        

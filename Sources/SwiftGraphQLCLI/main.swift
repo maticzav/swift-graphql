@@ -2,6 +2,7 @@ import ArgumentParser
 import Files
 import Foundation
 import GraphQLAST
+import Spinner
 import SwiftGraphQLCodegen
 import System
 import Yams
@@ -37,6 +38,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
     // MARK: - Main
 
     func run() throws {
+        print("Generating SwiftGraphQL Selection 🚀")
         
         // Make sure we get a valid endpoint file or URL endpoint.
         guard var url = URL(string: endpoint) else {
@@ -70,6 +72,10 @@ struct SwiftGraphQLCLI: ParsableCommand {
             config = Config()
         }
         
+        if !self.header.isEmpty {
+            print("Adding headers to your request:")
+        }
+        
         // Add headers to the request.
         var headers: [String: String] = [:]
         for header in self.header {
@@ -80,19 +86,29 @@ struct SwiftGraphQLCLI: ParsableCommand {
                 SwiftGraphQLCLI.exit(withError: .header)
             }
             
-            headers[String(parts[0])] = parts[1].trimmingCharacters(in: CharacterSet.whitespaces)
+            let name = String(parts[0])
+            let value = parts[1].trimmingCharacters(in: CharacterSet.whitespaces)
+            headers[name] = value
+            
+            print(" - \(name): \(value)")
         }
         
-        print(headers)
+        // Fetch the schema.
+        let loadSchemaSpinner = Spinner(.dots, "Fetching GraphQL Schema")
+        loadSchemaSpinner.start()
+        let schema = try Schema(from: url, withHeaders: headers)
+        loadSchemaSpinner.stop()
 
         // Generate the code.
-        let generator = GraphQLCodegen(scalars: config.scalars)
-        let result: GraphQLCodegen.Output
+        let generateCodeSpinner = Spinner(.dots, "Generating API")
+        generateCodeSpinner.start()
         
-        print("Fetching your schema and generating API...")
+        let generator = GraphQLCodegen(scalars: config.scalars)
+        let code: String
         
         do {
-            result = try generator.generate(from: url, withHeaders: headers)
+            code = try generator.generate(schema: schema)
+            generateCodeSpinner.stop()
         } catch CodegenError.formatting(let err) {
             print(err.localizedDescription)
             SwiftGraphQLCLI.exit(withError: .formatting)
@@ -110,26 +126,28 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
         // Write to target file or stdout.
         if let outputPath = output {
-            try Folder.current.createFile(at: outputPath).write(result.code)
+            try Folder.current.createFile(at: outputPath).write(code)
         } else {
-            FileHandle.standardOutput.write(result.code.data(using: .utf8)!)
+            FileHandle.standardOutput.write(code.data(using: .utf8)!)
         }
         
-        print("API generated successfully!")
+        print("\n\nAPI generated successfully!")
         
-        if !result.ignoredScalars.isEmpty {
-            let message = """
-            Your schema contains some unknown scalars:
-            
-            \(result.ignoredScalars.map { " - \($0)" }.joined(separator: "\n"))
-            
-            Add them to the config to get better type support!
-            """
-            
-            print(message)
+        // Warn about the unused scalars.
+        let ignoredScalars = try schema.missing(scalars: config.scalars)
+        guard !ignoredScalars.isEmpty else {
+            return
         }
-
-        // The end
+        
+        let message = """
+        Your schema contains some unknown scalars:
+        
+        \(ignoredScalars.map { " - \($0)" }.joined(separator: "\n"))
+        
+        Add them to the config to get better type support!
+        """
+        
+        print(message)
     }
 }
 

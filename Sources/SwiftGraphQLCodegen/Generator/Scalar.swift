@@ -5,6 +5,7 @@ import Foundation
  the generator functions.
  */
 
+/// Dictionary of Swift scalars indexed by the scalar name in GraphQL schema.
 public typealias ScalarMap = [String: String]
 
 extension ScalarMap {

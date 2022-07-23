@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.6
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -28,6 +28,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-format", from: "0.50600.1"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.0"),
+        .package(url: "https://github.com/dominicegginton/Spinner", from: "1.0.0"),
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.4"),
     ],
@@ -73,9 +74,10 @@ let package = Package(
             name: "SwiftGraphQLCLI",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .byName(name: "SwiftGraphQLCodegen"),
+                "SwiftGraphQLCodegen",
                 "Yams",
                 "Files",
+                "Spinner"
             ],
             path: "Sources/SwiftGraphQLCLI"
         ),

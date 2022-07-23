@@ -57,7 +57,7 @@ extension String {
     }
 
     /// Returns the number of characters before reaching a character that's not in a set going left-to-right.
-    func countLeft(characters: CharacterSet) -> Int {
+    private func countLeft(characters: CharacterSet) -> Int {
         var count = 0
         
         for char in self {
@@ -72,7 +72,7 @@ extension String {
     }
     
     /// Returns an indented string by n spaces in front.
-    func indent(by spaces: Int) -> String {
+    private func indent(by spaces: Int) -> String {
         "\(String(repeating: " ", count: spaces))\(self)"
     }
 }

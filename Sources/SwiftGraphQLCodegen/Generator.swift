@@ -19,32 +19,11 @@ public struct GraphQLCodegen {
             uniquingKeysWith: { _, override in override }
         )
     }
-    
-    public struct Output {
-        /// Generated API.
-        public var code: String
-        
-        /// List of scalars that weren't considered because they weren't listed as supported ones.
-        public var ignoredScalars: [String]
-    }
 
     // MARK: - Methods
 
-    /// Generates a target SwiftGraphQL Selection file.
-    ///
-    /// - parameter from: GraphQL server endpoint.
-    public func generate(from endpoint: URL, withHeaders headers: [String: String] = [:]) throws -> Output {
-        let schema = try Schema(from: endpoint, withHeaders: headers)
-        let code = try generate(schema: schema)
-        
-        let schemaScalars = try schema.usedScalars()
-        let ignoredScalars: [String] = schemaScalars.filter { !scalars.supported.contains($0) }
-        
-        return Output(code: code, ignoredScalars: ignoredScalars)
-    }
-
-    /// Generates the code that can be used to define selections.
-    func generate(schema: Schema) throws -> String {
+    /// Generates a SwiftGraphQL Selection File (i.e. the code that tells how to define selections).
+    public func generate(schema: Schema) throws -> String {
         let context = Context(schema: schema, scalars: self.scalars)
         
         let subscription = schema.operations.first { $0.isSubscription }?.type.name

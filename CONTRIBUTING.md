@@ -21,4 +21,10 @@ Every PR should follow the next set of guidelines
 1. Title should be well-formated (e.g. "Add WebSocket Support for Apple Watch", not "add WS for apple watch").
 1. The first comment should clearly outline what you've changed and, if necessary, why.
 1. Make sure that comments in the PR and in the code are grammatically correct.
-1. Check *all* your changes in GitHub files tab before *again* before requesting a review. 
+1. Check _all_ your changes in GitHub files tab before _again_ before requesting a review.
+
+## Building Binary
+
+```sh
+swift build -c release --product swift-graphql --disable-sandbox
+```

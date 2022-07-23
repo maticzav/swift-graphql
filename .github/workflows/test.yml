@@ -1,19 +1,42 @@
-name: Test
+name: Test Packages
 
 on:
   push: {}
   pull_request: {}
 
 jobs:
-  build:
-    runs-on: macos-latest
+  test:
+    name: Test Sources
+    runs-on: macos-11
+
+    timeout-minutes: 30
+
     steps:
       - uses: actions/checkout@v2
-      - name: Resolve
+
+      # Build the Library
+      - name: Swift Resolve
         run: swift package resolve
-      - name: Build
+      - name: Swift Build
         run: swift build
-      - name: Perform package tests
+
+      # Start Test Server
+      - name: Use Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - name: Install Server Dependencies
+        run: yarn install
+      - name: Start Test Server
+        run: yarn workspace server start &
+      - name: Wait for Server to Start
+        run: yarn dlx wait-on http://127.0.0.1:4000/graphql
+
+      # Perform Tests
+      - name: Test Package
         run: swift test
-      - name: Integration tests with workflows
-        run: ./scripts/test.sh
+
+      # Cleanup
+      - name: Stop Test Server
+        run: kill $(jobs -p)
