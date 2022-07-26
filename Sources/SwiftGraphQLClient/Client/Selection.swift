@@ -1,6 +1,8 @@
 import Combine
 import Foundation
 import GraphQL
+
+#if canImport(SwiftGraphQL)
 import SwiftGraphQL
 
 /// Extensions to the core implementation that connect SwiftGraphQL's Selection to the execution
@@ -76,12 +78,13 @@ extension GraphQLClient {
     
     // MARK: - Decoders
     
+    
     /// Executes a query and returns a stream of decoded values.
     public func query<T, TypeLock>(
-        for selection: Selection<T, TypeLock>,
+        _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         url request: URLRequest? = nil,
-        policy: Operation.Policy
+        policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLHttpOperation {
         self.executeQuery(for: selection, as: operationName, url: request, policy: policy)
             .map { result in result.decode(selection: selection) }
@@ -90,10 +93,10 @@ extension GraphQLClient {
     
     /// Executes a mutation and returns a stream of decoded values.
     public func mutate<T, TypeLock>(
-        for selection: Selection<T, TypeLock>,
+        _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         url request: URLRequest? = nil,
-        policy: Operation.Policy
+        policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLHttpOperation {
         self.executeMutation(for: selection, as: operationName, url: request, policy: policy)
             .map { result in result.decode(selection: selection) }
@@ -105,7 +108,7 @@ extension GraphQLClient {
         to selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
         url request: URLRequest? = nil,
-        policy: Operation.Policy
+        policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLWebSocketOperation & Decodable {
         self.executeSubscription(of: selection, as: operationName, url: request, policy: policy)
             .map { result in result.decode(selection: selection) }
@@ -119,19 +122,23 @@ extension OperationResult {
     fileprivate func decode<T, TypeLock>(
         selection: Selection<T, TypeLock>
     ) -> DecodedOperationResult<T> {
-        var decoded = DecodedOperationResult<T>(
-            operation: self.operation,
-            data: nil,
-            errors: self.errors,
-            stale: self.stale
-        )
+        let data: T?
+        var errors: [CombinedError] = self.errors
         
         do {
-            decoded.data = try selection.decode(raw: self.data)
+            data = try selection.decode(raw: self.data)
         } catch(let err) {
-            decoded.errors.append(CombinedError.parsing(err))
+            data = nil
+            errors.append(CombinedError.parsing(err))
         }
         
+        let decoded = DecodedOperationResult<T>(
+            operation: self.operation,
+            data: data,
+            errors: errors,
+            stale: self.stale
+        )
         return decoded
     }
 }
+#endif

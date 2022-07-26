@@ -5,6 +5,8 @@ import Foundation
 import GraphQL
 
 /// Exchange that lets you add authorization to your opertions.
+///
+/// - NOTE: `getToken` function should return the whole header value including the token.
 public class AuthExchange: Exchange {
     
     /// The name of the header containing the authorization information.
@@ -13,14 +15,14 @@ public class AuthExchange: Exchange {
     /// Function that returns a token to use for authorization.
     private var getToken: () -> String?
     
-    init(header: String, getToken: @escaping () -> String?) {
+    public init(header: String, getToken: @escaping () -> String?) {
         self.header = header
         self.getToken = getToken
     }
     
     // MARK: - Methods
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: ExchangeIO

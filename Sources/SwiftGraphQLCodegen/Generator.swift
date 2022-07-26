@@ -14,10 +14,7 @@ public struct GraphQLCodegen {
     // MARK: - Initializer
 
     public init(scalars: ScalarMap) {
-        self.scalars = ScalarMap.builtin.merging(
-            scalars,
-            uniquingKeysWith: { _, override in override }
-        )
+        self.scalars = scalars
     }
 
     // MARK: - Methods

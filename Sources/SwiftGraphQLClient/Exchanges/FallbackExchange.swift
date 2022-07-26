@@ -6,11 +6,11 @@ import GraphQL
 public struct FallbackExchange: Exchange {
     
     /// Tells whether the exchange should display error messages.
-    var debug: Bool
+    public var debug: Bool
     
     // MARK: - Methods
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: ExchangeIO

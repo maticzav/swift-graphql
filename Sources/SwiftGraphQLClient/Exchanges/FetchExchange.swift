@@ -32,13 +32,13 @@ public class FetchExchange: Exchange {
     
     // MARK: - Initializer
     
-    init(session: FetchSession = URLSession.shared) {
+    public init(session: FetchSession = URLSession.shared) {
         self.session = session
     }
     
     // MARK: - Methods
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: ExchangeIO

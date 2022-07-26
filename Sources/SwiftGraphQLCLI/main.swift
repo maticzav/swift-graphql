@@ -96,14 +96,22 @@ struct SwiftGraphQLCLI: ParsableCommand {
         // Fetch the schema.
         let loadSchemaSpinner = Spinner(.dots, "Fetching GraphQL Schema")
         loadSchemaSpinner.start()
-        let schema = try Schema(from: url, withHeaders: headers)
+        let schema: Schema
+        do {
+            schema = try Schema(from: url, withHeaders: headers)
+        } catch(let err) {
+            print(err.localizedDescription)
+            SwiftGraphQLCLI.exit(withError: .unreachable)
+        }
+        
         loadSchemaSpinner.stop()
 
         // Generate the code.
         let generateCodeSpinner = Spinner(.dots, "Generating API")
         generateCodeSpinner.start()
         
-        let generator = GraphQLCodegen(scalars: config.scalars)
+        let scalars = ScalarMap(scalars: config.scalars)
+        let generator = GraphQLCodegen(scalars: scalars)
         let code: String
         
         do {
@@ -134,7 +142,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
         print("\n\nAPI generated successfully!")
         
         // Warn about the unused scalars.
-        let ignoredScalars = try schema.missing(scalars: config.scalars)
+        let ignoredScalars = try schema.missing(scalars: scalars)
         guard !ignoredScalars.isEmpty else {
             return
         }
@@ -153,29 +161,24 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
 // MARK: - Configuraiton
 
-/*
- swiftgraphql.yml
+
+/**
+ Configuration file specification for `swiftgraphql.yml`.
 
  ```yml
  scalars:
      Date: DateTime
  ```
  */
-
 struct Config: Codable, Equatable {
     /// Key-Value dictionary of scalar mappings.
-    let scalars: ScalarMap
+    let scalars: [String: String]
 
     // MARK: - Initializers
 
     /// Creates an empty configuration instance.
     init() {
-        scalars = ScalarMap()
-    }
-
-    /// Creates a new config instance from given parameters.
-    init(scalars: ScalarMap) {
-        self.scalars = scalars
+        self.scalars = [:]
     }
 
     /// Tries to decode the configuration from a string.
@@ -194,6 +197,7 @@ enum SwiftGraphQLGeneratorError: String, Error {
     case unknown = "Something unexpected happened. Please open an issue and we'll help you out!"
     case introspection = "Couldn't introspect the schema."
     case header = "Invalid header format. Use `Header: Value` to specify a single header."
+    case unreachable = "Couldn't reach GraphQL server at given endpoint."
 }
 
 extension String: Error {}

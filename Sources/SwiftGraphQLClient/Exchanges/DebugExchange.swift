@@ -6,9 +6,9 @@ import GraphQL
 public struct DebugExchange: Exchange {
     
     /// Tells whether the client is in a development environment of not.
-    var debug: Bool
+    public var debug: Bool
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: ExchangeIO

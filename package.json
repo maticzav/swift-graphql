@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "server",
-    "website"
+    "website",
+    "examples/thesocialnetwork/server"
   ],
   "scripts": {
     "g:tsc": "cd $INIT_CWD && tsc",

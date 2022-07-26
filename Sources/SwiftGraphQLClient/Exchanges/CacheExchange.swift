@@ -10,7 +10,7 @@ import Foundation
 /// - NOTE: Cache exchange doesn't perform any deduplication of requests.
 ///
 /// - NOTE: The caching pattern used here is greedy and not optimal.
-class CacheExchange: Exchange {
+public class CacheExchange: Exchange {
     
     /// Results from previous oeprations indexed by operation's ids.
     private var resultCache: [String: OperationResult]
@@ -18,7 +18,7 @@ class CacheExchange: Exchange {
     /// A map that indexes operations related to a given typename.
     private var operationCache: [String: Set<String>]
     
-    init() {
+    public init() {
         self.resultCache = [:]
         self.operationCache = [:]
     }
@@ -27,13 +27,13 @@ class CacheExchange: Exchange {
     ///
     /// - NOTE: CacheOnly operations might get a nil value and fail when selection tries
     ///         to decode them. That's O.K.
-    func shouldUseCache(operation: Operation) -> Bool {
+    private func shouldUseCache(operation: Operation) -> Bool {
         operation.kind == .query &&
         operation.policy != .networkOnly &&
         (operation.policy == .cacheOnly || resultCache[operation.id] != nil)
     }
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: @escaping ExchangeIO

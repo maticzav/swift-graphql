@@ -10,13 +10,13 @@ public class DedupExchange: Exchange {
     /// Operation IDs that are currently awaiting responses.
     private var inFlightKeys: Set<String>
     
-    init() {
+    public init() {
         inFlightKeys = Set()
     }
     
     // MARK: - Methods
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: ExchangeIO

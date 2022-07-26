@@ -3,8 +3,8 @@ import GraphQLAST
 @testable import SwiftGraphQLCodegen
 
 extension Context {
-    /// Creates a
-    static func from(scalars: ScalarMap) -> Context {
+    /// Creates a mocking context that may be used in tests containing provided scalars.
+    static func from(scalars: [String: String]) -> Context {
         let schema = Schema(
             types: [
                 .object(ObjectType(name: "Query", description: nil, fields: [], interfaces: nil))
@@ -13,6 +13,6 @@ extension Context {
             mutation: nil,
             subscription: nil
         )
-        return Context(schema: schema, scalars: scalars)
+        return Context(schema: schema, scalars: ScalarMap(scalars: scalars))
     }
 }

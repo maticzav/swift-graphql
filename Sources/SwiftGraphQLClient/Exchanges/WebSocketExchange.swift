@@ -1,6 +1,8 @@
 import Combine
 import Foundation
 import GraphQL
+
+#if canImport(GraphQLWebSocket)
 import GraphQLWebSocket
 
 /// Exchange that lets you perform GraphQL queries over WebSocket protocol.
@@ -15,7 +17,7 @@ public class WebSocketExchange: Exchange {
     /// Tells whether the exchange should handle query and mutation operations as well as subscriptions.
     private var handleAllOperations: Bool = false
     
-    convenience init(
+    public convenience init(
         request: URLRequest,
         config: GraphQLWebSocketConfiguration = GraphQLWebSocketConfiguration(),
         handleAllOperations: Bool = false
@@ -25,7 +27,7 @@ public class WebSocketExchange: Exchange {
         self.init(client: client, handleAllOperations: handleAllOperations)
     }
     
-    init(client: GraphQLWebSocket, handleAllOperations: Bool = false) {
+    public init(client: GraphQLWebSocket, handleAllOperations: Bool = false) {
         self.client = client
         self.handleAllOperations = handleAllOperations
     }
@@ -81,7 +83,7 @@ public class WebSocketExchange: Exchange {
         return publisher
     }
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: ExchangeIO
@@ -117,4 +119,4 @@ public class WebSocketExchange: Exchange {
         return upstream.merge(with: socketstream).eraseToAnyPublisher()
     }
 }
-
+#endif

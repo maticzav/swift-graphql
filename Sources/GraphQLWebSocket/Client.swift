@@ -17,12 +17,6 @@ public class GraphQLWebSocket: WebSocketDelegate {
     /// Connection parameters for the task.
     private let request: URLRequest
     
-    /// Shared encoder used to encode the request.
-    private let encoder: JSONEncoder = JSONEncoder()
-    
-    /// Shared decoder used for decoding responses.
-    private let decoder: JSONDecoder = JSONDecoder()
-    
     // MARK: - State
     
     /// Transport WebSocket connection with the server.
@@ -176,7 +170,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
             
         case .text(let string):
             self.config.logger.debug("Received 'text' data from the server.")
-            guard let message = try? self.decoder.decode(ServerMessage.self, from: Data(string.utf8)) else {
+            guard let message = try? self.config.decoder.decode(ServerMessage.self, from: Data(string.utf8)) else {
                 break
             }
             self.tick(result: .success(message))
@@ -184,7 +178,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
                         
         case .binary(let data):
             self.config.logger.debug("Received 'binary' data from the server.")
-            guard let message = try? self.decoder.decode(ServerMessage.self, from: data) else {
+            guard let message = try? self.config.decoder.decode(ServerMessage.self, from: data) else {
                 break
             }
             self.tick(result: .success(message))
@@ -334,7 +328,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
             return
         }
         
-        let data = try! self.encoder.encode(message)
+        let data = try! self.config.encoder.encode(message)
         switch (self.health, message) {
         case (.acknowledged, _), (.disposed, _), (_, .initialise):
             // We can send any message when the connection has been ACK and meta messages when the server hasn't ACK the connection yet.

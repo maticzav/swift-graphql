@@ -10,7 +10,7 @@ CURRENT_PATH = $(PWD)
 # Commands
 
 build:
-	swift build --disable-sandbox -c release
+	swift build --disable-sandbox -c release --product $(TOOL_NAME)
 
 install: build
 	mkdir -p $(PREFIX)/bin

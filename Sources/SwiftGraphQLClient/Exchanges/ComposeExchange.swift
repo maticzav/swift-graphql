@@ -5,11 +5,15 @@ import Foundation
 public struct ComposeExchange: Exchange {
 
     /// All exchanges chained right-to-left.
-    var exchanges: [Exchange]
+    private var exchanges: [Exchange]
+    
+    public init(exchanges: [Exchange]) {
+        self.exchanges = exchanges
+    }
     
     // MARK: - Methods
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: @escaping ExchangeIO

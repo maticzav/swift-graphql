@@ -66,6 +66,12 @@ public struct GraphQLWebSocketConfiguration {
     /// Logger that we use to communitcate state changes inside the WebSocket.
     public var logger: Logger = Logger(label: "graphql.socket")
     
+    /// JSON encoder that's used to encode GraphQL query requests.
+    public var encoder: JSONEncoder = JSONEncoder()
+    
+    /// JSON decoder that's used to decode JSON responses received from the server.
+    public var decoder: JSONDecoder = JSONDecoder()
+    
     /// Creates a new WebSocket configuration with default values for all parameters.
     public init() {}
 }

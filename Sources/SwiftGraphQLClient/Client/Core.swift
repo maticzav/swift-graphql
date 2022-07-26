@@ -38,7 +38,7 @@ public class Client: GraphQLClient, ObservableObject {
     ///
     /// - parameter exchanges: List of exchanges that process each operation left-to-right.
     ///
-    init(
+    public init(
         url request: URLRequest,
         exchanges: [Exchange],
         config: ClientConfiguration = ClientConfiguration()
@@ -69,7 +69,9 @@ public class Client: GraphQLClient, ObservableObject {
     }
     
     /// Creates a new GraphQL Client using default exchanges, ready to go and be used.
-    convenience init(url request: URLRequest, config: ClientConfiguration = ClientConfiguration()) {
+    ///
+    /// - NOTE: By default, it includes deduplication exchange, basic caching exchange and the fetch exchange.
+    convenience public init(url request: URLRequest, config: ClientConfiguration = ClientConfiguration()) {
         let exchanges: [Exchange] = [
             DedupExchange(),
             CacheExchange(),

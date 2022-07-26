@@ -1,4 +1,6 @@
 import Foundation
+
+#if canImport(SwiftGraphQL)
 import SwiftGraphQL
 
 extension GraphQLOperation {
@@ -15,3 +17,4 @@ extension GraphQLOperation {
         }
     }
 }
+#endif

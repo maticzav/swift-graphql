@@ -7,11 +7,11 @@ struct ErrorExchange: Exchange {
     /// Error event handler.
     private var onError: (CombinedError, Operation) -> Void
     
-    init(onError: @escaping (CombinedError, Operation) -> Void) {
+    public init(onError: @escaping (CombinedError, Operation) -> Void) {
         self.onError = onError
     }
     
-    func register(
+    public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
         next: @escaping ExchangeIO

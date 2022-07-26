@@ -32,10 +32,14 @@ Every PR should follow the next set of guidelines
 1. Check _all_ your changes in GitHub files tab before _again_ before requesting a review.
 1. Suggest a release type (e.g. patch, minor, major) for your change.
 
-## Building Binary
+## Building Binary and Documentation
 
 ```sh
-swift build -c release --product swift-graphql --disable-sandbox --arch arm64 --arch x86_64
+swift build -c release --product swift-graphql --disable-sandbox
 ```
 
 > To verify that built binary contains both architectures use `lipo -info` (https://liamnichols.eu/2020/08/01/building-swift-packages-as-a-universal-binary.html).
+
+```sh
+swift build -Xswiftc -emit-symbol-graph -Xswiftc -emit-symbol-graph-dir
+```

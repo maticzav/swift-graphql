@@ -1,7 +1,3 @@
-/*
- Utility functions for handling indentation in the generated code.
- */
-
 extension String {
     
     /// Returns an indented string by n spaces in front.
