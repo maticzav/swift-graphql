@@ -122,20 +122,25 @@ extension OperationResult {
     fileprivate func decode<T, TypeLock>(
         selection: Selection<T, TypeLock>
     ) -> DecodedOperationResult<T> {
-        let data: T?
+        var result: DecodedOperationResult<T>.Result
         var errors: [CombinedError] = self.errors
         
         do {
-            data = try selection.decode(raw: self.data)
+            result = .ok(try selection.decode(raw: self.data))
         } catch(let err) {
-            data = nil
             errors.append(CombinedError.parsing(err))
+            result = .error(self.errors)
+        }
+        
+        // If there are any errors, we default to overriding the returned
+        // information with errors.
+        if !errors.isEmpty {
+            result = .error(errors)
         }
         
         let decoded = DecodedOperationResult<T>(
             operation: self.operation,
-            data: data,
-            errors: errors,
+            result: result,
             stale: self.stale
         )
         return decoded

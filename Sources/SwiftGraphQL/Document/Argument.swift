@@ -11,6 +11,7 @@ public struct Argument: Hashable {
     let name: String
     let type: String
     let hash: String
+    
     let value: AnyCodable?
 
     /*
@@ -46,7 +47,7 @@ public struct Argument: Hashable {
 
         // Argument hash identifier.
         let hashableValue = HashableValue(value: value, type: type)
-        hash = hashableValue.hashValue.hash
+        self.hash = "_\(hashableValue.hashValue.hash)"
 
         /* Encode value */
         if let value = value as? OptionalArgumentProtocol, !value.hasValue {

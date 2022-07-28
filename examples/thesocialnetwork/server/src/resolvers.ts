@@ -29,7 +29,7 @@ export const resolvers: Resolvers<Context> = {
       })
 
       if (!user) {
-        throw new Error('User not found')
+        return null
       }
 
       return {
@@ -107,7 +107,7 @@ export const resolvers: Resolvers<Context> = {
         }
       }
 
-      const hashedPassword = await crypto.hash(password, 42)
+      const hashedPassword = await crypto.hash(password, 8)
       const user = await ctx.prisma.user.create({
         data: { username, password: hashedPassword },
       })
@@ -124,13 +124,17 @@ export const resolvers: Resolvers<Context> = {
         throw new AuthError()
       }
 
-      const { file_url, upload_url } = await aws.getFileUploadValues({ extension, contentType, folder: 'profile_pictures' })
+      const { file_url, upload_url } = await aws.getFileUploadValues({
+        extension,
+        contentType,
+        folder: 'profile_pictures',
+      })
 
       const file = await ctx.prisma.file.create({
         data: { contentType, url: file_url },
       })
 
-      return { file_id: file.id, upload_url }
+      return { file_id: file.id, upload_url, file_url }
     },
     setProfilePicture: async (parent, { file }, ctx) => {
       if (!ctx.user) {

@@ -79,6 +79,7 @@ export type Query = {
 export type SignedUrl = {
   __typename?: 'SignedURL';
   file_id: Scalars['String'];
+  file_url: Scalars['String'];
   upload_url: Scalars['String'];
 };
 
@@ -241,6 +242,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 
 export type SignedUrlResolvers<ContextType = any, ParentType extends ResolversParentTypes['SignedURL'] = ResolversParentTypes['SignedURL']> = {
   file_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  file_url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   upload_url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

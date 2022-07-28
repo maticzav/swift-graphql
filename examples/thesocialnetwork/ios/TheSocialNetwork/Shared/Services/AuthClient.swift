@@ -8,7 +8,7 @@ import Valet
 enum AuthClient {
     
     /// The value of the token used for authentication.
-    static var token: String? {
+    static func getToken() -> String? {
         AuthClient.cache.token
     }
     
@@ -21,6 +21,7 @@ enum AuthClient {
         case loading
         case authenticated(User)
         case nosession
+        case error(String)
     }
     
     // MARK: - Cache
@@ -38,15 +39,39 @@ enum AuthClient {
         private let encoder = JSONEncoder()
         private let decoder = JSONDecoder()
         
-        @Published var token: String? = nil
-        @Published var user: User? = nil
+        var token: String? {
+            didSet {
+                guard let _ = token else {
+                    return
+                }
+                
+                NetworkClient.shared.query(User.viewer, policy: .networkOnly)
+                    .receive(on: DispatchQueue.main)
+                    .map { res in
+                        switch res.result {
+                        case .ok(let data) where data != nil:
+                            return data
+                        default:
+                            self.logout()
+                            return nil
+                        }
+                    }
+                    .removeDuplicates()
+                    .assign(to: &self.$user)
+            }
+        }
         
-        @Published var state: AuthState = .loading
+        @Published var user: User?
+        @Published var state: AuthState
         
         /// Reference to the login task.
         private var login: AnyCancellable?
         
         init() {
+            self.token = nil
+            self.user = nil
+            self.state = .loading
+            
             // Update the state as the user changes.
             self.$user
                 .map { user in
@@ -57,24 +82,6 @@ enum AuthClient {
                 }
                 .removeDuplicates()
                 .assign(to: &self.$state)
-            
-            // Fetch user whenever token changes.
-            self.$token
-                .filter { token in token != nil }
-                .flatMap { _ in
-                    return NetworkClient.shared.query(User.viewer, policy: .networkOnly)
-                }
-                .map { res in
-                    if let data = res.data, let user = data {
-                        return user
-                    }
-                    
-                    // Logout the user if the token doesn't apply to a session.
-                    self.logout()
-                    return nil
-                }
-                .removeDuplicates()
-                .assign(to: &self.$user)
         }
         
         /// The structure that the client saves in the Valet.
@@ -103,15 +110,12 @@ enum AuthClient {
         /// Retrieves the token from the keychain.
         func load() {
             self.state = .loading
-            do {
-                let data = try valet.object(forKey: Store.key)
-                if let store = try? self.decoder.decode(Store.self, from: data) {
-                    self.token = store.token
-                }
-            } catch {
-                self.token = nil
+            guard let data = try? valet.object(forKey: Store.key),
+                  let store = try? self.decoder.decode(Store.self, from: data) else {
                 self.state = .nosession
+                return
             }
+            self.token = store.token
         }
         
         /// Authenticates the user and starts relevant services.
@@ -120,24 +124,34 @@ enum AuthClient {
             
             let auth = User.login(username: username, password: password)
             self.login = NetworkClient.shared.query(auth)
+                .receive(on: RunLoop.main)
                 .sink(receiveValue: { result in
                     
-                    // Login the user if we found the token.
-                    if let data = result.data, let token = data {
+                    switch result.result {
+                    case .ok(let data):
+                        // Login the user if we found the token.
+                        guard let token = data else {
+                            self.logout()
+                            return
+                        }
+                        
                         self.token = token
                         self.persist(token: token)
-                        return
+                    case .error(let errors):
+                        self.logout()
+                        
+                        if let error = errors.first {
+                            self.state = .error(error.localizedDescription)
+                        }
                     }
-                    
-                    // Logout if the session is invalid.
-                    self.logout()
                 })
         }
         
+        /// Removes the user session and logs it out.
         func logout() {
             try? valet.removeObject(forKey: Store.key)
             self.token = nil
-            self.state = .nosession
+            self.user = nil
         }
     }
     

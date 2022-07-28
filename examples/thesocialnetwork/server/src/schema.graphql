@@ -44,6 +44,7 @@ union AuthPayload = AuthPayloadSuccess | AuthPayloadFailure
 type SignedURL {
   file_id: String!
   upload_url: String!
+  file_url: String!
 }
 
 type Subscription {

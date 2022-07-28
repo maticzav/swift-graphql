@@ -1,9 +1,8 @@
 import SwiftUI
 
 struct AuthView: View {
-    @State private var username: String = ""
-    @State private var password: String = ""
     
+    @ObservedObject private var vm = AuthViewModel()
     @FocusState private var focused: Field?
     
     enum Field: Hashable {
@@ -11,32 +10,40 @@ struct AuthView: View {
         case password
     }
     
-    var disabled: Bool {
-        username.count < 3 || password.count < 3
-    }
-    
-    private func action() {
-        AuthClient.loginOrSignup(
-            username: self.username,
-            password: self.password
-        )
-    }
-    
     var body: some View {
         VStack(alignment: .trailing, spacing: 5) {
-            TextField("Username", text: self.$username)
-                .focused(self.$focused, equals: .username)
+            Text("TSN")
+                .font(.system(size: 96, weight: .heavy, design: .rounded))
                 .padding()
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
+                .frame(maxWidth: .infinity, alignment: .center)
             
-            SecureField("Password", text: self.$password)
-                .focused(self.$focused, equals: .password)
+            VStack {
+                TextField("Username", text: self.$vm.username)
+                    .textFieldStyle(.roundedBorder)
+                    .focused(self.$focused, equals: .username)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .keyboardType(.twitter)
+                
+                SecureField("Password", text: self.$vm.password)
+                    .textFieldStyle(.roundedBorder)
+                    .focused(self.$focused, equals: .password)
+            }
+            .padding()
+            
+            if let message = vm.error {
+                Text(message)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 24)
+            }
+            
+            Spacer()
+            
+            Button("Sign In", action: { self.vm.submit() })
+                .buttonStyle(.primary)
+                .disabled(self.vm.invalid)
                 .padding()
-            
-            Button("Sign In", action: self.action)
-            .buttonStyle(.primaryBordered)
-            .disabled(disabled)
                 
         }
         .padding()

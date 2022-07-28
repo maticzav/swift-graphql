@@ -275,6 +275,22 @@ extension Fields where TypeLock == Objects.SignedUrl {
       return String.mockValue
     }
   }
+
+  func fileUrl() throws -> String {
+    let field = GraphQLField.leaf(
+      field: "file_url",
+      parent: "SignedURL",
+      arguments: []
+    )
+    self.__select(field)
+
+    switch self.__state {
+    case .decoding:
+      return try self.__decode(field: field.alias!) { try String(from: $0) }
+    case .selecting:
+      return String.mockValue
+    }
+  }
 }
 extension Selection where T == Never, TypeLock == Never {
   typealias SignedUrl<T> = Selection<T, Objects.SignedUrl>
@@ -575,6 +591,12 @@ extension Objects.SignedUrl {
   static func uploadUrl() throws -> Selection<String, Objects.SignedUrl> {
     Selection<String, Objects.SignedUrl> {
       try $0.uploadUrl()
+    }
+  }
+
+  static func fileUrl() throws -> Selection<String, Objects.SignedUrl> {
+    Selection<String, Objects.SignedUrl> {
+      try $0.fileUrl()
     }
   }
 }

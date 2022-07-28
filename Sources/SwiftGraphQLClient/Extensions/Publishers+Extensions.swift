@@ -30,7 +30,12 @@ extension Publisher {
     
     /// Takes upstream values until the publisher emits a true value.
     func takeUntil(_ predicate: AnyPublisher<Bool, Never>) -> AnyPublisher<Output, Failure> {
-        self.combineLatest(predicate.setFailureType(to: Failure.self))
+        // We merge the publisher that immediately resolves with the predicate to make
+        // sure values are emitted as soon as upstream starts sending values without waiting
+        // for the predicate.
+        let pub = predicate.merge(with: Just(false)).setFailureType(to: Failure.self)
+        
+        return self.combineLatest(pub)
             .takeUntil { value, p in p }
             .map { value, p in value }
             .eraseToAnyPublisher()

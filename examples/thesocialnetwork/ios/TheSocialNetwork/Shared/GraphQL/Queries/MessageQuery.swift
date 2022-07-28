@@ -11,4 +11,9 @@ extension Message {
         
         return Message(id: id, createdAt: createdAt, message: message, sender: sender)
     }
+    
+    /// Query that fetches the feed of messages from the server.
+    static var feed = Selection.Query<[Message]> {
+        try $0.feed(selection: Message.selection.list)
+    }
 }

@@ -16,6 +16,7 @@ final class FetchExchangeTests: XCTestCase {
         
         func dataTaskPublisher(
             for request: URLRequest
+            with args: ExecutionArgs
         ) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
             switch self.handler(request) {
             case .succcess(let body):

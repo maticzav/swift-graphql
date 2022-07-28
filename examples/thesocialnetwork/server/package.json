@@ -20,6 +20,7 @@
     "@graphql-yoga/render-graphiql": "^2.13.3",
     "@prisma/client": "^4.1.0",
     "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.1",
     "graphql": "^16.5.0",
     "graphql-scalars": "^1.14.1",
     "graphql-ws": "^5.8.2",

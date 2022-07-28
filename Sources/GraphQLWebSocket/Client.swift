@@ -492,13 +492,13 @@ public class GraphQLWebSocket: WebSocketDelegate {
     ///
     /// - NOTE: The client sends the request to the server once a subscriber has
     ///         subscribed - not as soon as you call `subscribe` method.
-    public func subscribe(_ args: ExecutionArgs) -> AnyPublisher<ExecutionResult, Error> {
+    public func subscribe(_ args: ExecutionArgs) -> AnyPublisher<ExecutionResult, Never> {
         let id = UUID().uuidString
         
         // We create a new publisher that is bound to the pipeline
         // that watches server events and forwards them to the subscriber.
         // There's one pipeline for every subscription.
-        let subject = PassthroughSubject<ExecutionResult, Error>()
+        let subject = PassthroughSubject<ExecutionResult, Never>()
         
         self.pipelines[id] = self.emitter
             .share()
@@ -535,10 +535,18 @@ public class GraphQLWebSocket: WebSocketDelegate {
                     subject.send(payload.payload)
                     
                 case .error(let payload):
-                    // NOTE: We send validation errors returned as standalone
-                    // messages as terminating events down the stream
-                    // since we don't expect to receive any other events.
-                    subject.send(completion: .failure(payload.payload))
+                    // NOTE: Validation errors returned as standalone
+                    // messages terminate the stream (https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#error)
+                    // that's why we close the pipeline.
+                    
+                    let result = ExecutionResult(
+                        data: AnyCodable(nil),
+                        errors: payload.payload,
+                        hasNext: false,
+                        extensions: [:]
+                    )
+                    subject.send(result)
+                    subject.send(completion: .finished)
                     
                 case .complete:
                     // NOTE: We only forward the completion event since the

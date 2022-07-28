@@ -34,6 +34,7 @@ async function main() {
         requireResolversToMatchSchema: 'error',
       },
     }),
+    cors: true,
     graphiql: {
       subscriptionsProtocol: 'WS',
     },
@@ -42,6 +43,7 @@ async function main() {
     maskedErrors: false,
     context: async (ctx: YogaInitialContext): Promise<Context> => {
       let user: { id: string } | null = null
+      console.log(`[${new Date().toISOString()}] new request`)
 
       const id = sessions.getUserIdFromContext(ctx)
       if (id) {
@@ -63,6 +65,9 @@ async function main() {
 
   // Get NodeJS Server from Yoga
   const httpServer: HTTPServer = await server.start()
+  httpServer.on('request', (req) => {
+    console.log('REQUEST', req.method, req.url)
+  })
 
   // Create WebSocket server instance from our Node server
   const wsServer = new WebSocketServer({
@@ -75,7 +80,6 @@ async function main() {
     {
       execute: (args: any) => args.rootValue.execute(args),
       subscribe: (args: any) => args.rootValue.subscribe(args),
-
       onSubscribe: async (ctx, msg) => {
         const { schema, execute, subscribe, contextFactory, parse, validate } = server.getEnveloped(ctx)
 

@@ -6,15 +6,19 @@ struct TheSocialNetworkApp: App {
     
     var body: some Scene {
         WindowGroup {
-            switch vm.state {
-            case .loading:
-                self.loading
-            case .nosession:
-                self.auth
-            case .authenticated:
-                self.app
+            ToastContainer {
+                switch vm.state {
+                case .loading:
+                    self.loading
+                case .nosession, .error:
+                    self.auth
+                case .authenticated(let user):
+                    self.app(user: user)
+                }
             }
-            
+            .onAppear {
+                AuthClient.loginFromKeychain()
+            }
         }
     }
     
@@ -24,13 +28,13 @@ struct TheSocialNetworkApp: App {
     }
     
     @ViewBuilder
-    var app: some View {
+    func app(user: User) -> some View {
         TabView {
             FeedView()
                 .tabItem {
-                    Label("Received", systemImage: "tray.and.arrow.down.fill")
+                    Label("Feed", systemImage: "square.grid.2x2")
                 }
-            AccountView()
+            AccountView(user: user)
                 .tabItem {
                     Label("Account", systemImage: "person.crop.circle.fill")
                 }

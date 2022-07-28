@@ -10,13 +10,21 @@ public protocol FetchSession {
     /// The publisher publishes data when the task completes, or terminates if the task fails with an error.
     /// - Parameter request: The URL request for which to create a data task.
     /// - Returns: A publisher that wraps a data task for the URL request.
-    func dataTaskPublisher(for request: URLRequest) -> AnyPublisher<(data: Data, response: URLResponse), URLError>
+    func dataTaskPublisher(for request: URLRequest, with args: ExecutionArgs) -> AnyPublisher<(data: Data, response: URLResponse), URLError>
     
 }
 
 extension URLSession: FetchSession {
-    public func dataTaskPublisher(for request: URLRequest) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
-        let publisher: DataTaskPublisher = self.dataTaskPublisher(for: request)
+    private static let encoder = JSONEncoder()
+    
+    public func dataTaskPublisher(for request: URLRequest, with args: ExecutionArgs) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
+        var gqlrequest = request
+        
+        gqlrequest.httpMethod = "POST"
+        gqlrequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        gqlrequest.httpBody = try! URLSession.encoder.encode(args)
+        
+        let publisher: DataTaskPublisher = self.dataTaskPublisher(for: gqlrequest)
         return publisher.eraseToAnyPublisher()
     }
 }
@@ -58,22 +66,37 @@ public class FetchExchange: Exchange {
                 operation.kind == .query || operation.kind == .mutation
             })
             .flatMap({ operation in
-                self.session.dataTaskPublisher(for: operation.request)
-                    .map { (data, _) -> OperationResult in
+                self.session.dataTaskPublisher(for: operation.request, with: operation.args)
+                    .map { (data, response) -> OperationResult in
                         do {
                             let result = try self.decoder.decode(ExecutionResult.self, from: data)
                             
                             if let errors = result.errors {
-                                return OperationResult(operation: operation, data: result.data, errors: [.graphql(errors)], stale: false)
+                                return OperationResult(
+                                    operation: operation,
+                                    data: result.data,
+                                    errors: [.graphql(errors)],
+                                    stale: false
+                                )
                             }
                             
                             return OperationResult(operation: operation, data: result.data, errors: [], stale: false)
                         } catch(let err) {
-                            return OperationResult(operation: operation, data: AnyCodable(()), errors: [.parsing(err)], stale: false)
+                            return OperationResult(
+                                operation: operation,
+                                data: AnyCodable(()),
+                                errors: [.parsing(err)],
+                                stale: false
+                            )
                         }
                     }
                     .catch { (error: URLError) -> AnyPublisher<OperationResult, Never> in
-                        let result = OperationResult(operation: operation, data: nil, errors: [.network(error)], stale: false)
+                        let result = OperationResult(
+                            operation: operation,
+                            data: nil,
+                            errors: [.network(error)],
+                            stale: false
+                        )
                         
                         return Just(result).eraseToAnyPublisher()
                     }

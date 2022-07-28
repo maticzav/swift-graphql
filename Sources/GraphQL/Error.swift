@@ -75,5 +75,3 @@ public struct GraphQLError: Codable, Equatable, Sendable {
 enum GraphQLParsingError: Error {
     case invalidPath
 }
-
-extension Array: Error where Element == GraphQLError {}

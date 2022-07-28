@@ -4,8 +4,8 @@ import SwiftGraphQLClient
 
 
 enum NetworkClient {
-    static var http: URLRequest = URLRequest(url: URL(string: "http://127.0.0.1:4000")!)
-    static var ws: URLRequest = URLRequest(url: URL(string: "ws://127.0.0.1:4000")!)
+    static var http: URLRequest = URLRequest(url: URL(string: "http://127.0.0.1:4000/graphql")!)
+    static var ws: URLRequest = URLRequest(url: URL(string: "ws://127.0.0.1:4000/graphql")!)
     
     static var config = ClientConfiguration()
     
@@ -16,8 +16,8 @@ enum NetworkClient {
         url: http,
         exchanges: [
             DedupExchange(),
-            AuthExchange(header: "Authorization", getToken: {
-                if let token = AuthClient.token {
+            AuthExchange(header: "Authentication", getToken: {
+                if let token = AuthClient.getToken() {
                     return "Bearer \(token)"
                 }
                 

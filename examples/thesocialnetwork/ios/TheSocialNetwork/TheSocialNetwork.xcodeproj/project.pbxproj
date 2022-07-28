@@ -7,9 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0202CD7A28913C330048804B /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0202CD7928913C330048804B /* File.swift */; };
+		0202CD7C28916AF50048804B /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0202CD7B28916AF50048804B /* ToastView.swift */; };
+		0202CD7E28917B5D0048804B /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0202CD7D28917B5D0048804B /* PostView.swift */; };
+		0202CD8028917C0A0048804B /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0202CD7F28917C0A0048804B /* AvatarView.swift */; };
+		0202CD822891CAFD0048804B /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0202CD812891CAFD0048804B /* Shimmer.swift */; };
+		0212F42E2892965E0080F5D3 /* FeedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F42D2892965E0080F5D3 /* FeedViewModel.swift */; };
+		0212F430289298E50080F5D3 /* MessageMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F42F289298E50080F5D3 /* MessageMutation.swift */; };
+		0212F43228929C3A0080F5D3 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F43128929C3A0080F5D3 /* AuthViewModel.swift */; };
 		0262A2C8288F3BC600F71BAD /* AuthMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2C7288F3BC600F71BAD /* AuthMutation.swift */; };
 		0262A2CB288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2CA288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift */; };
 		0262A2CE288F653400F71BAD /* Button+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2CD288F653400F71BAD /* Button+Extensions.swift */; };
+		0262A2D0288FFA1F00F71BAD /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2CF288FFA1F00F71BAD /* ImagePicker.swift */; };
+		0262A2D2288FFCD100F71BAD /* AccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2D1288FFCD100F71BAD /* AccountViewModel.swift */; };
+		0262A2D4288FFCE900F71BAD /* SignedURLMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2D3288FFCE900F71BAD /* SignedURLMutation.swift */; };
+		0262A2D6288FFD6800F71BAD /* SignedURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2D5288FFD6800F71BAD /* SignedURL.swift */; };
+		0262A2D8288FFD9200F71BAD /* SignedURLQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2D7288FFD9100F71BAD /* SignedURLQuery.swift */; };
+		0262A2DA288FFEB500F71BAD /* CDNClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2D9288FFEB500F71BAD /* CDNClient.swift */; };
 		02637577288DA39200CE3A08 /* AuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02637576288DA39200CE3A08 /* AuthClient.swift */; };
 		0263757A288DA3F900CE3A08 /* Valet in Frameworks */ = {isa = PBXBuildFile; productRef = 02637579288DA3F900CE3A08 /* Valet */; };
 		0279CE62288F2F6C0035D77D /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0279CE61288F2F6C0035D77D /* NetworkClient.swift */; };
@@ -59,9 +73,23 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0202CD7928913C330048804B /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
+		0202CD7B28916AF50048804B /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		0202CD7D28917B5D0048804B /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
+		0202CD7F28917C0A0048804B /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
+		0202CD812891CAFD0048804B /* Shimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shimmer.swift; sourceTree = "<group>"; };
+		0212F42D2892965E0080F5D3 /* FeedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedViewModel.swift; sourceTree = "<group>"; };
+		0212F42F289298E50080F5D3 /* MessageMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageMutation.swift; sourceTree = "<group>"; };
+		0212F43128929C3A0080F5D3 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		0262A2C7288F3BC600F71BAD /* AuthMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMutation.swift; sourceTree = "<group>"; };
 		0262A2CA288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheSocialNetworkAppViewModel.swift; sourceTree = "<group>"; };
 		0262A2CD288F653400F71BAD /* Button+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Button+Extensions.swift"; sourceTree = "<group>"; };
+		0262A2CF288FFA1F00F71BAD /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		0262A2D1288FFCD100F71BAD /* AccountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountViewModel.swift; sourceTree = "<group>"; };
+		0262A2D3288FFCE900F71BAD /* SignedURLMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedURLMutation.swift; sourceTree = "<group>"; };
+		0262A2D5288FFD6800F71BAD /* SignedURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedURL.swift; sourceTree = "<group>"; };
+		0262A2D7288FFD9100F71BAD /* SignedURLQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedURLQuery.swift; sourceTree = "<group>"; };
+		0262A2D9288FFEB500F71BAD /* CDNClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CDNClient.swift; sourceTree = "<group>"; };
 		02637576288DA39200CE3A08 /* AuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClient.swift; sourceTree = "<group>"; };
 		0263757B288F087700CE3A08 /* swiftgraphql.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = swiftgraphql.yml; sourceTree = "<group>"; };
 		0279CE61288F2F6C0035D77D /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
@@ -133,6 +161,9 @@
 		0262A2C9288F61F200F71BAD /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				0262A2D1288FFCD100F71BAD /* AccountViewModel.swift */,
+				0212F43128929C3A0080F5D3 /* AuthViewModel.swift */,
+				0212F42D2892965E0080F5D3 /* FeedViewModel.swift */,
 				0262A2CA288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift */,
 			);
 			path = ViewModels;
@@ -228,8 +259,10 @@
 		02A89C17288C7EA2001AABB8 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				02A89C18288C7EB0001AABB8 /* User.swift */,
+				0202CD7928913C330048804B /* File.swift */,
 				02A89C1A288C7EE2001AABB8 /* Message.swift */,
+				0262A2D5288FFD6800F71BAD /* SignedURL.swift */,
+				02A89C18288C7EB0001AABB8 /* User.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -248,6 +281,7 @@
 			isa = PBXGroup;
 			children = (
 				02637576288DA39200CE3A08 /* AuthClient.swift */,
+				0262A2D9288FFEB500F71BAD /* CDNClient.swift */,
 				0279CE61288F2F6C0035D77D /* NetworkClient.swift */,
 			);
 			path = Services;
@@ -271,7 +305,12 @@
 		02A89C3A288C88EF001AABB8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				0202CD7F28917C0A0048804B /* AvatarView.swift */,
 				02A89C22288C8125001AABB8 /* ChatBubbleView.swift */,
+				0262A2CF288FFA1F00F71BAD /* ImagePicker.swift */,
+				0202CD7B28916AF50048804B /* ToastView.swift */,
+				0202CD7D28917B5D0048804B /* PostView.swift */,
+				0202CD812891CAFD0048804B /* Shimmer.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -281,6 +320,7 @@
 			children = (
 				02A89C44288C8A51001AABB8 /* MessageQuery.swift */,
 				02A89C41288C8A29001AABB8 /* UserQuery.swift */,
+				0262A2D7288FFD9100F71BAD /* SignedURLQuery.swift */,
 			);
 			path = Queries;
 			sourceTree = "<group>";
@@ -289,6 +329,8 @@
 			isa = PBXGroup;
 			children = (
 				0262A2C7288F3BC600F71BAD /* AuthMutation.swift */,
+				0212F42F289298E50080F5D3 /* MessageMutation.swift */,
+				0262A2D3288FFCE900F71BAD /* SignedURLMutation.swift */,
 			);
 			path = Mutations;
 			sourceTree = "<group>";
@@ -485,18 +527,32 @@
 				02A89C23288C8125001AABB8 /* ChatBubbleView.swift in Sources */,
 				02A89C3E288C8916001AABB8 /* AccountView.swift in Sources */,
 				02A89C1B288C7EE2001AABB8 /* Message.swift in Sources */,
+				0262A2D0288FFA1F00F71BAD /* ImagePicker.swift in Sources */,
+				0262A2D2288FFCD100F71BAD /* AccountViewModel.swift in Sources */,
+				0262A2D6288FFD6800F71BAD /* SignedURL.swift in Sources */,
+				0202CD7A28913C330048804B /* File.swift in Sources */,
 				02A89C01288C7E4D001AABB8 /* TheSocialNetworkApp.swift in Sources */,
+				0202CD7E28917B5D0048804B /* PostView.swift in Sources */,
 				02637577288DA39200CE3A08 /* AuthClient.swift in Sources */,
 				02A89C48288C8BC6001AABB8 /* DateTimeScalar.swift in Sources */,
 				02A89C45288C8A51001AABB8 /* MessageQuery.swift in Sources */,
 				02A89C19288C7EB0001AABB8 /* User.swift in Sources */,
 				0262A2C8288F3BC600F71BAD /* AuthMutation.swift in Sources */,
+				0212F42E2892965E0080F5D3 /* FeedViewModel.swift in Sources */,
 				0262A2CE288F653400F71BAD /* Button+Extensions.swift in Sources */,
+				0212F430289298E50080F5D3 /* MessageMutation.swift in Sources */,
+				0262A2D4288FFCE900F71BAD /* SignedURLMutation.swift in Sources */,
 				0279CE62288F2F6C0035D77D /* NetworkClient.swift in Sources */,
+				0202CD8028917C0A0048804B /* AvatarView.swift in Sources */,
+				0212F43228929C3A0080F5D3 /* AuthViewModel.swift in Sources */,
+				0202CD7C28916AF50048804B /* ToastView.swift in Sources */,
 				02A89C42288C8A29001AABB8 /* UserQuery.swift in Sources */,
+				0262A2DA288FFEB500F71BAD /* CDNClient.swift in Sources */,
 				02A89C21288C7FB6001AABB8 /* FeedView.swift in Sources */,
+				0202CD822891CAFD0048804B /* Shimmer.swift in Sources */,
 				0262A2CB288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift in Sources */,
 				02A89C3C288C890D001AABB8 /* AuthView.swift in Sources */,
+				0262A2D8288FFD9200F71BAD /* SignedURLQuery.swift in Sources */,
 				02A89C25288C8832001AABB8 /* API.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

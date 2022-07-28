@@ -15,7 +15,7 @@ public class CacheExchange: Exchange {
     /// Results from previous oeprations indexed by operation's ids.
     private var resultCache: [String: OperationResult]
     
-    /// A map that indexes operations related to a given typename.
+    /// Index of operation IDs indexed by the typename in their result.
     private var operationCache: [String: Set<String>]
     
     public init() {
@@ -80,11 +80,11 @@ public class CacheExchange: Exchange {
         
         let upstream = forwardedOps
             .onPush { result in
-                
                 // Invalidate the cache given a mutation's response.
                 if result.operation.kind == .mutation {
                     var pendingOperations = Set<String>()
                     
+                    // Collect all operations that need to be invalidated.
                     for typename in result.operation.types {
                         guard let cachedOperations = self.operationCache[typename] else {
                             continue
@@ -92,7 +92,8 @@ public class CacheExchange: Exchange {
                         cachedOperations.forEach { pendingOperations.insert($0) }
                     }
                     
-                    pendingOperations.forEach { opid in
+                    // Invalidate all operations that need invalidation.
+                    for opid in pendingOperations {
                         guard let cachedResult = self.resultCache[opid] else {
                             return
                         }
@@ -103,13 +104,13 @@ public class CacheExchange: Exchange {
                 }
                 
                 // Cache query result and operation references.
-                // NOTE: AnyCodable represents nil values as Void objects.
-                if !(result.data.value is Void), result.operation.kind == .query {
+                // (AnyCodable represents nil values as Void objects.)
+                if result.operation.kind == .query {
                     self.resultCache[result.operation.id] = result
                     
-                    // NOTE: CacheOnly operations never receive data from the
-                    //       exchanges coming after the cache meaning they are
-                    //       never indexed for re-execution.
+                    // NOTE: cache-only operations never receive data from the
+                    //       exchanges coming after the cache (i.e. from the upstream stream)
+                    //       meaning they are never indexed for re-execution.
                     for typename in result.operation.types {
                         if self.operationCache[typename] == nil {
                             self.operationCache[typename] = Set<String>()

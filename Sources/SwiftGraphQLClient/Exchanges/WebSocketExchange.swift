@@ -57,27 +57,6 @@ public class WebSocketExchange: Exchange {
                 
                 return OperationResult(operation: operation, data: result.data, errors: [], stale: false)
             }
-            .catch { error -> AnyPublisher<OperationResult, Never> in
-                switch error {
-                case let gqlError as [GraphQLError]:
-                    let result = OperationResult(
-                        operation: operation,
-                        data: AnyCodable(()),
-                        errors: [CombinedError.graphql(gqlError)],
-                        stale: false
-                    )
-                    return Just(result).eraseToAnyPublisher()
-                default:
-                    let result = OperationResult(
-                        operation: operation,
-                        data: AnyCodable(()),
-                        errors: [CombinedError.unknown(error)],
-                        stale: false
-                    )
-                    return Just(result).eraseToAnyPublisher()
-                }
-                
-            }
             .eraseToAnyPublisher()
         
         return publisher

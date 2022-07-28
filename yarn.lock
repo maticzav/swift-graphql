@@ -6780,6 +6780,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:^16.0.1":
+  version: 16.0.1
+  resolution: "dotenv@npm:16.0.1"
+  checksum: e97e94476c1af74c81966438b7a1b606ef32764d4cffec79d9dae7f1bf25e8f718d630b2ad32ca3193cb6036c4e535c3d87103d94bb87c1b1ec2e9682db482b0
+  languageName: node
+  linkType: hard
+
 "dset@npm:^2.0.1":
   version: 2.1.0
   resolution: "dset@npm:2.1.0"
@@ -13421,6 +13428,7 @@ __metadata:
     "@types/node-fetch": ^2.6.1
     "@types/uuid": ^8
     bcryptjs: ^2.4.3
+    dotenv: ^16.0.1
     graphql: ^16.5.0
     graphql-scalars: ^1.14.1
     graphql-ws: ^5.8.2

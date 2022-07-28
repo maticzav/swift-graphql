@@ -90,41 +90,6 @@ public struct OperationResult: Equatable {
     public var stale: Bool?
 }
 
-extension OperationResult {
-    /// Changes the `stale` value fo the operation result on a copy of the current instance.
-    func with(stale: Bool) -> OperationResult {
-        var copy = self
-        copy.stale = stale
-        return copy
-    }
-}
-
-extension OperationResult: Identifiable {
-    
-    /// Id of the operation related to this result.
-    public var id: String {
-        self.operation.id
-    }
-}
-
-/// A structure describing decoded result of an operation execution.
-///
-/// - NOTE: Decoded result may include errors from invalid data even if
-///         the response query was correct.
-public struct DecodedOperationResult<T> {
-    
-    /// Back-reference to the operation that triggered the execution.
-    public var operation: Operation
-    
-    /// Decoded response.
-    public var data: T?
-    
-    /// Errors from the execution.
-    public var errors: [CombinedError]
-    
-    /// Tells wether the result of the query is ot up-to-date.
-    public var stale: Bool?
-}
 
 /// An error structure describing an error that may have happened in one of the exchanges.
 public enum CombinedError: Error {
@@ -154,3 +119,44 @@ extension CombinedError: Equatable {
         }
     }
 }
+
+
+extension OperationResult {
+    /// Changes the `stale` value fo the operation result on a copy of the current instance.
+    func with(stale: Bool) -> OperationResult {
+        var copy = self
+        copy.stale = stale
+        return copy
+    }
+}
+
+extension OperationResult: Identifiable {
+    
+    /// Id of the operation related to this result.
+    public var id: String {
+        self.operation.id
+    }
+}
+
+/// A structure describing decoded result of an operation execution.
+///
+/// - NOTE: Decoded result may include errors from invalid data even if
+///         the response query was correct.
+public struct DecodedOperationResult<T> {
+    
+    /// Back-reference to the operation that triggered the execution.
+    public var operation: Operation
+    
+    /// Decoded response of the query that's either successful when there are no errors
+    /// or a failure response with errors.
+    public var result: Result
+    
+    public enum Result {
+        case ok(T)
+        case error([CombinedError])
+    }
+    
+    /// Tells wether the result of the query is ot up-to-date.
+    public var stale: Bool?
+}
+

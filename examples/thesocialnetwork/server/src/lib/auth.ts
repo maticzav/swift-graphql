@@ -12,11 +12,12 @@ export class AuthSessions {
    */
   public getUserIdFromContext(ctx: YogaInitialContext): string | null {
     const header = ctx.request?.headers?.get('Authentication')
+
     if (!header) {
       return null
     }
 
-    const token = header.replace('Bearer ', '')
+    const token = header.toLowerCase().replace('bearer ', '')
     return this.sessions[token] || null
   }
 
