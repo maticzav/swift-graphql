@@ -27,6 +27,8 @@ extension String {
     }
     
     /// Adds backticks on reserved words.
+    ///
+    /// - NOTE: Function arguments don't need to be normalized.
     var normalize: String {
         if reservedWords.contains(self) {
             return "`\(self)`"
@@ -99,7 +101,7 @@ let reservedWords = [
     "or",
     /* Keywords used in patterns */
     "_",
-    // NOTE: There are other reserved keywords, but they aren't important in context.
+    // NOTE: There are other reserved keywords, but they aren't important in this context.
 ]
 
 

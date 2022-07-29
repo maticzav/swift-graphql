@@ -146,8 +146,7 @@ private extension Collection where Element == InputValue {
     /// Returns a one-to-one argument mapping.
     func arguments(field: Field, context: Context) -> String {
         let args = self
-            .map { $0.name.camelCase.normalize }
-            .map { "\($0): \($0)" }
+            .map { $0.name.camelCase }.map { "\($0): \($0.normalize)" }
             .joined(separator: ", ")
         
         switch field.type.namedType {

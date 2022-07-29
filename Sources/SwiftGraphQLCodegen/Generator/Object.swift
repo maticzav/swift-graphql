@@ -48,27 +48,15 @@ extension ObjectType {
     /// Generates utility code that may be used to select a single field from the object using a static function.
     ///
     /// - parameter alias: Tells whether the code should include utility reference in `Selection.Type`.
-    func statics(context: Context, alias: Bool = true) throws -> String {
+    func statics(context: Context) throws -> String {
         let name = self.name.pascalCase
         let selections = try self.fields.getStaticSelections(for: self, context: context)
         
-        var code = """
+        let code = """
         extension Objects.\(name) {
         \(selections)
         }
-        
         """
-        
-        guard alias else {
-            return code
-        }
-        
-        // Adds utility alias for the selection.
-        code.append("""
-        extension Selection where T == Never, TypeLock == Never {
-            typealias \(name) = Objects.\(name)
-        }
-        """)
         
         return code
     }

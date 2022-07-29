@@ -86,7 +86,7 @@ export type SignedUrl = {
 export type Subscription = {
   __typename?: 'Subscription';
   /** Number of new messages since the last fetch. */
-  messages: Scalars['Int'];
+  messages?: Maybe<Scalars['Int']>;
   /** Simple subscription that tells current time every second. */
   time: Scalars['DateTime'];
 };
@@ -248,7 +248,7 @@ export type SignedUrlResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
-  messages?: SubscriptionResolver<ResolversTypes['Int'], "messages", ParentType, ContextType>;
+  messages?: SubscriptionResolver<Maybe<ResolversTypes['Int']>, "messages", ParentType, ContextType>;
   time?: SubscriptionResolver<ResolversTypes['DateTime'], "time", ParentType, ContextType>;
 };
 

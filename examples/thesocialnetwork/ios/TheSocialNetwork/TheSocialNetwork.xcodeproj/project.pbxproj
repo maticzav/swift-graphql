@@ -17,6 +17,7 @@
 		0212F43228929C3A0080F5D3 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F43128929C3A0080F5D3 /* AuthViewModel.swift */; };
 		0212F434289328630080F5D3 /* FeedClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F433289328630080F5D3 /* FeedClient.swift */; };
 		0212F436289328BD0080F5D3 /* MessageSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F435289328BD0080F5D3 /* MessageSubscription.swift */; };
+		0212F4382893D5CD0080F5D3 /* DateSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F4372893D5CD0080F5D3 /* DateSubscription.swift */; };
 		0262A2C8288F3BC600F71BAD /* AuthMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2C7288F3BC600F71BAD /* AuthMutation.swift */; };
 		0262A2CB288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2CA288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift */; };
 		0262A2CE288F653400F71BAD /* Button+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2CD288F653400F71BAD /* Button+Extensions.swift */; };
@@ -85,6 +86,7 @@
 		0212F43128929C3A0080F5D3 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		0212F433289328630080F5D3 /* FeedClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedClient.swift; sourceTree = "<group>"; };
 		0212F435289328BD0080F5D3 /* MessageSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSubscription.swift; sourceTree = "<group>"; };
+		0212F4372893D5CD0080F5D3 /* DateSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSubscription.swift; sourceTree = "<group>"; };
 		0262A2C7288F3BC600F71BAD /* AuthMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMutation.swift; sourceTree = "<group>"; };
 		0262A2CA288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheSocialNetworkAppViewModel.swift; sourceTree = "<group>"; };
 		0262A2CD288F653400F71BAD /* Button+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Button+Extensions.swift"; sourceTree = "<group>"; };
@@ -343,6 +345,7 @@
 		02A89C43288C8A3F001AABB8 /* Subscriptions */ = {
 			isa = PBXGroup;
 			children = (
+				0212F4372893D5CD0080F5D3 /* DateSubscription.swift */,
 				0212F435289328BD0080F5D3 /* MessageSubscription.swift */,
 			);
 			path = Subscriptions;
@@ -542,6 +545,7 @@
 				0202CD7E28917B5D0048804B /* PostView.swift in Sources */,
 				02637577288DA39200CE3A08 /* AuthClient.swift in Sources */,
 				02A89C48288C8BC6001AABB8 /* DateTimeScalar.swift in Sources */,
+				0212F4382893D5CD0080F5D3 /* DateSubscription.swift in Sources */,
 				02A89C45288C8A51001AABB8 /* MessageQuery.swift in Sources */,
 				02A89C19288C7EB0001AABB8 /* User.swift in Sources */,
 				0262A2C8288F3BC600F71BAD /* AuthMutation.swift in Sources */,

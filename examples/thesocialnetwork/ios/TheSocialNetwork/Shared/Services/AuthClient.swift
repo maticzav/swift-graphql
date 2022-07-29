@@ -46,6 +46,7 @@ enum AuthClient {
                 }
                 
                 NetworkClient.shared.query(User.viewer, policy: .cacheAndNetwork)
+                
                     .receive(on: DispatchQueue.main)
                     .map { res in
                         switch res.result {
@@ -126,7 +127,6 @@ enum AuthClient {
             self.login = NetworkClient.shared.query(auth)
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { result in
-                    
                     switch result.result {
                     case .ok(let data):
                         // Login the user if we found the token.

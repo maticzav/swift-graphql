@@ -18,16 +18,23 @@ enum FeedClient {
         init() {
             self.posts = 0
             
-            NetworkClient.shared
-                .subscribe(to: Message.unread)
+            AuthClient.state
+                .filter { state in
+                    guard case .authenticated = state else {
+                        return false
+                    }
+                    return true
+                }
+                .flatMap { _ in
+                    NetworkClient.shared.subscribe(to: Message.unread)
+                }
                 .map { result -> Int in
                     switch result.result {
                     case .ok(let data):
                         return data
                     default:
                         return 0
-                    }
-                    
+                    }   
                 }
                 .assign(to: &self.$posts)
         }

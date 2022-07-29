@@ -36,10 +36,7 @@ public struct GraphQLCodegen {
         }
         
         let staticFieldSelection = try schema.objects.map { object in
-            try object.statics(
-                context: context,
-                alias: object.name == subscription
-            )
+            try object.statics(context: context)
         }
         
         let interfaceDefinitions = try schema.interfaces.map {

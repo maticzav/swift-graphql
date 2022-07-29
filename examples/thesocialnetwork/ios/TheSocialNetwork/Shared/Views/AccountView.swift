@@ -9,8 +9,19 @@ struct AccountView: View {
     
     @EnvironmentObject private var toastc: ToastCoordinator
     
+    /// DateFormatter used for formatting the server timestamp.
+    private var formatter: DateFormatter
+    
     /// The active user information.
     var user: User
+    
+    init(user: User) {
+        self.user = user
+        
+        self.formatter = DateFormatter()
+        self.formatter.timeStyle = .short
+        self.formatter.dateStyle = .short
+    }
     
     var body: some View {
         VStack {
@@ -24,6 +35,16 @@ struct AccountView: View {
                 .font(.system(size: 36, weight: .heavy, design: .rounded))
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.vertical, 25)
+            
+            if let time = vm.time {
+                Text("It's \(self.formatter.string(from: time))")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(.gray)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .background(.regularMaterial)
+                    .cornerRadius(8)
+            }
             
             Spacer()
             
@@ -68,6 +89,7 @@ struct AccountView: View {
 struct ProfileView_Previews: PreviewProvider {
     static var nopicture: User {
         var copy = User.preview
+        copy.username = "nopic"
         copy.picture = nil
         return copy
     }

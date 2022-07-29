@@ -40,7 +40,6 @@ class FeedViewModel: ObservableObject {
     /// Refreshes the feed with new data.
     func refresh() {
         NetworkClient.shared.query(Message.feed)
-            .print("{feed}")
             .receive(on: RunLoop.main)
             .map { result in
                 guard case let .ok(data) = result.result else {

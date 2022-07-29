@@ -517,7 +517,6 @@ extension Objects.Query {
     }
   }
 }
-
 extension Objects.Mutation {
   /// A mutation that returns the token that may be used to authenticate the user.
 
@@ -544,7 +543,7 @@ extension Objects.Mutation {
   ) -> Selection<T, Objects.Mutation> {
     Selection<T, Objects.Mutation> {
       try $0.getProfilePictureSignedUrl(
-        `extension`: `extension`, contentType: contentType, selection: selection)
+        extension: `extension`, contentType: contentType, selection: selection)
     }
   }
   /// Updates the profile picture of currently authenticated user.
@@ -557,7 +556,6 @@ extension Objects.Mutation {
     }
   }
 }
-
 extension Objects.AuthPayloadSuccess {
 
   static func token() -> Selection<String, Objects.AuthPayloadSuccess> {
@@ -566,7 +564,6 @@ extension Objects.AuthPayloadSuccess {
     }
   }
 }
-
 extension Objects.AuthPayloadFailure {
 
   static func message() -> Selection<String, Objects.AuthPayloadFailure> {
@@ -575,7 +572,6 @@ extension Objects.AuthPayloadFailure {
     }
   }
 }
-
 extension Objects.SignedUrl {
 
   static func fileId() -> Selection<String, Objects.SignedUrl> {
@@ -596,7 +592,6 @@ extension Objects.SignedUrl {
     }
   }
 }
-
 extension Objects.Subscription {
   /// Simple subscription that tells current time every second.
 
@@ -612,9 +607,6 @@ extension Objects.Subscription {
       try $0.messages()
     }
   }
-}
-extension Selection where T == Never, TypeLock == Never {
-  typealias Subscription = Objects.Subscription
 }
 extension Objects.User {
 
@@ -642,7 +634,6 @@ extension Objects.User {
     }
   }
 }
-
 extension Objects.Message {
 
   static func id() -> Selection<String, Objects.Message> {

@@ -7,10 +7,11 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import { Server as HTTPServer } from 'http'
-import { Server as WebSocketServer } from 'ws'
+import { WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { AuthSessions } from './lib/auth'
+import { config } from './lib/config'
 import { Context } from './lib/context'
 import { pubsub } from './lib/pubsub'
 import { resolvers } from './resolvers'
@@ -22,7 +23,9 @@ const typeDefs = fs.readFileSync(path.resolve(__dirname, './schema.graphql')).to
 
 async function main() {
   const sessions = new AuthSessions()
-  const prisma = new PrismaClient()
+  const prisma = new PrismaClient({
+    datasources: { db: { url: config.dbURL } },
+  })
   const mailbox = new Mailbox()
 
   const server = createServer<Context, any>({
@@ -81,19 +84,20 @@ async function main() {
       execute: (args: any) => args.rootValue.execute(args),
       subscribe: (args: any) => args.rootValue.subscribe(args),
       onSubscribe: async (ctx, msg) => {
-        const { schema, execute, subscribe, contextFactory, parse, validate } = server.getEnveloped(ctx)
+        console.log(ctx.extra.request.headers)
+        console.log(ctx.connectionParams)
 
+        const { schema, execute, subscribe, contextFactory, parse, validate } = server.getEnveloped(ctx)
         const args = {
           schema,
           operationName: msg.payload.operationName,
           document: parse(msg.payload.query),
           variableValues: msg.payload.variables,
           contextValue: await contextFactory(),
-          rootValue: {
-            execute,
-            subscribe,
-          },
+          rootValue: { execute, subscribe },
         }
+
+        console.log(args.contextValue)
 
         const errors = validate(args.schema, args.document)
         if (errors.length) {

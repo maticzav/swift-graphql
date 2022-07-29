@@ -199,7 +199,6 @@ export const resolvers: Resolvers<Context> = {
   },
   Subscription: {
     time: {
-      // This will return the value on every 1 sec until it reaches 0
       subscribe: async function* (_, {}) {
         while (true) {
           await new Promise((resolve) => setTimeout(resolve, 1000))

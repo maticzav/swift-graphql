@@ -7,51 +7,90 @@ struct FeedView: View {
     @EnvironmentObject private var toastCoordinator: ToastCoordinator
     
     var body: some View {
-        VStack {
-            HStack(alignment: .center) {
-                Text("TSN").font(.system(size: 24, weight: .bold, design: .rounded))
-                Spacer()
-                Button(action: { self.isComposerOpen = true }) {
-                    Image(systemName: "plus.circle.fill")
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                }
-            }
-            .padding(.vertical)
-            .padding(.horizontal, 24)
+        VStack(alignment: .leading) {
+            self.header
+            self.unread
             
             if vm.feed.isEmpty {
-                Image(systemName: "tray").resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 48)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    .foregroundColor(.gray)
+                self.placeholder
             } else {
-                ScrollView {
-                    ForEach(vm.feed) { item in
-                        PostView(
-                            message: item.message,
-                            author: item.sender,
-                            timestamp: item.createdAt
-                        )
-                        .padding(.horizontal)
-                    }
-                }
-                .refreshable {
-                    self.vm.refresh()
-                }
+                self.feed
             }
         }
-        .sheet(isPresented: self.$isComposerOpen, content: {
-            PostComposerView(message: self.$vm.message, onSubmit: {
-                self.isComposerOpen = false
-                self.toastCoordinator.toast = Toast(
-                    label: "Posting Message!",
-                    kind: .info
+        .sheet(isPresented: self.$isComposerOpen, content: { self.composer })
+    }
+    
+    @ViewBuilder
+    var header: some View {
+        HStack(alignment: .center) {
+            Text("TSN").font(.system(size: 24, weight: .bold, design: .rounded))
+            Spacer()
+            Button(action: { self.isComposerOpen = true }) {
+                Image(systemName: "plus.circle.fill")
+                    .resizable()
+                    .frame(width: 24, height: 24)
+            }
+        }
+        .padding(.vertical)
+        .padding(.horizontal, 24)
+    }
+    
+    @ViewBuilder
+    var feed: some View {
+        List {
+            self.unread
+                .padding(.horizontal)
+            
+            ForEach(vm.feed) { item in
+                PostView(
+                    message: item.message,
+                    author: item.sender,
+                    timestamp: item.createdAt
                 )
-                
-                self.vm.post()
-            })
+                .padding(.horizontal)
+            }
+            .listRowSeparatorTint(.clear)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+        }
+        .listStyle(.plain)
+        .refreshable { self.vm.refresh() }
+    }
+    
+    @ViewBuilder
+    var unread: some View {
+        if self.vm.unread > 0 {
+            Text("Pull to refresh (\(self.vm.unread) messages)")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(.gray)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .background(.regularMaterial)
+                .cornerRadius(8)
+        } else {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    var placeholder: some View {
+        Image(systemName: "tray").resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(height: 48)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .foregroundColor(.gray)
+    }
+    
+    @ViewBuilder
+    var composer: some View {
+        PostComposerView(message: self.$vm.message, onSubmit: {
+            self.isComposerOpen = false
+            self.toastCoordinator.toast = Toast(
+                label: "Posting Message!",
+                kind: .info
+            )
+            
+            self.vm.post()
         })
     }
 }

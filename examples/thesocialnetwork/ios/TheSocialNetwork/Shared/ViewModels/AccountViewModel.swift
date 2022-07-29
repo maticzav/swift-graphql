@@ -5,24 +5,25 @@ import UIKit
 class AccountViewModel: ObservableObject {
     
     @Published private(set) var loading: Bool
-    @Published private(set) var user: User?
+    
+    /// Current server time.
+    @Published var time: Date?
     
     private var cancellable: AnyCancellable?
     
     init() {
         self.loading = false
         
-        AuthClient.state
-            .map { state in
-                switch state {
-                case .authenticated(let user):
-                    return user
-                default:
+        NetworkClient.shared
+            .subscribe(to: Date.serverTime)
+            .map { result in
+                guard case let .ok(date) = result.result else {
                     return nil
                 }
+
+                return date
             }
-            .print("[authclient]")
-            .assign(to: &self.$user)
+            .assign(to: &self.$time)
     }
     
     /// Method that starts the upload of a profile picture.
