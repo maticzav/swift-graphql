@@ -10,7 +10,9 @@ extension Date: GraphQLScalar {
         
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        // https://stackoverflow.com/questions/39433852/parsing-a-iso8601-string-to-date-in-swift
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
+        
         guard let date = formatter.date(from: raw) else {
             throw DateTimeScalarDecodingError.invalidValue
         }

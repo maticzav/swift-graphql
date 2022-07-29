@@ -23,6 +23,14 @@ public class CacheExchange: Exchange {
         self.operationCache = [:]
     }
     
+    /// Clears all cached results.
+    ///
+    /// - NOTE: This method doesn't re-execute any of the watched queries.
+    public func clear() {
+        self.resultCache = [:]
+        self.operationCache = [:]
+    }
+    
     /// Tells whether a given operation should rely on the result saved in the cache.
     ///
     /// - NOTE: CacheOnly operations might get a nil value and fail when selection tries

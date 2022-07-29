@@ -70,7 +70,7 @@ extension Field {
         let code = """
         \(docs)
         \(availability)
-        static func \(fName)\(parameters) throws -> Selection<\(returnType), \(typelock)> {
+        static func \(fName)\(parameters) -> Selection<\(returnType), \(typelock)> {
             Selection<\(returnType), \(typelock)> {
                 try $0.\(fName)\(args)
             }

@@ -15,6 +15,8 @@
 		0212F42E2892965E0080F5D3 /* FeedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F42D2892965E0080F5D3 /* FeedViewModel.swift */; };
 		0212F430289298E50080F5D3 /* MessageMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F42F289298E50080F5D3 /* MessageMutation.swift */; };
 		0212F43228929C3A0080F5D3 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F43128929C3A0080F5D3 /* AuthViewModel.swift */; };
+		0212F434289328630080F5D3 /* FeedClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F433289328630080F5D3 /* FeedClient.swift */; };
+		0212F436289328BD0080F5D3 /* MessageSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0212F435289328BD0080F5D3 /* MessageSubscription.swift */; };
 		0262A2C8288F3BC600F71BAD /* AuthMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2C7288F3BC600F71BAD /* AuthMutation.swift */; };
 		0262A2CB288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2CA288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift */; };
 		0262A2CE288F653400F71BAD /* Button+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0262A2CD288F653400F71BAD /* Button+Extensions.swift */; };
@@ -81,6 +83,8 @@
 		0212F42D2892965E0080F5D3 /* FeedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedViewModel.swift; sourceTree = "<group>"; };
 		0212F42F289298E50080F5D3 /* MessageMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageMutation.swift; sourceTree = "<group>"; };
 		0212F43128929C3A0080F5D3 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		0212F433289328630080F5D3 /* FeedClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedClient.swift; sourceTree = "<group>"; };
+		0212F435289328BD0080F5D3 /* MessageSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSubscription.swift; sourceTree = "<group>"; };
 		0262A2C7288F3BC600F71BAD /* AuthMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMutation.swift; sourceTree = "<group>"; };
 		0262A2CA288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheSocialNetworkAppViewModel.swift; sourceTree = "<group>"; };
 		0262A2CD288F653400F71BAD /* Button+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Button+Extensions.swift"; sourceTree = "<group>"; };
@@ -282,6 +286,7 @@
 			children = (
 				02637576288DA39200CE3A08 /* AuthClient.swift */,
 				0262A2D9288FFEB500F71BAD /* CDNClient.swift */,
+				0212F433289328630080F5D3 /* FeedClient.swift */,
 				0279CE61288F2F6C0035D77D /* NetworkClient.swift */,
 			);
 			path = Services;
@@ -338,6 +343,7 @@
 		02A89C43288C8A3F001AABB8 /* Subscriptions */ = {
 			isa = PBXGroup;
 			children = (
+				0212F435289328BD0080F5D3 /* MessageSubscription.swift */,
 			);
 			path = Subscriptions;
 			sourceTree = "<group>";
@@ -526,6 +532,7 @@
 			files = (
 				02A89C23288C8125001AABB8 /* ChatBubbleView.swift in Sources */,
 				02A89C3E288C8916001AABB8 /* AccountView.swift in Sources */,
+				0212F434289328630080F5D3 /* FeedClient.swift in Sources */,
 				02A89C1B288C7EE2001AABB8 /* Message.swift in Sources */,
 				0262A2D0288FFA1F00F71BAD /* ImagePicker.swift in Sources */,
 				0262A2D2288FFCD100F71BAD /* AccountViewModel.swift in Sources */,
@@ -553,6 +560,7 @@
 				0262A2CB288F620D00F71BAD /* TheSocialNetworkAppViewModel.swift in Sources */,
 				02A89C3C288C890D001AABB8 /* AuthView.swift in Sources */,
 				0262A2D8288FFD9200F71BAD /* SignedURLQuery.swift in Sources */,
+				0212F436289328BD0080F5D3 /* MessageSubscription.swift in Sources */,
 				02A89C25288C8832001AABB8 /* API.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

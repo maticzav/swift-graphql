@@ -109,7 +109,7 @@ extension GraphQLClient {
         as operationName: String? = nil,
         url request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
-    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLWebSocketOperation & Decodable {
+    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLWebSocketOperation {
         self.executeSubscription(of: selection, as: operationName, url: request, policy: policy)
             .map { result in result.decode(selection: selection) }
             .eraseToAnyPublisher()

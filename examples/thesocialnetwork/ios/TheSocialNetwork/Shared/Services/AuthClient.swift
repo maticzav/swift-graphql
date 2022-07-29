@@ -45,7 +45,7 @@ enum AuthClient {
                     return
                 }
                 
-                NetworkClient.shared.query(User.viewer, policy: .networkOnly)
+                NetworkClient.shared.query(User.viewer, policy: .cacheAndNetwork)
                     .receive(on: DispatchQueue.main)
                     .map { res in
                         switch res.result {
@@ -149,6 +149,8 @@ enum AuthClient {
         
         /// Removes the user session and logs it out.
         func logout() {
+            NetworkClient.cache.clear()
+            
             try? valet.removeObject(forKey: Store.key)
             self.token = nil
             self.user = nil

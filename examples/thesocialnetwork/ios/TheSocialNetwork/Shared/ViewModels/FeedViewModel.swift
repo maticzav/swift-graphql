@@ -2,12 +2,22 @@ import Combine
 import Foundation
 
 class FeedViewModel: ObservableObject {
+    
+    /// Content of the new message that the user is composing.
     @Published var message: String
+    
+    /// Messages in the current feed.
     @Published var feed: [Message]
+    
+    /// Number of unread posts.
+    @Published var unread: Int
     
     init() {
         self.message = ""
         self.feed = []
+        self.unread = 0
+        
+        FeedClient.unread.assign(to: &self.$unread)
         
         self.refresh()
     }
@@ -24,14 +34,13 @@ class FeedViewModel: ObservableObject {
         self.message = ""
         
         self.cancellable = NetworkClient.shared.mutate(mutation)
-            .sink { result in
-                
-            }
+            .sink { result in }
     }
     
     /// Refreshes the feed with new data.
     func refresh() {
         NetworkClient.shared.query(Message.feed)
+            .print("{feed}")
             .receive(on: RunLoop.main)
             .map { result in
                 guard case let .ok(data) = result.result else {

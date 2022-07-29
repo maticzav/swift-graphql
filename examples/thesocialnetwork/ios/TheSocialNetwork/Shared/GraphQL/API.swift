@@ -504,18 +504,14 @@ extension Selection where T == Never, TypeLock == Never {
 }
 extension Objects.Query {
 
-  static func viewer<T>(selection: Selection<T, Objects.User?>) throws -> Selection<
-    T, Objects.Query
-  > {
+  static func viewer<T>(selection: Selection<T, Objects.User?>) -> Selection<T, Objects.Query> {
     Selection<T, Objects.Query> {
       try $0.viewer(selection: selection)
     }
   }
   /// A sample list of random strings.
 
-  static func feed<T>(selection: Selection<T, [Objects.Message]>) throws -> Selection<
-    T, Objects.Query
-  > {
+  static func feed<T>(selection: Selection<T, [Objects.Message]>) -> Selection<T, Objects.Query> {
     Selection<T, Objects.Query> {
       try $0.feed(selection: selection)
     }
@@ -527,16 +523,16 @@ extension Objects.Mutation {
 
   static func login<T>(
     username: String, password: String, selection: Selection<T, Unions.AuthPayload>
-  ) throws -> Selection<T, Objects.Mutation> {
+  ) -> Selection<T, Objects.Mutation> {
     Selection<T, Objects.Mutation> {
       try $0.login(username: username, password: password, selection: selection)
     }
   }
   /// A mutation that lets you send a message to the feed.
 
-  static func message<T>(message: String, selection: Selection<T, Objects.Message?>) throws
-    -> Selection<T, Objects.Mutation>
-  {
+  static func message<T>(message: String, selection: Selection<T, Objects.Message?>) -> Selection<
+    T, Objects.Mutation
+  > {
     Selection<T, Objects.Mutation> {
       try $0.message(message: message, selection: selection)
     }
@@ -545,7 +541,7 @@ extension Objects.Mutation {
 
   static func getProfilePictureSignedUrl<T>(
     `extension`: String, contentType: String, selection: Selection<T, Objects.SignedUrl?>
-  ) throws -> Selection<T, Objects.Mutation> {
+  ) -> Selection<T, Objects.Mutation> {
     Selection<T, Objects.Mutation> {
       try $0.getProfilePictureSignedUrl(
         `extension`: `extension`, contentType: contentType, selection: selection)
@@ -553,7 +549,7 @@ extension Objects.Mutation {
   }
   /// Updates the profile picture of currently authenticated user.
 
-  static func setProfilePicture<T>(file: String, selection: Selection<T, Objects.User?>) throws
+  static func setProfilePicture<T>(file: String, selection: Selection<T, Objects.User?>)
     -> Selection<T, Objects.Mutation>
   {
     Selection<T, Objects.Mutation> {
@@ -564,7 +560,7 @@ extension Objects.Mutation {
 
 extension Objects.AuthPayloadSuccess {
 
-  static func token() throws -> Selection<String, Objects.AuthPayloadSuccess> {
+  static func token() -> Selection<String, Objects.AuthPayloadSuccess> {
     Selection<String, Objects.AuthPayloadSuccess> {
       try $0.token()
     }
@@ -573,7 +569,7 @@ extension Objects.AuthPayloadSuccess {
 
 extension Objects.AuthPayloadFailure {
 
-  static func message() throws -> Selection<String, Objects.AuthPayloadFailure> {
+  static func message() -> Selection<String, Objects.AuthPayloadFailure> {
     Selection<String, Objects.AuthPayloadFailure> {
       try $0.message()
     }
@@ -582,19 +578,19 @@ extension Objects.AuthPayloadFailure {
 
 extension Objects.SignedUrl {
 
-  static func fileId() throws -> Selection<String, Objects.SignedUrl> {
+  static func fileId() -> Selection<String, Objects.SignedUrl> {
     Selection<String, Objects.SignedUrl> {
       try $0.fileId()
     }
   }
 
-  static func uploadUrl() throws -> Selection<String, Objects.SignedUrl> {
+  static func uploadUrl() -> Selection<String, Objects.SignedUrl> {
     Selection<String, Objects.SignedUrl> {
       try $0.uploadUrl()
     }
   }
 
-  static func fileUrl() throws -> Selection<String, Objects.SignedUrl> {
+  static func fileUrl() -> Selection<String, Objects.SignedUrl> {
     Selection<String, Objects.SignedUrl> {
       try $0.fileUrl()
     }
@@ -604,14 +600,14 @@ extension Objects.SignedUrl {
 extension Objects.Subscription {
   /// Simple subscription that tells current time every second.
 
-  static func time() throws -> Selection<Date, Objects.Subscription> {
+  static func time() -> Selection<Date, Objects.Subscription> {
     Selection<Date, Objects.Subscription> {
       try $0.time()
     }
   }
   /// Number of new messages since the last fetch.
 
-  static func messages() throws -> Selection<Int, Objects.Subscription> {
+  static func messages() -> Selection<Int, Objects.Subscription> {
     Selection<Int, Objects.Subscription> {
       try $0.messages()
     }
@@ -622,25 +618,25 @@ extension Selection where T == Never, TypeLock == Never {
 }
 extension Objects.User {
 
-  static func id() throws -> Selection<String, Objects.User> {
+  static func id() -> Selection<String, Objects.User> {
     Selection<String, Objects.User> {
       try $0.id()
     }
   }
 
-  static func username() throws -> Selection<String, Objects.User> {
+  static func username() -> Selection<String, Objects.User> {
     Selection<String, Objects.User> {
       try $0.username()
     }
   }
 
-  static func picture() throws -> Selection<String?, Objects.User> {
+  static func picture() -> Selection<String?, Objects.User> {
     Selection<String?, Objects.User> {
       try $0.picture()
     }
   }
 
-  static func isViewer() throws -> Selection<Bool, Objects.User> {
+  static func isViewer() -> Selection<Bool, Objects.User> {
     Selection<Bool, Objects.User> {
       try $0.isViewer()
     }
@@ -649,27 +645,25 @@ extension Objects.User {
 
 extension Objects.Message {
 
-  static func id() throws -> Selection<String, Objects.Message> {
+  static func id() -> Selection<String, Objects.Message> {
     Selection<String, Objects.Message> {
       try $0.id()
     }
   }
 
-  static func createdAt() throws -> Selection<Date, Objects.Message> {
+  static func createdAt() -> Selection<Date, Objects.Message> {
     Selection<Date, Objects.Message> {
       try $0.createdAt()
     }
   }
 
-  static func message() throws -> Selection<String, Objects.Message> {
+  static func message() -> Selection<String, Objects.Message> {
     Selection<String, Objects.Message> {
       try $0.message()
     }
   }
 
-  static func sender<T>(selection: Selection<T, Objects.User>) throws -> Selection<
-    T, Objects.Message
-  > {
+  static func sender<T>(selection: Selection<T, Objects.User>) -> Selection<T, Objects.Message> {
     Selection<T, Objects.Message> {
       try $0.sender(selection: selection)
     }

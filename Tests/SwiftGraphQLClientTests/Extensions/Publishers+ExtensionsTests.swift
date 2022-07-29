@@ -121,7 +121,10 @@ final class PublishersExtensionsTests: XCTestCase {
         
         publisher.send(3)
         
-        XCTAssertEqual(received, [1, 2])
+        // Even though we emitted only two events in publisher,
+        // take until self-emitted a first `false` event to make sure
+        // data is flowing through the publisher.
+        XCTAssertEqual(received, [1, 1, 2])
         XCTAssertTrue(completed)
     }
     

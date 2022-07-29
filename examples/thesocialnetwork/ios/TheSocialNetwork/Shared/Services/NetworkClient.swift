@@ -11,6 +11,9 @@ enum NetworkClient {
     
     static var socket: GraphQLWebSocket = GraphQLWebSocket(request: ws)
     
+    /// Exchange that takes care of the caching of results.
+    static private(set) var cache = CacheExchange()
+    
     /// Instance of the GraphQL client that may be used by all services.
     static var shared: GraphQLClient = SwiftGraphQLClient.Client(
         url: http,
@@ -23,7 +26,7 @@ enum NetworkClient {
                 
                 return nil
             }),
-            CacheExchange(),
+            cache,
             FetchExchange(),
             WebSocketExchange(client: socket)
         ],
