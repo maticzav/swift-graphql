@@ -19,32 +19,6 @@ protocol Structure {
     var possibleTypes: [ObjectTypeRef] { get }
 }
 
-extension Structure {
-    
-    /// Returns a definition of a Swift struct that represents a given GraphQL structure.
-    ///
-    /// - parameter name: The name that the structure should use in the API (not necessarily the same as its GraphQL name).
-    /// - parameter objects: List of all objects that appear in the schema.
-    func definition(name apiName: String, objects: [ObjectType], context: Context) throws -> String {
-        let typename: String
-        if let object = possibleTypes.first, self.possibleTypes.count == 1 {
-            typename = "let __typename: TypeName = .\(object.name.camelCase)"
-        } else {
-            typename = "let __typename: TypeName"
-        }
-        
-        let typenamesEnum = possibleTypes.typenamesEnum()
-
-        return """
-        struct \(apiName) {
-            \(typename)
-
-            \(typenamesEnum)
-        }
-        """
-    }
-}
-
 // MARK: - Decoder
 
 private extension Collection where Element == ObjectTypeRef {

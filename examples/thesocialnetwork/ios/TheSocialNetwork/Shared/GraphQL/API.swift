@@ -18,13 +18,7 @@ extension Objects.Subscription: GraphQLWebSocketOperation {
 // MARK: - Objects
 enum Objects {}
 extension Objects {
-  struct Query {
-    let __typename: TypeName = .query
-
-    enum TypeName: String, Codable {
-      case query = "Query"
-    }
-  }
+  struct Query {}
 }
 
 extension Fields where TypeLock == Objects.Query {
@@ -70,13 +64,7 @@ extension Selection where T == Never, TypeLock == Never {
   typealias Query<T> = Selection<T, Objects.Query>
 }
 extension Objects {
-  struct Mutation {
-    let __typename: TypeName = .mutation
-
-    enum TypeName: String, Codable {
-      case mutation = "Mutation"
-    }
-  }
+  struct Mutation {}
 }
 
 extension Fields where TypeLock == Objects.Mutation {
@@ -171,13 +159,7 @@ extension Selection where T == Never, TypeLock == Never {
   typealias Mutation<T> = Selection<T, Objects.Mutation>
 }
 extension Objects {
-  struct AuthPayloadSuccess {
-    let __typename: TypeName = .authPayloadSuccess
-
-    enum TypeName: String, Codable {
-      case authPayloadSuccess = "AuthPayloadSuccess"
-    }
-  }
+  struct AuthPayloadSuccess {}
 }
 
 extension Fields where TypeLock == Objects.AuthPayloadSuccess {
@@ -202,13 +184,7 @@ extension Selection where T == Never, TypeLock == Never {
   typealias AuthPayloadSuccess<T> = Selection<T, Objects.AuthPayloadSuccess>
 }
 extension Objects {
-  struct AuthPayloadFailure {
-    let __typename: TypeName = .authPayloadFailure
-
-    enum TypeName: String, Codable {
-      case authPayloadFailure = "AuthPayloadFailure"
-    }
-  }
+  struct AuthPayloadFailure {}
 }
 
 extension Fields where TypeLock == Objects.AuthPayloadFailure {
@@ -233,13 +209,7 @@ extension Selection where T == Never, TypeLock == Never {
   typealias AuthPayloadFailure<T> = Selection<T, Objects.AuthPayloadFailure>
 }
 extension Objects {
-  struct SignedUrl {
-    let __typename: TypeName = .signedUrl
-
-    enum TypeName: String, Codable {
-      case signedUrl = "SignedURL"
-    }
-  }
+  struct SignedUrl {}
 }
 
 extension Fields where TypeLock == Objects.SignedUrl {
@@ -296,13 +266,7 @@ extension Selection where T == Never, TypeLock == Never {
   typealias SignedUrl<T> = Selection<T, Objects.SignedUrl>
 }
 extension Objects {
-  struct Subscription {
-    let __typename: TypeName = .subscription
-
-    enum TypeName: String, Codable {
-      case subscription = "Subscription"
-    }
-  }
+  struct Subscription {}
 }
 
 extension Fields where TypeLock == Objects.Subscription {
@@ -343,13 +307,7 @@ extension Fields where TypeLock == Objects.Subscription {
 }
 
 extension Objects {
-  struct User {
-    let __typename: TypeName = .user
-
-    enum TypeName: String, Codable {
-      case user = "User"
-    }
-  }
+  struct User {}
 }
 
 extension Fields where TypeLock == Objects.User {
@@ -422,13 +380,7 @@ extension Selection where T == Never, TypeLock == Never {
   typealias User<T> = Selection<T, Objects.User>
 }
 extension Objects {
-  struct Message {
-    let __typename: TypeName = .message
-
-    enum TypeName: String, Codable {
-      case message = "Message"
-    }
-  }
+  struct Message {}
 }
 
 extension Fields where TypeLock == Objects.Message {
@@ -667,14 +619,7 @@ enum Interfaces {}
 // MARK: - Unions
 enum Unions {}
 extension Unions {
-  struct AuthPayload {
-    let __typename: TypeName
-
-    enum TypeName: String, Codable {
-      case authPayloadSuccess = "AuthPayloadSuccess"
-      case authPayloadFailure = "AuthPayloadFailure"
-    }
-  }
+  struct AuthPayload {}
 }
 
 extension Fields where TypeLock == Unions.AuthPayload {

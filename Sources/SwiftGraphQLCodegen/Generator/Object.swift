@@ -16,13 +16,11 @@ extension ObjectType {
     /// - parameter alias: Tells whether the generated code should include utility `Selection.Type` alias.
     func declaration(objects: [ObjectType], context: Context, alias: Bool = true) throws -> String {
         let apiName = self.name.pascalCase
-        
-        let definition = try self.definition(name: apiName, objects: objects, context: context)
         let selection = try self.fields.getDynamicSelections(parent: self.name, context: context)
         
         var code = """
         extension Objects {
-        \(definition)
+            struct \(apiName) {}
         }
 
         extension Fields where TypeLock == Objects.\(apiName) {

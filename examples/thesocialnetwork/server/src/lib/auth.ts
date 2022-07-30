@@ -12,7 +12,13 @@ export class AuthSessions {
    */
   public getUserIdFromContext(ctx: YogaInitialContext): string | null {
     const header = ctx.request?.headers?.get('Authentication')
+    return this.getUserIdFromHeader(header)
+  }
 
+  /**
+   * Returns the id of the associated user if it exists.
+   */
+  public getUserIdFromHeader(header?: string | null): string | null {
     if (!header) {
       return null
     }

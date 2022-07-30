@@ -5,14 +5,13 @@ import Foundation
  */
 
 extension Collection where Element == GraphQLField {
-    
-    /// Returns a GraphQL query for the current selection set.
-    func serialize(for operationType: String) -> String {
-        serialize(for: operationType, operationName: nil)
-    }
 
     /// Returns a GraphQL query for the current selection set.
-    func serialize(for operationType: String, operationName: String?) -> String {
+    func serialize(
+        for operationType: String,
+        operationName: String? = nil,
+        typename: Bool = true
+    ) -> String {
         // http://spec.graphql.org/June2018/#sec-Language.Operations
         let operationDefinition: String = [
             operationType,
@@ -23,12 +22,10 @@ extension Collection where Element == GraphQLField {
         // http://spec.graphql.org/June2018/#sec-Selection-Sets
         let query = [
             "\(operationDefinition) {",
-            "__typename".indent(by: 2),
             self.serialized.indent(by: 2).joined(separator: "\n"),
             "}",
-        ].joined(separator: "\n")
-
-        return query
+        ]
+        return query.joined(separator: "\n")
     }
     
     // MARK: - Utils

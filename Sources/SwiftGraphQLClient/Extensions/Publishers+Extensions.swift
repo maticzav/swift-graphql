@@ -24,21 +24,28 @@ extension Publisher {
 extension Publisher {
     
     /// Takes upstream values for as long as predicate isn't met. Once the predicate fulfills, it sends a completion event down the stream.
-    func takeUntil(_ predicate: @escaping (Output) -> Bool) -> Publishers.TakenUntilPublisher<Self> {
+    func takeUntilTrue(_ predicate: @escaping (Output) -> Bool) -> Publishers.TakenUntilPublisher<Self> {
         Publishers.TakenUntilPublisher<Self>(upstream: self, predicate: predicate)
     }
-    
+}
+
+extension Publisher {
     /// Takes upstream values until the publisher emits a true value.
     func takeUntil(_ predicate: AnyPublisher<Bool, Never>) -> AnyPublisher<Output, Failure> {
         // We merge the publisher that immediately resolves with the predicate to make
         // sure values are emitted as soon as upstream starts sending values without waiting
         // for the predicate.
-        let pub = predicate.merge(with: Just(false)).setFailureType(to: Failure.self)
-        
-        return self.combineLatest(pub)
-            .takeUntil { value, p in p }
-            .map { value, p in value }
+        let pp: AnyPublisher<Bool, Failure> = predicate
+            .merge(with: Just(false))
+            .setFailureType(to: Failure.self)
+            .removeDuplicates()
             .eraseToAnyPublisher()
+        
+        let upstream = self.combineLatest(pp)
+            .takeUntilTrue({ value, p in p })
+            .map { value, p in value }
+            
+        return upstream.eraseToAnyPublisher()
     }
 }
 

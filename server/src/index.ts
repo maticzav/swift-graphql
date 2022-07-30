@@ -95,9 +95,6 @@ async function main() {
       },
       onSubscribe: async (ctx, msg) => {
         console.log('received subscription request')
-        console.log({ ctx })
-        console.log({ msg })
-
         const { schema, execute, subscribe, contextFactory, parse, validate } = server.getEnveloped(ctx)
 
         const args = {

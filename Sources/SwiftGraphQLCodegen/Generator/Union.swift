@@ -20,13 +20,11 @@ extension UnionType {
     /// - parameter objects:
     func declaration(objects: [ObjectType], context: Context) throws -> String {
         let name = self.name.pascalCase
-        let definition = try self.definition(name: name, objects: objects, context: context)
-        
         let selections = possibleTypes.selection(name: "Unions.\(name)", objects: objects)
         
         return """
         extension Unions {
-        \(definition)
+            struct \(name) {}
         }
 
         \(selections)

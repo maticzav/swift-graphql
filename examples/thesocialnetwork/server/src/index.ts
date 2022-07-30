@@ -45,8 +45,12 @@ async function main() {
     logging: true,
     maskedErrors: false,
     context: async (ctx: YogaInitialContext): Promise<Context> => {
+      console.log('extensions', ctx.extensions)
+
       let user: { id: string } | null = null
       console.log(`[${new Date().toISOString()}] new request`)
+
+      // Authenticate user from HTTP request or from headers in the extension.
 
       const id = sessions.getUserIdFromContext(ctx)
       if (id) {
@@ -68,9 +72,6 @@ async function main() {
 
   // Get NodeJS Server from Yoga
   const httpServer: HTTPServer = await server.start()
-  httpServer.on('request', (req) => {
-    console.log('REQUEST', req.method, req.url)
-  })
 
   // Create WebSocket server instance from our Node server
   const wsServer = new WebSocketServer({
@@ -81,23 +82,24 @@ async function main() {
   // Integrate Yoga's Envelop instance and NodeJS server with graphql-ws
   useServer(
     {
-      execute: (args: any) => args.rootValue.execute(args),
-      subscribe: (args: any) => args.rootValue.subscribe(args),
       onSubscribe: async (ctx, msg) => {
-        console.log(ctx.extra.request.headers)
-        console.log(ctx.connectionParams)
-
         const { schema, execute, subscribe, contextFactory, parse, validate } = server.getEnveloped(ctx)
+        const contextValue: any = await contextFactory()
+
+        const headers = ctx.connectionParams?.headers as { [key: string]: string } | undefined
+        const id = sessions.getUserIdFromHeader(headers?.['Authentication'])
+        if (id) {
+          contextValue.user = { id }
+        }
+
         const args = {
           schema,
           operationName: msg.payload.operationName,
           document: parse(msg.payload.query),
           variableValues: msg.payload.variables,
-          contextValue: await contextFactory(),
+          contextValue: contextValue,
           rootValue: { execute, subscribe },
         }
-
-        console.log(args.contextValue)
 
         const errors = validate(args.schema, args.document)
         if (errors.length) {
@@ -106,6 +108,9 @@ async function main() {
 
         return args
       },
+
+      execute: (args: any) => args.rootValue.execute(args),
+      subscribe: (args: any) => args.rootValue.subscribe(args),
 
       connectionInitWaitTimeout: 5000,
     },

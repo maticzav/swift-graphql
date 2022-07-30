@@ -19,7 +19,7 @@ struct AccountView: View {
         self.user = user
         
         self.formatter = DateFormatter()
-        self.formatter.timeStyle = .short
+        self.formatter.timeStyle = .long
         self.formatter.dateStyle = .short
     }
     

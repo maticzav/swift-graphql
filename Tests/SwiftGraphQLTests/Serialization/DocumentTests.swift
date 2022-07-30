@@ -10,7 +10,6 @@ final class DocumentTests: XCTestCase {
 
         let query = """
         query {
-          __typename
           \(fruit.alias!): fruit
         }
         """
@@ -24,7 +23,6 @@ final class DocumentTests: XCTestCase {
 
         let query = """
         query {
-          __typename
           \(apple.alias!): apple
           \(banana.alias!): banana
         }
@@ -46,7 +44,6 @@ final class DocumentTests: XCTestCase {
 
         let query = """
         query {
-          __typename
           \(fruit.alias!): fruit
           \(cart.alias!): cart {
             __typename
@@ -70,7 +67,6 @@ final class DocumentTests: XCTestCase {
 
         let query = """
         query ($\(argument.hash): String!) {
-          __typename
           \(fruit.alias!): fruit(name: $\(argument.hash))
         }
         """
@@ -89,7 +85,6 @@ final class DocumentTests: XCTestCase {
 
         let query = """
         query ($\(argumentOne.hash): String!) {
-          __typename
           \(fruit.alias!): fruit(one: $\(argumentOne.hash), two: $\(argumentTwo.hash))
         }
         """
@@ -115,7 +110,6 @@ final class DocumentTests: XCTestCase {
 
         let query = """
         query ($\(argument.hash): String!) {
-          __typename
           \(fruit.alias!): fruit
           \(cart.alias!): cart(name: $\(argument.hash)) {
             __typename
@@ -143,7 +137,6 @@ final class DocumentTests: XCTestCase {
 
         let query = """
         query {
-          __typename
           \(cart.alias!): cart {
             __typename
             ...on Fruit {
@@ -165,7 +158,6 @@ final class DocumentTests: XCTestCase {
 
         let query = """
         query Fruit {
-          __typename
           \(fruit.alias!): fruit
         }
         """

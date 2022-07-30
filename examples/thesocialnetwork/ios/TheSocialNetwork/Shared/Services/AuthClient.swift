@@ -46,7 +46,6 @@ enum AuthClient {
                 }
                 
                 NetworkClient.shared.query(User.viewer, policy: .cacheAndNetwork)
-                
                     .receive(on: DispatchQueue.main)
                     .map { res in
                         switch res.result {
@@ -154,6 +153,7 @@ enum AuthClient {
             try? valet.removeObject(forKey: Store.key)
             self.token = nil
             self.user = nil
+            self.state = .nosession
         }
     }
     

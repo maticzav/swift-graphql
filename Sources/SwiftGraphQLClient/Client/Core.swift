@@ -28,6 +28,8 @@ public class Client: GraphQLClient, ObservableObject {
     public typealias Source = AnyPublisher<OperationResult, Never>
     
     /// Map of currently active sources identified by their operation identifier.
+    ///
+    /// - NOTE: Removing the source from the active list should start its deallocation.
     private var active: [String: Source]
     
     private var cancellables = Set<AnyCancellable>()
@@ -94,7 +96,8 @@ public class Client: GraphQLClient, ObservableObject {
     ///          to the operation's exchange results.
     public func reexecute(operation: Operation) {
         // Check that we have an active subscriber.
-        guard operation.kind != .mutation && self.active[operation.id] != nil else {
+        guard operation.kind != .mutation, self.active[operation.id] != nil else {
+            self.config.logger.debug("Operation \(operation.id) is no longer active.")
             return
         }
         
@@ -136,13 +139,11 @@ public class Client: GraphQLClient, ObservableObject {
         //
         // To sum up both cases, client shouldn't handle processing of the operations.
         return source
-            .onStart {
-                self.operations.send(operation)
-            }
+            .onStart { self.operations.send(operation) }
             .eraseToAnyPublisher()
     }
     
-    /// Defines how result streams are created.
+    /// Returns a new result source that
     private func createResultSource(operation: Operation) -> Source {
         self.config.logger.debug("Creating result source for operation \(operation.id)...")
         
@@ -155,9 +156,7 @@ public class Client: GraphQLClient, ObservableObject {
         // (i.e. the result of the mutation).
         if operation.kind == .mutation {
             return source
-                .onStart {
-                    self.operations.send(operation)
-                }
+                .onStart { self.operations.send(operation) }
                 .first()
                 .eraseToAnyPublisher()
         }
@@ -166,15 +165,17 @@ public class Client: GraphQLClient, ObservableObject {
         // a teardown event is sent through the pipeline. When that
         // happens, we emit a completion event.
         //
-        // NOTE: We need the torndown stream because queries return
-        //       a stram that keeps updating (e.g. stale result) and
-        //       needs to be manually dismantled.
+        // NOTE: We need the torndown stream because queries and subscriptions
+        //       return a stream that keeps updating (e.g. stale result)
+        //       and needs to be manually dismantled.
         let torndown = self.operations
             .map { $0.kind == .teardown && $0.id == operation.id }
             .eraseToAnyPublisher()
         
         let result: AnyPublisher<OperationResult, Never> = source
+            .print("[result before]")
             .takeUntil(torndown)
+            .print("[result after]")
             .map { result -> AnyPublisher<OperationResult, Never> in
                 self.config.logger.debug("Processing result of operation \(operation.id)")
                 

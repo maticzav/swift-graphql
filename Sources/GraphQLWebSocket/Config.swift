@@ -4,13 +4,16 @@ import Foundation
 import Logging
 
 /// Structure that lets you configure WebSocket's behaviour.
+///
+/// - NOTE: You should create a new configuration instance that holds default settings
+///         and change the parts that you want to configure.
 public struct GraphQLWebSocketConfiguration {
     
     /// Optional parameters, passed through the `payload` field with the `ConnectionInit` message,
     /// that the client specifies when establishing a connection with the sever.
     ///
     /// You can use this for securely passing arguments for authentication.
-    public var connectionParams: [String: AnyCodable]? = nil
+    public var connectionParams: () -> [String: AnyCodable]? = { nil }
     
     /// Controls when the client should establish a connection with the server.
     public var behaviour: Behaviour = .eager

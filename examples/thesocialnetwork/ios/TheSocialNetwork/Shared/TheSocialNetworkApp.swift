@@ -11,7 +11,7 @@ struct TheSocialNetworkApp: App {
                 case .loading:
                     self.loading
                 case .nosession, .error:
-                    self.auth
+                    self.auth()
                 case .authenticated(let user):
                     self.app(user: user)
                 }
@@ -23,7 +23,7 @@ struct TheSocialNetworkApp: App {
     }
     
     @ViewBuilder
-    var auth: some View {
+    func auth() -> some View {
         AuthView()
     }
     

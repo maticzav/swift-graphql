@@ -4,12 +4,23 @@ import SwiftGraphQLClient
 
 
 enum NetworkClient {
-    static var http: URLRequest = URLRequest(url: URL(string: "http://127.0.0.1:4000/graphql")!)
-    static var ws: URLRequest = URLRequest(url: URL(string: "ws://127.0.0.1:4000/graphql")!)
+    static private var http: URLRequest = URLRequest(url: URL(string: "http://127.0.0.1:4000/graphql")!)
+    static private var ws: URLRequest = URLRequest(url: URL(string: "ws://127.0.0.1:4000/graphql")!)
     
-    static var config = ClientConfiguration()
+    static private var wsconfig: GraphQLWebSocketConfiguration {
+        var config = GraphQLWebSocketConfiguration()
+        config.behaviour = .lazy(closeTimeout: 60)
+        config.connectionParams = {
+            guard let token = AuthClient.getToken() else {
+                return nil
+            }
+            return ["headers": ["Authentication": "Bearer \(token)"]]
+        }
+        
+        return config
+    }
     
-    static var socket: GraphQLWebSocket = GraphQLWebSocket(request: ws)
+    static private var socket: GraphQLWebSocket = GraphQLWebSocket(request: ws, config: wsconfig)
     
     /// Exchange that takes care of the caching of results.
     static private(set) var cache = CacheExchange()
@@ -29,7 +40,6 @@ enum NetworkClient {
             cache,
             FetchExchange(),
             WebSocketExchange(client: socket)
-        ],
-        config: config
+        ]
     )
 }

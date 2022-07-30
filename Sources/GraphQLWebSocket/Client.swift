@@ -166,7 +166,8 @@ public class GraphQLWebSocket: WebSocketDelegate {
                     })
             }
             
-            self.send(message: ClientMessage.initalise(payload: self.config.connectionParams))
+            let payload = self.config.connectionParams()
+            self.send(message: ClientMessage.initalise(payload: payload))
             
         case .text(let string):
             self.config.logger.debug("Received 'text' data from the server.")

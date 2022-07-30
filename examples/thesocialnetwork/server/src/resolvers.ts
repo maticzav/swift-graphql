@@ -45,6 +45,8 @@ export const resolvers: Resolvers<Context> = {
       }
 
       const unread = ctx.mailbox.drain(ctx.user.id)
+      ctx.pubsub.publish(`mailbox`, ctx.user.id, { count: 0 })
+
       const rawfeed = await ctx.prisma.message.findMany({
         select: {
           id: true,

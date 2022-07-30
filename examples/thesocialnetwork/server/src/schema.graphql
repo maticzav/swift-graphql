@@ -56,7 +56,7 @@ type Subscription {
   """
   Number of new messages since the last fetch.
   """
-  messages: Int
+  messages: Int!
 }
 
 # Types

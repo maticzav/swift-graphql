@@ -17,13 +17,11 @@ extension InterfaceType {
     /// - parameter objects: List of all objects in the schema.
     func declaration(objects: [ObjectType], context: Context) throws -> String {
         let name = self.name.pascalCase
-        
-        let definition = try self.definition(name: name, objects: objects, context: context)
         let fields = try self.fields.getDynamicSelections(parent: self.name, context: context)
 
         return """
         extension Interfaces {
-        \(definition)
+            struct \(name) {}
         }
 
         extension Fields where TypeLock == Interfaces.\(name) {

@@ -4,27 +4,24 @@ import UIKit
 
 class AccountViewModel: ObservableObject {
     
-    @Published private(set) var loading: Bool
+    @Published private(set) var loading: Bool = false
     
     /// Current server time.
     @Published var time: Date?
     
-    private var cancellable: AnyCancellable?
-    
     init() {
-        self.loading = false
-        
         NetworkClient.shared
             .subscribe(to: Date.serverTime)
             .map { result in
                 guard case let .ok(date) = result.result else {
                     return nil
                 }
-
                 return date
             }
             .assign(to: &self.$time)
     }
+    
+    private var cancellable: AnyCancellable?
     
     /// Method that starts the upload of a profile picture.
     func changeProfilePicture(image: UIImage) {
