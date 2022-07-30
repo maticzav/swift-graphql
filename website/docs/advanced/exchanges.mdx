@@ -3,12 +3,41 @@ title: Creating Custom Exchanges
 sidebar_label: Custom Exchanges
 ---
 
-SwiftGraphQLClient is centered around the idea of exchanges. Exchanges are a natural way to model the flow of continuous data. Multiple exchanges form a pipeline where each exchange only does one job and leaves the rest to other exchanges. An exchange may either modify an operation (e.g. `AuthExchange`, `LogExchange`), process an operation (e.g. `FetchExchange`, `WebSocketExchange`) or both (e.g. `CacheExchange`).
+SwiftGraphQLClient is centered around the idea of exchanges. Exchanges are a natural way to model the flow of continuous data. Multiple exchanges form a pipeline where each exchange only does one job and leaves the rest to other exchanges.
 
-Each exchange should
+An exchange may either modify an operation (e.g. `AuthExchange`, `LogExchange`), process an operation (e.g. `FetchExchange`, `WebSocketExchange`) or both (e.g. `CacheExchange`).
 
-- either modify the data or process it (e.g. send it to the server),
--
+### Understanding the Client
+
+When you create a client, it connects all exchanges into a single pipeline. The easiest way to imagine the pipeline is as a ladder with requests going down on the right side and coming up on the left side.
+
+We call the right side of the ladder **downstream** and the left side **upstream**.
+
+When a new opeartion request is created by the client, the operation starts going down the ladder stopping at each exchange. As mentioned, each exchange may either
+
+- modify the operation and push it further down the stream,
+- process the operation and stop its way down,
+- modify the operation and push it down as well as start processing it.
+
+Once the exchange processes an operation, it sends it back up the ladder as operation result. The result then again stops at each exchange - in reverse order - and each exchange again may modify, filter or process the operation result. Once it reaches the top of the ladder, the client emits it to the source where it reaches the application.
+
+### The Structure of an Exchange
+
+Each exchange has to follow the `Exchange` protocol spec.
+
+```swift
+typealias ExchangeIO = (AnyPublisher<Operation, Never>) -> AnyPublisher<OperationResult, Never>
+
+
+protocol Exchange {
+    func register(
+        client: GraphQLClient,
+        operations: AnyPublisher<Operation, Never>,
+        next: @escaping ExchangeIO
+    ) -> AnyPublisher<OperationResult, Never>
+}
+
+```
 
 ### Example Exchange
 
