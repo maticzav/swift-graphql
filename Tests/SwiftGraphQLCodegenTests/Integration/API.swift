@@ -539,7 +539,7 @@ extension Fields where TypeLock == Objects.Mutation {
   /// authenticated, mutation will throw an error.
 
   func uploadFile<T>(
-    contentType: String, `extension`: OptionalArgument<String> = .init(), folder: String,
+    contentType: String, extension: OptionalArgument<String> = .init(), folder: String,
     selection: Selection<T, Objects.File>
   ) throws -> T {
     let field = GraphQLField.composite(
@@ -1065,7 +1065,7 @@ extension Objects.Mutation {
   ) throws -> Selection<T, Objects.Mutation> {
     Selection<T, Objects.Mutation> {
       try $0.uploadFile(
-        contentType: contentType, `extension`: `extension`, folder: folder, selection: selection)
+        contentType: contentType, extension: `extension`, folder: folder, selection: selection)
     }
   }
 }
