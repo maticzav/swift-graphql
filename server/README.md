@@ -1,5 +1,3 @@
-# Demo Server
+# Test Server
 
-> This demo server serves as a testing base for the package.
-
-Test server that should be running when performing library tests.
+We use test server to perform unit and integration tests for the library. It's not meant to serve as an example of real world use. To find real-world examples, check out `examples` folder.

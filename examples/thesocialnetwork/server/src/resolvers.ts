@@ -3,7 +3,7 @@ import { DateTimeResolver } from 'graphql-scalars'
 import { DateTime } from 'luxon'
 
 import { AuthError } from './lib/auth'
-import * as aws from './lib/aws'
+import { CDNUtils } from './lib/cdn'
 import { Context } from './lib/context'
 
 import { Resolvers } from './types'
@@ -126,7 +126,7 @@ export const resolvers: Resolvers<Context> = {
         throw new AuthError()
       }
 
-      const { file_url, upload_url } = await aws.getFileUploadValues({
+      const { file_url, upload_url } = await CDNUtils.getFileUploadValues({
         extension,
         contentType,
         folder: 'profile_pictures',

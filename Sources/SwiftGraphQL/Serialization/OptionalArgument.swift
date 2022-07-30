@@ -11,11 +11,19 @@ protocol OptionalArgumentProtocol {
     var hasValue: Bool { get }
 }
 
-/// A utility type-alias that reduces the number of characters we need to type.
-public typealias OptArg = OptionalArgument
-
 /// OptionalArgument is a utility structure used to represent possibly absent values.
 public struct OptionalArgument<T>: OptionalArgumentProtocol {
+    
+    /// Special structure that allows recursive type references.
+    ///
+    /// - NOTE: We encode `absent` as empty list, `present` as list with one value,
+    ///         and `null` as null value.
+    fileprivate enum InternalValue {
+        case value([T])
+        case null
+    }
+    
+    /// Internal representation of the provided value that allows recursive types.
     private var _value: InternalValue
 
     // MARK: - Initializer
@@ -41,19 +49,6 @@ public struct OptionalArgument<T>: OptionalArgumentProtocol {
         case .null:
             _value = .null
         }
-    }
-
-    // MARK: - Internal
-
-    fileprivate enum InternalValue {
-        /*
-         There are three states a value can be in:
-            - absent (value, but empty list),
-            - null (there is a value - it's null),
-            - present (value and list with a value)
-         */
-        case value([T])
-        case null
     }
 
     // MARK: - Calculated Properties
@@ -82,11 +77,14 @@ public struct OptionalArgument<T>: OptionalArgumentProtocol {
     }
 }
 
-// MARK: - Initializers
+/// A utility type-alias that reduces the number of characters you need to type to create an optional argument value.
+public typealias OptArg = OptionalArgument
+
+// MARK: - Utility Initializers
 
 public extension OptionalArgument {
     
-    /// Converts optional value to an optional argument so that `nil` becomes `null`.
+    /// Converts optional value  so that `nil` becomes `null`.
     init(present value: T?) {
         switch value {
         case let .some(value):
@@ -96,7 +94,7 @@ public extension OptionalArgument {
         }
     }
    
-    /// Maps optional value to an optional argument so that `nil` becomes `absent`.
+    /// Converts optional value so that `nil` becomes `absent`.
     init(absent value: T? = nil) {
         switch value {
         case let .some(value):
@@ -129,6 +127,7 @@ public extension OptionalArgument {
         switch self.value {
         case .present(let value):
             return fn(value)
+            
         case .null:
             return OptionalArgument<V>(.null)
             
@@ -139,7 +138,7 @@ public extension OptionalArgument {
     }
 }
 
-// MARK: - Protocols Conformances
+// MARK: - Literal Expressions
 
 extension OptionalArgument: ExpressibleByNilLiteral {
     public init(nilLiteral: ()) {
@@ -162,7 +161,11 @@ extension OptionalArgument: ExpressibleByFloatLiteral where T == Float {
     }
 }
 
-extension OptionalArgument: ExpressibleByUnicodeScalarLiteral, ExpressibleByStringLiteral, ExpressibleByExtendedGraphemeClusterLiteral where T == String {
+extension OptionalArgument:
+    ExpressibleByUnicodeScalarLiteral,
+        ExpressibleByStringLiteral,
+        ExpressibleByExtendedGraphemeClusterLiteral where T == String {
+    
     public init(unicodeScalarLiteral value: String) {
         self.init(present: value)
     }
@@ -174,8 +177,17 @@ extension OptionalArgument: ExpressibleByUnicodeScalarLiteral, ExpressibleByStri
     public init(stringLiteral value: String) {
         self.init(.present(value))
     }
-
 }
+
+// MARK: - Utility Prefix
+// https://www.avanderlee.com/swift/custom-operators-swift/
+
+/// Converts a value to an optional argument.
+public prefix func ~ <T>(value: T?) -> OptionalArgument<T> {
+    OptionalArgument<T>(present: value)
+}
+
+// MARK: - Equatable, Hashable
 
 extension OptionalArgument.InternalValue: Equatable where T: Equatable {}
 extension OptionalArgument.InternalValue: Hashable where T: Hashable {}

@@ -10,19 +10,20 @@ public protocol FetchSession {
     /// The publisher publishes data when the task completes, or terminates if the task fails with an error.
     /// - Parameter request: The URL request for which to create a data task.
     /// - Returns: A publisher that wraps a data task for the URL request.
-    func dataTaskPublisher(for request: URLRequest, with args: ExecutionArgs) -> AnyPublisher<(data: Data, response: URLResponse), URLError>
+    func dataTaskPublisher(for: URLRequest, with: Data) -> AnyPublisher<(data: Data, response: URLResponse), URLError>
     
 }
 
 extension URLSession: FetchSession {
-    private static let encoder = JSONEncoder()
-    
-    public func dataTaskPublisher(for request: URLRequest, with args: ExecutionArgs) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
+    public func dataTaskPublisher(
+        for request: URLRequest,
+        with body: Data
+    ) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
         var gqlrequest = request
         
         gqlrequest.httpMethod = "POST"
         gqlrequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        gqlrequest.httpBody = try! URLSession.encoder.encode(args)
+        gqlrequest.httpBody = body
         
         let publisher: DataTaskPublisher = self.dataTaskPublisher(for: gqlrequest)
         return publisher.eraseToAnyPublisher()
@@ -35,13 +36,22 @@ public class FetchExchange: Exchange {
     /// Structure used to connect to the server.
     private var session: FetchSession
     
-    /// Shared decoder that we use to process responses.
-    private var decoder = JSONDecoder()
+    /// Shared decoder that's used to decode server responses.
+    private var decoder: JSONDecoder
+    
+    /// Shared encoder that's used to encode request body.
+    private var encoder: JSONEncoder
     
     // MARK: - Initializer
     
-    public init(session: FetchSession = URLSession.shared) {
+    public init(
+        session: FetchSession = URLSession.shared,
+        encoder: JSONEncoder = JSONEncoder(),
+        decoder: JSONDecoder = JSONDecoder()
+    ) {
         self.session = session
+        self.encoder = encoder
+        self.decoder = decoder
     }
     
     // MARK: - Methods
@@ -65,8 +75,11 @@ public class FetchExchange: Exchange {
             .filter({ operation in
                 operation.kind == .query || operation.kind == .mutation
             })
-            .flatMap({ operation in
-                self.session.dataTaskPublisher(for: operation.request, with: operation.args)
+            .flatMap({ operation -> AnyPublisher<OperationResult, Never> in
+                let body = try! self.encoder.encode(operation.args)
+                
+                let publisher = self.session
+                    .dataTaskPublisher(for: operation.request, with: body)
                     .map { (data, response) -> OperationResult in
                         do {
                             let result = try self.decoder.decode(ExecutionResult.self, from: data)
@@ -100,6 +113,9 @@ public class FetchExchange: Exchange {
                         
                         return Just(result).eraseToAnyPublisher()
                     }
+                    .eraseToAnyPublisher()
+                
+                return publisher
             })
         
         return fetchstream.merge(with: upstream).eraseToAnyPublisher()

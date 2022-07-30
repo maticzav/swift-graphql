@@ -1,0 +1,19 @@
+---
+title: Creating Custom Exchanges
+sidebar_label: Custom Exchanges
+---
+
+SwiftGraphQLClient is centered around the idea of exchanges. Exchanges are a natural way to model the flow of continuous data. Multiple exchanges form a pipeline where each exchange only does one job and leaves the rest to other exchanges. An exchange may either modify an operation (e.g. `AuthExchange`, `LogExchange`), process an operation (e.g. `FetchExchange`, `WebSocketExchange`) or both (e.g. `CacheExchange`).
+
+Each exchange should
+
+- either modify the data or process it (e.g. send it to the server),
+-
+
+### Example Exchange
+
+> A simple custom exchange may log every request and every response to the console. This section show you how to create such an exchange.
+
+```swift
+
+```

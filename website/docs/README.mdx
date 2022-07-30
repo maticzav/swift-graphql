@@ -4,15 +4,68 @@ title: Getting Started
 
 ## Overview
 
-SwiftGraphQL is a GraphQL Client that ships with a type-safe query builder. It lets you perform queries, mutations and listen for subscriptions. The query builder guarantees that every query you _can_ create is valid and complies with the GraphQL spec.
+SwiftGraphQL is a GraphQL Client that ships with a type-safe query builder. It lets you perform queries, mutations and listen for subscriptions.
 
 The library is centered around three core principles:
 
 - 🚀 If your project compiles, your queries work.
-- 🦉 Use Swift in favour of GraphQL wherever possible.
-- 🌳 Your application model should be independent of your schema.
+- 🦅 Use Swift in favour of GraphQL wherever possible.
+- 🗝 We don't lock you into the framework.
 
-Here's how you can create a query:
+> You may choose to only use parts of the library (e.g. only the client but not the query builder, or only the websocket client), but you may also choose to use the entire library.
+
+### GraphQL Client
+
+SwiftGraphQLClient is heavily inspired by `urql` GraphQL client in the JavaScript community. It models the queries as streams of values and lets you create custom operation processors called exchanges.
+
+```swift
+let request = URLRequest(url: URL(string: "http://127.0.0.1:4000/graphql")!)
+let client = SwiftGraphQLClient.Client(request: request)
+
+let args = ExecutionArgs(
+    query: """
+    query HelloWorld {
+        hello
+    }
+    """,
+    variables: [:]
+)
+
+client.query(args)
+    .sink { completion in
+        print(completion)
+    } receiveValue: { result in
+        print(result)
+    }
+```
+
+### WebSocket Client
+
+GraphQLWebSocket is an implementation of GraphQL over WebSocket client conforming to the [GraphQL over WebSocket protocol](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md) specification widely supported by GraphQL servers.
+
+```swift
+let ws = GraphQLWebSocket(request: API_ENDPOINT)
+
+let args = ExecutionArgs(
+    query: """
+    subscription Counter {
+        count(from: 10, to: 1)
+    }
+    """,
+    variables: [:]
+)
+
+client.subscribe(args)
+    .sink { completion in
+        print(completion)
+    } receiveValue: { result in
+        print(result)
+    }
+```
+
+### Query Builder
+
+The query builder guarantees that every query you _can_ create is valid and complies with the GraphQL spec. Additionally, it lets you write queries as Swift functions and process the data during the selection process.
 
 ```swift
 import SwiftGraphQL
@@ -30,17 +83,34 @@ struct Human: Identifiable {
 
 // Create a selection.
 let human = Selection.Human<Human> {
+    // Query
     let id: String = try $0.id()
     let name: String = try $0.name()
+    let rawPlanet = try $0.planet()
 
-    // Represent the planet using different Swift type.
-    let rawPlanet: String? = try $0.planet()
+    // Decode
     guard let homePlanet = Planet(rawValue: rawPlanet) else {
-        throw "Invalid planet"
+        throw "Invalid planet value"
     }
-
     return Human(id: id, name: name, homePlanet: homePlanet)
 }
+
+let query = Selection.Query<[Human]> {
+    try $0.friends(selection: human.list)
+}
+
+// Perform a request.
+let url = URL(string: "http://localhost:8080/graphql")!
+let request = URLRequest(url: url).querying(query)
+
+let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    guard let result = try? data?.decode(query) else {
+        print("something went wrong")
+    }
+
+    print(result)
+}
+task.resume()
 ```
 
 ## What Now

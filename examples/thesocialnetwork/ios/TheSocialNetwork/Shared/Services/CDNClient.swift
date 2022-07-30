@@ -5,7 +5,6 @@ enum CDNClient {
     
     /// Uploads a given file to the CDN and returns the ID that may be used to identify it.
     static func upload(data: Data, extension ext: String, contentType: String) -> AnyPublisher<File, Error> {
-        
         NetworkClient.shared.mutate(SignedURL.getSignedURL(extension: ext, contentType: contentType))
             .flatMap { result -> AnyPublisher<File, Error> in
                 

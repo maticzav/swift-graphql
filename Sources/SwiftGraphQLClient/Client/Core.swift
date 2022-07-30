@@ -41,7 +41,7 @@ public class Client: GraphQLClient, ObservableObject {
     /// - parameter exchanges: List of exchanges that process each operation left-to-right.
     ///
     public init(
-        url request: URLRequest,
+        request: URLRequest,
         exchanges: [Exchange],
         config: ClientConfiguration = ClientConfiguration()
     ) {
@@ -73,17 +73,17 @@ public class Client: GraphQLClient, ObservableObject {
     /// Creates a new GraphQL Client using default exchanges, ready to go and be used.
     ///
     /// - NOTE: By default, it includes deduplication exchange, basic caching exchange and the fetch exchange.
-    convenience public init(url request: URLRequest, config: ClientConfiguration = ClientConfiguration()) {
+    convenience public init(request: URLRequest, config: ClientConfiguration = ClientConfiguration()) {
         let exchanges: [Exchange] = [
             DedupExchange(),
             CacheExchange(),
             FetchExchange()
         ]
         
-        self.init(url: request, exchanges: exchanges, config: config)
+        self.init(request: request, exchanges: exchanges, config: config)
     }
     
-    // MARK: - Methods
+    // MARK: - Core
     
     /// Log a debug message.
     public func log(message: String) {
@@ -211,5 +211,61 @@ public class Client: GraphQLClient, ObservableObject {
             .eraseToAnyPublisher()
     
         return result
+    }
+    
+    // MARK: - Querying
+    
+    /// Executes a query request with given execution parameters.
+    public func query(
+        _ args: ExecutionArgs,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) -> Source {
+        let operation = Operation(
+            id: UUID().uuidString,
+            kind: .query,
+            request: request ?? self.request,
+            policy: policy,
+            types: [],
+            args: args
+        )
+        
+        return self.execute(operation: operation)
+    }
+    
+    /// Executes a mutation request with given execution parameters.
+    public func mutate(
+        _ args: ExecutionArgs,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) -> Source {
+        let operation = Operation(
+            id: UUID().uuidString,
+            kind: .mutation,
+            request: request ?? self.request,
+            policy: policy,
+            types: [],
+            args: args
+        )
+        
+        return self.execute(operation: operation)
+    }
+    
+    /// Executes a subscription request with given execution parameters.
+    public func subscribe(
+        _ args: ExecutionArgs,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) -> Source {
+        let operation = Operation(
+            id: UUID().uuidString,
+            kind: .subscription,
+            request: request ?? self.request,
+            policy: policy,
+            types: [],
+            args: args
+        )
+        
+        return self.execute(operation: operation)
     }
 }

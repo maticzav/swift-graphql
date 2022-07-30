@@ -11,7 +11,7 @@ public class DedupExchange: Exchange {
     private var inFlightKeys: Set<String>
     
     public init() {
-        inFlightKeys = Set()
+        self.inFlightKeys = Set()
     }
     
     // MARK: - Methods

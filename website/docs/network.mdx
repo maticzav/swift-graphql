@@ -3,16 +3,6 @@ title: Networking
 sidebar_label: Networking
 ---
 
-SwiftGraphQL ships with a basic networking client that lets you perform network calls and caches the data.
+SwiftGraphQL ships with a fully-featured GraphQL client inspired by [`urql`](https://formidable.com/open-source/urql/). The client itself does not depend on the query-builder, but they work together nicely. We are going to showcase how you can use it with the query-builder, but it shouldn't be hard to use it without it.
 
-> For a detailed overview of all client functions examine exposed functions and their comments.
-
-```swift
-let client = GraphQLClient()
-
-client.query(Human.query)
-	.sink { value in
-
-	}
-	.replaceError(nil)
-```
+### Understanding the Client

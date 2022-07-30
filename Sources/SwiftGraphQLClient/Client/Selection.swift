@@ -83,7 +83,7 @@ extension GraphQLClient {
     public func query<T, TypeLock>(
         _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest? = nil,
+        request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLHttpOperation {
         self.executeQuery(for: selection, as: operationName, url: request, policy: policy)
@@ -95,7 +95,7 @@ extension GraphQLClient {
     public func mutate<T, TypeLock>(
         _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest? = nil,
+        request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLHttpOperation {
         self.executeMutation(for: selection, as: operationName, url: request, policy: policy)
@@ -107,7 +107,7 @@ extension GraphQLClient {
     public func subscribe<T, TypeLock>(
         to selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
-        url request: URLRequest? = nil,
+        request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLWebSocketOperation {
         self.executeSubscription(of: selection, as: operationName, url: request, policy: policy)
