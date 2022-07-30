@@ -28,7 +28,6 @@ Each exchange has to follow the `Exchange` protocol spec.
 ```swift
 typealias ExchangeIO = (AnyPublisher<Operation, Never>) -> AnyPublisher<OperationResult, Never>
 
-
 protocol Exchange {
     func register(
         client: GraphQLClient,
@@ -36,13 +35,66 @@ protocol Exchange {
         next: @escaping ExchangeIO
     ) -> AnyPublisher<OperationResult, Never>
 }
-
 ```
 
-### Example Exchange
+The only requirement of an exchange is that it implements `register` method. `register` method lets the exchange hook itself to the stream of operations and call generic methods on `client`. It should return the stream of operation results.
 
-> A simple custom exchange may log every request and every response to the console. This section show you how to create such an exchange.
+### Do Nothing Exchange
+
+The simplest exchange is an exchange that does nothing. It forwards the operations to the next exchange and returns the result stream of that exchange.
 
 ```swift
-
+struct DoNothingExchange: Exchange {
+    func register(
+        client: GraphQLClient,
+        operations: AnyPublisher<Operation, Never>,
+        next: @escaping ExchangeIO
+    ) -> AnyPublisher<OperationResult, Never> {
+        next(operations)
+    }
+}
 ```
+
+### Logging Exchange
+
+A slightly more complex example of an exchange is a logging exchange that logs all operations and results that go up and down the stream.
+
+```swift
+struct LoggingExchange: Exchange {
+    func register(
+        client: GraphQLClient,
+        operations: AnyPublisher<Operation, Never>,
+        next: @escaping ExchangeIO
+    ) -> AnyPublisher<OperationResult, Never> {
+        let downstream = operations
+            .print()
+            .eraseToAnyPublisher()
+
+        let upstream = next(downstream)
+            .print()
+            .eraseToAnyPublisher()
+
+        return upstream
+    }
+}
+```
+
+We could easily imagine also modifying the values instead of simply printing them.
+
+### Operation Processing Exchange
+
+Lastly, we are going to observe an example of a more complex exchange - an exchange that processes operations. Such an exchange should take care of
+
+1. creating new streams,
+1. merging their results into the result upstream, and
+1. dismantling each pipeline when the application stops listening to events or the server has stopped sending them.
+
+As a general guideline, your exchange should
+
+1. create a shared stream,
+1. filter the operations it's going to process and forward the rest downstream,
+1. create a new result stream for a new operation,
+1. emit events until the client sends a `teardown` event with the same operation ID,
+1. manage the "dangling" stream appropriately.
+
+You should check out `FetchExchange` and `WebSocketExchange` source codes to see an example.

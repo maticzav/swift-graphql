@@ -8,23 +8,35 @@ export function getRoutes(): IRoutes {
         $routes: [
           //
           'README',
+          'why',
           'installation',
           'network',
           'querying',
           'subscriptions',
           'guides',
-          ['www.google.com', 'Reference'],
           'advanced',
           'faq',
         ],
         _: {
           guides: {
             $name: 'Guides',
-            $routes: ['generation', 'structure', 'auth', 'files'],
+            $routes: [
+              //
+              'auth',
+              'uploads',
+              'filestructure',
+            ],
           },
           advanced: {
             $name: 'Advanced',
-            $routes: ['selection', 'cache', 'codecs', 'why', 'how'],
+            $routes: [
+              //
+              'scalars',
+              'cache',
+              'exchanges',
+              'how',
+              'selection',
+            ],
           },
         },
       },

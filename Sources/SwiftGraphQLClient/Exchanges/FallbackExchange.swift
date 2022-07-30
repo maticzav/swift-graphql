@@ -6,7 +6,11 @@ import GraphQL
 public struct FallbackExchange: Exchange {
     
     /// Tells whether the exchange should display error messages.
-    public var debug: Bool
+    private var debug: Bool
+
+    public init(debug: Bool = true) {
+        self.debug = debug
+    }
     
     // MARK: - Methods
     

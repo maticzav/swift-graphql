@@ -9,8 +9,7 @@ This guide shows how you possible ways to make an authenticated GraphQL requests
 
 ### Using AuthExchange
 
-SwiftGraphQLClient comes with a special exchange dedicated to authenticating your requests - `AuthExchange`. You provide a function that
-returns a token and it applies that token to a given header to make an authenticated request.
+SwiftGraphQLClient comes with a special exchange dedicated to authenticating your requests - `AuthExchange`. You provide a function that returns a token and it applies that token to a given header to make an authenticated request.
 
 It's important that `AuthExchange` comes before `FetchExchange`, `WebSocketExchange` or any other exchange that transmits the data.
 

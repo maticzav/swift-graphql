@@ -6,7 +6,18 @@ import GraphQL
 public struct DebugExchange: Exchange {
     
     /// Tells whether the client is in a development environment of not.
-    public var debug: Bool
+    private var debug: Bool
+
+    /// Optional custom logging function.
+    private var logger: ((String) -> Void)?
+
+    public init(
+        debug: Bool = true, 
+        logger: ((String) -> Void)? = nil
+    ) {
+        self.debug = debug
+        self.logger = logger
+    }
     
     public func register(
         client: GraphQLClient,
@@ -16,16 +27,19 @@ public struct DebugExchange: Exchange {
         guard debug else {
             return next(operations)
         }
+
+        // Function used to emit logs.
+        let log = self.logger ?? client.log
         
         let downstream = operations
             .onPush({ operation in
-                client.log(message: "[Debug Exchange]: Incoming Operation: \(operation)")
+                log("[debug exchange]: Incoming Operation: \(operation)")
             })
             .eraseToAnyPublisher()
         
         let upstream = next(downstream)
             .onPush { result in
-                client.log(message: "[Debug Exchange]: Completed Operation: \(result)")
+                log("[debug exchange]: Completed Operation: \(result)")
             }
             .eraseToAnyPublisher()
         

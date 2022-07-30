@@ -46,8 +46,10 @@ Read on to learn more about each.
 
 Document caching is a default, simple caching mechanism that greedily requests new data when performing mutations. By checking the return type of your mutation it reexecutes and invalidates all cached values that contain that type.
 
-<!-- Image? -->
+For example, if you have a running query that streams feed of `[Post]` then a mutation `createPost` that returns a new `Post` triggers re-execution of that feed query automatically.
+
+If your queries are deep and depend on many types, they are more likely to be automatically revalidated.
 
 # Normalized Caching
 
-<!-- TODO! -->
+> 🚧 A normalized caching exchange is a work in progress. You are welcome to contribute your knowledge, ideas and code on the repository.
