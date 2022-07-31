@@ -56,7 +56,6 @@ public class WebSocketExchange: Exchange {
     private func createSubscriptionSource(operation: Operation) -> AnyPublisher<OperationResult, Never> {
         let publisher: AnyPublisher<OperationResult, Never> = self.client
             .subscribe(operation.args)
-            .print("[css]")
             .map { exec -> OperationResult in
                 var op = OperationResult(
                     operation: operation,
@@ -91,11 +90,9 @@ public class WebSocketExchange: Exchange {
         // Handled operations.
         let socketstream = shared
             .filter { self.shouldHandle(operation: $0) }
-            .print("[socketexchange]")
             .flatMap { operation -> AnyPublisher<OperationResult, Never> in
                 let torndown = shared
                     .map { $0.kind == .teardown && $0.id == operation.id }
-                    .print("[teardown]")
                     .eraseToAnyPublisher()
                 
                 

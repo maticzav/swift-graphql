@@ -29,12 +29,13 @@ extension URLRequest {
     public mutating func query<T, TypeLock>(
         _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
+        extensions: [String: AnyCodable]? = nil,
         encoder: JSONEncoder = JSONEncoder()
     ) where TypeLock: GraphQLOperation {
         self.httpMethod = "POST"
         self.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let payload = selection.encode(operationName: operationName)
+        let payload = selection.encode(operationName: operationName, extensions: extensions)
         self.httpBody = try! encoder.encode(payload)
     }
     
@@ -45,10 +46,11 @@ extension URLRequest {
     public func querying<T, TypeLock>(
         _ selection: Selection<T, TypeLock>,
         as operationName: String? = nil,
+        extensions: [String: AnyCodable]? = nil,
         encoder: JSONEncoder = JSONEncoder()
     ) -> URLRequest where TypeLock: GraphQLOperation {
         var copy = self
-        copy.query(selection, as: operationName, encoder: encoder)
+        copy.query(selection, as: operationName, extensions: extensions, encoder: encoder)
         return copy
     }
 }

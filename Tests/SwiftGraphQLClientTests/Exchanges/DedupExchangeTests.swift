@@ -45,9 +45,10 @@ final class DedupExchangeTests: XCTestCase {
             client: client,
             operations: operations.eraseToAnyPublisher()
         ) { ops in
-            let downstream = ops.onPush { operation in
-                trace.append("requested: \(operation.id) (\(operation.kind.rawValue))")
-            }
+            let downstream = ops
+                .handleEvents(receiveOutput: { operation in
+                    trace.append("requested: \(operation.id) (\(operation.kind.rawValue))")
+                })
                 .compactMap({ op in
                     SwiftGraphQLClient.OperationResult?.none
                 })

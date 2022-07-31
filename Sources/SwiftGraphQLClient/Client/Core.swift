@@ -116,7 +116,7 @@ public class Client: GraphQLClient, ObservableObject {
         
         let source: Source
         if let existingSource = active[operation.id] {
-            source = existingSource
+            source = existingSource.share().eraseToAnyPublisher()
         } else {
             source = createResultSource(operation: operation)
             active[operation.id] = source
@@ -173,9 +173,7 @@ public class Client: GraphQLClient, ObservableObject {
             .eraseToAnyPublisher()
         
         let result: AnyPublisher<OperationResult, Never> = source
-            .print("[result before]")
             .takeUntil(torndown)
-            .print("[result after]")
             .map { result -> AnyPublisher<OperationResult, Never> in
                 self.config.logger.debug("Processing result of operation \(operation.id)")
                 

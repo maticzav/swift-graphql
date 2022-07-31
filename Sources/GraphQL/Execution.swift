@@ -1,25 +1,32 @@
 import Foundation
 
 /// Parameters sent to the GraphQL server for evaluation.
+///
+/// ExecutionArgs contains fields in the [GraphQL over HTTP spec](https://github.com/graphql/graphql-over-http/blob/main/spec/GraphQLOverHTTP.md#request-parameters) and [GraphQL over WebSocket](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#subscribe) spec.
 public struct ExecutionArgs: Codable, Equatable {
     
-    /// Stringified GraphQL selection.
+    /// A Document containing GraphQL Operations and Fragments to execute.
     public var query: String
     
-    /// Variables forwarded to the client in the JSON body.
-    public var variables: [String: AnyCodable]
-    
-    /// Name that should be used to identify the operation.
+    /// The name of the Operation in the Document to execute.
     public var operationName: String?
+    
+    /// Values for any variables defined by the operation.
+    public var variables: [String: AnyCodable]?
+    
+    /// Reserved entry for implementors to extend the protocol however they see fit.
+    public var extensions: [String: AnyCodable]?
     
     public init(
         query: String,
-        variables: [String: AnyCodable],
-        operationName: String? = nil
+        operationName: String? = nil,
+        variables: [String: AnyCodable]? = nil,
+        extensions: [String: AnyCodable]? = nil
     ) {
         self.query = query
-        self.variables = variables
         self.operationName = operationName
+        self.variables = variables
+        self.extensions = extensions
     }
 }
 

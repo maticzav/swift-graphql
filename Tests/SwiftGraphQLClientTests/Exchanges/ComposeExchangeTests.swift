@@ -19,15 +19,15 @@ final class ComposeExchangeTests: XCTestCase {
             next: @escaping ExchangeIO
         ) -> AnyPublisher<OperationResult, Never> {
             let downstream = operations
-                .onPush { _ in
+                .handleEvents(receiveOutput: { _ in
                     self.trace("going down: \(name)")
-                }
+                })
                 .eraseToAnyPublisher()
             
             let upstream = next(downstream)
-                .onPush { _ in
+                .handleEvents(receiveOutput: { _ in
                     self.trace("going up: \(name)")
-                }
+                })
                 .eraseToAnyPublisher()
             
             return upstream

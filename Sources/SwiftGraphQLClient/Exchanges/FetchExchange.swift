@@ -2,7 +2,10 @@ import Combine
 import Foundation
 import GraphQL
 
-/// Protocol that outlines methods that are required by fetch exchange to operate as expected.
+/// Protocol that outlines methods that are required by FetchExchange to operate as expected.
+///
+/// To use a custom HTTP client to send query and mutation opeartion requests extend your client
+/// instance to conform to this protocol and pass it in as a `session` parameter to the exchange.
 public protocol FetchSession {
     
     /// Returns a publisher that wraps a URL session data task for a given URL request.
@@ -11,26 +14,12 @@ public protocol FetchSession {
     /// - Parameter request: The URL request for which to create a data task.
     /// - Returns: A publisher that wraps a data task for the URL request.
     func dataTaskPublisher(for: URLRequest, with: Data) -> AnyPublisher<(data: Data, response: URLResponse), URLError>
-    
 }
 
-extension URLSession: FetchSession {
-    public func dataTaskPublisher(
-        for request: URLRequest,
-        with body: Data
-    ) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
-        var gqlrequest = request
-        
-        gqlrequest.httpMethod = "POST"
-        gqlrequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        gqlrequest.httpBody = body
-        
-        let publisher: DataTaskPublisher = self.dataTaskPublisher(for: gqlrequest)
-        return publisher.eraseToAnyPublisher()
-    }
-}
-
-/// Performs query and mutation operations on the network.
+/// Exchange that performs query and mutation operations following the [GraphQL over HTTP](https://github.com/graphql/graphql-over-http/blob/main/spec/GraphQLOverHTTP.md) spec.
+///
+/// FetchExchange should be put at the end of the exchange pipeline. It filters out query and mutation operations
+/// that it's processing and doesn't forward them to the next exchange in the pipeline chain.
 public class FetchExchange: Exchange {
     
     /// Structure used to connect to the server.
@@ -121,4 +110,20 @@ public class FetchExchange: Exchange {
         return fetchstream.merge(with: upstream).eraseToAnyPublisher()
     }
 
+}
+
+extension URLSession: FetchSession {
+    public func dataTaskPublisher(
+        for request: URLRequest,
+        with body: Data
+    ) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
+        var gqlrequest = request
+        
+        gqlrequest.httpMethod = "POST"
+        gqlrequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        gqlrequest.httpBody = body
+        
+        let publisher: DataTaskPublisher = self.dataTaskPublisher(for: gqlrequest)
+        return publisher.eraseToAnyPublisher()
+    }
 }

@@ -12,11 +12,6 @@ extension Publisher {
     func onEnd(_ handler: @escaping () -> Void) -> Publishers.HandleEvents<Self> {
         self.handleEvents(receiveCompletion: { _ in handler() }, receiveCancel: handler)
     }
-    
-    /// An operator that triggers the handler everytime the publisher sends a new event.
-    func onPush(_ handler: @escaping (Output) -> Void) -> Publishers.HandleEvents<Self> {
-        self.handleEvents(receiveOutput: handler)
-    }
 }
 
 // MARK: - TakeUntil Publisher

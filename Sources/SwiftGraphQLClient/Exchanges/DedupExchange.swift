@@ -4,7 +4,10 @@ import Combine
 import Foundation
 import GraphQL
 
-/// Exchange that prevents multiple executions of the same operation.
+/// Exchange that prevents multiple executions of the same operation from running in parallel.
+///
+/// It wouldn't make sense to send the same operation / request twice in parallel (i.e. executing the second one
+/// while waiting for the result of the first one).
 public class DedupExchange: Exchange {
     
     /// Operation IDs that are currently awaiting responses.
@@ -32,6 +35,9 @@ public class DedupExchange: Exchange {
                     return true
                 }
                 
+                // It's crucial that we figure out whether the opearation is in-flight
+                // before modifying the store because otherwise every operation would
+                // always be in-flight.
                 let isInFlight = self.inFlightKeys.contains(operation.id)
                 self.inFlightKeys.insert(operation.id)
                 
@@ -40,9 +46,9 @@ public class DedupExchange: Exchange {
             .eraseToAnyPublisher()
         
         let upstream = next(downstream)
-            .onPush { result in
+            .handleEvents(receiveOutput: { result in
                 self.inFlightKeys.remove(result.operation.id)
-            }
+            })
             .eraseToAnyPublisher()
         
         return upstream

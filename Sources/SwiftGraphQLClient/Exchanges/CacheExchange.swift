@@ -87,7 +87,7 @@ public class CacheExchange: Exchange {
         let forwardedOps: AnyPublisher<OperationResult, Never> = next(downstream)
         
         let upstream = forwardedOps
-            .onPush { result in
+            .handleEvents(receiveOutput: { result in
                 // Invalidate the cache given a mutation's response.
                 if result.operation.kind == .mutation {
                     var pendingOperations = Set<String>()
@@ -127,7 +127,7 @@ public class CacheExchange: Exchange {
                         self.operationCache[typename]!.insert(result.operation.id)
                     }
                 }
-            }
+            })
             .eraseToAnyPublisher()
         
         

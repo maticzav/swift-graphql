@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import GraphQL
 
-/// Exchange that logs operations going down- and results going upstream.
+/// Exchange that logs operations going down- and results going up-stream.
 public struct DebugExchange: Exchange {
     
     /// Tells whether the client is in a development environment of not.
@@ -19,6 +19,8 @@ public struct DebugExchange: Exchange {
         self.logger = logger
     }
     
+    // MARK: - Methods
+    
     public func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,
@@ -32,15 +34,15 @@ public struct DebugExchange: Exchange {
         let log = self.logger ?? client.log
         
         let downstream = operations
-            .onPush({ operation in
+            .handleEvents(receiveOutput: { operation in
                 log("[debug exchange]: Incoming Operation: \(operation)")
             })
             .eraseToAnyPublisher()
         
         let upstream = next(downstream)
-            .onPush { result in
+            .handleEvents(receiveOutput: { result in
                 log("[debug exchange]: Completed Operation: \(result)")
-            }
+            })
             .eraseToAnyPublisher()
         
         return upstream

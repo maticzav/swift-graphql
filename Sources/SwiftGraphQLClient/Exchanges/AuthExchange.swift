@@ -4,7 +4,7 @@ import Combine
 import Foundation
 import GraphQL
 
-/// Exchange that lets you add authorization to your opertions.
+/// Exchange that lets you add authorization header to your operations.
 ///
 /// - NOTE: `getToken` function should return the whole header value including the token.
 public class AuthExchange: Exchange {
