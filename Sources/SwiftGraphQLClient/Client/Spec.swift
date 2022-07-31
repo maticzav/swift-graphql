@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Logging
 
 /// Specifies the minimum requirements of a client to support the execution of queries
 /// composed using SwiftGraphQL.
@@ -8,8 +9,8 @@ public protocol GraphQLClient {
     /// Request to use to perform the operation.
     var request: URLRequest { get }
     
-    /// Log a debug message.
-    func log(message: String) -> Void
+    /// A shared logger instance that may be used to emit information about the client state.
+    var logger: Logger { get }
     
     /// Executes an operation by sending it down the exchange pipeline.
     ///

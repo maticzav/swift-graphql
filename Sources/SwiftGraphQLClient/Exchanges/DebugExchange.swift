@@ -8,15 +8,8 @@ public struct DebugExchange: Exchange {
     /// Tells whether the client is in a development environment of not.
     private var debug: Bool
 
-    /// Optional custom logging function.
-    private var logger: ((String) -> Void)?
-
-    public init(
-        debug: Bool = true, 
-        logger: ((String) -> Void)? = nil
-    ) {
+    public init(debug: Bool = true) {
         self.debug = debug
-        self.logger = logger
     }
     
     // MARK: - Methods
@@ -29,19 +22,16 @@ public struct DebugExchange: Exchange {
         guard debug else {
             return next(operations)
         }
-
-        // Function used to emit logs.
-        let log = self.logger ?? client.log
         
         let downstream = operations
             .handleEvents(receiveOutput: { operation in
-                log("[debug exchange]: Incoming Operation: \(operation)")
+                client.logger.debug("[debug exchange]: Incoming Operation: \(operation)")
             })
             .eraseToAnyPublisher()
         
         let upstream = next(downstream)
             .handleEvents(receiveOutput: { result in
-                log("[debug exchange]: Completed Operation: \(result)")
+                client.logger.debug("[debug exchange]: Completed Operation: \(result)")
             })
             .eraseToAnyPublisher()
         

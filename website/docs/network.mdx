@@ -62,10 +62,10 @@ CacheExchange()
 
 #### DebugExchange
 
-Lets you log downstream and upstream events to a custom or default logger function.
+Lets you log downstream and upstream events to a client logger function. The events are logged as `debug` level logs.
 
 ```swift
-DebugExchange(logger: { message in print(message) })
+DebugExchange()
 ```
 
 #### DedupExchange

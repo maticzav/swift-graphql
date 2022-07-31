@@ -95,7 +95,6 @@ public class WebSocketExchange: Exchange {
                     .map { $0.kind == .teardown && $0.id == operation.id }
                     .eraseToAnyPublisher()
                 
-                
                 let pipe = PassthroughSubject<OperationResult, Never>()
                 
                 self.sources[operation.id] = self

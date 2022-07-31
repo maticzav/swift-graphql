@@ -53,7 +53,7 @@ final class PublishersExtensionsTests: XCTestCase {
         
         XCTAssertEqual(i, 1)
         XCTAssertEqual(received, [42])
-    } 
+    }
     
     func testTakeUntil() throws {
         var received = [Int]()

@@ -27,7 +27,7 @@ public struct FallbackExchange: Exchange {
                         Check whether you've added an exchange responsible for these operations.
                         """
                     
-                    client.log(message: message)
+                    client.logger.debug("\(message)")
                 }
                 
                 // Filter out all unprocessed operations from the stream.

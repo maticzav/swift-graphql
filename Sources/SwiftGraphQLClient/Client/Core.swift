@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import GraphQL
+import Logging
 
 /// A built-in implementation of the GraphQLClient specification that may be used with the library.
 ///
@@ -45,29 +46,33 @@ public class Client: GraphQLClient, ObservableObject {
         exchanges: [Exchange],
         config: ClientConfiguration = ClientConfiguration()
     ) {
+        // A publisher that never emits anything.
+        let noop = Empty<OperationResult, Never>().eraseToAnyPublisher()
+        
         self.request = request
         self.config = config
-        
-        let exchange = ComposeExchange(exchanges: exchanges)
-        let operations = operations.share().eraseToAnyPublisher()
-        
-        let noop = Empty<OperationResult, Never>().eraseToAnyPublisher()
         self.results = noop
-        
         self.active = [:]
         
-        self.results = exchange.register(client: self, operations: operations, next: { _ in noop })
+        let operations = operations.share().eraseToAnyPublisher()
+        
+        // We think of all exchanges as a single flattened exchange - once
+        //  we have sent a request through the pipeline there's nothing left to do
+        //  and we pass it in the stream of all operations from the client.
+        let exchange = ComposeExchange(exchanges: exchanges)
+        self.results = exchange
+            .register(client: self, operations: operations, next: { _ in noop })
             .share()
             .eraseToAnyPublisher()
         
         // We start the chain to make sure the data is always flowing through the pipeline.
-        // This is important to make sure all exchanges receive information when necessary
-        // even if there are no active subscribers outside the client.
+        //  This is important to make sure all exchanges are fully initialised
+        //  even if there are no active subscribers yet.
         self.results
             .sink { _ in }
             .store(in: &self.cancellables)
         
-        self.config.logger.info("Created a GraphQL Client!")
+        self.config.logger.info("GraphQL Client ready!")
     }
     
     /// Creates a new GraphQL Client using default exchanges, ready to go and be used.
@@ -86,8 +91,8 @@ public class Client: GraphQLClient, ObservableObject {
     // MARK: - Core
     
     /// Log a debug message.
-    public func log(message: String) {
-        self.config.logger.debug("\(message)")
+    public var logger: Logger {
+        self.config.logger
     }
     
     /// Reexecutes an operation by sending it down the exchange pipeline.
@@ -116,7 +121,7 @@ public class Client: GraphQLClient, ObservableObject {
         
         let source: Source
         if let existingSource = active[operation.id] {
-            source = existingSource.share().eraseToAnyPublisher()
+            source = existingSource
         } else {
             source = createResultSource(operation: operation)
             active[operation.id] = source
@@ -210,6 +215,9 @@ public class Client: GraphQLClient, ObservableObject {
                 
                 self.config.logger.debug("Operation \(operation.id) has been torn down.")
             }
+            // A single source may be reused multiple times for operation
+            // with the same identifier but different subscriber.
+            .share()
             .eraseToAnyPublisher()
     
         return result
