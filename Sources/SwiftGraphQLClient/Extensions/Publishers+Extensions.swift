@@ -3,11 +3,6 @@ import Foundation
 
 extension Publisher {
     
-    /// An operator that triggers the handler when the publisher sends the subscription down to the subscriber.
-    func onStart(_ handler: @escaping () -> Void) -> Publishers.HandleEvents<Self> {
-        self.handleEvents(receiveSubscription: { _ in handler() })
-    }
-    
     /// An operator that triggers the handler when the publisher sends the completion event down to the subscriber.
     func onEnd(_ handler: @escaping () -> Void) -> Publishers.HandleEvents<Self> {
         self.handleEvents(receiveCompletion: { _ in handler() }, receiveCancel: handler)

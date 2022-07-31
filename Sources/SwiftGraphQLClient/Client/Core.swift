@@ -122,7 +122,7 @@ public class Client: GraphQLClient, ObservableObject {
             active[operation.id] = source
         }
         
-        // We chain the `onStart` operator outside of the `createResultSource`
+        // We chain the `receiveOperation` event outside of the `createResultSource`
         // to send a new operation down the exchange chain even if the
         // source already exists.
         //
@@ -139,7 +139,9 @@ public class Client: GraphQLClient, ObservableObject {
         //
         // To sum up both cases, client shouldn't handle processing of the operations.
         return source
-            .onStart { self.operations.send(operation) }
+            .handleEvents(receiveSubscription: { _ in
+                self.operations.send(operation)
+            })
             .eraseToAnyPublisher()
     }
     
@@ -156,7 +158,9 @@ public class Client: GraphQLClient, ObservableObject {
         // (i.e. the result of the mutation).
         if operation.kind == .mutation {
             return source
-                .onStart { self.operations.send(operation) }
+                .handleEvents(receiveSubscription: { _ in
+                    self.operations.send(operation)
+                })
                 .first()
                 .eraseToAnyPublisher()
         }
