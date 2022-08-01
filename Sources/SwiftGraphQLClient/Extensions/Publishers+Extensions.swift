@@ -14,30 +14,9 @@ extension Publisher {
 // MARK: - TakeUntil Publisher
 
 extension Publisher {
-    
-    /// Takes upstream values for as long as predicate isn't met. Once the predicate fulfills, it sends a completion event down the stream.
-    func takeUntilTrue(_ predicate: @escaping (Output) -> Bool) -> Publishers.TakenUntilPublisher<Self> {
-        Publishers.TakenUntilPublisher<Self>(upstream: self, predicate: predicate)
-    }
-}
-
-extension Publisher {
-    /// Takes upstream values until the publisher emits a true value.
-    func takeUntil(_ predicate: AnyPublisher<Bool, Never>) -> AnyPublisher<Output, Failure> {
-        // We merge the publisher that immediately resolves with the predicate to make
-        // sure values are emitted as soon as upstream starts sending values without waiting
-        // for the predicate.
-        let pp: AnyPublisher<Bool, Failure> = predicate
-            .merge(with: Just(false))
-            .setFailureType(to: Failure.self)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-        
-        let upstream = self.combineLatest(pp)
-            .takeUntilTrue({ value, p in p })
-            .map { value, p in value }
-            
-        return upstream.eraseToAnyPublisher()
+    /// Takes upstream values until predicates a value.
+    func takeUntil<Predicate: Publisher>(_ predicate: Predicate) -> Publishers.TakenUntilPublisher<Self, Predicate> {
+        Publishers.TakenUntilPublisher<Self, Predicate>(upstream: self, predicate: predicate)
     }
 }
 
@@ -45,22 +24,19 @@ extension Publishers {
     
     /// A subscriber that takes upstream values for as long as predicate isn't met.
     /// Once the predicate fulfills, it sends a completion event down the stream.
-    struct TakenUntilPublisher<Upstream: Publisher>: Publisher {
+    struct TakenUntilPublisher<Upstream: Publisher, Predicate: Publisher>: Publisher {
         typealias Output = Upstream.Output
         typealias Failure = Upstream.Failure
         
         /// A function that tells whether the condition is met.
-        private var predicate: (Upstream.Output) -> Bool
+        private var predicate: Predicate
         
         /// Publisher emitting the values.
         private var upstream: Upstream
         
         // MARK: - Initializer
         
-        init(
-            upstream: Upstream,
-            predicate: @escaping (Upstream.Output) -> Bool
-        ) {
+        init(upstream: Upstream, predicate: Predicate) {
             self.upstream = upstream
             self.predicate = predicate
         }
@@ -84,27 +60,31 @@ extension Publishers {
 }
 
 extension Subscriptions {
-    final class TakeUntilSubscription<Downstream: Subscriber>: Subscription, Subscriber {
+    
+    /// A subscription that emits upstream values downstream until predicate emits a value.
+    final class TakeUntilSubscription<Downstream: Subscriber, Predicate: Publisher>: Subscription, Subscriber {
         
         typealias Input = Downstream.Input
         typealias Failure = Downstream.Failure
         
-        /// Subscription that yields values we use to stream down.
+        /// Subscription that yields values streamed to the subscriber.
         private var subscription: Subscription?
         
         /// The subscriber we are forwarding values to.
         private var subscriber: Downstream
         
         /// Function telling whether the sought condition has been met.
-        private var predicate: (Downstream.Input) -> Bool
+        private var predicate: Predicate
         
         /// Tells whether the predicate has been met.
         private var closed: Bool = false
         
+        private var cancellable: AnyCancellable?
+        
         /// Tells how much events downstream has already requested from the upstream.
         private var demand: Subscribers.Demand
         
-        init(subscriber: Downstream, predicate: @escaping (Downstream.Input) -> Bool) {
+        init(subscriber: Downstream, predicate: Predicate) {
             self.subscriber = subscriber
             self.predicate = predicate
             self.demand = .none
@@ -112,34 +92,34 @@ extension Subscriptions {
         
         // MARK: - Subscriber
         
+        /// Tells the subscriber that it has successfully subscribed to the publisher and may request items.
         func receive(subscription: Subscription) {
             self.subscription = subscription
             
+            self.cancellable = self.predicate
+                .sink(receiveCompletion: { _ in
+                    
+                }, receiveValue: { _ in
+                    // We send the completion event downstream and cancel the
+                    // upstream subscription once we've received any event.
+                    self.subscriber.receive(completion: .finished)
+                    self.subscription?.cancel()
+                    self.subscription = nil
+                    self.cancellable = nil
+                })
+            
+            // Request the accumulated demand and drain it.
             if self.demand > 0 {
                 self.subscription?.request(self.demand)
             }
-            
             if self.demand < .unlimited {
                 self.demand = .none
             }
         }
         
         func receive(_ input: Downstream.Input) -> Subscribers.Demand {
-            let result = self.predicate(input)
-            
-            // NOTE: Predicate may only evaluate once we have received some values from
-            // the publisher (i.e. from the subscription). If there's no subscription,
-            // the pipeline has been torn down and we don't have to worry about additional
-            // events.
-            guard !result else {
-                if !closed {
-                    self.subscriber.receive(completion: .finished)
-                    self.closed = true
-                }
-                
-                return .none
-            }
-            return self.subscriber.receive(input)
+            // We simply forward all the values further down the chain.
+            self.subscriber.receive(input)
         }
         
         func receive(completion: Subscribers.Completion<Downstream.Failure>) {
@@ -161,6 +141,7 @@ extension Subscriptions {
         func cancel() {
             self.subscription?.cancel()
             self.subscription = nil
+            self.cancellable = nil
         }
     }
 }

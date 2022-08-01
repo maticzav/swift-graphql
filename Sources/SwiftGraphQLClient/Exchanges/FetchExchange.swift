@@ -61,14 +61,17 @@ public class FetchExchange: Exchange {
         let upstream = next(downstream)
         
         let fetchstream = shared
-            .filter({ operation in
-                operation.kind == .query || operation.kind == .mutation
-            })
+            .filter({ $0.kind == .query || $0.kind == .mutation })
             .flatMap({ operation -> AnyPublisher<OperationResult, Never> in
                 let body = try! self.encoder.encode(operation.args)
                 
+                let torndown = shared
+                    .filter { $0.kind == .teardown && $0.id == operation.id }
+                    .eraseToAnyPublisher()
+                
                 let publisher = self.session
                     .dataTaskPublisher(for: operation.request, with: body)
+                    .takeUntil(torndown)
                     .map { (data, response) -> OperationResult in
                         do {
                             let result = try self.decoder.decode(ExecutionResult.self, from: data)

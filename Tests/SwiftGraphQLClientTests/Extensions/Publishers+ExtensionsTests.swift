@@ -55,33 +55,85 @@ final class PublishersExtensionsTests: XCTestCase {
         XCTAssertEqual(received, [42])
     }
     
-    func testTakeUntil() throws {
+    // MARK: - TakeUntil tests
+    
+    func testTakeUntilEmitsValuesUntilTermination() throws {
+        let expectation = expectation(description: "terminated")
         var received = [Int]()
-        var completed = false
         
-        let terminator = PassthroughSubject<Bool, Never>()
+        let terminator = PassthroughSubject<(), Never>()
         let publisher = PassthroughSubject<Int, Never>()
         
         publisher
             .takeUntil(terminator.eraseToAnyPublisher())
             .sink(receiveCompletion: { completion in
-                completed = completion == .finished
+                expectation.fulfill()
             }, receiveValue: { value in
                 received.append(value)
             })
             .store(in: &self.cancellables)
         
         publisher.send(1)
-        terminator.send(false)
         publisher.send(2)
-        terminator.send(true)
-        
-        XCTAssertTrue(completed)
-        
+        terminator.send(())
         publisher.send(3)
         
+        waitForExpectations(timeout: 1)
+        
         XCTAssertEqual(received, [1, 2])
-        XCTAssertTrue(completed)
     }
     
+    func testCancelsUpstreamAfterTermination() throws {
+        // NOTE: Expectation only fulfills if the upstream has been
+        //       cancelled after termination.
+        let expectation = expectation(description: "terminated")
+        var received = [Int]()
+        
+        let terminator = PassthroughSubject<(), Never>()
+        let publisher = PassthroughSubject<Int, Never>()
+        
+        publisher
+            .handleEvents(receiveCancel: {
+                expectation.fulfill()
+            })
+            .takeUntil(terminator.eraseToAnyPublisher())
+            .sink(receiveValue: { value in
+                received.append(value)
+            })
+            .store(in: &self.cancellables)
+        
+        publisher.send(1)
+        terminator.send(())
+        publisher.send(2)
+        
+        waitForExpectations(timeout: 1)
+        
+        XCTAssertEqual(received, [1])
+    }
+    
+    func testForwardsFinishedEventToTheSubscriber() throws {
+        // NOTE: This expectation only fulfills if subscriber
+        //       receive completion event.
+        let expectation = expectation(description: "finished")
+        var received: [Int] = []
+        
+        let terminator = PassthroughSubject<(), Never>()
+        let publisher = PassthroughSubject<Int, Never>()
+        
+        publisher
+            .takeUntil(terminator.eraseToAnyPublisher())
+            .sink(receiveCompletion: { completion in
+                expectation.fulfill()
+            }, receiveValue: { value in
+                received.append(value)
+            })
+            .store(in: &self.cancellables)
+        
+        publisher.send(1)
+        publisher.send(completion: .finished)
+        
+        waitForExpectations(timeout: 1)
+        
+        XCTAssertEqual(received, [1])
+    }
 }

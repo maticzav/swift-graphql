@@ -92,28 +92,18 @@ public class WebSocketExchange: Exchange {
             .filter { self.shouldHandle(operation: $0) }
             .flatMap { operation -> AnyPublisher<OperationResult, Never> in
                 let torndown = shared
-                    .map { $0.kind == .teardown && $0.id == operation.id }
+                    .filter { $0.kind == .teardown && $0.id == operation.id }
                     .eraseToAnyPublisher()
                 
-                let pipe = PassthroughSubject<OperationResult, Never>()
-                
-                self.sources[operation.id] = self
-                    .createSubscriptionSource(operation: operation)
-                    .sink(receiveCompletion: { completion in
-                        pipe.send(completion: .finished)
-                    }, receiveValue: { result in
-                        pipe.send(result)
-                    })
-                
-                return pipe
-                    .takeUntil(torndown)
+                return self.createSubscriptionSource(operation: operation)
                     .onEnd {
+                        
                         // Once the subscription ends (either because user stopped it
                         // or because the server ended the transmission), we inform
                         // the client-pipeline that it should be dismantled.
-                        self.sources.removeValue(forKey: operation.id)
                         client.reexecute(operation: operation.with(kind: .teardown))
                     }
+                    .takeUntil(torndown)
                     .eraseToAnyPublisher()
             }
             
