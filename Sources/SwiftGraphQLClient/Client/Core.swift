@@ -175,14 +175,22 @@ public class Client: GraphQLClient, ObservableObject {
         // happens, we emit a completion event.
         //
         // NOTE: We need the torndown stream because queries and subscriptions
-        //       return a stream that keeps updating (e.g. stale result)
-        //       and needs to be manually dismantled.
+        //  return a stream that keeps updating (e.g. stale result)
+        //  and needs to be manually dismantled.
         let torndown = self.operations
-            .map { $0.kind == .teardown && $0.id == operation.id }
+            .filter { $0.kind == .teardown && $0.id == operation.id }
             .eraseToAnyPublisher()
         
         let result: AnyPublisher<OperationResult, Never> = source
-            .takeUntil(torndown)
+            .handleEvents(receiveCompletion: { _ in
+                // Once the publisher stops the stream (i.e. the stream ended because we
+                // received all relevant results), we dismantle the pipeline by sending
+                // the teardown event to all exchanges in the chain.
+                self.config.logger.debug("Operation \(operation.id) source has completed.")
+                
+                self.active.removeValue(forKey: operation.id)
+                self.operations.send(operation.with(kind: .teardown))
+            })
             .map { result -> AnyPublisher<OperationResult, Never> in
                 self.config.logger.debug("Processing result of operation \(operation.id)")
                 
@@ -206,17 +214,22 @@ public class Client: GraphQLClient, ObservableObject {
                 return Just(result).merge(with: staleResult).eraseToAnyPublisher()
             }
             .switchToLatest()
-            .onEnd {
-                // Once the publisher stops the stream (i.e. the stream ended because we
-                // received all relevant results), we dismantle the pipeline by sending
-                // the teardown event to all exchanges in the chain.
+            // NOTE: We use `takeUntil` teardown operator here to emit finished event
+            // if the source has finished sending events and requested a teardown.
+            // This is necessary to correctly propagate down the completion since the
+            // finished event sent by the publisher may have been lost in the pipeline.
+            .takeUntil(torndown)
+            .handleEvents(receiveCancel: {
+                // Once the source has been canceled because the application is no longer interested
+                // in results, we start the teardown process.
+                self.config.logger.debug("Operation \(operation.id) source has been canceled.")
+                
                 self.active.removeValue(forKey: operation.id)
                 self.operations.send(operation.with(kind: .teardown))
-                
-                self.config.logger.debug("Operation \(operation.id) has been torn down.")
-            }
-            // A single source may be reused multiple times for operation
-            // with the same identifier but different subscriber.
+            })
+            // NOTE: We create a sharable source because a single source may be
+            // reused multiple times for operation with the same identifier
+            // but a different subscriber.
             .share()
             .eraseToAnyPublisher()
     

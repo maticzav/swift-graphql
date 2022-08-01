@@ -5,56 +5,7 @@ import XCTest
 final class PublishersExtensionsTests: XCTestCase {
     
     var cancellables = Set<AnyCancellable>()
-    
-    func testOnEndTriggeredWhenPublisherEnds() throws {
-        var i = 0
-        var received = [Int]()
-        
-        let subject = PassthroughSubject<Int, Never>()
-        let _ = subject
-            .eraseToAnyPublisher()
-            .onEnd {
-                i += 1
-            }
-            .sink { val in
-                received.append(val)
-            }
-            .store(in: &self.cancellables)
-        
-        subject.send(42)
-        
-        XCTAssertEqual(i, 0)
-        
-        subject.send(completion: .finished)
-        
-        XCTAssertEqual(i, 1)
-        XCTAssertEqual(received, [42])
-    }
-    
-    func testOnEndTriggeredWhenSubscriberUnsubscribes() throws {
-        var i = 0
-        var received = [Int]()
-        
-        let subject = PassthroughSubject<Int, Never>()
-        let cancellable = subject
-            .eraseToAnyPublisher()
-            .onEnd {
-                i += 1
-            }
-            .sink { val in
-                received.append(val)
-            }
-        
-        subject.send(42)
-        
-        XCTAssertEqual(i, 0)
-        
-        cancellable.cancel()
-        
-        XCTAssertEqual(i, 1)
-        XCTAssertEqual(received, [42])
-    }
-    
+
     // MARK: - TakeUntil tests
     
     func testTakeUntilEmitsValuesUntilTermination() throws {
@@ -83,7 +34,7 @@ final class PublishersExtensionsTests: XCTestCase {
         XCTAssertEqual(received, [1, 2])
     }
     
-    func testCancelsUpstreamAfterTermination() throws {
+    func testTakeUntilCancelsUpstreamAfterTermination() throws {
         // NOTE: Expectation only fulfills if the upstream has been
         //       cancelled after termination.
         let expectation = expectation(description: "terminated")
@@ -111,7 +62,7 @@ final class PublishersExtensionsTests: XCTestCase {
         XCTAssertEqual(received, [1])
     }
     
-    func testForwardsFinishedEventToTheSubscriber() throws {
+    func testTakeUntilForwardsFinishedEventToTheSubscriber() throws {
         // NOTE: This expectation only fulfills if subscriber
         //       receive completion event.
         let expectation = expectation(description: "finished")
@@ -131,6 +82,35 @@ final class PublishersExtensionsTests: XCTestCase {
         
         publisher.send(1)
         publisher.send(completion: .finished)
+        
+        waitForExpectations(timeout: 1)
+        
+        XCTAssertEqual(received, [1])
+    }
+    
+    func testTakeUntilForwardsCancelEventToPublisher() throws {
+        // NOTE: This expectation only fulfills if subscriber
+        //       receive completion event.
+        let expectation = expectation(description: "cancelled")
+        var received: [Int] = []
+        
+        let terminator = PassthroughSubject<(), Never>()
+        let publisher = PassthroughSubject<Int, Never>()
+        
+        var cancellable: AnyCancellable? = publisher
+            .handleEvents(receiveCancel: {
+                expectation.fulfill()
+            })
+            .takeUntil(terminator.eraseToAnyPublisher())
+            .sink(receiveCompletion: { completion in
+                XCTFail()
+            }, receiveValue: { value in
+                received.append(value)
+            })
+        
+        publisher.send(1)
+        cancellable?.cancel()
+        cancellable = nil
         
         waitForExpectations(timeout: 1)
         

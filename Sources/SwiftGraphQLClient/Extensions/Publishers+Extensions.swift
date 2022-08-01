@@ -1,44 +1,33 @@
 import Combine
 import Foundation
 
-// MARK: - OnEnd Opeartor
-
-extension Publisher {
-    
-    /// An operator that triggers the handler when the publisher sends the completion event down to the subscriber.
-    func onEnd(_ handler: @escaping () -> Void) -> Publishers.HandleEvents<Self> {
-        self.handleEvents(receiveCompletion: { _ in handler() }, receiveCancel: handler)
-    }
-}
-
 // MARK: - TakeUntil Publisher
 
 extension Publisher {
     /// Takes upstream values until predicates a value.
-    func takeUntil<Predicate: Publisher>(_ predicate: Predicate) -> Publishers.TakenUntilPublisher<Self, Predicate> {
-        Publishers.TakenUntilPublisher<Self, Predicate>(upstream: self, predicate: predicate)
+    func takeUntil<Terminator: Publisher>(_ terminator: Terminator) -> Publishers.TakenUntilPublisher<Self, Terminator> {
+        Publishers.TakenUntilPublisher<Self, Terminator>(upstream: self, terminator: terminator)
     }
 }
 
 extension Publishers {
     
-    /// A subscriber that takes upstream values for as long as predicate isn't met.
-    /// Once the predicate fulfills, it sends a completion event down the stream.
-    struct TakenUntilPublisher<Upstream: Publisher, Predicate: Publisher>: Publisher {
+    /// A subscriber that takes upstream values until terminator emits a value.
+    struct TakenUntilPublisher<Upstream: Publisher, Terminator: Publisher>: Publisher {
         typealias Output = Upstream.Output
         typealias Failure = Upstream.Failure
         
         /// A function that tells whether the condition is met.
-        private var predicate: Predicate
+        private var terminator: Terminator
         
         /// Publisher emitting the values.
         private var upstream: Upstream
         
         // MARK: - Initializer
         
-        init(upstream: Upstream, predicate: Predicate) {
+        init(upstream: Upstream, terminator: Terminator) {
             self.upstream = upstream
-            self.predicate = predicate
+            self.terminator = terminator
         }
         
         // MARK: - Publisher
@@ -49,7 +38,7 @@ extension Publishers {
             // and subscribes to the upstream publisher with it.
             let takeUntilSubscription = Subscriptions.TakeUntilSubscription(
                 subscriber: subscriber,
-                predicate: self.predicate
+                terminator: self.terminator
             )
             
             subscriber.receive(subscription: takeUntilSubscription)
@@ -62,7 +51,7 @@ extension Publishers {
 extension Subscriptions {
     
     /// A subscription that emits upstream values downstream until predicate emits a value.
-    final class TakeUntilSubscription<Downstream: Subscriber, Predicate: Publisher>: Subscription, Subscriber {
+    final class TakeUntilSubscription<Downstream: Subscriber, Terminator: Publisher>: Subscription, Subscriber {
         
         typealias Input = Downstream.Input
         typealias Failure = Downstream.Failure
@@ -70,23 +59,21 @@ extension Subscriptions {
         /// Subscription that yields values streamed to the subscriber.
         private var subscription: Subscription?
         
+        /// Tells how much events downstream has already requested from the upstream.
+        private var demand: Subscribers.Demand
+        
         /// The subscriber we are forwarding values to.
         private var subscriber: Downstream
         
         /// Function telling whether the sought condition has been met.
-        private var predicate: Predicate
+        private var terminator: Terminator
         
-        /// Tells whether the predicate has been met.
-        private var closed: Bool = false
-        
+        /// Cancellable reference to the terminator sink.
         private var cancellable: AnyCancellable?
-        
-        /// Tells how much events downstream has already requested from the upstream.
-        private var demand: Subscribers.Demand
-        
-        init(subscriber: Downstream, predicate: Predicate) {
+
+        init(subscriber: Downstream, terminator: Terminator) {
             self.subscriber = subscriber
-            self.predicate = predicate
+            self.terminator = terminator
             self.demand = .none
         }
         
@@ -96,16 +83,18 @@ extension Subscriptions {
         func receive(subscription: Subscription) {
             self.subscription = subscription
             
-            self.cancellable = self.predicate
+            self.cancellable = self.terminator
                 .sink(receiveCompletion: { _ in
                     
-                }, receiveValue: { _ in
+                }, receiveValue: { [weak self] _ in
+                    guard let _ = self?.cancellable else {
+                        return
+                    }
+
                     // We send the completion event downstream and cancel the
-                    // upstream subscription once we've received any event.
-                    self.subscriber.receive(completion: .finished)
-                    self.subscription?.cancel()
-                    self.subscription = nil
-                    self.cancellable = nil
+                    // upstream subscription once we've received any event from the predicate.
+                    self?.subscriber.receive(completion: .finished)
+                    self?.cancel()
                 })
             
             // Request the accumulated demand and drain it.
@@ -118,12 +107,10 @@ extension Subscriptions {
         }
         
         func receive(_ input: Downstream.Input) -> Subscribers.Demand {
-            // We simply forward all the values further down the chain.
             self.subscriber.receive(input)
         }
         
         func receive(completion: Subscribers.Completion<Downstream.Failure>) {
-            self.closed = true
             self.subscriber.receive(completion: completion)
         }
         
@@ -141,6 +128,8 @@ extension Subscriptions {
         func cancel() {
             self.subscription?.cancel()
             self.subscription = nil
+            
+            self.cancellable?.cancel()
             self.cancellable = nil
         }
     }

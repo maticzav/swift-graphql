@@ -58,7 +58,7 @@ struct FeedView: View {
     var unread: some View {
         let messages = self.vm.unread == 1 ? "message" : "messages"
         if self.vm.unread > 0 {
-            Text("Pull to refresh (\(self.vm.unread) \(messages)")
+            Text("Pull to refresh (\(self.vm.unread) \(messages))")
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(.gray)
                 .padding(.vertical, 8)

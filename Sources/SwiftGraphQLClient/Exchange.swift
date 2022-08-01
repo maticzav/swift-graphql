@@ -11,6 +11,9 @@ public typealias ExchangeIO = (AnyPublisher<Operation, Never>) -> AnyPublisher<O
 public protocol Exchange {
     /// Register function receives a stream of operations and the next exchange in the chain
     /// and should return a stream of results.
+    ///
+    /// If exchange creates any new sources, it should make sure that once it receives an operation with the same
+    /// ID as the operation of the source and of type `teardown` it clears that source to prevent memory leaks.
     func register(
         client: GraphQLClient,
         operations: AnyPublisher<Operation, Never>,

@@ -54,8 +54,7 @@ extension _AnyDecodable {
         let container = try decoder.singleValueContainer()
 
         if container.decodeNil() {
-//            // NOTE: This function is different from the original implementation, it's intentional!
-//            self.init(())
+            // NOTE: This function is different from the original implementation, it's intentional!
             #if canImport(Foundation)
             self.init(NSNull())
             #else

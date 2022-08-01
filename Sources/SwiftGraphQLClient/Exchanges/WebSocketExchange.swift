@@ -56,6 +56,7 @@ public class WebSocketExchange: Exchange {
     private func createSubscriptionSource(operation: Operation) -> AnyPublisher<OperationResult, Never> {
         let publisher: AnyPublisher<OperationResult, Never> = self.client
             .subscribe(operation.args)
+            .print()
             .map { exec -> OperationResult in
                 var op = OperationResult(
                     operation: operation,
@@ -96,13 +97,14 @@ public class WebSocketExchange: Exchange {
                     .eraseToAnyPublisher()
                 
                 return self.createSubscriptionSource(operation: operation)
-                    .onEnd {
-                        
-                        // Once the subscription ends (either because user stopped it
-                        // or because the server ended the transmission), we inform
-                        // the client-pipeline that it should be dismantled.
+                    .handleEvents(receiveCompletion: { _ in
+                        // Once the subscription ends because socket stream stopped sending events,
+                        // we inform the client-pipeline that it should be dismantled.
                         client.reexecute(operation: operation.with(kind: .teardown))
-                    }
+                    })
+                    // NOTE: We use `takeuntil` to clear up initialised source when
+                    // the client (i.e. application) emits the teardown event because someone
+                    // cancelled the subscription.
                     .takeUntil(torndown)
                     .eraseToAnyPublisher()
             }

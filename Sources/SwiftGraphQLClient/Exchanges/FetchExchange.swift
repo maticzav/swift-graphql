@@ -71,7 +71,13 @@ public class FetchExchange: Exchange {
                 
                 let publisher = self.session
                     .dataTaskPublisher(for: operation.request, with: body)
+                    // NOTE: If the client emits the teardown event, we want to clear up
+                    //  the initialised source to prevent memory laeks.
                     .takeUntil(torndown)
+                    // NOTE: Unlike WebSocketExchange that emits completion when the stream is over,
+                    //  fetch response send completion once it has received all the data. Cancelling
+                    //  the pipeline then, would prevent updates from exchange in the future, that's
+                    //  why we don't cancel it.
                     .map { (data, response) -> OperationResult in
                         do {
                             let result = try self.decoder.decode(ExecutionResult.self, from: data)

@@ -45,7 +45,7 @@ final class FetchExchangeTests: XCTestCase {
     private static let queryOperation = SwiftGraphQLClient.Operation(
         id: "qur-id",
         kind: .query,
-        request: URLRequest(url: URL(string: "https://mock.com")!),
+        request: URLRequest(url: URL(string: "https://www.mock.com")!),
         policy: .cacheAndNetwork,
         types: ["A", "B", "C"],
         args: ExecutionArgs(query: "", variables: [:])
@@ -55,7 +55,7 @@ final class FetchExchangeTests: XCTestCase {
     private static let mutationOperation = SwiftGraphQLClient.Operation(
         id: "mut-id",
         kind: .mutation,
-        request: URLRequest(url: URL(string: "https://mock.com")!),
+        request: URLRequest(url: URL(string: "https://www.mock.com")!),
         policy: .cacheAndNetwork,
         types: ["A", "B"],
         args: ExecutionArgs(query: "", variables: [:])

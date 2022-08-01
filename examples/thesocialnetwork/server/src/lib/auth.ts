@@ -1,6 +1,6 @@
 import { YogaInitialContext } from '@graphql-yoga/node'
 
-import { generateAlphaNumericString } from './random'
+import { RandomUtils } from './random'
 
 export class AuthSessions {
   private sessions: { [key: string]: string } = {}
@@ -31,7 +31,7 @@ export class AuthSessions {
    * Associates user with a random session identifier.
    */
   public createSessionForUser(userId: string): string {
-    const token = generateAlphaNumericString(16)
+    const token = RandomUtils.generateSecretKey()
     this.sessions[token] = userId
 
     return token
