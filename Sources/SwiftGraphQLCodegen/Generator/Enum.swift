@@ -71,7 +71,6 @@ extension EnumValue {
     fileprivate var declaration: String {
         """
         \(docs)
-        \(availability)
         case \(name.camelCase.normalize) = "\(name)"
         """
     }
@@ -79,14 +78,6 @@ extension EnumValue {
     private var docs: String {
         if let description = self.description {
             return description.split(separator: "\n").map { "/// \($0)" }.joined(separator: "\n")
-        }
-        return ""
-    }
-
-    private var availability: String {
-        if isDeprecated {
-            let message = deprecationReason ?? ""
-            return "@available(*, deprecated, message: \"\(message)\")"
         }
         return ""
     }

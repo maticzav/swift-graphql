@@ -56,7 +56,6 @@ public class WebSocketExchange: Exchange {
     private func createSubscriptionSource(operation: Operation) -> AnyPublisher<OperationResult, Never> {
         let publisher: AnyPublisher<OperationResult, Never> = self.client
             .subscribe(operation.args)
-            .print()
             .map { exec -> OperationResult in
                 var op = OperationResult(
                     operation: operation,

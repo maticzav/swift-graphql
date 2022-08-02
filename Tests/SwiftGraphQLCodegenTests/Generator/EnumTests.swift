@@ -46,17 +46,13 @@ final class EnumTests: XCTestCase {
              /// Earliest trilogy.
              enum Episodes: String, CaseIterable, Codable {
                /// Released in 1977.
-           
                case newhope = "NEWHOPE"
                /// Introduced Yoda.
                /// Considered the best.
-           
                case empire = "EMPIRE"
                /// Released in 1983.
-               @available(*, deprecated, message: "Was too good.")
                case jedi = "JEDI"
            
-               @available(*, deprecated, message: "")
                case skywalker = "SKYWALKER"
              }
            }

@@ -104,7 +104,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
             SwiftGraphQLCLI.exit(withError: .unreachable)
         }
         
-        loadSchemaSpinner.stop()
+        loadSchemaSpinner.succeed("Schema loaded!")
 
         // Generate the code.
         let generateCodeSpinner = Spinner(.dots, "Generating API")
@@ -116,17 +116,14 @@ struct SwiftGraphQLCLI: ParsableCommand {
         
         do {
             code = try generator.generate(schema: schema)
-            generateCodeSpinner.stop()
+            generateCodeSpinner.succeed("API generated successfully!")
         } catch CodegenError.formatting(let err) {
-            print(err.localizedDescription)
+            generateCodeSpinner.failure(err.localizedDescription)
             SwiftGraphQLCLI.exit(withError: .formatting)
         } catch IntrospectionError.emptyfile, IntrospectionError.unknown {
             SwiftGraphQLCLI.exit(withError: .introspection)
-        } catch IntrospectionError.statusCode(let code) {
-            print("Received status code \(code) while introspecting the schema...")
-            SwiftGraphQLCLI.exit(withError: .introspection)
         } catch IntrospectionError.error(let err) {
-            print(err.localizedDescription)
+            generateCodeSpinner.failure(err.localizedDescription)
             SwiftGraphQLCLI.exit(withError: .introspection)
         } catch {
             SwiftGraphQLCLI.exit(withError: .unknown)
@@ -139,13 +136,17 @@ struct SwiftGraphQLCLI: ParsableCommand {
             FileHandle.standardOutput.write(code.data(using: .utf8)!)
         }
         
-        print("\n\nAPI generated successfully!")
+        let analyzeSchemaSpinner = Spinner(.dots, "Analyzing Schema")
+        analyzeSchemaSpinner.start()
         
         // Warn about the unused scalars.
-        let ignoredScalars = try schema.missing(scalars: scalars)
+        let ignoredScalars = try schema.missing(from: scalars)
         guard !ignoredScalars.isEmpty else {
+            analyzeSchemaSpinner.succeed("SwiftGraphQL Ready!")
             return
         }
+        
+        analyzeSchemaSpinner.stop()
         
         let message = """
         Your schema contains some unknown scalars:
@@ -154,7 +155,6 @@ struct SwiftGraphQLCLI: ParsableCommand {
         
         Add them to the config to get better type support!
         """
-        
         print(message)
     }
 }
