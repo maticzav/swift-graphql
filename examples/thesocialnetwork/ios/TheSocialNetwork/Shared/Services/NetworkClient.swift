@@ -16,12 +16,6 @@ enum NetworkClient {
     static private var wsconfig: GraphQLWebSocketConfiguration {
         let config = GraphQLWebSocketConfiguration()
         config.behaviour = .lazy(closeTimeout: 60)
-        config.connectionParams = {
-            guard let token = AuthClient.getToken() else {
-                return nil
-            }
-            return ["headers": ["Authentication": "Bearer \(token)"]]
-        }
         config.encoder = encoder
         return config
     }
@@ -42,6 +36,12 @@ enum NetworkClient {
                 }
                 
                 return nil
+            }),
+            ExtensionsExchange({ op in
+                guard let token = AuthClient.getToken() else {
+                    return nil
+                }
+                return ["headers": ["Authentication": "Bearer \(token)"]]
             }),
             cache,
             FetchExchange(encoder: encoder),

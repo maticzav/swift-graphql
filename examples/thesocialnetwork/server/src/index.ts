@@ -86,7 +86,7 @@ async function main() {
         const { schema, execute, subscribe, contextFactory, parse, validate } = server.getEnveloped(ctx)
         const contextValue: any = await contextFactory()
 
-        const headers = ctx.connectionParams?.headers as { [key: string]: string } | undefined
+        const headers = msg.payload.extensions?.headers as { [key: string]: string } | undefined
         const id = sessions.getUserIdFromHeader(headers?.['Authentication'])
         if (id) {
           contextValue.user = { id }

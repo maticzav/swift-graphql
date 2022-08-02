@@ -1,0 +1,7 @@
+scalars:
+    Date: Date
+    DateTime: Date
+    PreciseDateTime: Date
+    URI: URL
+    Base64String: String
+    HTML: String
