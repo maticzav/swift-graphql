@@ -37,7 +37,9 @@ extension ExecutionArgs: Hashable {
     }
 }
 
-/// GraphQL execution result as outlined in the [GraphQL Spec](http://spec.graphql.org/October2021/#sec-Response-Format).
+/// GraphQL execution result.
+/// 
+/// Execution result follows [GraphQL Spec](http://spec.graphql.org/October2021/#sec-Response-Format).
 public struct ExecutionResult: Equatable, Encodable, Decodable {
     
     /// Result of a successfull execution of a query.
