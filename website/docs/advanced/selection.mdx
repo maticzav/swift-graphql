@@ -1,0 +1,237 @@
+---
+title: Deep Dive into Selection
+sidebar_label: Understanding Selection
+---
+
+Selection lets you select fields that you want to fetch from the query on a particular type.
+
+SwiftGraphQL generates phantom types for your operations, objects, interfaces and unions. You can use these in combination with `Selection` type to generate a concrete type for your selection (e.g. `Selection<String, Objects.Human>`). You can find all generated phantom types by typing
+
+- `Unions.`
+- `Interfaces.`
+- `Objects.`
+- `Operations.`
+
+followed by a name from your GraphQL schema.
+
+Most of the time, however, you should use `Selection.` that contains type-alias for unions, interfaces, objects and operations. In that case, you don't have to specify the type-lock anymore and simply provide the return type (e.g. `Selection.Human<String>`).
+
+### Selecting Fields
+
+##### `Unions`
+
+When fetching a union you should provide selections for each of the union sub-types. Additionally, all of those selections should resolve to the same type.
+
+```swift
+let union = Selection.CharacterUnion<String> {
+    try $0.on(
+        human: Selection.Human<String> { try $0.funFact() },
+        droid: Selection.Droid<String> { try $0.primaryFunction() }
+    )
+}
+```
+
+You'd usually want to create a Swift enumerator and have different selecitons return different cases.
+
+##### `Interfaces`
+
+Interfaces are very similar to unions. The only difference is that you may query for a common field from the intersection.
+
+```swift
+let interface = Selection.Character<String> {
+
+    /* Common */
+    let name = try $0.name()
+
+    /* Fragments */
+    let about = try $0.on(
+        droid: Selection.Droid<String> { try $0.primaryFunction() },
+        human: Selection.Human<String> { try $0.homePlanet() }
+    )
+
+    return "\(name). \(about)"
+}
+```
+
+### Transforming Selections
+
+##### Nullable, List, and Non-Nullable Selection
+
+Selection packs a collection of utility functions that let you select nullable and list fields using your existing selecitons.
+Each selection comes with three calculated properties that let you do that:
+
+- `list` - to query lists
+- `nullable` - to query nullable fields
+- `nonNullOrFail` - to query nullable fields that should be there
+
+```swift
+// Create a non-nullable selection.
+let human = Selection.Human<Human> {
+    Human(
+        id: try $0.id(),
+        name: try $0.name()
+    )
+}
+
+// Use it with nullable and list fields.
+let query = Selection.Query<Void> {
+    let list = try $0.humans(human.list)
+    let nullable = try $0.human(id: "100", human.nullable)
+}
+```
+
+You can achieve the same effect using `Selection` static functions `.list`, `.nullable`, and `.nonNullOrFail`.
+
+```swift
+// Use it with nullable and list fields.
+let query = Selection.Query<[Human]> {
+    try $0.humans(Selection.list(human))
+}
+```
+
+##### Making selection on the entire type
+
+You might want to write a selection on the entire type from the selection composer itself. This usually happens if you have a distinct identifier reused in many types.
+
+Consider the following scenario where we have an `id` field in `Human` type. There are many cases where we only query `id` field from the `Human` that's why we create a human id selection.
+
+```swift
+let humanId = Selection<HumanID, Objects.Human> {
+    HumanID.fromString(try $0.id())
+}
+```
+
+Now, we want to reuse that same selection when query a detailed human type. To do that, we can use `selection` helper method that lets you make a selection on the whole `TypeLock` from inside the selection.
+
+```swift
+struct Human {
+    let id: HumanID
+    let name: String
+}
+
+let human = Selection.Human {
+    Human(
+        id: try $0.selection(humanId),
+        name: try $0.name()
+    )
+}
+```
+
+An alternative approach would be to manually rewrite the selection inside `Human` again.
+
+```swift
+let human = Selection.Human {
+    Human(
+        id: HumanID.fromString(try $0.id()),
+        name: try $0.name()
+    )
+}
+```
+
+Having distinct types for ids of different object types is particularly useful in large projects as it gives you verification that you are not using a wrong identifier for a particular type of field. At first, this might seem useless and cumbersome, but it makes your code more robust once you get used to it.
+
+##### Mapping Selection
+
+You might want to map the result of your selection to a new type and get a selection for that new type.
+You can do that by calling a `map` function on selection and provide a mapping.
+
+```swift
+struct Human {
+    let id: String
+    let name: String
+}
+
+// Create a selection.
+let human = Selection.Human {
+    Human(
+        id: try $0.id(),
+        name: try $0.name(),
+    )
+}
+
+// Map the original selection on Human to return String.
+let humanName: Selection<String, Objects.Human> = human.map { $0.name }
+```
+
+> ⚠️ Don't make any nested calls to the API. Use the first half of the initializer to fetch all the data and return the calculated result. Just don't make nested requests.
+
+```swift
+// WRONG!
+let human = Selection.Human { select in
+    let message: String
+    if try select.likesStrawberries() {
+        message = try select.name()
+    } else {
+        message = try select.homePlanet()
+    }
+    return message
+}
+
+// Correct.
+let human = Selection.Human { select in
+
+    /* Data */
+    let likesStrawberries = try select.likesStrawberries()
+    let name = try select.name()
+    let homePlanet = try select.homePlanet()
+
+    /* Return */
+    let message: String
+    if likesStrawberries {
+        message = name
+    } else {
+        message = homePlanet
+    }
+    return message
+}
+```
+
+### Validating Data
+
+Since SwiftGraphQL uses functions to create selections, you may validate recieved data before turning it into a Swift structure. This way, you can use more structure to represent your data and make stricter requirements than those imposed by schema.
+
+You can easily terminate resolution by throwing an error inside your selection.
+
+> NOTE: Always make all selection before throwing errors!
+
+```swift
+// Model
+enum Animal {
+    // Cat with a name and age.
+    case cat(String, Int)
+    // Dog with a name and isGoodDog flag.
+    case dog(String, Bool)
+}
+
+// Selection
+let animal = Selection.DogOrCat<Animal> {
+    let name = try $0.name()
+    let age: Int? = try $0.age()
+    let isGoodDog: Bool? = try $0.isGoodDog()
+
+    if let age = age {
+        return .cat(name, age)
+    }
+
+    if let isGoodDog = isGoodDog {
+        return .dog(name, isGoodDog)
+    }
+
+    throw "Animal should be either cat or dog!"
+}
+
+extension String: Error {}
+```
+
+> NOTE: `age` and `isGoodDog` values are nullable in our schema but aren't nullable in our model.
+
+### Operations on selection
+
+Selections are quite useless on their own - they feel a bit like skeletons. Their true (and only) power comes from the two functions they expose - `query` and `decode`.
+
+- `query` returns a spec-compliant GraphQL query and a variable set that you should use in your request.
+- `decode` accepts the body of the response and returns the decoded result.
+
+> `query` and `decode` don't actually communicate with the server. To do that, use one of the official clients or create your own.
+
+> Besides `query` and `decode` selection also contains wide range of utility functions that help you understand the structure of a given query. Those functions won't be covered here. You should follow their comments to understand what they do and examine official clients to see how they are used.

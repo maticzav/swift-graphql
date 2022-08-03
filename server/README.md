@@ -1,3 +1,3 @@
-# SwiftGraphQL demo StarWars server
+# Test Server
 
-> This demo server is derived from NexusJS's StarWars example.
+We use test server to perform unit and integration tests for the library. It's not meant to serve as an example of real world use. To find real-world examples, check out `examples` folder.

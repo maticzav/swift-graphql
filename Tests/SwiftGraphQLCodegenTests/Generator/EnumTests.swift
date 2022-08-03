@@ -40,30 +40,42 @@ final class EnumTests: XCTestCase {
 
         let generated = try type.declaration.format()
 
-        let expected = try """
-        extension Enums {
-            /// Collection of all StarWars episodes.
-            /// Earliest trilogy.
-            enum Episodes: String, CaseIterable, Codable {
-                /// Released in 1977.
-
-                case newhope = "NEWHOPE"
-                /// Introduced Yoda.
-                /// Considered the best.
-
-                case empire = "EMPIRE"
-                /// Released in 1983.
-                @available(*, deprecated, message: "Was too good.")
-                case jedi = "JEDI"
-
-                @available(*, deprecated, message: "")
-                case skywalker = "SKYWALKER"
-            }
-        }
-        """.format()
-
-        /* Test */
-
-        XCTAssertEqual(generated, expected)
+        generated.assertInlineSnapshot(matching: """
+           extension Enums {
+             /// Collection of all StarWars episodes.
+             /// Earliest trilogy.
+             enum Episodes: String, CaseIterable, Codable {
+               /// Released in 1977.
+               case newhope = "NEWHOPE"
+               /// Introduced Yoda.
+               /// Considered the best.
+               case empire = "EMPIRE"
+               /// Released in 1983.
+               case jedi = "JEDI"
+           
+               case skywalker = "SKYWALKER"
+             }
+           }
+           
+           extension Enums.Episodes: GraphQLScalar {
+             init(from data: AnyCodable) throws {
+               switch data.value {
+               case let string as String:
+                 if let value = Enums.Episodes(rawValue: string) {
+                   self = value
+                 } else {
+                   throw ScalarDecodingError.unknownEnumCase(value: string)
+                 }
+               default:
+                 throw ScalarDecodingError.unexpectedScalarType(
+                   expected: "Episodes",
+                   received: data.value
+                 )
+               }
+             }
+           
+             static var mockValue = Self.newhope
+           }
+           """)
     }
 }

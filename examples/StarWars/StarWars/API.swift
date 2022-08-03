@@ -80,7 +80,7 @@ extension Fields where TypeLock == Objects.Mutation {
     }
 }
 
-extension Selection where TypeLock == Never, Type == Never {
+extension Selection where TypeLock == Never, T == Never {
     typealias Mutation<T> = Selection<T, Objects.Mutation>
 }
 
@@ -217,7 +217,7 @@ extension Fields where TypeLock == Objects.Droid {
     }
 }
 
-extension Selection where TypeLock == Never, Type == Never {
+extension Selection where TypeLock == Never, T == Never {
     typealias Droid<T> = Selection<T, Objects.Droid>
 }
 
@@ -374,7 +374,7 @@ extension Fields where TypeLock == Objects.Human {
     }
 }
 
-extension Selection where TypeLock == Never, Type == Never {
+extension Selection where TypeLock == Never, T == Never {
     typealias Human<T> = Selection<T, Objects.Human>
 }
 
@@ -650,7 +650,7 @@ extension Fields where TypeLock == Objects.Query {
     }
 }
 
-extension Selection where TypeLock == Never, Type == Never {
+extension Selection where TypeLock == Never, T == Never {
     typealias Query<T> = Selection<T, Objects.Query>
 }
 
@@ -717,7 +717,7 @@ extension Fields where TypeLock == Objects.Subscription {
     }
 }
 
-extension Selection where TypeLock == Never, Type == Never {
+extension Selection where TypeLock == Never, T == Never {
     typealias Subscription<T> = Selection<T, Objects.Subscription>
 }
 
@@ -860,7 +860,7 @@ extension Fields where TypeLock == Interfaces.Character {
     }
 }
 
-extension Selection where TypeLock == Never, Type == Never {
+extension Selection where TypeLock == Never, T == Never {
     typealias Character<T> = Selection<T, Interfaces.Character>
 }
 
@@ -961,7 +961,7 @@ extension Fields where TypeLock == Unions.CharacterUnion {
     }
 }
 
-extension Selection where TypeLock == Never, Type == Never {
+extension Selection where TypeLock == Never, T == Never {
     typealias CharacterUnion<T> = Selection<T, Unions.CharacterUnion>
 }
 

@@ -1,0 +1,78 @@
+scalar DateTime
+
+type Query {
+  viewer: User
+
+  """
+  A sample list of random strings.
+  """
+  feed: [Message!]!
+}
+
+type Mutation {
+  """
+  A mutation that returns the token that may be used to authenticate the user.
+  """
+  login(username: String!, password: String!): AuthPayload!
+
+  """
+  A mutation that lets you send a message to the feed.
+  """
+  message(message: String!): Message
+
+  """
+  Returns an URL that may be used to upload the user image.
+  """
+  getProfilePictureSignedURL(extension: String!, contentType: String!): SignedURL
+
+  """
+  Updates the profile picture of currently authenticated user.
+  """
+  setProfilePicture(file: ID!): User
+}
+
+type AuthPayloadSuccess {
+  token: String!
+}
+
+type AuthPayloadFailure {
+  message: String!
+}
+
+union AuthPayload = AuthPayloadSuccess | AuthPayloadFailure
+
+type SignedURL {
+  file_id: String!
+  upload_url: String!
+  file_url: String!
+}
+
+type Subscription {
+  """
+  Simple subscription that tells current time every second.
+  """
+  time: DateTime!
+
+  """
+  Number of new messages since the last fetch.
+  """
+  messages: Int!
+}
+
+# Types
+
+type User {
+  id: ID!
+
+  username: String!
+  picture: String
+
+  isViewer: Boolean!
+}
+
+type Message {
+  id: ID!
+  createdAt: DateTime!
+  message: String!
+  sender: User!
+}

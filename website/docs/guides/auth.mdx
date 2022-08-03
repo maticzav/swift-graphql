@@ -1,0 +1,71 @@
+---
+title: Authentication
+sidebar_label: Authentication
+---
+
+This guide shows how you possible ways to make an authenticated GraphQL requests using SwiftGraphQL client.
+
+> You can see the full code in practice in `thesocialnetwork` example on [GitHub](https://github.com/maticzav/).
+
+### Using AuthExchange
+
+SwiftGraphQLClient comes with a special exchange dedicated to authenticating your requests - `AuthExchange`. You provide a function that returns a token and it applies that token to a given header to make an authenticated request.
+
+It's important that `AuthExchange` comes before `FetchExchange`, `WebSocketExchange` or any other exchange that transmits the data.
+
+```swift
+import SwiftGraphQLClient
+
+let client = SwiftGraphQLClient.Client(
+	request: http,
+  exchanges: [
+		AuthExchange(header: "Authentication", getToken: {
+				if let token = AuthClient.getToken() {
+						return "Bearer \(token)"
+				}
+				return nil
+		}),
+		FetchExchange(),
+	]
+)
+```
+
+Since the `getToken` function is not asynchronous, we recommend that you first load the token from storage and store it as a statically available variable.
+
+> You can find the full example in `thesocialnetwork` example on [GitHub](https://github.com/maticzav).
+
+### Modifying URLRequest
+
+Instead of using an exchange, you can also modify the URLRequest directly. This is useful if you want to add additional non-standard headers to the request.
+
+```swift
+let client = SwiftGraphQLClient.Client(request: API_ENDPOINT)
+
+let request = URLRequest(url: API_ENDPOINT)
+request.setValue("Token ssssshhhhhh", forHTTPHeaderField: "Auth")
+
+client.query(selection, request: request, policy: .networkOnly)
+```
+
+### Using ExtensionsExchange
+
+`ExtensionsExchange` lets you add custom values to the `extension` field of a GraphQL query. Adding a custom authentication property to query extensions can be useful when you can't access request headers on the server (e.g. when using subscriptions).
+
+`ExtensionsExchange` lets you specify a function that should be synchronously called for each request. The function should either return `nil` value when there are no extensions or an `AnyCodable` value containing additional request information.
+
+```swift
+import SwiftGraphQLClient
+
+let client = SwiftGraphQLClient.Client(
+	request: http,
+  exchanges: [
+		ExtensionsExchange(getExtensions: {
+				if let token = AuthClient.getToken() {
+						return ["headers": ["Authentication": "Bearer \(token)"]]
+				}
+				return nil
+		}),
+		FetchExchange(),
+	]
+)
+```

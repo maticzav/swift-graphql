@@ -200,7 +200,7 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
         }
     }.resume()
 
-    /* Result */
+    // Result
     _ = semaphore.wait(wallTimeout: .distantFuture)
 
     switch result {
@@ -213,18 +213,37 @@ func fetch(from endpoint: URL, withHeaders headers: [String: String] = [:]) thro
     }
 }
 
-enum IntrospectionError: Error {
+public enum IntrospectionError: Error {
+    
+    /// There was an error during the execution.
     case error(Error)
+    
+    /// Request received a bad status code from the server.
     case statusCode(Int)
+    
+    /// We don;t know what caused the error, but something unexpected happened.
     case unknown
+    
+    /// Error that signifies that there's no content at the provided file path.
+    case emptyfile
 }
 
 // MARK: - Extension
 
 public extension Schema {
-    /// Downloads a schema from the provided endpoint.
+    
+    /// Downloads a schema from the provided endpoint or a local file.
+    ///
+    /// - NOTE: The function is going to load from the local path if the URL is missing a scheme or has a `file` scheme.
     init(from endpoint: URL, withHeaders headers: [String: String] = [:]) throws {
-        let introspection: Data = try fetch(from: endpoint, withHeaders: headers)
+
+        let introspection: Data
+        if endpoint.isFileURL {
+            introspection = try Data(contentsOf: endpoint)
+        } else {
+            introspection = try fetch(from: endpoint, withHeaders: headers)
+        }
+        
         self = try parse(introspection)
     }
 }

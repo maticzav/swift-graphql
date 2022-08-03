@@ -1,0 +1,55 @@
+---
+title: Caching
+sidebar_label: Caching
+---
+
+This document outlines how the official SwiftGraphQL client does caching.
+
+> SwiftGraphQL's caching mechanisms are heavily inspired by [Urql](https://github.com/FormidableLabs/urql).
+
+# Overview
+
+SwiftGraphQL's cache works like cache in the browser - once you've queried something, you can reuse that result instead of sending a network request again. Naturally, we ask ourselves
+
+1. How we identify the same queries?
+1. How do we make sure data doesn't become outdated?
+
+## Operation Keys
+
+Each SwiftGraphQL query contains a deterministic key that's constructed from the selection and variables.
+
+<!-- Image? -->
+
+Once a result comes in, it's indefinitely cached using this key. Therefore, if you send the same query again, we check the in-memory cache for possible existing results and use them instead.
+
+In some cases greedily reusing the cache isn't the best solution. That's why SwiftGraphQL lets you chose from four different querying options:
+
+- `cacheFirst` (default) - _prefers cached results and falls back to sending a network request when there's no existing cache_
+- `cacheAndNetwork` - _returns cached results immediately but also sends an API request and updates the data on response_
+- `networkOnly` - _always sensds a network request and ignores cache entirely_
+- `cacheOnly` - _always returns cached result or `nil`_
+
+> Regardless of your query caching option SwiftGraphQL caches your result if some other part of your code may want to reuse it.
+
+## Cache Invalidation
+
+As you update the data in one part of the app, results might become outdated in another part. SwiftGraphQL gives you the flexibility of choosing how that cache becomes invalidated.
+
+You can choose between
+
+- Document Caching - _greedy with less automation_
+- Normalized Caching - _clever and complex_
+
+Read on to learn more about each.
+
+# Document Caching
+
+Document caching is a default, simple caching mechanism that greedily requests new data when performing mutations. By checking the return type of your mutation it reexecutes and invalidates all cached values that contain that type.
+
+For example, if you have a running query that streams feed of `[Post]` then a mutation `createPost` that returns a new `Post` triggers re-execution of that feed query automatically.
+
+If your queries are deep and depend on many types, they are more likely to be automatically revalidated.
+
+# Normalized Caching
+
+> 🚧 A normalized caching exchange is a work in progress. You are welcome to contribute your knowledge, ideas and code on the repository.

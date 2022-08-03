@@ -5,11 +5,11 @@ sidebar_label: Installation
 
 ## Installation
 
-SwiftGraphQL is a code generator as well as a ligtweight client. That's why it's important that you install both of them.
+SwiftGraphQL is a GraphQL client as well as code generator. You may use the client without generating the utility functions, but we encourage you to try the generator. This section outlines how you install either of them.
 
-Make sure Xcode 11+ is installed first. Then, you need to include the client in your iOS/macOS project, and locally generate the code using code generator.
+> Make sure you use Xcode 11+.
 
-### Installing SwiftGraphQL Client
+### Installing Client
 
 To install it using Swift Package Manager, open the following menu item in Xcode:
 
@@ -21,13 +21,31 @@ In the Choose Package Repository prompt add this url:
 https://github.com/maticzav/swift-graphql/
 ```
 
-Then press Next and complete the remaining steps. You should select `SwiftGraphQL` as a dependency, since that includes the client code.
+Then press Next and complete the remaining steps. You should select all packages as dependencies apart from the `SwiftGraphQLCLI` and `SwiftGraphQLCodegen`.
 
 To learn more about Swift Package Manager, check out the [official documentation](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
 
-### Installing Code Generator
+### Installing Generator
 
-SwiftGraphQL generator comes as a CLI tool and as a library that you may import. You can use Mint, Homebrew and Make to use CLI only, or you may import it as a SPM dependency and use the generator itself.
+To generate query building functions, you are going to use SwiftGraphQL generator CLI. Follow the instructions below on how to install the generator using your tool of choice.
+
+To run the generator, type `swift-graphql`. If you are using any custom scalars, you should create a configuration file called `swiftgraphql.yml` and put in data-type mappings as a key-value dictionary like this. Keys should be GraphQL types, and values should be SwiftGraphQL Codecs.
+
+```yml
+# swiftgraphql.yml
+scalars:
+  Date: DateTime
+  Upload: Upload
+```
+
+> You can also run `swift-graphql --help` to learn more.
+
+#### Homebrew
+
+```sh
+brew tap maticzav/swift-graphql https://github.com/maticzav/swift-graphql.git
+brew install SwiftGraphQL
+```
 
 #### Mint
 
@@ -36,13 +54,6 @@ mint install maticzav/swift-graphql
 ```
 
 > You can read more about Mint [here](https://github.com/yonaskolb/mint).
-
-#### Homebrew
-
-```sh
-brew tap maticzav/swift-graphql https://github.com/maticzav/swift-graphql.git
-brew install SwiftGraphQL
-```
 
 #### Make
 

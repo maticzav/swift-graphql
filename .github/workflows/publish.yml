@@ -1,0 +1,51 @@
+name: Create GitHub Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Sources/**/*'
+
+jobs:
+  build:
+    runs-on: macos-12
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # Release
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v5.2
+        with:
+          # Relevant Branches
+          release_branches: main
+          # Tag configuration
+          tag_prefix: ''
+          default_bump: 'patch'
+          # Credentials
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create a GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          release_name: SwiftGraphQL ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+        if: steps.tag_version.outputs.new_tag != null
+
+      - name: Create Release
+        run: |
+          make update_brew_formula
+          make update_podspec
+
+          git add .
+          git commit -m "Update Formula and PodSpec to $(VERSION)"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.tag_version.outputs.new_version }}
+        if: steps.tag_version.outputs.new_tag != null

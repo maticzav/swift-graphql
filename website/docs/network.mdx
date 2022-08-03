@@ -1,0 +1,118 @@
+---
+title: Networking
+sidebar_label: Networking
+---
+
+SwiftGraphQL ships with a fully-featured GraphQL client inspired by [`urql`](https://formidable.com/open-source/urql/). The client itself does not depend on the query-builder, but they work together nicely.
+
+This section shows you how you can use it with the query-builder, but it shouldn't be hard to use it without it.
+
+## Creating a Client
+
+To create a client you can either choose to go with default (basic) set of exchanges that don't require any setup, or customize it to fit your needs. You can start with the simpler configuration, but we encourage you to switch to the complete configuration soon, since it gives you more clarity and control over what's happening.
+
+```swift
+// Configuration of the client internals.
+let config = ClientConfiguration()
+
+// Default request used to send HTTP requests.
+let request = URLRequest(url: URL(string: "http://127.0.0.1:4000/graphql")!)
+
+let client = SwiftGraphQLClient.Client(
+	request: request,
+	exchanges: [
+		DedupExchange(),
+		CacheExchange(),
+		FetchExchange()
+	],
+	config: config
+)
+```
+
+## Exchanges
+
+Exchanges handle each operation and actually perform the requests. When you perform an operation, the client sends it down from the first exchange to the last. In case an exchange before the end of the list filters that operation from the downstream (e.g. `FetchExchange`), exchanges further down won't receive it. Once an exchange produces a result, it sends it upstream in reverse order to other exchanges above, until it reaches the application again.
+
+#### AuthExchange
+
+Lets you add authentication header with a given token to your requests. You provide a function that returns a token and the name of the header and the exchange processes the rest..
+
+It's important that `AuthExchange` comes before `FetchExchange`, `WebSocketExchange` or any other exchange that transmits the data so that those exchanges receive a request with the header.
+
+```swift
+AuthExchange(header: "Authentication", getToken: {
+		if let token = AuthClient.getToken() {
+				return "Bearer \(token)"
+		}
+		return nil
+}),
+```
+
+Since the `getToken` function is not asynchronous, we recommend that you first load the token from storage and store it as a statically available variable.
+
+> You can find the full example in `thesocialnetwork` example on [GitHub](https://github.com/maticzav).
+
+#### CacheExchange
+
+Basic caching exchange that uses the document caching mechanism to invalidate queries. You can read more about the caching mechanisms available in SwiftGraphQLClient in [advanced caching](/advanced/cache). As a rule of thumb you should use the `CacheExchange` because it automatically reexecutes queries that might have outdated results.
+
+```swift
+CacheExchange()
+```
+
+#### DebugExchange
+
+Lets you log downstream and upstream events to a client logger function. The events are logged as `debug` level logs.
+
+```swift
+DebugExchange()
+```
+
+#### DedupExchange
+
+Filters out operation requests that are still waiting for the result and were sent more than once.
+
+```swift
+DedupExchange()
+```
+
+#### ErrorExchange
+
+Exchange that triggers the provided function whenever there's a GraphQL error in the operation.
+
+```swift
+ErrorExchange(onError: { err in
+	print(err)
+})
+```
+
+## Performing Queries
+
+To perform an operation, you can call `query`, `mutate` or `subscribe` method that each accepts a query selection and returns a stream of results. SwiftGraphQL heavily leverages the Combine framework that's also the backbone of SwiftUI so you should know at least the basics to use the library.
+
+```swift
+let query = Selection.Query<String> {
+	try $0.hello()
+}
+
+// General result callback.
+client.query(query)
+	.sink(receiveValue: { result in
+		guard case let .ok(data) = result.result else {
+				return nil
+		}
+		return data
+	})
+
+// Applying the result to a @Published value.
+client.query(query)
+	.map {
+		guard case let .ok(data) = result.result else {
+				return nil
+		}
+		return data
+	}
+	.assign(to: &self.$value)
+```
+
+> Note that the compile will warn you when you try to use a query in place of a mutation or subscription.

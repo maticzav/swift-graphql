@@ -38,7 +38,7 @@ public extension NamedTypeProtocol {
 
 // MARK: - Named Types
 
-public struct ScalarType: NamedTypeProtocol, Decodable, Equatable {
+public struct ScalarType: NamedTypeProtocol, Decodable, Hashable {
     public var kind: NamedTypeKind = .scalar
     public let name: String
     public let description: String?
@@ -51,6 +51,21 @@ public struct ObjectType: NamedTypeProtocol, Decodable, Equatable {
 
     public let fields: [Field]
     public let interfaces: [InterfaceTypeRef]?
+    
+}
+
+extension ObjectType {
+    public init(
+        name: String,
+        description: String?,
+        fields: [Field],
+        interfaces: [InterfaceTypeRef]?
+    ) {
+        self.name = name
+        self.description = description
+        self.fields = fields
+        self.interfaces = interfaces
+    }
 }
 
 public struct InterfaceType: NamedTypeProtocol, Decodable, Equatable {
@@ -63,12 +78,40 @@ public struct InterfaceType: NamedTypeProtocol, Decodable, Equatable {
     public let possibleTypes: [ObjectTypeRef]
 }
 
+extension InterfaceType {
+    public init(
+        name: String,
+        description: String?,
+        fields: [Field],
+        interfaces: [InterfaceTypeRef]?,
+        possibleTypes: [ObjectTypeRef]
+    ) {
+        self.name = name
+        self.description = description
+        self.fields = fields
+        self.interfaces = interfaces
+        self.possibleTypes = possibleTypes
+    }
+}
+
 public struct UnionType: NamedTypeProtocol, Decodable, Equatable {
     public var kind: NamedTypeKind = .union
     public let name: String
     public let description: String?
 
     public let possibleTypes: [ObjectTypeRef]
+}
+
+extension UnionType {
+    public init(
+        name: String,
+        description: String?,
+        possibleTypes: [ObjectTypeRef]
+    ) {
+        self.name = name
+        self.description = description
+        self.possibleTypes = possibleTypes
+    }
 }
 
 public struct EnumType: NamedTypeProtocol, Decodable, Equatable {
@@ -79,12 +122,36 @@ public struct EnumType: NamedTypeProtocol, Decodable, Equatable {
     public let enumValues: [EnumValue]
 }
 
+extension EnumType {
+    public init(
+        name: String,
+        description: String?,
+        values: [EnumValue]
+    ) {
+        self.name = name
+        self.description = description
+        self.enumValues = values
+    }
+}
+
 public struct InputObjectType: NamedTypeProtocol, Decodable, Equatable {
     public var kind: NamedTypeKind = .inputObject
     public let name: String
     public let description: String?
 
     public let inputFields: [InputValue]
+}
+
+extension InputObjectType {
+    public init(
+        name: String,
+        description: String?,
+        fields: [InputValue]
+    ) {
+        self.name = name
+        self.description = description
+        self.inputFields = fields
+    }
 }
 
 // MARK: - Collection Types
@@ -97,6 +164,7 @@ public enum NamedType: Equatable {
     case `enum`(EnumType)
     case inputObject(InputObjectType)
 
+    /// Returns a name of the named type.
     public var name: String {
         switch self {
         case let .enum(`enum`):

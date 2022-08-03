@@ -1,0 +1,24 @@
+#####
+# Documentation
+# YAML (all config values): https://render.com/docs/yaml-spec
+#####
+
+services:
+  - name: thesocialnetwork-api
+    type: web
+    env: node
+    region: frankfurt
+    buildCommand: yarn workspaces focus tsn-server
+    startCommand: yarn workspace tsn-server start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: thesocialnetwork-db
+          property: connectionString
+      - fromGroup: thesocialnetwork-secrets
+
+databases:
+  - name: thesocialnetwork-db
+    region: frankfurt

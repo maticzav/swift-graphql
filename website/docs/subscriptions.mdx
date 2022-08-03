@@ -1,0 +1,73 @@
+---
+title: GraphQL Subscriptions
+sidebar_label: Subscriptions
+---
+
+SwiftGraphQL packs a fully-featured GraphQL subscription client that conforms to the [GraphQL over WebSocket protocol](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md) specification.
+
+> You can use GraphQLWebSocket as a standalone client or with the query-builder and the SwiftGraphQLClient.
+
+## Using WebSocketExchange
+
+To create a subscription request on the client, you need to use `WebSocketExchange`. `WebSocketExchange` depends on the `GraphQLWebSocket` client that you may further modify to suit your needs.
+
+```swift
+let http_endpoint = URL(string: "http://localhost:8080/graphql")!
+let ws_endpoint = URL(string: "ws://127.0.0.1:4000/graphql")!
+
+let config = GraphQLWebSocketConfiguration()
+config.behaviour = .lazy(closeTimeout: 60)
+
+let ws = GraphQLWebSocket(
+	request: URLRequest(url: ws_endpoint),
+	config: config
+)
+
+let client = SwiftGraphQLClient.Client(
+	request: URLRequest(url: http_endpoint),
+	exchanges: [
+		FetchExchange(),
+		WebSocketExchange(client: socket)
+	]
+)
+
+let args = ExecutionArgs(
+    query: """
+    subscription Counter {
+        count(from: 10, to: 1)
+    }
+    """,
+    variables: [:]
+)
+
+client.subscribe(args)
+	.sink { completion in
+		print(completion)
+	} receiveValue: { result in
+		print(result)
+	}
+```
+
+SwiftGraphQLClient also exposes public utility methods that let you use query builder to make a subscription and decode responses.
+
+## Using GraphQLWebSocketClient
+
+```swift
+let ws = GraphQLWebSocket(request: API_ENDPOINT)
+
+let args = ExecutionArgs(
+    query: """
+    subscription Counter {
+        count(from: 10, to: 1)
+    }
+    """,
+    variables: [:]
+)
+
+client.subscribe(args)
+    .sink { completion in
+        print(completion)
+    } receiveValue: { result in
+        print(result)
+    }
+```

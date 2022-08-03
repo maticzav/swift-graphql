@@ -20,33 +20,65 @@ import GraphQLAST
  */
 
 extension Collection where Element == Field {
-    /// Returns the functions that represent selection for a given type.
-    func selection(scalars: ScalarMap) throws -> String {
-        try map { try $0.selection(scalars: scalars) }.joined(separator: "\n")
+    
+    /// Returns dynamic selection function for every field in the collection.
+    func getDynamicSelections(parent: String, context: Context) throws -> String {
+        try self
+            .map { try $0.getDynamicSelection(parent: parent, context: context) }
+            .joined(separator: "\n")
+    }
+    
+    /// Returns static selection function for every field in the collection.
+    func getStaticSelections(for type: ObjectType, context: Context) throws -> String {
+        try self.map { try $0.getStaticSelection(for: type, context: context) }.joined(separator: "\n")
     }
 }
 
 extension Field {
-    /// Returns the function that may be used to create selection using SwiftGraphQL.
-    func selection(scalars: ScalarMap) throws -> String {
-        """
+    
+    /// Returns a function that may be used to create dynamic selection (i.e. a special subcase of a type) using SwiftGraphQL.
+    func getDynamicSelection(parent: String, context: Context) throws -> String {
+        let parameters = try fParameters(context: context)
+        let output = try type.dynamicReturnType(context: context)
+        
+        let code = """
         \(docs)
         \(availability)
-        func \(fName)\(try fParameters(scalars: scalars)) throws -> \(try type.returnType(scalars: scalars)) {
-            \(selection)
-            self.select(field)
+        func \(fName)\(parameters) throws -> \(output) {
+            \(self.selection(parent: parent))
+            self.__select(field)
 
-            switch self.response {
-            case .decoding(let data):
-                \(decoder)
-            case .mocking:
-                return \(try type.mock(scalars: scalars))
+            switch self.__state {
+            case .decoding:
+                \(try self.decoder(parent: parent, context: context))
+            case .selecting:
+                return \(try type.mock(context: context))
             }
         }
         """
+        
+        return code
     }
-
-    // MARK: - TODO: generate function parameter docs and example!
+    
+    /// Returns a function that may be used to select a single field in the object.
+    func getStaticSelection(for type: ObjectType, context: Context) throws -> String {
+        let parameters = try fParameters(context: context)
+        let typelock = "Objects.\(type.name.pascalCase)"
+        let returnType = try self.type.dynamicReturnType(context: context)
+        let args = self.args.arguments(field: self, context: context)
+        
+        let code = """
+        \(docs)
+        \(availability)
+        static func \(fName)\(parameters) -> Selection<\(returnType), \(typelock)> {
+            Selection<\(returnType), \(typelock)> {
+                try $0.\(fName)\(args)
+            }
+        }
+        """
+        
+        return code
+    }
 
     private var docs: String {
         if let description = self.description {
@@ -67,8 +99,8 @@ extension Field {
         name.camelCase.normalize
     }
 
-    private func fParameters(scalars: ScalarMap) throws -> String {
-        try args.parameters(field: self, scalars: scalars, typelock: type.type(for: typelock))
+    private func fParameters(context: Context) throws -> String {
+        try args.parameters(field: self, context: context, typelock: type.type(for: typelock))
     }
 
     /// Returns a typelock value for this field.
@@ -95,39 +127,51 @@ extension Field {
 
 private extension Collection where Element == InputValue {
     /// Returns a function parameter definition.
-    func parameters(field: Field, scalars: ScalarMap, typelock: String) throws -> String {
-        /*
-         We only return parameters when given scalars. If the function is referencing another type,
-         however, we also generate a generic type and add arguments.
-         */
+    func parameters(field: Field, context: Context, typelock: String) throws -> String {
+        // We only return parameters when given scalars. If the function is referencing another type,
+        // however, we also generate a generic type and add arguments.
+        let params = try map { try $0.parameter(context: context) }.joined(separator: ", ")
+        
         switch field.type.namedType {
         case .scalar, .enum:
-            return "(\(try parameters(scalars: scalars)))"
+            return "(\(params))"
         default:
             if isEmpty {
-                return "<Type>(selection: Selection<Type, \(typelock)>)"
+                return "<T>(selection: Selection<T, \(typelock)>)"
             }
-            return "<Type>(\(try parameters(scalars: scalars)), selection: Selection<Type, \(typelock)>)"
+            return "<T>(\(params), selection: Selection<T, \(typelock)>)"
         }
     }
-
-    /// Returns a list of parameters for given input values.
-    func parameters(scalars: ScalarMap) throws -> String {
-        try map { try $0.parameter(scalars: scalars) }.joined(separator: ", ")
+    
+    /// Returns a one-to-one argument mapping.
+    func arguments(field: Field, context: Context) -> String {
+        let args = self
+            .map { $0.name.camelCase }.map { "\($0): \($0.normalize)" }
+            .joined(separator: ", ")
+        
+        switch field.type.namedType {
+        case .scalar, .enum:
+            return "(\(args))"
+        default:
+            if isEmpty {
+                return "(selection: selection)"
+            }
+            return "(\(args), selection: selection)"
+        }
     }
 }
 
 extension InputValue {
     /// Generates a function parameter for this input value.
-    fileprivate func parameter(scalars: ScalarMap) throws -> String {
-        "\(name.camelCase.normalize): \(try type.type(scalars: scalars)) \(self.default)"
+    fileprivate func parameter(context: Context) throws -> String {
+        "\(name.camelCase.normalize): \(try type.type(scalars: context.scalars)) \(self.default)"
     }
 
     /// Returns the default value of the parameter.
     private var `default`: String {
         switch type.inverted {
         case .nullable:
-            return "= .absent()"
+            return "= .init()"
         default:
             return ""
         }
@@ -142,22 +186,26 @@ extension InputValue {
  */
 
 private extension Field {
+    
     /// Generates an internal leaf definition used for composing selection set.
-    var selection: String {
+    func selection(parent: String) -> String {
         switch type.namedType {
         case .scalar, .enum:
             return """
             let field = GraphQLField.leaf(
-                 name: \"\(name)\",
+                 field: \"\(name)\",
+                 parent: \"\(parent)\",
                  arguments: [ \(args.arguments) ]
             )
             """
         case .interface, .object, .union:
             return """
             let field = GraphQLField.composite(
-                 name: \"\(name)\",
+                 field: "\(name)",
+                 parent: "\(parent)",
+                 type: "\(self.type.namedType.name)",
                  arguments: [ \(args.arguments) ],
-                 selection: selection.selection
+                 selection: selection.__selection()
             )
             """
         }
@@ -206,39 +254,18 @@ extension InputTypeRef {
  */
 
 private extension Field {
+    
     /// Returns selection decoder for this field.
-    var decoder: String {
-        let name = self.name.camelCase
+    func decoder(parent: String, context: Context) throws -> String {
+        let internalType = try self.type.namedType.type(scalars: context.scalars)
+        let wrappedType = self.type.type(for: internalType)
 
-        switch type.inverted.namedType {
-        case .scalar(_), .enum:
-            switch type.inverted {
-            case .nullable:
-                // When decoding a nullable scalar, we just return the value.
-                return "return data.\(name)[field.alias!]"
-            default:
-                // In list value and non-optional scalars we want to make sure that value is present.
-                return """
-                if let data = data.\(name)[field.alias!] {
-                    return data
-                }
-                throw HttpError.badpayload
-                """
-            }
+        switch self.type.namedType {
+        case .scalar, .enum:
+            return "return try self.__decode(field: field.alias!) { try \(wrappedType)(from: $0) }"
+            
         case .interface, .object, .union:
-            switch type.inverted {
-            case .nullable:
-                // When decoding a nullable field we simply pass it down to the decoder.
-                return "return try selection.decode(data: data.\(name)[field.alias!])"
-            default:
-                // When decoding a non-nullable field, we want to make sure that field is present.
-                return """
-                if let data = data.\(name)[field.alias!] {
-                    return try selection.decode(data: data)
-                }
-                throw HttpError.badpayload
-                """
-            }
+            return "return try self.__decode(field: field.alias!) { try selection.__decode(data: $0) }"
         }
     }
 }
@@ -252,25 +279,26 @@ private extension Field {
 
 extension OutputTypeRef {
     /// Generates mock data for this output ref.
-    func mock(scalars: ScalarMap) throws -> String {
-        switch namedType {
-        case let .scalar(scalar):
-            let type = try scalars.scalar(scalar)
+    func mock(context: Context) throws -> String {
+        switch self.namedType {
+        case .scalar(let scalar):
+            let type = try context.scalars.scalar(scalar)
             return mock(value: "\(type).mockValue")
-        case let .enum(enm):
-            return mock(value: "Enums.\(enm.pascalCase).allCases.first!")
+        case .enum(let enm):
+            return mock(value: "Enums.\(enm.pascalCase).mockValue")
         case .interface, .object, .union:
-            return "selection.mock()"
+            return "try selection.__mock()"
         }
     }
 
     /// Returns a mock value wrapped according to ref.
     private func mock(value: String) -> String {
-        inverted.mock(value: value)
+        self.inverted.mock(value: value)
     }
 }
 
 extension InvertedOutputTypeRef {
+    
     /// Returns a mock value wrapped according to ref.
     func mock(value: String) -> String {
         switch self {
@@ -282,6 +310,7 @@ extension InvertedOutputTypeRef {
             return "nil"
         }
     }
+    
 }
 
 // MARK: - Output Types
@@ -292,21 +321,24 @@ extension InvertedOutputTypeRef {
  */
 
 private extension OutputTypeRef {
+    
     /// Returns a return type of a referrable type.
-    func returnType(scalars: ScalarMap) throws -> String {
+    func dynamicReturnType(context: Context) throws -> String {
         switch namedType {
         case let .scalar(scalar):
-            let scalar = try scalars.scalar(scalar)
+            let scalar = try context.scalars.scalar(scalar)
             return type(for: scalar)
         case let .enum(enm):
             return type(for: "Enums.\(enm.pascalCase)")
         case .interface, .object, .union:
-            return "Type"
+            return "T"
         }
     }
+    
 }
 
 extension TypeRef {
+    
     /// Returns a wrapped instance of a given type respecting the reference.
     func type(for name: String) -> String {
         inverted.type(for: name)
@@ -314,6 +346,7 @@ extension TypeRef {
 }
 
 extension InvertedTypeRef {
+    
     /// Returns a wrapped instance of a given type respecting the reference.
     func type(for name: String) -> String {
         switch self {

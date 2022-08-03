@@ -1,25 +1,28 @@
 import Foundation
 import GraphQLAST
 
-/*
- We use fragments' selection to support union and interface types.
- */
-
 extension Collection where Element == ObjectTypeRef {
-    /// Returns a fragment selection for a given type.
-    func selection(name: String, objects: [ObjectType]) -> String {
+    
+    /// Returns a function that may create fragment selection for a type of a given interface or union.
+    ///
+    /// - parameter name: Name of the fragment this selection is for.
+    /// - parameter objects: List of all objects in the scheama.
+    func selection(name type: String, objects: [ObjectType]) -> String {
         """
-        extension Fields where TypeLock == \(name) {
-            func on<Type>(\(parameters)) throws -> Type {
-                self.select([\(selection)])
+        extension Fields where TypeLock == \(type) {
+            func on<T>(\(parameters)) throws -> T {
+                self.__select([\(selection(interface: type))])
 
-                switch self.response {
+                switch self.__state {
                 case .decoding(let data):
-                    switch data.__typename {
-                    \(decoders(objects: objects))
+                    let typename = try self.__decode(field: "__typename") { $0.value as? String }
+                    switch typename {
+                    \(self.decoders(objects: objects))
+                    default:
+                        throw ObjectDecodingError.unknownInterfaceType(interface: "\(type)", typename: typename)
                     }
-                case .mocking:
-                    return \(mock).mock()
+                case .selecting:
+                    return try \(mock).__mock()
                 }
             }
         }
@@ -30,47 +33,43 @@ extension Collection where Element == ObjectTypeRef {
         map { $0.parameter }.joined(separator: ", ")
     }
 
-    private var selection: String {
-        map { $0.fragment }.joined(separator: ", ")
+    /// Creates a field selection variables for the given interface.
+    ///
+    /// - parameter interace: The name of the union or interface.
+    private func selection(interface: String) -> String {
+        map { $0.fragment(interface: interface) }.joined(separator: ",\n")
     }
 
+    /// Functions used to decode response values.
     private func decoders(objects: [ObjectType]) -> String {
         map { $0.decoder(objects: objects) }.lines
     }
 
+    /// Type used to 
     private var mock: String {
-        first!.namedType.name.camelCase
+        self.first!.namedType.name.camelCase
     }
 }
 
 private extension ObjectTypeRef {
     /// Returns a parameter definition for a given type reference.
     var parameter: String {
-        "\(namedType.name.camelCase): Selection<Type, Objects.\(namedType.name.pascalCase)>"
+        "\(namedType.name.camelCase): Selection<T, Objects.\(namedType.name.pascalCase)>"
     }
 
     /// Returns a SwiftGraphQL Fragment selection.
-    var fragment: String {
-        "GraphQLField.fragment(type: \"\(namedType.name)\", selection: \(namedType.name.camelCase).selection)"
+    func fragment(interface: String) -> String {
+        #"GraphQLField.fragment(type: "\#(namedType.name)", interface: "\#(interface)", selection: \#(namedType.name.camelCase).__selection())"#
     }
 
     /// Returns a decoder for a fragment.
+    ///
+    /// - parameter objects: List of all objects that appear in the schema.
     func decoder(objects: [ObjectType]) -> String {
         let name = namedType.name
-        let object = objects.first { $0.name == name }!
-
-        let fields = object.fields
-            .sorted(by: { $0.name < $1.name })
-            .map {
-                let name = $0.name.camelCase
-                return "\(name): data.\(name)"
-            }
-            .joined(separator: ", ")
-
         return """
-        case .\(name.camelCase):
-            let data = Objects.\(name.pascalCase)(\(fields))
-            return try \(name.camelCase).decode(data: data)
+        case "\(name)":
+            return try \(name.camelCase).__decode(data: data)
         """
     }
 }

@@ -1,5 +1,6 @@
 import Foundation
 import GraphQLAST
+import SwiftGraphQL
 
 /*
  This file contains the code that we use to generate interfaces.
@@ -10,26 +11,26 @@ import GraphQLAST
 extension InterfaceType: Structure {}
 
 extension InterfaceType {
+    
     /// Returns a code that represents an interface.
-    func declaration(objects: [ObjectType], scalars: ScalarMap) throws -> String {
+    ///
+    /// - parameter objects: List of all objects in the schema.
+    func declaration(objects: [ObjectType], context: Context) throws -> String {
         let name = self.name.pascalCase
+        let fields = try self.fields.getDynamicSelections(parent: self.name, context: context)
 
         return """
         extension Interfaces {
-        \(try self.struct(name: name, objects: objects, scalars: scalars))
-        }
-
-        extension Interfaces.\(name): Decodable {
-        \(try allFields(objects: objects).decoder(scalars: scalars, includeTypenameDecoder: true))
+            struct \(name) {}
         }
 
         extension Fields where TypeLock == Interfaces.\(name) {
-        \(try fields.selection(scalars: scalars))
+        \(fields)
         }
 
         \(possibleTypes.selection(name: "Interfaces.\(name)", objects: objects))
 
-        extension Selection where TypeLock == Never, Type == Never {
+        extension Selection where T == Never, TypeLock == Never {
             typealias \(name)<T> = Selection<T, Interfaces.\(name)>
         }
         """

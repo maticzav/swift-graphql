@@ -1,0 +1,31 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug swift-graphql",
+      "program": ".build/debug/swift-graphql",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-graphql}",
+      "preLaunchTask": "swift: Build Debug swift-graphql"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release swift-graphql",
+      "program": ".build/release/swift-graphql",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-graphql}",
+      "preLaunchTask": "swift: Build Release swift-graphql"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Test swift-graphql",
+      "program": "/Applications/Xcode.app/Contents/Developer/usr/bin/xctest",
+      "args": [".build/debug/swift-graphqlPackageTests.xctest"],
+      "cwd": "${workspaceFolder:swift-graphql}",
+      "preLaunchTask": "swift: Build All"
+    }
+  ]
+}

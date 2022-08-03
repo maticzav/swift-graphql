@@ -1,94 +1,127 @@
-import { makeSchema } from 'nexus'
+import { createServer, YogaInitialContext } from '@graphql-yoga/node'
+import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+
+import * as fs from 'fs'
 import * as path from 'path'
 
-import { data } from './data'
-import * as allTypes from './graphql'
-import { ContextType } from './types/backingTypes'
+import { Server as HTTPServer } from 'http'
+import { Server as WebSocketServer } from 'ws'
+import { useServer } from 'graphql-ws/lib/use/ws'
 
-/* Schema */
+import { getUserName } from './lib/auth'
+import { Context } from './lib/context'
+import { resolvers } from './resolvers'
 
-const schema = makeSchema({
-  types: allTypes,
-  nonNullDefaults: {
-    input: true,
-    output: true,
-  },
-  outputs: {
-    typegen: path.join(__dirname, 'nexus.types.ts'),
-    schema: path.join(__dirname, './schema.graphql'),
-  },
-  sourceTypes: {
-    modules: [
-      {
-        module: path.join(__dirname.replace(/\/dist$/, '/src'), './types/backingTypes.ts'),
-        alias: 'swapi',
+// Server
+
+const typeDefs = fs.readFileSync(path.resolve(__dirname, './schema.graphql')).toString('utf-8')
+
+async function main() {
+  const server = createServer<Context, any>({
+    hostname: '0.0.0.0',
+    schema: makeExecutableSchema({
+      typeDefs,
+      resolvers,
+      resolverValidationOptions: {
+        requireResolversToMatchSchema: 'error',
       },
-    ],
-  },
-  contextType: {
-    module: path.join(__dirname.replace(/\/dist$/, '/src'), './types/backingTypes.ts'),
-    export: 'ContextType',
-  },
-  prettierConfig: require.resolve('../../prettier.config.js'),
-})
-
-/* Server */
-
-const express = require("express");
-//import express from 'express';
-const ws = require("ws");
-// import ws from 'ws'; // yarn add ws
-import { useServer } from 'graphql-ws/lib/use/ws';
-import { execute, subscribe, GraphQLError } from 'graphql';
-import { createServer, IncomingMessage, Server } from 'http';
-import { graphqlHTTP } from 'express-graphql';
-
-const port = process.env.PORT || 4000;
-
-const http = express();
-const httpServer = createServer(http);
-
-http.use('/graphql', async (req: any, res: any) => {
-  const context: any = { req: req, data: data };
-
-	graphqlHTTP({
-		schema: schema,
-		context: context
-	})(req, res);
-});
-
-const wsServer = new ws.Server({
-  server: httpServer,
-  path: '/subscriptions'
-});
-
-useServer(
-  {
-    schema,
-    execute,
-    subscribe,
-    onConnect: (ctx) => {
-      console.log('Connect', ctx);
-      ctx["data"] = data
+    }),
+    graphiql: {
+      subscriptionsProtocol: 'WS',
     },
-    onSubscribe: (ctx, msg) => {
-      console.log('Subscribe', { ctx, msg });
-    },
-    onNext: (ctx, msg, args, result) => {
-      console.debug('Next', { ctx, msg, args, result });
-    },
-    onError: (ctx, msg, errors) => {
-      console.error('Error', { ctx, msg, errors });
-    },
-    onComplete: (ctx, msg) => {
-      console.log('Complete', { ctx, msg });
-    }
-  },
-  wsServer
-);
+    renderGraphiQL,
+    logging: true,
+    maskedErrors: false,
+    context: async (ctx: YogaInitialContext): Promise<Context> => {
+      let user: { name: string } | null = null
 
-httpServer.listen(port, () => {
-	console.log(`HTTP server listening on port ${port}`);
-});
+      const name = getUserName(ctx)
+      if (name) {
+        user = { name }
+      }
 
-console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
+      return { ...ctx, user }
+    },
+  })
+
+  // Get NodeJS Server from Yoga
+  const httpServer: HTTPServer = await server.start()
+
+  // Create WebSocket server instance from our Node server
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: server.getAddressInfo().endpoint,
+  })
+
+  // Integrate Yoga's Envelop instance and NodeJS server with graphql-ws
+  useServer(
+    {
+      execute: (args: any) => args.rootValue.execute(args),
+      subscribe: (args: any) => args.rootValue.subscribe(args),
+      onConnect(ctx) {
+        console.log('connection created')
+        console.log({ ctx })
+
+        ctx.extra.socket.on('message', (data) => {
+          console.log(String(data))
+        })
+      },
+      onDisconnect(ctx) {
+        console.log('connection disconnected')
+        console.log({ ctx })
+      },
+      onClose(ctx) {
+        console.log('connection closed')
+        console.log({ ctx })
+      },
+      onOperation(ctx) {
+        console.log('operation started')
+        console.log({ ctx })
+      },
+      onComplete(ctx) {
+        console.log('operation completed')
+        console.log({ ctx })
+      },
+      onNext(ctx) {
+        console.log('operation next')
+        console.log({ ctx })
+      },
+      connectionInitWaitTimeout: 5000,
+      onError(ctx, message) {
+        console.log('error in connection')
+        console.log({ ctx })
+        console.log(message)
+      },
+      onSubscribe: async (ctx, msg) => {
+        console.log('received subscription request')
+        const { schema, execute, subscribe, contextFactory, parse, validate } = server.getEnveloped(ctx)
+
+        const args = {
+          schema,
+          operationName: msg.payload.operationName,
+          document: parse(msg.payload.query),
+          variableValues: msg.payload.variables,
+          contextValue: await contextFactory(),
+          rootValue: {
+            execute,
+            subscribe,
+          },
+        }
+
+        const errors = validate(args.schema, args.document)
+        if (errors.length) return errors
+        return args
+      },
+    },
+    wsServer,
+  )
+}
+
+// Start
+
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err)
+  })
+}

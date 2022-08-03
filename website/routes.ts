@@ -5,15 +5,38 @@ export function getRoutes(): IRoutes {
     _: {
       docs: {
         $name: 'Docs',
-        $routes: ['README', 'installation', 'generation', 'querying', 'selection', 'faq'],
+        $routes: [
+          //
+          'README',
+          'why',
+          'installation',
+          'network',
+          'querying',
+          'subscriptions',
+          'guides',
+          'advanced',
+          'faq',
+        ],
         _: {
+          guides: {
+            $name: 'Guides',
+            $routes: [
+              //
+              'auth',
+              'uploads',
+              'filestructure',
+            ],
+          },
           advanced: {
             $name: 'Advanced',
-            $routes: ['why', 'how', 'codecs'],
-          },
-          reference: {
-            $name: 'Reference',
-            $routes: ['client', 'generator'],
+            $routes: [
+              //
+              'scalars',
+              'cache',
+              'exchanges',
+              'how',
+              'selection',
+            ],
           },
         },
       },

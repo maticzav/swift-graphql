@@ -6,6 +6,8 @@
 
 ![CI Tests](https://github.com/maticzav/swift-graphql/workflows/Test/badge.svg)
 
+https://graphql.org/swapi-graphql/
+
 ## Features
 
 - ✨ **Intuitive:** You'll forget about the GraphQL layer altogether.
@@ -16,75 +18,38 @@
 
 ## Overview
 
-SwiftGraphQL is a Swift code generator and a lightweight GraphQL client. It lets you create queries using Swift, and guarantees that every query you create is valid.
+SwiftGraphQL is a GraphQL Client that ships with a type-safe query builder. It lets you perform queries, mutations and listen for subscriptions. The query builder guarantees that every query you _can_ create is valid and complies with the GraphQL spec.
 
 The library is centered around three core principles:
 
 - 🚀 If your project compiles, your queries work.
 - 🦉 Use Swift in favour of GraphQL wherever possible.
-- 🌳 Your application model should be independent of your schema.
+- 🕊 Packages shouldn't lock you in to the "framework".
 
-Here's a short preview of the SwiftGraphQL code
-
-```swift
-import SwiftGraphQL
-
-// Define a Swift model.
-struct Human: Identifiable {
-    let id: String
-    let name: String
-    let homePlanet: String?
-}
-
-// Create a selection.
-let human = Selection.Human {
-    Human(
-        id: try $0.id(),
-        name: try $0.name(),
-        homePlanet: try $0.homePlanet()
-    )
-}
-
-// Construct a query.
-let query = Selection.Query {
-    try $0.humans(human.list)
-}
-
-// Perform the query.
-send(query, to: "http://swift-graphql.heroku.com") { result in
-    if let data = try? result.get() {
-        print(data) // [Human]
-    }
-}
-```
+> You can use only parts of SwiftGraphQL that are useful to you (e.g. use GraphQLWebSocket implementation but not the query builder, or WebSocket but not the client).
 
 ## Documentation
 
-You can find detailed documentation on the SwiftGraphQL page at [swift-graphql.vercel.app](https://swift-graphql.vercel.app)
+You can find detailed documentation on the SwiftGraphQL page at [https://www.swift-graphql.com/](https://www.swift-graphql.com/).
+
+### Other Libraries
+
+SwiftGraphQL solves a set of specific problems but it doesn't solve _every_ problem. Depending on your needs, you may also want to check out
+
+- https://github.com/relay-tools/Relay.swift
+- https://github.com/apollographql/apollo-ios
+- https://github.com/nerdsupremacist/Graphaello
 
 ---
 
-## Roadmap and Contributing
-
-This library is feature complete for our use case. We are actively using it in our production applications and plan to expand it as our needs change. We'll also publish performance updates and bug fixes that we find.
-
-I plan to actively maintain it for many upcoming years. Swift seems like a fantastic language and I've only started learning it.
-
-Feel free to create a pull request with future improvements. Please, document your contributions well, and clearly outline the benefits of the change. It's also very helpful to include the ideas behind changes.
-
-Here's a rough collection of ideas we might tackle next:
-
-- Networking Layer
-- Caching
-
-> PS.: PRs for the above features will be reviewed a lot more quickly!
-
 ## Thank you
 
-I want to dedicate this last section to everyone who helped me along the way.
+I would like to dedicate this last section to everyone who helped develop this library.
 
 - First, I would like to thank Dillon Kearns, the author of [elm-graphql](http://github.com/dillonkearns/elm-graphql), who inspired me to write the library, and helped me understand the core principles behind his Elm version.
 - Second, I would like to thank Peter Albert for giving me a chance to build this library, having faith that it's possible, and all the conversations that helped me push through the difficult parts of it.
+- Thirdly, special thanks to Phil Pluckthun who explained all the bits of how `urql` and `wonka` work,
+- Fourthly, thanks to Orta Therox for helping me navigate Combine.
 - Lastly, I'd like to thank every contributor to the project. SwiftGraphQL is better because of you. Thank you!
 
 Thank you! 🙌
@@ -94,3 +59,5 @@ Thank you! 🙌
 ## License
 
 MIT @ Matic Zavadlal
+
+https://steipete.com/posts/logging-in-swift/

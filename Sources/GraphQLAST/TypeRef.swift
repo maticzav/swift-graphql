@@ -49,6 +49,7 @@ public enum NamedRef: Equatable {
     case `enum`(String)
     case inputObject(String)
 
+    /// Returns a name of the referenced type.
     public var name: String {
         switch self {
         case let .scalar(name), let
@@ -107,15 +108,6 @@ public enum InputRef: Equatable {
     case scalar(String)
     case `enum`(String)
     case inputObject(String)
-
-//        var name: String {
-//            switch self {
-//            case .scalar(let name),
-//                 .enum(let name),
-//                 .inputObject(let name):
-//                return name
-//            }
-//        }
 }
 
 // MARK: - Extensions

@@ -2,10 +2,9 @@
 import XCTest
 
 final class ASTIntrospectionTests: XCTestCase {
-    /* Schema */
-
-    func testIntrospectServer() throws {
-        let url = URL(string: "https://swapi-ql.herokuapp.com/graphql")!
+    /// Test that it's possible to load schema from a URL.
+    func testLoadSchemaFromURL() throws {
+        let url = URL(string: "http://127.0.0.1:4000/graphql")!
         let schema = try Schema(from: url)
 
         /* Tests */

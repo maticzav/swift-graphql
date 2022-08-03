@@ -7,14 +7,19 @@ on:
 
 jobs:
   build:
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
+
     steps:
       # Setup
       - uses: actions/checkout@master
       - uses: actions/setup-node@v1
         with:
-          node-version: '13.x'
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
       # Build
       - run: yarn install --skip-builds
-      - name: Generate table of contents
+
+      # Generate TOC
+      - name: Generate Table of Contents
         run: ./scripts/toc.sh

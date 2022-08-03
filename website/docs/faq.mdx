@@ -42,7 +42,7 @@ We use the limitation of Swift's types that you cannot recursively reference a n
 Swift handles errors in a very upfront way. Since we are trying to decode nested values, the decoder might fail
 at various different depths. Because of that, we have to write `try`.
 
-### What are the pitfalls in Apollo iOS that you were referring to at the top?
+### What problems of Apollo Client does SwiftGraphQL solve?
 
 Apollo iOS code generator lets you write your queries upfront and generates the type annotations for them. Let's say that there's a `Human` object type that has a property `friends` (who are also humans). Because you could select different fields in `Human` than in `friends` (sub-`Human`), Apollo generates two different nested structs for "each" of the humans. In TypeScript and JavaScript this is not a problem, since objects are not "locked" into definition. In Swift, however, this becomes problematic as you probably want to represent all your humans in your model with only one human type.
 

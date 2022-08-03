@@ -1,0 +1,170 @@
+---
+title: Uploading Files
+sidebar_label: Uploading Files
+---
+
+You might be tempted to slam `scalar Upload` on top of your GraphQL Schema and process file uploads using your GraphQL server.
+
+Don't do it. If you are going to do it:
+
+- It adds huge network load on your server,
+- It'll cost you more money,
+- You won't be able to upload files using SwiftGraphQL.
+
+This guide explains how you can do it better.
+
+## Server
+
+Instead of consuming all the traffic of file uploads on your server and sending it to your cloud storage, you are going to use signed upload URLs. Signed Upload URLs let client upload a file to the cloud storage provider directly in a given time period.
+
+We split the tasks among server and client so that:
+
+- the server is going to be responsible for creating signed URLs, and
+- the client is going to be responsible for handling uploads
+
+```typescript
+// Using AWS S3
+const client = new S3Client({
+  credentials: {
+    accessKeyId: config.awsAccessKeyId,
+    secretAccessKey: config.awsSecretAccessKey,
+  },
+  region: config.awsRegion,
+})
+
+export namespace CDNUtils {
+  /**
+   * Returns information that you need to upload a file to the walletta CDN.
+   */
+  export const getFileUploadValues = async ({
+    extension,
+    contentType,
+    folder,
+  }: {
+    extension?: string | null
+    contentType: string
+    folder: string
+  }): Promise<{
+    file_url: string
+    file_key: string
+    upload_url: string
+  }> => {
+    const Key = generateS3Key({ folder, extension })
+
+    const command = new PutObjectCommand({
+      Bucket: config.awsS3Bucket,
+      Key,
+      ContentType: contentType,
+      ACL: 'public-read',
+    })
+    const upload_url = await getSignedUrl(client, command, { expiresIn: 3600 })
+
+    const file_key = `/${Key}`
+    const file_url = getFileURL({ fileKey: file_key })
+
+    return { upload_url, file_url, file_key }
+  }
+
+  /**
+   * Returns a unique identifier that may be used as a key of a file.
+   */
+  const generateS3Key = ({ folder, extension }: { folder: string; extension?: string | null }): string => {
+    const subfolder = RandomUtils.generateRandomAlphaNumericString(2)
+    const id = uuid()
+
+    let key = `${folder}/${subfolder}/${id}`
+    if (extension) {
+      key += '.' + extension
+    }
+    return key
+  }
+
+  /**
+   * Returns a file key from a file url.
+   */
+  export const getFileKey = ({ fileURL }: { fileURL: string }): string => {
+    return fileURL.replace(config.awsBase, '').replace(`${config.awsS3Bucket}/`, '')
+  }
+
+  /**
+   * Converts file key to a public URL.
+   */
+  export const getFileURL = ({ fileKey }: { fileKey: string }): string => {
+    return config.awsBase + config.awsS3Bucket + fileKey
+  }
+}
+```
+
+## Client
+
+Instead of passing in your file as a GraphQL mutation parameter, you are going to request a file from your GraphQL server and then use native Swift methods to upload your file there. The flow is going to consist of
+
+1. Requesting the `upload_url` and `file_id`,
+1. Uploading the file to `upload_url`,
+1. Using the `file_id` in mutation to link your file to a database model.
+
+```swift
+import Combine
+import Foundation
+
+enum CDNClient {
+
+    /// Uploads a given file to the CDN and returns the ID that may be used to identify it.
+    static func upload(data: Data, extension ext: String, contentType: String) -> AnyPublisher<File, Error> {
+        swiftclient.mutate(SignedURL.getSignedURL(extension: ext, contentType: contentType))
+            .flatMap { result -> AnyPublisher<File, Error> in
+                switch result.result {
+                case .ok(let url):
+                    guard let url = url else {
+                        break
+                    }
+
+                    let file = File(id: url.id, url: url.fileURL)
+
+                    var request = URLRequest(url: url.uploadURL, cachePolicy: .reloadIgnoringLocalCacheData)
+                    request.httpMethod = "PUT"
+                    request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+
+                    let upload = URLSession.shared.uploadTaskPublisher(with: request, from: data)
+                    return upload.map { _ in file }.eraseToAnyPublisher()
+                default:
+                    break
+                }
+
+                return Fail<File, Error>(error: CDNError.badSignedURL).eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+}
+
+extension URLSession {
+
+    /// Creates a publisher that emits `true` when the file was successfully uploaded to a given URL.
+    func uploadTaskPublisher(with request: URLRequest, from data: Data) -> AnyPublisher<Bool, Error> {
+        let publisher = Future<Bool, Error> { promise in
+            let task = self.uploadTask(with: request, from: data) { data, response, error in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let response = response as? HTTPURLResponse,
+                    (200...299).contains(response.statusCode) else {
+                    promise(.failure(CDNError.badResponseCode))
+                    return
+                }
+
+                promise(.success(true))
+            }
+
+            task.resume()
+        }
+
+        return publisher.eraseToAnyPublisher()
+    }
+}
+
+enum CDNError: Error {
+    case badResponseCode
+    case badSignedURL
+}
+```
