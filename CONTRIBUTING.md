@@ -27,8 +27,9 @@ Feel free to contribute in any way possible. We are excited about your ideas and
 
 We are currently investing our efforts into
 
-- Normalized Caching
-- Subscriptions over SSE
+- Swift Docc Reference of the library,
+- Normalized Caching exchange,
+- Subscriptions over SSE exchange,
 - SwiftUI bindings
 
 Contributing in any of these topics will get a lot of attention and have top priority.

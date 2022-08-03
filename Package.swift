@@ -1,5 +1,4 @@
 // swift-tools-version:5.6
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
@@ -24,6 +23,7 @@ let package = Package(
         .library(name: "GraphQLWebSocket", targets: ["GraphQLWebSocket"])
     ],
     dependencies: [
+        // .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-format", from: "0.50600.1"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
