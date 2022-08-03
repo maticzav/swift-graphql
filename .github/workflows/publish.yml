@@ -37,14 +37,10 @@ jobs:
           body: ${{ steps.tag_version.outputs.changelog }}
         if: steps.tag_version.outputs.new_tag != null
 
-      - name: Create Release
+      - name: Update Library Information
         run: |
           make update_brew_formula
           make update_podspec
-
-          git add .
-          git commit -m 
-          git push origin main
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request
