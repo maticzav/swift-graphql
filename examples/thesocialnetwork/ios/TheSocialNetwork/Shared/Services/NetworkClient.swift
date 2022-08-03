@@ -4,8 +4,13 @@ import SwiftGraphQLClient
 
 
 enum NetworkClient {
-    static private var http: URLRequest = URLRequest(url: URL(string: "http://127.0.0.1:4000/graphql")!)
-    static private var ws: URLRequest = URLRequest(url: URL(string: "ws://127.0.0.1:4000/graphql")!)
+    // Local Instance
+    // static private var http = URL(string: "http://127.0.0.1:4000/graphql")!
+    // static private var ws = URL(string: "ws://127.0.0.1:4000/graphql")!
+
+    // With Hosted Server
+    static private var http = URL(string: "https://thesocialnetwork.swift-graphql.com/graphql")!
+    static private var ws = URL(string: "wss://thesocialnetwork.swift-graphql.com/graphql")!
     
     static private var encoder: JSONEncoder {
         let encoder = JSONEncoder()
@@ -15,19 +20,21 @@ enum NetworkClient {
     
     static private var wsconfig: GraphQLWebSocketConfiguration {
         let config = GraphQLWebSocketConfiguration()
-        config.behaviour = .lazy(closeTimeout: 60)
         config.encoder = encoder
         return config
     }
     
-    static private var socket: GraphQLWebSocket = GraphQLWebSocket(request: ws, config: wsconfig)
+    static private var socket: GraphQLWebSocket = GraphQLWebSocket(
+        request: URLRequest(url: ws), 
+        config: wsconfig
+    )
     
     /// Exchange that takes care of the caching of results.
     static let cache = CacheExchange()
     
     /// Instance of the GraphQL client that may be used by all services.
     static let shared: GraphQLClient = SwiftGraphQLClient.Client(
-        request: http,
+        request: URLRequest(url: http),
         exchanges: [
             DedupExchange(),
             AuthExchange(header: "Authentication", getToken: {
