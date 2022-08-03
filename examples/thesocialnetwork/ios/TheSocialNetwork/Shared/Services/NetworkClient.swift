@@ -8,7 +8,7 @@ enum NetworkClient {
     // static private var http = URL(string: "http://127.0.0.1:4000/graphql")!
     // static private var ws = URL(string: "ws://127.0.0.1:4000/graphql")!
 
-    // With Hosted Server
+    // Hosted Server
     static private var http = URL(string: "https://thesocialnetwork.swift-graphql.com/graphql")!
     static private var ws = URL(string: "wss://thesocialnetwork.swift-graphql.com/graphql")!
     

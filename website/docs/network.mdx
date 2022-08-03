@@ -12,14 +12,16 @@ This section shows you how you can use it with the query-builder, but it shouldn
 To create a client you can either choose to go with default (basic) set of exchanges that don't require any setup, or customize it to fit your needs. You can start with the simpler configuration, but we encourage you to switch to the complete configuration soon, since it gives you more clarity and control over what's happening.
 
 ```swift
-// Configuration of the client internals.
+let url = URL(string: "http://127.0.0.1:4000/graphql")!
+
+// Simple
+let client = SwiftGraphQLClient.Client(request: URLRequest(url: url))
+
+// Complete
 let config = ClientConfiguration()
-
-// Default request used to send HTTP requests.
-let request = URLRequest(url: URL(string: "http://127.0.0.1:4000/graphql")!)
-
 let client = SwiftGraphQLClient.Client(
-	request: request,
+	// Default request used to send HTTP requests.
+	request: URLRequest(url: url),
 	exchanges: [
 		DedupExchange(),
 		CacheExchange(),

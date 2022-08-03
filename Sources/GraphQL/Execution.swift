@@ -1,6 +1,6 @@
 import Foundation
 
-/// Parameters sent to the GraphQL server for evaluation.
+/// The structure holding parameters for a GraphQL request.
 ///
 /// ExecutionArgs contains fields in the [GraphQL over HTTP spec](https://github.com/graphql/graphql-over-http/blob/main/spec/GraphQLOverHTTP.md#request-parameters) and [GraphQL over WebSocket](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#subscribe) spec.
 public struct ExecutionArgs: Codable, Equatable {
@@ -38,7 +38,7 @@ extension ExecutionArgs: Hashable {
 }
 
 /// GraphQL execution result as outlined in the [GraphQL Spec](http://spec.graphql.org/October2021/#sec-Response-Format).
-public struct ExecutionResult {
+public struct ExecutionResult: Equatable, Encodable, Decodable {
     
     /// Result of a successfull execution of a query.
     public var data: AnyCodable
@@ -64,8 +64,3 @@ public struct ExecutionResult {
         self.extensions = extensions
     }
 }
-
-
-extension ExecutionResult: Equatable  {}
-extension ExecutionResult: Encodable  {}
-extension ExecutionResult: Decodable  {}
