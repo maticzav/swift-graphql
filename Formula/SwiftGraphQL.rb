@@ -1,4 +1,4 @@
-class SwiftGraphQL < Formula
+class Swiftgraphql < Formula
   desc "Code generator for SwiftGraphQL library"
   homepage "https://swift-graphql.org"
   license "MIT"
