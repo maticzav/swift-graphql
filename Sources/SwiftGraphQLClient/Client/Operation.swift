@@ -100,7 +100,7 @@ public enum CombinedError: Error {
     /// Describes errors that occured during the GraphQL execution.
     case graphql([GraphQLError])
     
-    /// Describes an error that occured during the parsing phase on the client.
+    /// Describes an error that occured during the parsing phase on the client (e.g. received JSON is invalid).
     case parsing(Error)
     
     /// An error occured and it's not clear why.
@@ -147,14 +147,11 @@ public struct DecodedOperationResult<T> {
     /// Back-reference to the operation that triggered the execution.
     public var operation: Operation
     
-    /// Decoded response of the query that's either successful when there are no errors
-    /// or a failure response with errors.
-    public var result: Result
+    /// Data received from the server.
+    public var data: T
     
-    public enum Result {
-        case ok(T)
-        case error([CombinedError])
-    }
+    /// Errors accumulated along the execution path.
+    public var errors: [CombinedError]
     
     /// Tells wether the result of the query is ot up-to-date.
     public var stale: Bool?

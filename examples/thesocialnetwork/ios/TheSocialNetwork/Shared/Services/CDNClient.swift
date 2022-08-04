@@ -8,26 +8,19 @@ enum CDNClient {
         NetworkClient.shared.mutate(SignedURL.getSignedURL(extension: ext, contentType: contentType))
             .flatMap { result -> AnyPublisher<File, Error> in
                 
-                switch result.result {
-                case .ok(let url):
-                    guard let url = url else {
-                        break
-                    }
-                    
-                    let file = File(id: url.id, url: url.fileURL)
-                    
-                    var request = URLRequest(url: url.uploadURL, cachePolicy: .reloadIgnoringLocalCacheData)
-                    request.httpMethod = "PUT"
-                    request.setValue(contentType, forHTTPHeaderField: "Content-Type")
-                    
-                    let upload = URLSession.shared.uploadTaskPublisher(with: request, from: data)
-                    
-                    return upload.map { _ in file }.eraseToAnyPublisher()
-                default:
-                    ()
+                guard let url = result.data else {
+                    return Fail<File, Error>(error: CDNError.badSignedURL).eraseToAnyPublisher()
                 }
                 
-                return Fail<File, Error>(error: CDNError.badSignedURL).eraseToAnyPublisher()
+                let file = File(id: url.id, url: url.fileURL)
+                
+                var request = URLRequest(url: url.uploadURL, cachePolicy: .reloadIgnoringLocalCacheData)
+                request.httpMethod = "PUT"
+                request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+                
+                let upload = URLSession.shared.uploadTaskPublisher(with: request, from: data)
+                
+                return upload.map { _ in file }.eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
     }

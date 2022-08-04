@@ -47,15 +47,11 @@ enum AuthClient {
                 
                 NetworkClient.shared.query(User.viewer, policy: .cacheAndNetwork)
                     .receive(on: DispatchQueue.main)
-                    .map { res in
-                        switch res.result {
-                        case .ok(let data):
-                            return data
-                        default:
-                            self.logout()
-                            return nil
-                        }
-                    }
+                    .map { res -> User? in res.data }
+                    .catch({ _ -> AnyPublisher<User?, Never> in
+                        self.logout()
+                        return Just(User?.none).eraseToAnyPublisher()
+                    })
                     .removeDuplicates()
                     .assign(to: &self.$user)
             }

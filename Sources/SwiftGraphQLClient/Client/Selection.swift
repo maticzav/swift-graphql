@@ -85,9 +85,9 @@ extension GraphQLClient {
         as operationName: String? = nil,
         request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
-    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLHttpOperation {
+    ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLHttpOperation {
         self.executeQuery(for: selection, as: operationName, url: request, policy: policy)
-            .map { result in result.decode(selection: selection) }
+            .tryMap { result in try result.decode(selection: selection) }
             .eraseToAnyPublisher()
     }
     
@@ -97,9 +97,9 @@ extension GraphQLClient {
         as operationName: String? = nil,
         request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
-    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLHttpOperation {
+    ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLHttpOperation {
         self.executeMutation(for: selection, as: operationName, url: request, policy: policy)
-            .map { result in result.decode(selection: selection) }
+            .tryMap { result in try result.decode(selection: selection) }
             .eraseToAnyPublisher()
     }
     
@@ -109,9 +109,9 @@ extension GraphQLClient {
         as operationName: String? = nil,
         request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
-    ) -> AnyPublisher<DecodedOperationResult<T>, Never> where TypeLock: GraphQLWebSocketOperation {
+    ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLWebSocketOperation {
         self.executeSubscription(of: selection, as: operationName, url: request, policy: policy)
-            .map { result in result.decode(selection: selection) }
+            .tryMap { result in try result.decode(selection: selection) }
             .eraseToAnyPublisher()
     }
 }
@@ -121,29 +121,17 @@ extension OperationResult {
     /// Decodes data in operation result using the selection decoder.
     fileprivate func decode<T, TypeLock>(
         selection: Selection<T, TypeLock>
-    ) -> DecodedOperationResult<T> {
-        var result: DecodedOperationResult<T>.Result
-        var errors: [CombinedError] = self.errors
+    ) throws -> DecodedOperationResult<T> {
+        let data = try selection.decode(raw: self.data)
         
-        do {
-            result = .ok(try selection.decode(raw: self.data))
-        } catch(let err) {
-            errors.append(CombinedError.parsing(err))
-            result = .error(self.errors)
-        }
-        
-        // If there are any errors, we default to overriding the returned
-        // information with errors.
-        if !errors.isEmpty {
-            result = .error(errors)
-        }
-        
-        let decoded = DecodedOperationResult<T>(
+        let result = DecodedOperationResult(
             operation: self.operation,
-            result: result,
+            data: data,
+            errors: self.errors,
             stale: self.stale
         )
-        return decoded
+        
+        return result
     }
 }
 #endif

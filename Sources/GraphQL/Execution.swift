@@ -66,3 +66,34 @@ public struct ExecutionResult: Equatable, Encodable, Decodable {
         self.extensions = extensions
     }
 }
+
+// MARK: - Extra
+
+/// GraphQL execution result that has decoded data parameter.
+public struct DecodedExecutionResult<T> {
+    
+    /// Result of a successfull execution of a query.
+    public var data: T
+    
+    /// Any errors that occurred during the GraphQL execution of the server.
+    public var errors: [GraphQLError]?
+    
+    /// Optional parameter indicating that there are more values following this one.
+    public var hasNext: Bool?
+    
+    /// Reserved entry for implementors to extend the protocol however they see fit.
+    public let extensions: [String: AnyCodable]?
+    
+    public init(
+        data: T,
+        errors: [GraphQLError]? = nil,
+        hasNext: Bool? = nil,
+        extensions: [String: AnyCodable]? = nil
+    ) {
+        self.data = data
+        self.errors = errors
+        self.hasNext = hasNext
+        self.extensions = extensions
+    }
+}
+

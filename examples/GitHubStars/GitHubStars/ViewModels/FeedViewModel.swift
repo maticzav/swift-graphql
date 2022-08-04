@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 class FeedViewModel: ObservableObject {
@@ -15,14 +16,8 @@ class FeedViewModel: ObservableObject {
             }
             .flatMap { _ in NetworkClient.shared.query(Repository.starred) }
             .receive(on: RunLoop.main)
-            .map { result -> [Repository] in
-                switch result.result {
-                case .ok(let data):
-                    return data
-                default:
-                    return []
-                }
-            }
+            .map { res in res.data }
+            .catch({ _ in Just([]) })
             .assign(to: &self.$repositories)
     }
 }

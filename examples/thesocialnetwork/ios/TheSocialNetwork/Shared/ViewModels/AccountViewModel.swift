@@ -12,12 +12,8 @@ class AccountViewModel: ObservableObject {
     init() {
         NetworkClient.shared
             .subscribe(to: Date.serverTime)
-            .map { result in
-                guard case let .ok(date) = result.result else {
-                    return nil
-                }
-                return date
-            }
+            .map { result in result.data }
+            .catch({ _ in Just(Date?.none) })
             .assign(to: &self.$time)
     }
     
@@ -37,10 +33,15 @@ class AccountViewModel: ObservableObject {
                     .eraseToAnyPublisher()
             })
             .receive(on: RunLoop.main)
-            .sink(receiveCompletion: { res in             
-                self.loading = false
-            }, receiveValue: { result in
-                ()
-            })
+            .print()
+            .sink(receiveCompletion: { res in
+                switch res {
+                case .finished:
+                    self.loading = false
+                case .failure(let err):
+                    print(err.localizedDescription)
+                    self.loading = false
+                }
+            }, receiveValue: { result in })
     }
 }

@@ -44,9 +44,7 @@ let package = Package(
                 "Starscream"
             ],
             path: "Sources/GraphQLWebSocket",
-            exclude: [
-                "README.md"
-            ]
+            exclude: ["README.md"]
         ),
         // SwiftGraphQL
         .target(name: "SwiftGraphQL", dependencies: ["GraphQL"], path: "Sources/SwiftGraphQL"),
@@ -63,10 +61,9 @@ let package = Package(
         .target(
             name: "SwiftGraphQLCodegen",
             dependencies: [
+                "GraphQLAST",
                 .product(name: "SwiftFormat", package: "swift-format"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
-                .byName(name: "GraphQLAST"),
-                .byName(name: "SwiftGraphQL"),
             ],
             path: "Sources/SwiftGraphQLCodegen"
         ),
@@ -74,10 +71,10 @@ let package = Package(
             name: "SwiftGraphQLCLI",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "Files",
+                "Spinner",
                 "SwiftGraphQLCodegen",
                 "Yams",
-                "Files",
-                "Spinner"
             ],
             path: "Sources/SwiftGraphQLCLI"
         ),
@@ -88,6 +85,7 @@ let package = Package(
                 "Files",
                 "GraphQL",
                 "GraphQLAST",
+                "GraphQLWebSocket",
                 "SwiftGraphQLCodegen",
                 "SwiftGraphQL",
                 "SwiftGraphQLClient"
