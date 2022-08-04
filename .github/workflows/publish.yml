@@ -37,10 +37,13 @@ jobs:
           body: ${{ steps.tag_version.outputs.changelog }}
         if: steps.tag_version.outputs.new_tag != null
 
-      - name: Update Library Information
+      - name: Update Podspec and Formula
         run: |
           make update_brew_formula
           make update_podspec
+        env:
+          VERSION: ${{ steps.tag_version.outputs.new_version }}
+        if: steps.tag_version.outputs.new_tag != null
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
