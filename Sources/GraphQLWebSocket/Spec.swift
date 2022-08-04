@@ -119,7 +119,7 @@ public enum ClientMessage: Encodable {
         }
     }
 
-    /// Message indicating that the client has stopped listening and wants to complete the subscription.
+    /// Message indicating that the client has stopped listening and wants to end the subscription.
     ///
     /// - NOTE: No further events, relevant to the original subscription, should be sent through the communication channel.
     public struct Complete: ClientMessageInterface, Identifiable {

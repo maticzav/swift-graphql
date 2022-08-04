@@ -1,10 +1,10 @@
-#  GraphQLWebSocket
+# GraphQLWebSocket
 
-> GraphQLWebSocket package implements the `graphql-ws` specification. 
+> GraphQLWebSocket package implements the `graphql-ws` specification.
 
-It may be used independently of other parts of SwiftGraphQL and doesn't lock you in to the system even though it works nicely with it.
+It may be used independently of other parts of SwiftGraphQL, even though it works nicely with them.
 
-Note that GraphQLWebSocket is not compatible with `subscriptions-transport-ws`.
+> Note that GraphQLWebSocket is not compatible with `subscriptions-transport-ws`.
 
 ## Useful Links
 
