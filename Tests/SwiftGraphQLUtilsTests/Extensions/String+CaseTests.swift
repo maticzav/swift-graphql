@@ -1,4 +1,4 @@
-@testable import SwiftGraphQL
+@testable import SwiftGraphQLUtils
 import XCTest
 
 final class StringExtensionsTest: XCTestCase {

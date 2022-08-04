@@ -1,12 +1,6 @@
 import Foundation
 import GraphQLAST
-
-/*
- InputObjects represent the input values that functions accept.
-
- We map the actual keys to more appropriate Swift fields and reference
- the actual fields using CodingKeys enumerator.
- */
+import SwiftGraphQLUtils
 
 // MARK: - Struct Definition
 

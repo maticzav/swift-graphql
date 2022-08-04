@@ -1,5 +1,6 @@
 import Foundation
 import GraphQLAST
+import SwiftGraphQLUtils
 
 
 /// Structure protocol outlines anything that might be made codable (e.g. GraphQL Objects, Interfaces and Unions).

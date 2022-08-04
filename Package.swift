@@ -33,7 +33,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.4"),
     ],
     targets: [
-        // Utility Targets
+        // Spec
         .target(name: "GraphQL", dependencies: [], path: "Sources/GraphQL"),
         .target(name: "GraphQLAST", dependencies: [], path: "Sources/GraphQLAST"),
         .target(
@@ -46,8 +46,14 @@ let package = Package(
             path: "Sources/GraphQLWebSocket",
             exclude: ["README.md"]
         ),
+        
         // SwiftGraphQL
-        .target(name: "SwiftGraphQL", dependencies: ["GraphQL"], path: "Sources/SwiftGraphQL"),
+        
+        .target(
+            name: "SwiftGraphQL",
+            dependencies: ["GraphQL", "SwiftGraphQLUtils"],
+            path: "Sources/SwiftGraphQL"
+        ),
         .target(
             name: "SwiftGraphQLClient",
             dependencies: [
@@ -64,9 +70,14 @@ let package = Package(
                 "GraphQLAST",
                 .product(name: "SwiftFormat", package: "swift-format"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
+                "SwiftGraphQLUtils"
             ],
             path: "Sources/SwiftGraphQLCodegen"
         ),
+        .target(name: "SwiftGraphQLUtils", dependencies: [], path: "Sources/SwiftGraphQLUtils"),
+        
+        // Executables
+        
         .executableTarget(
             name: "SwiftGraphQLCLI",
             dependencies: [
@@ -78,7 +89,9 @@ let package = Package(
             ],
             path: "Sources/SwiftGraphQLCLI"
         ),
+        
         // Tests
+        
         .testTarget(
             name: "SwiftGraphQLTests",
             dependencies: [
@@ -88,7 +101,8 @@ let package = Package(
                 "GraphQLWebSocket",
                 "SwiftGraphQLCodegen",
                 "SwiftGraphQL",
-                "SwiftGraphQLClient"
+                "SwiftGraphQLClient",
+                "SwiftGraphQLUtils",
             ],
             path: "Tests",
             exclude: [
