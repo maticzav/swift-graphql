@@ -45,13 +45,8 @@ async function main() {
     logging: true,
     maskedErrors: false,
     context: async (ctx: YogaInitialContext): Promise<Context> => {
-      console.log('extensions', ctx.extensions)
-
-      let user: { id: string } | null = null
-      console.log(`[${new Date().toISOString()}] new request`)
-
       // Authenticate user from HTTP request or from headers in the extension.
-
+      let user: { id: string } | null = null
       const id = sessions.getUserIdFromContext(ctx)
       if (id) {
         user = { id }

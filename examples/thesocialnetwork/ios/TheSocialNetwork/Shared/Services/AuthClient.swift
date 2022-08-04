@@ -47,15 +47,11 @@ enum AuthClient {
                 
                 NetworkClient.shared.query(User.viewer, policy: .cacheAndNetwork)
                     .receive(on: DispatchQueue.main)
-                    .map { res in
-                        switch res.result {
-                        case .ok(let data) where data != nil:
-                            return data
-                        default:
-                            self.logout()
-                            return nil
-                        }
-                    }
+                    .map { res in res.data }
+                    .catch({ _ -> AnyPublisher<User?, Never> in
+                        self.logout()
+                        return Just(User?.none).eraseToAnyPublisher()
+                    })
                     .removeDuplicates()
                     .assign(to: &self.$user)
             }
@@ -125,24 +121,22 @@ enum AuthClient {
             let auth = User.login(username: username, password: password)
             self.login = NetworkClient.shared.query(auth)
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { result in
-                    switch result.result {
-                    case .ok(let data):
-                        // Login the user if we found the token.
-                        guard let token = data else {
-                            self.logout()
-                            return
-                        }
-                        
-                        self.token = token
-                        self.persist(token: token)
-                    case .error(let errors):
-                        self.logout()
-                        
-                        if let error = errors.first {
-                            self.state = .error(error.localizedDescription)
-                        }
+            
+                .sink(receiveCompletion: { status in
+                    guard case let .failure(err) = status else {
+                        return
                     }
+                    
+                    self.logout()
+                    self.state = .error(err.localizedDescription)
+                }, receiveValue: { res in
+                    guard let token = res.data else {
+                        self.logout()
+                        return
+                    }
+                    
+                    self.token = token
+                    self.persist(token: token)
                 })
         }
         

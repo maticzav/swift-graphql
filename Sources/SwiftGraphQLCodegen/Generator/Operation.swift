@@ -1,4 +1,5 @@
 import GraphQLAST
+import SwiftGraphQLUtils
 
 extension Operation {
     

@@ -1,5 +1,6 @@
 import Foundation
 import GraphQLAST
+import SwiftGraphQLUtils
 
 extension Collection where Element == ObjectTypeRef {
     

@@ -7,7 +7,7 @@ import Foundation
 public struct GraphQLError: Codable, Equatable, Sendable {
     
     /// A short, human-readable summary of the problem.
-    let message: String
+    public let message: String
     
     /// Errors during validation often contain multiple locations, for example to point out two things with
     /// the same name. Errors during execution include a single location, the field which

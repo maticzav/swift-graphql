@@ -1,11 +1,7 @@
 import Foundation
 import GraphQLAST
 
-/*
- This file contains publicly accessible functions used to
- generate SwiftGraphQL code.
- */
-
+/// Structure that holds methods for SwiftGraphQL query-builder generation.
 public struct GraphQLCodegen {
     
     /// Map of supported scalars.
@@ -90,7 +86,6 @@ public struct GraphQLCodegen {
         \(inputObjectDefinitions.lines)
         """
 
-//        return code
         let formatted = try code.format()
         return formatted
     }

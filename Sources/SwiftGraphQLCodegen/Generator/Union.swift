@@ -1,6 +1,6 @@
 import Foundation
 import GraphQLAST
-import SwiftGraphQL
+import SwiftGraphQLUtils
 
 /*
  This file contains code used to generate unions.
@@ -9,8 +9,7 @@ import SwiftGraphQL
 
 extension UnionType: Structure {
     var fields: [Field] {
-        // Unions come with no predefined fields.
-        []
+        [] // Unions come with no predefined fields.
     }
 }
 

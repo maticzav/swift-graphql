@@ -1,5 +1,6 @@
 import Foundation
 import GraphQLAST
+import SwiftGraphQLUtils
 
 /*
  We use functions - selections - to construct a query.
@@ -23,8 +24,7 @@ extension Collection where Element == Field {
     
     /// Returns dynamic selection function for every field in the collection.
     func getDynamicSelections(parent: String, context: Context) throws -> String {
-        try self
-            .map { try $0.getDynamicSelection(parent: parent, context: context) }
+        try self.map { try $0.getDynamicSelection(parent: parent, context: context) }
             .joined(separator: "\n")
     }
     

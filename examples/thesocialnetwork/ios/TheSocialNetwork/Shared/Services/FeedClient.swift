@@ -26,14 +26,10 @@ enum FeedClient {
                     return true
                 }
                 .flatMap { _ in NetworkClient.shared.subscribe(to: Message.unread) }
-                .map { result -> Int in
-                    switch result.result {
-                    case .ok(let data):
-                        return data
-                    default:
-                        return 0
-                    }
-                }
+                .map { result in result.data }
+                .catch({ _ in
+                    Just(0)
+                })
                 .assign(to: &self.$posts)
         }
     }

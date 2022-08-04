@@ -1,7 +1,6 @@
 import Foundation
 import GraphQLAST
-import SwiftGraphQL
-
+import SwiftGraphQLUtils
 
 extension EnumType {
     

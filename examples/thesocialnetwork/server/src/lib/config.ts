@@ -20,6 +20,6 @@ export const config = {
 
 for (const key in config) {
   if ((config as { [key: string]: string })[key] == null) {
-    console.warn(`Missing ${key} in configuration...`)
+    console.warn(`IMPORTANT: Missing ${key} in configuration...`)
   }
 }

@@ -34,20 +34,18 @@ class FeedViewModel: ObservableObject {
         self.message = ""
         
         self.cancellable = NetworkClient.shared.mutate(mutation)
-            .sink { result in }
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { result in })
     }
     
     /// Refreshes the feed with new data.
     func refresh() {
         NetworkClient.shared.query(Message.feed)
             .receive(on: RunLoop.main)
-            .map { result in
-                guard case let .ok(data) = result.result else {
-                    return []
-                }
-                
-                return data
-            }
+            .map { result in result.data }
+            .catch({ err in
+                Just([])
+            })
             .assign(to: &self.$feed)
     }
 }
