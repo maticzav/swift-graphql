@@ -192,7 +192,7 @@ private extension Field {
         switch type.namedType {
         case .scalar, .enum:
             return """
-            public let field = GraphQLField.leaf(
+            let field = GraphQLField.leaf(
                  field: \"\(name)\",
                  parent: \"\(parent)\",
                  arguments: [ \(args.arguments) ]
@@ -200,7 +200,7 @@ private extension Field {
             """
         case .interface, .object, .union:
             return """
-            public let field = GraphQLField.composite(
+            let field = GraphQLField.composite(
                  field: "\(name)",
                  parent: "\(parent)",
                  type: "\(self.type.namedType.name)",

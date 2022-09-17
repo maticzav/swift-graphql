@@ -106,7 +106,7 @@ private extension Collection where Element == InputValue {
     /// Returns a codingkeys enumerator that we can use to create a codable out of our type.
     var codingKeys: String {
         """
-        pulbic enum CodingKeys: String, CodingKey {
+        public enum CodingKeys: String, CodingKey {
         \(map { $0.codingKey }.joined(separator: "\n"))
         }
         """

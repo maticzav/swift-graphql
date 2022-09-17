@@ -19,6 +19,7 @@ extension String {
         do {
             try formatter.format(source: trimmed, assumingFileURL: nil, to: &output)
         } catch(let err) {
+            
             throw CodegenError.formatting(err)
         }
         

@@ -44,7 +44,7 @@ final class EnumTests: XCTestCase {
            extension Enums {
              /// Collection of all StarWars episodes.
              /// Earliest trilogy.
-             enum Episodes: String, CaseIterable, Codable {
+             public enum Episodes: String, CaseIterable, Codable {
                /// Released in 1977.
                case newhope = "NEWHOPE"
                /// Introduced Yoda.
@@ -58,7 +58,7 @@ final class EnumTests: XCTestCase {
            }
            
            extension Enums.Episodes: GraphQLScalar {
-             init(from data: AnyCodable) throws {
+             public init(from data: AnyCodable) throws {
                switch data.value {
                case let string as String:
                  if let value = Enums.Episodes(rawValue: string) {
@@ -74,7 +74,7 @@ final class EnumTests: XCTestCase {
                }
              }
            
-             static var mockValue = Self.newhope
+             public static var mockValue = Self.newhope
            }
            """)
     }
