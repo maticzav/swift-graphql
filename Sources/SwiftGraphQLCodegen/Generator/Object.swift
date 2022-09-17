@@ -20,7 +20,7 @@ extension ObjectType {
         
         var code = """
         extension Objects {
-            struct \(apiName) {}
+            public struct \(apiName) {}
         }
 
         extension Fields where TypeLock == Objects.\(apiName) {
@@ -36,7 +36,7 @@ extension ObjectType {
         // Adds utility alias for the selection.
         code.append("""
         extension Selection where T == Never, TypeLock == Never {
-            typealias \(apiName)<T> = Selection<T, Objects.\(apiName)>
+            public typealias \(apiName)<T> = Selection<T, Objects.\(apiName)>
         }
         """)
         

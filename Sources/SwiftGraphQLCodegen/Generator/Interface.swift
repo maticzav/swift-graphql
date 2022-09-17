@@ -21,7 +21,7 @@ extension InterfaceType {
 
         return """
         extension Interfaces {
-            struct \(name) {}
+            public struct \(name) {}
         }
 
         extension Fields where TypeLock == Interfaces.\(name) {
@@ -31,7 +31,7 @@ extension InterfaceType {
         \(possibleTypes.selection(name: "Interfaces.\(name)", objects: objects))
 
         extension Selection where T == Never, TypeLock == Never {
-            typealias \(name)<T> = Selection<T, Interfaces.\(name)>
+            public typealias \(name)<T> = Selection<T, Interfaces.\(name)>
         }
         """
     }

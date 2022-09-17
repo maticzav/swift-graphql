@@ -44,7 +44,7 @@ extension Field {
         let code = """
         \(docs)
         \(availability)
-        func \(fName)\(parameters) throws -> \(output) {
+        public func \(fName)\(parameters) throws -> \(output) {
             \(self.selection(parent: parent))
             self.__select(field)
 
@@ -70,7 +70,7 @@ extension Field {
         let code = """
         \(docs)
         \(availability)
-        static func \(fName)\(parameters) -> Selection<\(returnType), \(typelock)> {
+        public static func \(fName)\(parameters) -> Selection<\(returnType), \(typelock)> {
             Selection<\(returnType), \(typelock)> {
                 try $0.\(fName)\(args)
             }
@@ -192,7 +192,7 @@ private extension Field {
         switch type.namedType {
         case .scalar, .enum:
             return """
-            let field = GraphQLField.leaf(
+            public let field = GraphQLField.leaf(
                  field: \"\(name)\",
                  parent: \"\(parent)\",
                  arguments: [ \(args.arguments) ]
@@ -200,7 +200,7 @@ private extension Field {
             """
         case .interface, .object, .union:
             return """
-            let field = GraphQLField.composite(
+            public let field = GraphQLField.composite(
                  field: "\(name)",
                  parent: "\(parent)",
                  type: "\(self.type.namedType.name)",

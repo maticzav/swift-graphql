@@ -10,7 +10,7 @@ extension InputObjectType {
     func declaration(context: Context) throws -> String {
         """
         extension InputObjects {
-            struct \(self.name.pascalCase): Encodable, Hashable {
+            public struct \(self.name.pascalCase): Encodable, Hashable {
 
             \(try self.inputFields.map { try $0.declaration(context: context) }.joined(separator: "\n"))
 
@@ -35,7 +35,7 @@ extension InputValue {
     fileprivate func declaration(context: Context) throws -> String {
         """
         \(docs)
-        var \(name.camelCase.normalize): \(try type.type(scalars: context.scalars)) \(self.default)
+        public var \(name.camelCase.normalize): \(try type.type(scalars: context.scalars)) \(self.default)
         """
     }
 
@@ -96,7 +96,7 @@ private extension Collection where Element == InputValue {
     /// Generates encoder function for an input object.
     var encoder: String {
         """
-        func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             \(map { $0.encoder }.joined(separator: "\n"))
         }
@@ -106,7 +106,7 @@ private extension Collection where Element == InputValue {
     /// Returns a codingkeys enumerator that we can use to create a codable out of our type.
     var codingKeys: String {
         """
-        enum CodingKeys: String, CodingKey {
+        pulbic enum CodingKeys: String, CodingKey {
         \(map { $0.codingKey }.joined(separator: "\n"))
         }
         """

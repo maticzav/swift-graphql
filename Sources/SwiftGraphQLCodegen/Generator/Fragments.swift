@@ -11,7 +11,7 @@ extension Collection where Element == ObjectTypeRef {
     func selection(name type: String, objects: [ObjectType]) -> String {
         """
         extension Fields where TypeLock == \(type) {
-            func on<T>(\(parameters)) throws -> T {
+            public func on<T>(\(parameters)) throws -> T {
                 self.__select([\(selection(interface: type))])
 
                 switch self.__state {
