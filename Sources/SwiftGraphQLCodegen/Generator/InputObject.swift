@@ -8,12 +8,22 @@ extension InputObjectType {
     /// Returns the code that represents a particular InputObjectType in our schema. It contains
     /// an encoder as well as the function used to add values into it.
     func declaration(context: Context) throws -> String {
-        """
+        return """
         extension InputObjects {
             public struct \(self.name.pascalCase): Encodable, Hashable {
-
+        
             \(try self.inputFields.map { try $0.declaration(context: context) }.joined(separator: "\n"))
-
+        
+            public init(
+                \(try self.inputFields.map {
+                    try $0.initDeclaration(context: context, isLast: $0 == self.inputFields.last)
+                }.joined(separator: ",\n"))
+            ) {
+                \(try self.inputFields.map {
+                    try $0.initFields(context: context)
+                }.joined(separator: "\n"))
+            }
+        
             \(self.inputFields.encoder)
             
             \(self.inputFields.codingKeys)
@@ -35,7 +45,19 @@ extension InputValue {
     fileprivate func declaration(context: Context) throws -> String {
         """
         \(docs)
-        public var \(name.camelCase.normalize): \(try type.type(scalars: context.scalars)) \(self.default)
+        public var \(name.camelCase.normalize): \(try type.type(scalars: context.scalars))
+        """
+    }
+    
+    fileprivate func initDeclaration(context: Context, isLast: Bool) throws -> String {
+        """
+        \(name.camelCase.normalize): \(try type.type(scalars: context.scalars))\(self.default)
+        """
+    }
+    
+    fileprivate func initFields(context: Context) throws -> String {
+        """
+        self.\(name.camelCase.normalize) = \(name.camelCase.normalize)
         """
     }
 
