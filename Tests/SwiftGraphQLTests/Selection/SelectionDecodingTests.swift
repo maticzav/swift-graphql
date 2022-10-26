@@ -47,6 +47,28 @@ final class SelectionDecodingTests: XCTestCase {
         XCTAssertEqual(result.errors, nil)
     }
 
+    func testNullableNSNull() throws {
+        let result: ExecutionResult = """
+            {
+              "data": null
+            }
+            """.execution()
+
+        let selection = Selection<String, String> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try String(from: data)
+            case .selecting:
+                return "wrong"
+            }
+        }
+        let nullableSelection = selection.nullable
+
+        let decoded = try nullableSelection.decode(raw: result.data)
+        XCTAssertEqual(decoded, nil)
+        XCTAssertEqual(result.errors, nil)
+    }
+
     func testList() throws {
         
         let result: ExecutionResult = """
