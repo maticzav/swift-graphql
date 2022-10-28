@@ -4,7 +4,7 @@ import Foundation
 /// execute phases of performing a GraphQL operation. In addition to a message
 /// and stack trace, it also includes information about the locations in a
 /// GraphQL document and/or execution result that correspond to the Error.
-public struct GraphQLError: Codable, Equatable, Sendable {
+public struct GraphQLError: Codable, Equatable {
     
     /// A short, human-readable summary of the problem.
     public let message: String
@@ -58,17 +58,22 @@ public struct GraphQLError: Codable, Equatable, Sendable {
             }
         }
     }
+
+    /// Reserved entry for implementors to extend the protocol however they see fit.
+    public let extensions: [String: AnyCodable]?
     
     // MARK: - Initializer
 
     public init(
         message: String,
         locations: [Location]? = nil,
-        path: [PathLink]? = nil
+        path: [PathLink]? = nil,
+        extensions: [String: AnyCodable]? = nil
     ) {
         self.message = message
         self.locations = locations
         self.path = path
+        self.extensions = extensions
     }
 }
 
