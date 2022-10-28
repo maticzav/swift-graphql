@@ -122,16 +122,26 @@ extension OperationResult {
     fileprivate func decode<T, TypeLock>(
         selection: Selection<T, TypeLock>
     ) throws -> DecodedOperationResult<T> {
-        let data = try selection.decode(raw: self.data)
-        
-        let result = DecodedOperationResult(
-            operation: self.operation,
-            data: data,
-            errors: self.errors,
-            stale: self.stale
-        )
-        
-        return result
+        do {
+            let data = try selection.decode(raw: self.data)
+
+            let result = DecodedOperationResult(
+                operation: self.operation,
+                data: data,
+                errors: self.errors,
+                stale: self.stale
+            )
+
+            return result
+        } catch {
+            if self.errors.isEmpty {
+                throw error
+            } else {
+                var errors = self.errors
+                errors.append(.parsing(error))
+                throw CombinedError.combined(errors)
+            }
+        }
     }
 }
 #endif

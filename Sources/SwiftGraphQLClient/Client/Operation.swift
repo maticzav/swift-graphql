@@ -105,6 +105,9 @@ public enum CombinedError: Error {
     
     /// An error occured and it's not clear why.
     case unknown(Error)
+
+    /// Combines different kinds of errors into one
+    indirect case combined([CombinedError])
 }
 
 extension CombinedError: Equatable {
