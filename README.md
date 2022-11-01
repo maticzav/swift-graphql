@@ -32,6 +32,13 @@ The library is centered around three core principles:
 
 You can find detailed documentation on the SwiftGraphQL page at [https://www.swift-graphql.com/](https://www.swift-graphql.com/).
 
+## Examples
+
+You can find examples of how to use a local GraphQL API or remote one in the `/examples` directory.
+
+- _thesocialnetwork_ - a simple chat app that shows how to `swift-graphql` with queries and subscriptions,
+- _GitHubStars_ - shows how to use GitHub API with `swift-graphql`.
+
 ### Other Libraries
 
 SwiftGraphQL solves a set of specific problems but it doesn't solve _every_ problem. Depending on your needs, you may also want to check out
