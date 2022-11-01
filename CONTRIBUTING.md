@@ -4,7 +4,6 @@ Hey :wave:! This library is a collaborative effort of many people and we are all
 
 > If you have any questions about the library or just want to share ideas, feel free to reach out to Matic at `matic.zavadlal [at] gmail.com` or `@maticzav` on Twitter.
 
-
 ## Roadmap
 
 Feel free to contribute in any way possible. We are excited about your ideas and want to share them with the rest of the world. It's often even more helpful to write a well documented idea than to write code because ["code is the easy part"](https://www.youtube.com/watch?v=DSjbTC-hvqQ).
@@ -19,7 +18,6 @@ We are currently investing our efforts into
 
 If you decide to contribute in any of these topics, you'll' get a lot of attention and have top priority.
 
-
 ## Code Organization
 
 SwiftGraphQL is split into multiple packages that serve different purposes.
@@ -32,7 +30,6 @@ SwiftGraphQL is split into multiple packages that serve different purposes.
 1. **SwiftGraphQLCLI** exposes a ready to use CLI tool for code generation.
 
 This package is best developed using Swift command line tools.
-
 
 ## Creating a Pull Request
 
@@ -52,9 +49,16 @@ You can test the generators by running
 swift run swift-graphql http://localhost:4000/graphql
 ```
 
-
 ## Building Binary and Documentation
 
 ```sh
 swift build -c release --product swift-graphql --disable-sandbox
+```
+
+You can run the following two scripts to regenerate APIs for both examples.
+
+```sh
+swift run swift-graphql https://api.github.com/graphql --config examples/GitHubStars/swiftgraphql.yml --output examples/GitHubStars/GitHubStars/GraphQL/API.swift  --header "Authorization: bearer TOKEN"
+
+swift run swift-graphql http://localhost:4000/graphql --config examples/thesocialnetwork/ios/TheSocialNetwork/swiftgraphql.yml --output examples/thesocialnetwork/ios/TheSocialNetwork/Shared/GraphQL/API.swift
 ```
