@@ -40,7 +40,7 @@ extension Optional: GraphQLScalar where Wrapped: GraphQLScalar {
         case is NSNull:
             self = nil
         #endif
-        case is Void, nil:
+        case is Void:
             self = nil
         case Optional<AnyDecodable>.none:
             self = nil
