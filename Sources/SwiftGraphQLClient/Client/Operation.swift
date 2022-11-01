@@ -88,6 +88,18 @@ public struct OperationResult: Equatable {
     
     /// Optional stale flag added by exchanges that return stale results.
     public var stale: Bool?
+    
+    public init(
+        operation: Operation,
+        data: AnyCodable,
+        errors: [CombinedError],
+        stale: Bool? = nil
+    ) {
+        self.operation = operation
+        self.data = data
+        self.errors = errors
+        self.stale = stale
+    }
 }
 
 

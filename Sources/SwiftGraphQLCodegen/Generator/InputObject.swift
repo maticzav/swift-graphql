@@ -8,12 +8,22 @@ extension InputObjectType {
     /// Returns the code that represents a particular InputObjectType in our schema. It contains
     /// an encoder as well as the function used to add values into it.
     func declaration(context: Context) throws -> String {
-        """
+        return """
         extension InputObjects {
-            struct \(self.name.pascalCase): Encodable, Hashable {
-
+            public struct \(self.name.pascalCase): Encodable, Hashable {
+        
             \(try self.inputFields.map { try $0.declaration(context: context) }.joined(separator: "\n"))
-
+        
+            public init(
+                \(try self.inputFields.map {
+                    try $0.initDeclaration(context: context, isLast: $0 == self.inputFields.last)
+                }.joined(separator: ",\n"))
+            ) {
+                \(try self.inputFields.map {
+                    try $0.initFields(context: context)
+                }.joined(separator: "\n"))
+            }
+        
             \(self.inputFields.encoder)
             
             \(self.inputFields.codingKeys)
@@ -35,7 +45,19 @@ extension InputValue {
     fileprivate func declaration(context: Context) throws -> String {
         """
         \(docs)
-        var \(name.camelCase.normalize): \(try type.type(scalars: context.scalars)) \(self.default)
+        public var \(name.camelCase.normalize): \(try type.type(scalars: context.scalars))
+        """
+    }
+    
+    fileprivate func initDeclaration(context: Context, isLast: Bool) throws -> String {
+        """
+        \(name.camelCase.normalize): \(try type.type(scalars: context.scalars))\(self.default)
+        """
+    }
+    
+    fileprivate func initFields(context: Context) throws -> String {
+        """
+        self.\(name.camelCase.normalize) = \(name.camelCase.normalize)
         """
     }
 
@@ -96,7 +118,7 @@ private extension Collection where Element == InputValue {
     /// Generates encoder function for an input object.
     var encoder: String {
         """
-        func encode(to encoder: Encoder) throws {
+        public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             \(map { $0.encoder }.joined(separator: "\n"))
         }
@@ -106,7 +128,7 @@ private extension Collection where Element == InputValue {
     /// Returns a codingkeys enumerator that we can use to create a codable out of our type.
     var codingKeys: String {
         """
-        enum CodingKeys: String, CodingKey {
+        public enum CodingKeys: String, CodingKey {
         \(map { $0.codingKey }.joined(separator: "\n"))
         }
         """

@@ -44,7 +44,7 @@ extension Field {
         let code = """
         \(docs)
         \(availability)
-        func \(fName)\(parameters) throws -> \(output) {
+        public func \(fName)\(parameters) throws -> \(output) {
             \(self.selection(parent: parent))
             self.__select(field)
 
@@ -70,7 +70,7 @@ extension Field {
         let code = """
         \(docs)
         \(availability)
-        static func \(fName)\(parameters) -> Selection<\(returnType), \(typelock)> {
+        public static func \(fName)\(parameters) -> Selection<\(returnType), \(typelock)> {
             Selection<\(returnType), \(typelock)> {
                 try $0.\(fName)\(args)
             }

@@ -2,13 +2,23 @@
 
 Hey :wave:! This library is a collaborative effort of many people and we are all very excited to see you here. This file will help you navigate around more easily and make sure your pull requests receive attention they deserve.
 
-This package is best developed using Swift command line tools.
+> If you have any questions about the library or just want to share ideas, feel free to reach out to Matic at `matic.zavadlal [at] gmail.com` or `@maticzav` on Twitter.
 
-> NOTE: SwiftGraphQL depends on `swift-format` that relies on `SwiftSyntax` that is distributed as part of the Swift toolchain. It's important that you set the correct version of Swift Command Line Tools when developing so that the tools match the version of `swift-format` used.
 
-```sh
-swift package tools-version --set 5.5
-```
+## Roadmap
+
+Feel free to contribute in any way possible. We are excited about your ideas and want to share them with the rest of the world. It's often even more helpful to write a well documented idea than to write code because ["code is the easy part"](https://www.youtube.com/watch?v=DSjbTC-hvqQ).
+
+We are currently investing our efforts into
+
+- setting up a Swift Docc reference of the library,
+- building an exchange that handles normalized caching,
+- building an exchange for GraphQL subscriptions over SSE,
+- creating better SwiftUI bindings,
+- creating a type generator for queries in `.graphql` files.
+
+If you decide to contribute in any of these topics, you'll' get a lot of attention and have top priority.
+
 
 ## Code Organization
 
@@ -21,20 +31,14 @@ SwiftGraphQL is split into multiple packages that serve different purposes.
 1. **SwiftGraphQLCodegen** generates methods that you may use to build type-safe queries,
 1. **SwiftGraphQLCLI** exposes a ready to use CLI tool for code generation.
 
-## Roadmap
+This package is best developed using Swift command line tools.
 
-Feel free to contribute in any way possible. We are excited about your ideas and want to share them with the rest of the world. It's often even more helpful to write a well documented idea than to write code because ["code is the easy part"](https://www.youtube.com/watch?v=DSjbTC-hvqQ).
+> NOTE: SwiftGraphQL depends on `swift-format` that relies on `SwiftSyntax` that is distributed as part of the Swift toolchain. It's important that you set the correct version of Swift Command Line Tools when developing so that the tools match the version of `swift-format` used.
 
-We are currently investing our efforts into
+```sh
+swift package tools-version --set 5.5
+```
 
-- Swift Docc Reference of the library,
-- Normalized Caching exchange,
-- Subscriptions over SSE exchange,
-- SwiftUI bindings
-
-Contributing in any of these topics will get a lot of attention and have top priority.
-
-> If you have any questions about the library, feel free to reach out to Matic at `matic.zavadlal [at] gmail.com`.
 
 ## Creating a Pull Request
 
@@ -47,6 +51,13 @@ Every PR should follow the next set of guidelines
 1. Make sure that comments in the PR and in the code are grammatically correct.
 1. Check _all_ your changes in GitHub files tab before _again_ before requesting a review.
 1. Suggest a release type (e.g. patch, minor, major) for your change.
+
+You can test the generators by running
+
+```
+swift run swift-graphql http://localhost:4000/graphql
+```
+
 
 ## Building Binary and Documentation
 

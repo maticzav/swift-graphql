@@ -59,5 +59,3 @@ Thank you! 🙌
 ## License
 
 MIT @ Matic Zavadlal
-
-https://steipete.com/posts/logging-in-swift/

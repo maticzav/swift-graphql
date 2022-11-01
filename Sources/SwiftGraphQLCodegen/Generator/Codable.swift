@@ -31,7 +31,7 @@ private extension Collection where Element == ObjectTypeRef {
             .joined(separator: "\n")
 
         return """
-        enum TypeName: String, Codable {
+        public enum TypeName: String, Codable {
         \(types)
         }
         """

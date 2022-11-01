@@ -57,32 +57,32 @@ public struct GraphQLCodegen {
         import SwiftGraphQL
 
         // MARK: - Operations
-        enum Operations {}
+        public enum Operations {}
         \(operations.lines)
 
         // MARK: - Objects
-        enum Objects {}
+        public enum Objects {}
         \(objectDefinitions.lines)
         \(staticFieldSelection.lines)
 
         // MARK: - Interfaces
-        enum Interfaces {}
+        public enum Interfaces {}
         \(interfaceDefinitions.lines)
 
         // MARK: - Unions
-        enum Unions {}
+        public enum Unions {}
         \(unionDefinitions.lines)
 
         // MARK: - Enums
-        enum Enums {}
+        public enum Enums {}
         \(enumDefinitions.lines)
 
         // MARK: - Input Objects
         
         /// Utility pointer to InputObjects.
-        typealias Inputs = InputObjects
+        public typealias Inputs = InputObjects
         
-        enum InputObjects {}
+        public enum InputObjects {}
         \(inputObjectDefinitions.lines)
         """
 

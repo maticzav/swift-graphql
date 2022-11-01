@@ -23,7 +23,7 @@ final class FieldTests: XCTestCase {
            /// Object identifier.
            /// Multiline.
            @available(*, deprecated, message: "Use ID instead.")
-           func id() throws -> String? {
+           public func id() throws -> String? {
              let field = GraphQLField.leaf(
                field: "id",
                parent: "TestType",
@@ -59,7 +59,7 @@ final class FieldTests: XCTestCase {
         ).format()
 
         generated.assertInlineSnapshot(matching: """
-           func id() throws -> String {
+           public func id() throws -> String {
              let field = GraphQLField.leaf(
                field: "id",
                parent: "TestType",
@@ -93,7 +93,7 @@ final class FieldTests: XCTestCase {
         ).format()
         
         generated.assertInlineSnapshot(matching: """
-           func id() throws -> String? {
+           public func id() throws -> String? {
              let field = GraphQLField.leaf(
                field: "id",
                parent: "TestType",
@@ -127,7 +127,7 @@ final class FieldTests: XCTestCase {
         ).format()
 
         generated.assertInlineSnapshot(matching: """
-           func ids() throws -> [String]? {
+           public func ids() throws -> [String]? {
              let field = GraphQLField.leaf(
                field: "ids",
                parent: "TestType",
@@ -161,7 +161,7 @@ final class FieldTests: XCTestCase {
         ).format()
 
         generated.assertInlineSnapshot(matching: """
-           func ids() throws -> [String] {
+           public func ids() throws -> [String] {
              let field = GraphQLField.leaf(
                field: "ids",
                parent: "TestType",
@@ -197,7 +197,7 @@ final class FieldTests: XCTestCase {
         ).format()
         
         generated.assertInlineSnapshot(matching: """
-           func episode() throws -> Enums.Episode {
+           public func episode() throws -> Enums.Episode {
              let field = GraphQLField.leaf(
                field: "episode",
                parent: "TestType",
@@ -231,7 +231,7 @@ final class FieldTests: XCTestCase {
         ).format()
 
         generated.assertInlineSnapshot(matching: """
-           func episode() throws -> Enums.Episode? {
+           public func episode() throws -> Enums.Episode? {
              let field = GraphQLField.leaf(
                field: "episode",
                parent: "TestType",
@@ -265,7 +265,7 @@ final class FieldTests: XCTestCase {
         ).format()
 
         generated.assertInlineSnapshot(matching: """
-           func episode() throws -> [Enums.Episode?] {
+           public func episode() throws -> [Enums.Episode?] {
              let field = GraphQLField.leaf(
                field: "episode",
                parent: "TestType",
@@ -301,7 +301,7 @@ final class FieldTests: XCTestCase {
         ).format()
         
         generated.assertInlineSnapshot(matching: """
-           func hero<T>(selection: Selection<T, Objects.Hero>) throws -> T {
+           public func hero<T>(selection: Selection<T, Objects.Hero>) throws -> T {
              let field = GraphQLField.composite(
                field: "hero",
                parent: "TestType",
@@ -337,7 +337,7 @@ final class FieldTests: XCTestCase {
         ).format()
         
         generated.assertInlineSnapshot(matching: """
-           func hero<T>(selection: Selection<T, Objects.Hero?>) throws -> T {
+           public func hero<T>(selection: Selection<T, Objects.Hero?>) throws -> T {
              let field = GraphQLField.composite(
                field: "hero",
                parent: "TestType",
@@ -373,7 +373,7 @@ final class FieldTests: XCTestCase {
         ).format()
         
         generated.assertInlineSnapshot(matching: """
-           func hero<T>(selection: Selection<T, [Objects.Hero]>) throws -> T {
+           public func hero<T>(selection: Selection<T, [Objects.Hero]>) throws -> T {
              let field = GraphQLField.composite(
                field: "hero",
                parent: "TestType",
@@ -417,7 +417,7 @@ final class FieldTests: XCTestCase {
         ).format()
         
         generated.assertInlineSnapshot(matching: """
-           func hero(id: String) throws -> String {
+           public func hero(id: String) throws -> String {
              let field = GraphQLField.leaf(
                field: "hero",
                parent: "TestType",
@@ -457,7 +457,7 @@ final class FieldTests: XCTestCase {
         ).format()
         
         generated.assertInlineSnapshot(matching: """
-           func hero(id: OptionalArgument<String> = .init()) throws -> String {
+           public func hero(id: OptionalArgument<String> = .init()) throws -> String {
              let field = GraphQLField.leaf(
                field: "hero",
                parent: "TestType",
@@ -497,7 +497,7 @@ final class FieldTests: XCTestCase {
         ).format()
         
         generated.assertInlineSnapshot(matching: """
-           func hero(id: InputObjects.Input) throws -> String {
+           public func hero(id: InputObjects.Input) throws -> String {
              let field = GraphQLField.leaf(
                field: "hero",
                parent: "TestType",

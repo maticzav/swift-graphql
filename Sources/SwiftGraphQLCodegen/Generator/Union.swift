@@ -23,13 +23,13 @@ extension UnionType {
         
         return """
         extension Unions {
-            struct \(name) {}
+            public struct \(name) {}
         }
 
         \(selections)
 
         extension Selection where T == Never, TypeLock == Never {
-            typealias \(name)<T> = Selection<T, Unions.\(name)>
+            public typealias \(name)<T> = Selection<T, Unions.\(name)>
         }
         """
     }
