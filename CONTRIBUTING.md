@@ -33,12 +33,6 @@ SwiftGraphQL is split into multiple packages that serve different purposes.
 
 This package is best developed using Swift command line tools.
 
-> NOTE: SwiftGraphQL depends on `swift-format` that relies on `SwiftSyntax` that is distributed as part of the Swift toolchain. It's important that you set the correct version of Swift Command Line Tools when developing so that the tools match the version of `swift-format` used.
-
-```sh
-swift package tools-version --set 5.5
-```
-
 
 ## Creating a Pull Request
 

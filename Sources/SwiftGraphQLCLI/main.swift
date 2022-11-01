@@ -104,7 +104,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
             SwiftGraphQLCLI.exit(withError: .unreachable)
         }
         
-        loadSchemaSpinner.succeed("Schema loaded!")
+        loadSchemaSpinner.success("Schema loaded!")
 
         // Generate the code.
         let generateCodeSpinner = Spinner(.dots, "Generating API")
@@ -116,14 +116,14 @@ struct SwiftGraphQLCLI: ParsableCommand {
         
         do {
             code = try generator.generate(schema: schema)
-            generateCodeSpinner.succeed("API generated successfully!")
+            generateCodeSpinner.success("API generated successfully!")
         } catch CodegenError.formatting(let err) {
-            generateCodeSpinner.failure(err.localizedDescription)
+            generateCodeSpinner.error(err.localizedDescription)
             SwiftGraphQLCLI.exit(withError: .formatting)
         } catch IntrospectionError.emptyfile, IntrospectionError.unknown {
             SwiftGraphQLCLI.exit(withError: .introspection)
         } catch IntrospectionError.error(let err) {
-            generateCodeSpinner.failure(err.localizedDescription)
+            generateCodeSpinner.error(err.localizedDescription)
             SwiftGraphQLCLI.exit(withError: .introspection)
         } catch {
             SwiftGraphQLCLI.exit(withError: .unknown)
@@ -142,7 +142,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
         // Warn about the unused scalars.
         let ignoredScalars = try schema.missing(from: scalars)
         guard !ignoredScalars.isEmpty else {
-            analyzeSchemaSpinner.succeed("SwiftGraphQL Ready!")
+            analyzeSchemaSpinner.success("SwiftGraphQL Ready!")
             return
         }
         
