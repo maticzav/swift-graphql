@@ -3,8 +3,8 @@ class Swiftgraphql < Formula
   homepage "https://swift-graphql.org"
   license "MIT"
   
-  url "https://github.com/maticzav/swift-graphql/archive/4.0.1.tar.gz"
-  sha256 "c6f0e780b2dced7b5b38b5831c06a9c287be33b9c97aa2d2ac02e6ee3b95e39c"
+  url "https://github.com/maticzav/swift-graphql/archive/4.0.2.tar.gz"
+  sha256 "21b76dfdf1adcff27b94518be87658421060439865bdd3b314f76270de434808"
   
   head "https://github.com/maticzav/swift-graphql.git"
 
