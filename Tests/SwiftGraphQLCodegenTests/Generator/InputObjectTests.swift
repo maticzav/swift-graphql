@@ -28,8 +28,6 @@ final class InputObjectTests: XCTestCase {
             context: Context.from(scalars: ["ID": "ID"])
         ).format()
         
-        print(generated)
-
         generated.assertInlineSnapshot(matching: """
            extension InputObjects {
              public struct InputObject: Encodable, Hashable {
