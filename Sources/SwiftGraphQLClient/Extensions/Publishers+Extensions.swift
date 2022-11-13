@@ -8,6 +8,42 @@ extension Publisher {
     func takeUntil<Terminator: Publisher>(_ terminator: Terminator) -> Publishers.TakenUntilPublisher<Self, Terminator> {
         Publishers.TakenUntilPublisher<Self, Terminator>(upstream: self, terminator: terminator)
     }
+
+    /// Takes the first emitted value and completes or throws an error
+    func first() async throws -> Output {
+        try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+
+            cancellable = first()
+                .sink { result in
+                    switch result {
+                    case .finished:
+                        break
+                    case let .failure(error):
+                        continuation.resume(throwing: error)
+                    }
+                    cancellable?.cancel()
+                } receiveValue: { value in
+                    continuation.resume(with: .success(value))
+                }
+        }
+    }
+}
+
+extension Publisher where Failure == Never {
+    /// Takes the first emitted value and completes or throws an error
+    func first() async -> Output {
+        await withCheckedContinuation { continuation in
+            var cancellable: AnyCancellable?
+
+            cancellable = first()
+                .sink { _ in
+                    cancellable?.cancel()
+                } receiveValue: { value in
+                    continuation.resume(with: .success(value))
+                }
+        }
+    }
 }
 
 extension Publishers {

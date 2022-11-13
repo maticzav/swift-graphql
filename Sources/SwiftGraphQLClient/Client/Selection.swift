@@ -90,6 +90,17 @@ extension GraphQLClient {
             .tryMap { result in try result.decode(selection: selection) }
             .eraseToAnyPublisher()
     }
+
+
+    /// Executes a query request with given execution parameters.
+    public func query<T, TypeLock>(
+        _ selection: Selection<T, TypeLock>,
+        as operationName: String? = nil,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) async throws -> DecodedOperationResult<T> where TypeLock: GraphQLHttpOperation {
+        try await self.query(selection, as: operationName, request: request, policy: policy).first()
+    }
     
     /// Executes a mutation and returns a stream of decoded values.
     public func mutate<T, TypeLock>(
@@ -101,6 +112,15 @@ extension GraphQLClient {
         self.executeMutation(for: selection, as: operationName, url: request, policy: policy)
             .tryMap { result in try result.decode(selection: selection) }
             .eraseToAnyPublisher()
+    }
+
+    public func mutate<T, TypeLock>(
+        _ selection: Selection<T, TypeLock>,
+        as operationName: String? = nil,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) async throws -> DecodedOperationResult<T> where TypeLock: GraphQLHttpOperation {
+        try await self.mutate(selection, as: operationName, request: request, policy: policy).first()
     }
     
     /// Creates a subscription stream of decoded values from the given query.

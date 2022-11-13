@@ -255,6 +255,15 @@ public class Client: GraphQLClient, ObservableObject {
         
         return self.execute(operation: operation)
     }
+
+    /// Executes a query request with given execution parameters.
+    public func query(
+        _ args: ExecutionArgs,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) async -> OperationResult {
+        await self.query(args, request: request, policy: policy).first()
+    }
     
     /// Executes a mutation request with given execution parameters.
     public func mutate(
@@ -272,6 +281,14 @@ public class Client: GraphQLClient, ObservableObject {
         )
         
         return self.execute(operation: operation)
+    }
+
+    public func mutate(
+        _ args: ExecutionArgs,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) async -> OperationResult {
+        await self.mutate(args, request: request, policy: policy).first()
     }
     
     /// Executes a subscription request with given execution parameters.
