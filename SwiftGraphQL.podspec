@@ -13,6 +13,6 @@ Pod::Spec.new do |spec|
 
   spec.source_files  = "Sources/**/*.swift"
 
-	s.deprecated = true
-  s.deprecated_in_favor_of = "Swift Package Manager"
+  spec.deprecated = true
+  spec.deprecated_in_favor_of = "Swift Package Manager"
 end
