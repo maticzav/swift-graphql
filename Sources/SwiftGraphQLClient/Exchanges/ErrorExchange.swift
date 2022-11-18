@@ -2,7 +2,7 @@ import Combine
 import Foundation
 
 /// An exchange that lets you listen to errors happening in the execution pipeline.
-struct ErrorExchange: Exchange {
+public struct ErrorExchange: Exchange {
     
     /// Callback function that the exchange calls for every error in the operation result.
     private var onError: (CombinedError, Operation) -> Void
