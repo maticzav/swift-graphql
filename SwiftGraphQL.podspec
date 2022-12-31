@@ -5,7 +5,7 @@ Pod::Spec.new do |spec|
   spec.summary      = 'GraphQL query generator and client for Swift'
   spec.license      = { :type => 'MIT' }
 
-  spec.version      = '4.0.3'
+  spec.version      = '4.0.4'
   spec.source       = { 
 		:git => 'https://github.com/maticzav/swift-graphql.git', 
 		:tag => spec.version.to_s 
@@ -13,6 +13,6 @@ Pod::Spec.new do |spec|
 
   spec.source_files  = "Sources/**/*.swift"
 
-	s.deprecated = true
-  s.deprecated_in_favor_of = "Swift Package Manager"
+  spec.deprecated = true
+  spec.deprecated_in_favor_of = "Swift Package Manager"
 end
