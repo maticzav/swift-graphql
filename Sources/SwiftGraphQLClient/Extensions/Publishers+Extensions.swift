@@ -5,7 +5,7 @@ import Foundation
 
 extension Publisher {
     /// Takes upstream values until predicates a value.
-    func takeUntil<Terminator: Publisher>(_ terminator: Terminator) -> Publishers.TakenUntilPublisher<Self, Terminator> {
+    public func takeUntil<Terminator: Publisher>(_ terminator: Terminator) -> Publishers.TakenUntilPublisher<Self, Terminator> {
         Publishers.TakenUntilPublisher<Self, Terminator>(upstream: self, terminator: terminator)
     }
 }
@@ -13,9 +13,9 @@ extension Publisher {
 extension Publishers {
     
     /// A subscriber that takes upstream values until terminator emits a value.
-    struct TakenUntilPublisher<Upstream: Publisher, Terminator: Publisher>: Publisher {
-        typealias Output = Upstream.Output
-        typealias Failure = Upstream.Failure
+    public struct TakenUntilPublisher<Upstream: Publisher, Terminator: Publisher>: Publisher {
+        public typealias Output = Upstream.Output
+        public typealias Failure = Upstream.Failure
         
         /// A function that tells whether the condition is met.
         private var terminator: Terminator
@@ -25,14 +25,14 @@ extension Publishers {
         
         // MARK: - Initializer
         
-        init(upstream: Upstream, terminator: Terminator) {
+        public init(upstream: Upstream, terminator: Terminator) {
             self.upstream = upstream
             self.terminator = terminator
         }
         
         // MARK: - Publisher
         
-        func receive<S>(subscriber: S) where S : Subscriber, Failure == S.Failure, Output == S.Input {
+        public func receive<S>(subscriber: S) where S : Subscriber, Failure == S.Failure, Output == S.Input {
             
             // Wraps the actual subscriber inside a custom subscribers
             // and subscribes to the upstream publisher with it.
