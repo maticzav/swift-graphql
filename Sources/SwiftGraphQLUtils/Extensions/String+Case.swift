@@ -78,4 +78,19 @@ extension String {
         let pascal = pascalCase
         return pascal[pascal.startIndex].lowercased() + pascal.dropFirst()
     }
+
+
+    /// Returns if the string is an integer or not
+    var isInt: Bool {
+        return Int(self) != nil
+    }
+
+    /// Returns the string with an underscore prepended if the string is an integer.
+    public var prependUnderscoreIfInt: String {
+        if self.isInt {
+            return "_\(self)"
+        }
+        return self
+    }
+
 }
