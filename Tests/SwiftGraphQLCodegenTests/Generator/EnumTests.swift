@@ -30,13 +30,14 @@ final class EnumTests: XCTestCase {
                     deprecationReason: "Was too good."
                 ),
                 EnumValue(
-                    name: "SKYWALKER",
-                    description: nil,
-                    isDeprecated: true,
+                    name: "_SKYWALKER",
+                    description: "Test of prepended underscore.",
+                    isDeprecated: false,
                     deprecationReason: nil
                 ),
             ]
         )
+
 
         let generated = try type.declaration.format()
 
@@ -52,8 +53,8 @@ final class EnumTests: XCTestCase {
                case empire = "EMPIRE"
                /// Released in 1983.
                case jedi = "JEDI"
-           
-               case skywalker = "SKYWALKER"
+               /// Test of prepended underscore.
+               case _skywalker = "_SKYWALKER"
              }
            }
            

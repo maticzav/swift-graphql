@@ -70,7 +70,7 @@ extension EnumValue {
     fileprivate var declaration: String {
         """
         \(docs)
-        case \(name.camelCase.normalize.prependUnderscoreIfInt) = "\(name)"
+        case \(name.camelCase(keepPrependedUnderscore: true).normalize) = "\(name)"
         """
     }
 

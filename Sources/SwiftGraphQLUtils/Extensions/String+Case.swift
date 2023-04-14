@@ -79,18 +79,17 @@ extension String {
         return pascal[pascal.startIndex].lowercased() + pascal.dropFirst()
     }
 
+	 public func camelCase(keepPrependedUnderscore: Bool) -> String {
+		var result = camelCase
+		if self.prefix(1) == "_" {
+		  result = "_" + result
+		}
+		return result
+	 }
 
     /// Returns if the string is an integer or not
     var isInt: Bool {
         return Int(self) != nil
-    }
-
-    /// Returns the string with an underscore prepended if the string is an integer.
-    public var prependUnderscoreIfInt: String {
-        if self.isInt {
-            return "_\(self)"
-        }
-        return self
     }
 
 }
