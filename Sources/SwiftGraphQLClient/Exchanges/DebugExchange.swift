@@ -3,6 +3,16 @@ import Foundation
 import GraphQL
 
 /// Exchange that logs operations going down- and results going up-stream.
+///
+/// - NOTE: `DebugExchange` assumes that the logger level of the client is set to `.debug`. Otherwise, the logs might not appear in the stream.
+///
+/// ```swift
+/// // chaning the client logger level
+/// var config = SwiftGraphQLClient.ClientConfiguration()
+/// config.logger.logLevel = .debug
+///
+/// SwiftGraphQLClient.Client(request: request, exchanges: exchanges, config: config)
+/// ```
 public struct DebugExchange: Exchange {
     
     /// Tells whether the client is in a development environment of not.
