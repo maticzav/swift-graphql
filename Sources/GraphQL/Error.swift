@@ -1,10 +1,9 @@
 import Foundation
 
-/// A GraphQLError describes an Error found during the parse, validate, or
-/// execute phases of performing a GraphQL operation. In addition to a message
-/// and stack trace, it also includes information about the locations in a
-/// GraphQL document and/or execution result that correspond to the Error.
-public struct GraphQLError: Codable, Equatable, Sendable {
+/// A GraphQLError describes an Error found during the parse, validate, or execute phases of performing a GraphQL operation. In addition to a message and stack trace, it also includes information about the locations in a GraphQL document and/or execution result that correspond to the Error.
+///
+/// Its implementation follows the specification described at [GraphQLSpec](http://spec.graphql.org/October2021/#sec-Errors.Error-result-format).
+public struct GraphQLError: Codable, Equatable {
     
     /// A short, human-readable summary of the problem.
     public let message: String
@@ -59,16 +58,21 @@ public struct GraphQLError: Codable, Equatable, Sendable {
         }
     }
     
+    /// A map of strings for implementors to add additional information to errors however they see fit, and there are no additional restrictions on its contents.
+    public let extensions: [String: AnyCodable]?
+    
     // MARK: - Initializer
 
     public init(
         message: String,
         locations: [Location]? = nil,
-        path: [PathLink]? = nil
+        path: [PathLink]? = nil,
+        extensions: [String: AnyCodable]? = nil
     ) {
         self.message = message
         self.locations = locations
         self.path = path
+        self.extensions = extensions
     }
 }
 

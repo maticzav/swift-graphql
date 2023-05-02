@@ -285,6 +285,44 @@ final class SelectionDecodingTests: XCTestCase {
             ),
         ])
     }
+    
+    func testErrorResponse() throws {
+        let result: ExecutionResult = """
+            {
+              "errors": [
+                {
+                  "message": "Bad Request Exception",
+                  "extensions": {
+                    "code": "BAD_USER_INPUT",
+                  }
+                }
+              ],
+              "data": null
+            }
+            """.execution()
+        
+        let selection = Selection<String, String> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try String(from: data)
+            case .selecting:
+                return "wrong"
+            }
+        }
+
+        let decoded = try selection.nullable.decode(raw: result.data)
+        XCTAssertEqual(decoded, nil)
+        XCTAssertEqual(result.errors, [
+            GraphQLError(
+                message: "Bad Request Exception",
+                locations: nil,
+                path: nil,
+                extensions: [
+                    "code": AnyCodable("BAD_USER_INPUT")
+                ]
+            )
+        ])
+    }
 }
 
 extension String {
