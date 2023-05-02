@@ -58,7 +58,7 @@ final class ComposeExchangeTests: XCTestCase {
                         SwiftGraphQLClient.OperationResult(
                             operation: operation,
                             data: nil,
-                            errors: [],
+                            error: nil,
                             stale: false
                         )
                     }

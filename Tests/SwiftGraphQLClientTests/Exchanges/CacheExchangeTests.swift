@@ -113,7 +113,7 @@ final class CacheExchangeTests: XCTestCase {
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
-                errors: [],
+                error: nil,
                 stale: false
             ))
             operations.send(op)
@@ -136,14 +136,14 @@ final class CacheExchangeTests: XCTestCase {
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
-                errors: [],
+                error: nil,
                 stale: false
             ))
             operations.send(op)
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("world"),
-                errors: [],
+                error: nil,
                 stale: false
             ))
         }
@@ -175,7 +175,7 @@ final class CacheExchangeTests: XCTestCase {
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
-                errors: [],
+                error: nil,
                 stale: false
             ))
             
@@ -201,7 +201,7 @@ final class CacheExchangeTests: XCTestCase {
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
-                errors: [],
+                error: nil,
                 stale: false
             ))
             
@@ -243,7 +243,7 @@ final class CacheExchangeTests: XCTestCase {
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
-                errors: [],
+                error: nil,
                 stale: false
             ))
             
@@ -251,7 +251,7 @@ final class CacheExchangeTests: XCTestCase {
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: CacheExchangeTests.mutationOperation,
                 data: AnyCodable("much data"),
-                errors: [],
+                error: nil,
                 stale: false
             ))
         }

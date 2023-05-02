@@ -60,12 +60,12 @@ public class WebSocketExchange: Exchange {
                 var op = OperationResult(
                     operation: operation,
                     data: exec.data,
-                    errors: [],
+                    error: nil,
                     stale: false
                 )
                 
                 if let errors = exec.errors {
-                    op.errors = [.graphql(errors)]
+                    op.error = .graphql(errors)
                 }
                 return op
             }

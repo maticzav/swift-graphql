@@ -83,8 +83,10 @@ public struct OperationResult: Equatable {
     /// Data received from the server.
     public var data: AnyCodable
     
-    /// Errors accumulated along the execution path.
-    public var errors: [CombinedError]
+    /// Execution error encontered in one of the exchanges in the chain.
+    ///
+    /// When we use a GraphQL API there are two kinds of errors we may encounter: Network Errors and GraphQL Errors from the API. Since it's common to encounter either of them, there's a CombinedError class that can hold and abstract either.
+    public var error: ExecutionError?
     
     /// Optional stale flag added by exchanges that return stale results.
     public var stale: Bool?
@@ -92,19 +94,19 @@ public struct OperationResult: Equatable {
     public init(
         operation: Operation,
         data: AnyCodable,
-        errors: [CombinedError],
+        error: ExecutionError? = nil,
         stale: Bool? = nil
     ) {
         self.operation = operation
         self.data = data
-        self.errors = errors
+        self.error = error
         self.stale = stale
     }
 }
 
 
 /// An error structure describing an error that may have happened in one of the exchanges.
-public enum CombinedError: Error {
+public enum ExecutionError: Error {
     
     /// Describes an error that occured on the networking layer.
     case network(URLError)
@@ -112,15 +114,12 @@ public enum CombinedError: Error {
     /// Describes errors that occured during the GraphQL execution.
     case graphql([GraphQLError])
     
-    /// Describes an error that occured during the parsing phase on the client (e.g. received JSON is invalid).
-    case parsing(Error)
-    
     /// An error occured and it's not clear why.
     case unknown(Error)
 }
 
-extension CombinedError: Equatable {
-    public static func == (lhs: CombinedError, rhs: CombinedError) -> Bool {
+extension ExecutionError: Equatable {
+    public static func == (lhs: ExecutionError, rhs: ExecutionError) -> Bool {
         switch (lhs, rhs) {
         case let (.graphql(l), .graphql(r)):
             return l == r
@@ -162,8 +161,8 @@ public struct DecodedOperationResult<T> {
     /// Data received from the server.
     public var data: T
     
-    /// Errors accumulated along the execution path.
-    public var errors: [CombinedError]
+    /// Execution error encountered in one of the exchanges.
+    public var error: ExecutionError?
     
     /// Tells wether the result of the query is ot up-to-date.
     public var stale: Bool?

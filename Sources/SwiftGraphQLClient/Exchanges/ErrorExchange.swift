@@ -5,9 +5,9 @@ import Foundation
 public struct ErrorExchange: Exchange {
     
     /// Callback function that the exchange calls for every error in the operation result.
-    private var onError: (CombinedError, Operation) -> Void
+    private var onError: (ExecutionError, Operation) -> Void
     
-    public init(onError: @escaping (CombinedError, Operation) -> Void) {
+    public init(onError: @escaping (ExecutionError, Operation) -> Void) {
         self.onError = onError
     }
     
@@ -20,7 +20,7 @@ public struct ErrorExchange: Exchange {
     ) -> AnyPublisher<OperationResult, Never> {
         next(operations)
             .handleEvents(receiveOutput: { result in
-                for error in result.errors {
+                if let error = result.error {
                     self.onError(error, result.operation)
                 }
             })

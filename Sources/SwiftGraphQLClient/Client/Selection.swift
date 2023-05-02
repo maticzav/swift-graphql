@@ -119,19 +119,52 @@ extension GraphQLClient {
 extension OperationResult {
     
     /// Decodes data in operation result using the selection decoder.
-    fileprivate func decode<T, TypeLock>(
-        selection: Selection<T, TypeLock>
-    ) throws -> DecodedOperationResult<T> {
-        let data = try selection.decode(raw: self.data)
+    fileprivate func decode<T, TypeLock>(selection: Selection<T, TypeLock>) throws -> DecodedOperationResult<T> {
+        // NOTE: One of four things might happen as described in http://spec.graphql.org/October2021/#sec-Response-Format:
+        //   1. execution was successful: `data` field is present, `error` is not;
+        //   2. error was raised before the execution began: `error` field is present, `data` is not;
+        //   3. error was raised during exeuction: `error` field is present, `data` is nil;
+        //   4. field error occurred: both `data` and `error` fiels are present.
+        // Of the above four cases, we can be confident that the contract hasn't been broken in cases
+        // 1) and 4). In other cases, it's possible that even though the resolver expected a value it encountered
+        // an error and received `nil` instead. In such cases, we need to terminate the pipeline altogether.
         
-        let result = DecodedOperationResult(
-            operation: self.operation,
-            data: data,
-            errors: self.errors,
-            stale: self.stale
-        )
+        switch (self.data.value) {
+        #if canImport(Foundation)
+        case is NSNull, is Void, Optional<AnyDecodable>.none:
+            if let error = self.error {
+                throw error
+            }
+            // NOTE: This should never happen if the server follows the GraphQL Specification!
+            throw OperationError.missingBothDataAndErrorFields
+        #else
+        case is Void, Optional<AnyDecodable>.none:
+            if let error = self.error {
+                throw error
+            }
+            throw OperationError.missingBothDataAndErrorFields
+        #endif
+                
+        default:
+            let data = try selection.decode(raw: self.data)
+                    
+            let result = DecodedOperationResult(
+                operation: self.operation,
+                data: data,
+                error: self.error,
+                stale: self.stale
+            )
+                    
+            return result
+        }
         
-        return result
+        
     }
 }
+
+public enum OperationError: Error {
+    case missingBothDataAndErrorFields
+}
+
 #endif
+

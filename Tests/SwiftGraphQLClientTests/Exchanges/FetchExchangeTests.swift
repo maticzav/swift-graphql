@@ -89,7 +89,7 @@ final class FetchExchangeTests: XCTestCase {
             XCTAssertEqual(result, OperationResult(
                 operation: result.operation,
                 data: AnyCodable("hello"),
-                errors: [],
+                error: nil,
                 stale: false)
             )
             
@@ -126,13 +126,14 @@ final class FetchExchangeTests: XCTestCase {
             return downstream
         }
         .sink { result in
-            XCTAssertEqual(result, OperationResult(
-                operation: result.operation,
-                data: nil,
-                errors: [
-                    .network(URLError(rawValue: 400))
-                ],
-                stale: false)
+            XCTAssertEqual(
+                result,
+                OperationResult(
+                    operation: result.operation,
+                    data: nil,
+                    error: .network(URLError(rawValue: 400)),
+                    stale: false
+                )
             )
             
             expectation.fulfill()
