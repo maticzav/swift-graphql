@@ -13,6 +13,7 @@ export function getRoutes(): IRoutes {
           'network',
           'querying',
           'subscriptions',
+          'errors',
           'guides',
           'advanced',
           'faq',
