@@ -1,0 +1,50 @@
+---
+title: Handling Errors
+sidebar_label: Error Handling
+---
+
+When you submit a query, mutation or a subscription to your GraphQL server one of the following things might happen:
+
+1. the request was successful,
+1. your request encountered an error,
+1. your request encountered an error but could still produce a result.
+
+In both the first and the third case, your GraphQL server is going to conform to your schema - certain fields may have null values instead of the expected data, but the shape of the response will match the expected one.
+
+In the second case, on the other hand, GraphQL encountered a "terminating error" meaning that it could not produce a result that would conform to your schema (e.g. a non-nullable field was null). In this case, GraphQL will _not_ return a result at all.
+
+Since SwiftGraphQL uses the schema as the single source of truth, handling the first and the third case is easy. Handling the second case, however, requires some additional work.
+
+## Operation Result Errors vs Throwables
+
+Because Swift is a compiled, statically typed language, we need to be explicit about every type conversion happening in our code. To make sure developer experience doesn't suffer, SwiftGraphQL produces a terminating error when it encounters a diviation from the schema and produces a `DecodedOperationResult` in other cases.
+
+```swift
+let query = Selection.Query<String> {
+	try $0.hello()
+}
+
+// General result callback.
+client.query(query)
+	.sink { completion in
+		switch (completion) {
+		case .failure(let error):
+			// Handle a terminating error.
+		case .finished:
+			()
+		}
+
+	} receiveValue: { (result: DecodedOperationResult) in
+		// Handle a successful or partial result.
+	}
+```
+
+> You can read more about error handling in [The Swift Programming Language](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/errorhandling#Handling-Errors-Using-Do-Catch).
+
+## Combined Errors
+
+> CombinedError pattern is heavily inspired by [urql](https://formidable.com/open-source/urql/docs/basics/errors/) client. I suggest you check their documentation for any further explanations.
+
+When we use a GraphQL API there are two kinds of errors we may encounter: Network Errors and GraphQL Errors from the API. Since it's common to encounter either of them, there's a CombinedError class that can hold and abstract either.
+
+> It's worth noting that an error can coexist and be returned in a successful request alongside data. This is because in GraphQL a query can have partially failed but still contain some data.

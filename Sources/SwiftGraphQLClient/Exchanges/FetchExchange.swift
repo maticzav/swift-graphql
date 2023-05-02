@@ -86,17 +86,22 @@ public class FetchExchange: Exchange {
                                 return OperationResult(
                                     operation: operation,
                                     data: result.data,
-                                    errors: [.graphql(errors)],
+                                    error: .graphql(errors),
                                     stale: false
                                 )
                             }
                             
-                            return OperationResult(operation: operation, data: result.data, errors: [], stale: false)
+                            return OperationResult(
+                                operation: operation,
+                                data: result.data,
+                                error: nil,
+                                stale: false
+                            )
                         } catch(let err) {
                             return OperationResult(
                                 operation: operation,
                                 data: AnyCodable(()),
-                                errors: [.parsing(err)],
+                                error: .unknown(err),
                                 stale: false
                             )
                         }
@@ -105,7 +110,7 @@ public class FetchExchange: Exchange {
                         let result = OperationResult(
                             operation: operation,
                             data: nil,
-                            errors: [.network(error)],
+                            error: .network(error),
                             stale: false
                         )
                         

@@ -98,7 +98,7 @@ final class DedupExchangeTests: XCTestCase {
             results.send(SwiftGraphQLClient.OperationResult(
                 operation: DedupExchangeTests.queryOperation,
                 data: nil,
-                errors: [],
+                error: nil,
                 stale: false
             ))
             operations.send(DedupExchangeTests.queryOperation)

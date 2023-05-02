@@ -113,7 +113,7 @@ public class CacheExchange: Exchange {
                 
                 // Cache query result and operation references.
                 // (AnyCodable represents nil values as Void objects.)
-                if result.operation.kind == .query, result.errors.isEmpty {
+                if result.operation.kind == .query, result.error == nil {
                     self.resultCache[result.operation.id] = result
                     
                     // NOTE: cache-only operations never receive data from the

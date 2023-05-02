@@ -20,7 +20,7 @@ public struct ErrorExchange: Exchange {
     ) -> AnyPublisher<OperationResult, Never> {
         next(operations)
             .handleEvents(receiveOutput: { result in
-                for error in result.errors {
+                if let error = result.error {
                     self.onError(error, result.operation)
                 }
             })
