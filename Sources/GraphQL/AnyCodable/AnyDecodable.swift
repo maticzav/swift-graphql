@@ -71,8 +71,10 @@ extension _AnyDecodable {
         } else if let string = try? container.decode(String.self) {
             self.init(string)
         } else if let array = try? container.decode([AnyDecodable].self) {
+            // NOTE: This line manually unwrapps nested AnyCodable values into a flattened `AnyCodable` value (e.g. `AnyCodable([AnyCodable("A"), AnyCodable("B")` into `AnyCodable(["A", "B"]).
             self.init(array.map { $0.value })
         } else if let dictionary = try? container.decode([String: AnyDecodable].self) {
+            // NOTE: This line manually unwrapps nested AnyCodable values into a flattened `AnyCodable` value.
             self.init(dictionary.mapValues { $0.value })
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyDecodable value cannot be decoded")
