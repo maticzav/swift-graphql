@@ -2,6 +2,8 @@ name: Migrate TheSocialNetwork Database
 
 on:
   push:
+    paths:
+      - 'examples/thesocialnetwork/prisma/**'
     branches:
       - main
 
@@ -17,10 +19,10 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
-          
+
       - name: Install dependencies
         run: yarn workspaces focus tsn-server
-        
+
       - name: Deploy Migration
         run: yarn workspace tsn-server deploy
         env:

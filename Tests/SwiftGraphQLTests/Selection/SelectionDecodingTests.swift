@@ -68,9 +68,30 @@ final class SelectionDecodingTests: XCTestCase {
         XCTAssertEqual(decoded, nil)
         XCTAssertEqual(result.errors, nil)
     }
+    
+    func testCoercedFloats() throws {
+        let result: ExecutionResult = """
+            {
+              "data": 0
+            }
+            """.execution()
 
-    func testList() throws {
-        
+        let selection = Selection<Double, Double> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try Double(from: data)
+            case .selecting:
+                return 42
+            }
+        }
+        let nullableSelection = selection.nullable
+
+        let decoded = try nullableSelection.decode(raw: result.data)
+        XCTAssertEqual(decoded, 0)
+        XCTAssertEqual(result.errors, nil)
+    }
+
+    func testListOfInts() throws {
         let result: ExecutionResult = """
             {
               "data": [1, 2, 3]
@@ -88,6 +109,70 @@ final class SelectionDecodingTests: XCTestCase {
 
         let decoded = try selection.list.decode(raw: result.data)
         XCTAssertEqual(decoded, [1, 2, 3])
+        XCTAssertEqual(result.errors, nil)
+    }
+    
+    func testListOfCoercedFloats() throws {
+        let result: ExecutionResult = """
+            {
+              "data": [1, 2, 3]
+            }
+            """.execution()
+        
+        let selection = Selection<Double, Double> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try Double(from: data)
+            case .selecting:
+                return 0
+            }
+        }
+
+        let decoded = try selection.list.decode(raw: result.data)
+        XCTAssertEqual(decoded, [1, 2, 3])
+        XCTAssertEqual(result.errors, nil)
+    }
+    
+    func testListOfStrings() throws {
+        let result: ExecutionResult = """
+            {
+                "data": ["John", "Tom"]
+            }
+            """.execution()
+
+        let selection = Selection<String, String> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try String(from: data)
+            case .selecting:
+                return "wrong"
+            }
+        }
+
+        let decoded = try selection.list.decode(raw: result.data)
+        XCTAssertEqual(decoded, ["John", "Tom"])
+        XCTAssertEqual(result.errors, nil)
+    }
+    
+    func testListOfLiteralStrings() throws {
+        // NOTE: This is a different test than the one above. SwiftGraphQL generates an "in-place decoder" for a list of scalars (i.e. you should do `.list()`, not `field.list.nullable.list.string`).
+        let result: ExecutionResult = """
+            {
+                "data": ["John", "Tom"]
+            }
+            """.execution()
+
+        let selection = Selection<[String], [String]> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try [String](from: data)
+            case .selecting:
+                return []
+            }
+        }
+
+        let decoded = try selection.decode(raw: result.data)
+        XCTAssertEqual(decoded, ["John", "Tom"])
         XCTAssertEqual(result.errors, nil)
     }
     
@@ -198,6 +283,44 @@ final class SelectionDecodingTests: XCTestCase {
                 locations: [GraphQLError.Location(line: 6, column: 7)],
                 path: [.path("hero"), .path("heroFriends"), .index(1), .path("name")]
             ),
+        ])
+    }
+    
+    func testErrorResponse() throws {
+        let result: ExecutionResult = """
+            {
+              "errors": [
+                {
+                  "message": "Bad Request Exception",
+                  "extensions": {
+                    "code": "BAD_USER_INPUT",
+                  }
+                }
+              ],
+              "data": null
+            }
+            """.execution()
+        
+        let selection = Selection<String, String> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try String(from: data)
+            case .selecting:
+                return "wrong"
+            }
+        }
+
+        let decoded = try selection.nullable.decode(raw: result.data)
+        XCTAssertEqual(decoded, nil)
+        XCTAssertEqual(result.errors, [
+            GraphQLError(
+                message: "Bad Request Exception",
+                locations: nil,
+                path: nil,
+                extensions: [
+                    "code": AnyCodable("BAD_USER_INPUT")
+                ]
+            )
         ])
     }
 }

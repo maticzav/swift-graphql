@@ -20,6 +20,9 @@ extension Array: GraphQLScalar where Element: GraphQLScalar {
         switch(codable.value) {
         case let value as [AnyCodable]:
             self = try value.map { try Element(from: $0) }
+        case let value as [Any]:
+            // NOTE: We need this special case because wrapped scalar types (e.g. `[String]` or `String?`) are represented as a single `AnyCodable` value with a nested structure (e.g. `AnyCodable([String])`).
+            self = try value.map { try Element(from: AnyCodable($0)) }
         default:
             let err = ScalarDecodingError.unexpectedScalarType(
                 expected: "Collection",
@@ -130,8 +133,32 @@ extension Bool: GraphQLScalar {
 extension Double: GraphQLScalar {
     public init(from codable: AnyCodable) throws {
         switch(codable.value) {
+        // NOTE: AnyCodable might falsely assume that a value is an integer when it's actualy a float. This might happen because of result coercion. We need to handle all number options and manually convert them to Double values because of that. You can read more about it at http://spec.graphql.org/October2021/#sec-Float.Result-Coercion
+        // Integers
+        case let value as Int:
+            self = Double(value)
+        case let value as Int8:
+            self = Double(value)
+        case let value as Int16:
+            self = Double(value)
+        case let value as Int32:
+            self = Double(value)
+        case let value as Int64:
+            self = Double(value)
+        case let value as UInt:
+            self = Double(value)
+        case let value as UInt8:
+            self = Double(value)
+        case let value as UInt16:
+            self = Double(value)
+        case let value as UInt32:
+            self = Double(value)
+        case let value as UInt64:
+            self = Double(value)
+        // Float
         case let value as Float:
             self = Double(value)
+        // Double
         case let value as Double:
             self = value
         default:
