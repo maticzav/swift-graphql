@@ -86,7 +86,7 @@ public struct OperationResult: Equatable {
     /// Execution error encontered in one of the exchanges in the chain.
     ///
     /// When we use a GraphQL API there are two kinds of errors we may encounter: Network Errors and GraphQL Errors from the API. Since it's common to encounter either of them, there's a CombinedError class that can hold and abstract either.
-    public var error: ExecutionError?
+    public var error: CombinedError?
     
     /// Optional stale flag added by exchanges that return stale results.
     public var stale: Bool?
@@ -94,7 +94,7 @@ public struct OperationResult: Equatable {
     public init(
         operation: Operation,
         data: AnyCodable,
-        error: ExecutionError? = nil,
+        error: CombinedError? = nil,
         stale: Bool? = nil
     ) {
         self.operation = operation
@@ -106,7 +106,7 @@ public struct OperationResult: Equatable {
 
 
 /// An error structure describing an error that may have happened in one of the exchanges.
-public enum ExecutionError: Error {
+public enum CombinedError: Error {
     
     /// Describes an error that occured on the networking layer.
     case network(URLError)
@@ -118,8 +118,8 @@ public enum ExecutionError: Error {
     case unknown(Error)
 }
 
-extension ExecutionError: Equatable {
-    public static func == (lhs: ExecutionError, rhs: ExecutionError) -> Bool {
+extension CombinedError: Equatable {
+    public static func == (lhs: CombinedError, rhs: CombinedError) -> Bool {
         switch (lhs, rhs) {
         case let (.graphql(l), .graphql(r)):
             return l == r
@@ -162,7 +162,7 @@ public struct DecodedOperationResult<T> {
     public var data: T
     
     /// Execution error encountered in one of the exchanges.
-    public var error: ExecutionError?
+    public var error: CombinedError?
     
     /// Tells wether the result of the query is ot up-to-date.
     public var stale: Bool?
