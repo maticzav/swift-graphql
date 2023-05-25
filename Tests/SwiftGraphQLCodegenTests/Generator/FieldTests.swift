@@ -40,6 +40,43 @@ final class FieldTests: XCTestCase {
            }
            """)
     }
+    
+    func testDeprecatedFieldWithEscapeCharacters() throws {
+        let field = Field(
+            name: "id",
+            description: "Object identifier.\nMultiline.",
+            args: [],
+            type: .named(.scalar("ID")),
+            isDeprecated: true,
+            deprecationReason: "Use \"ID\" instead."
+        )
+
+        let generated = try field.getDynamicSelection(
+            parent: "TestType",
+            context: Context.from(scalars: ["ID": "String"])
+        ).format()
+
+        generated.assertInlineSnapshot(matching: """
+           /// Object identifier.
+           /// Multiline.
+           @available(*, deprecated, message: "Use \\\"ID\\\" instead.")
+           public func id() throws -> String? {
+             let field = GraphQLField.leaf(
+               field: "id",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+           
+             switch self.__state {
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try String?(from: $0) }
+             case .selecting:
+               return nil
+             }
+           }
+           """)
+    }
 
     // MARK: - Scalar
 
