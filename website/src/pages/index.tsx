@@ -1,5 +1,4 @@
-import Head from 'next/head'
-import { FeatureList, HeroGradient, HeroIllustration, InfoList } from '@theguild/components'
+import { HeroGradient, HeroIllustration, InfoList } from '@theguild/components'
 import { handlePushRoute } from '@guild-docs/client'
 import { accentColor } from './_app'
 
@@ -15,12 +14,7 @@ export default function Index() {
           title: 'Start programming with SwiftGraphQL',
           onClick: (e) => handlePushRoute('/docs', e),
         }}
-        // version={
-        //   <a href="https://www.npmjs.com/package/@envelop/core" target="_blank">
-        //     <img src="https://badge.fury.io/js/%40envelop%2Fcore.svg" alt="npm version" height="18" />
-        //   </a>
-        // }
-        colors={['#FD53F6', '#F35D41']}
+        colors={['#fd53f6', '#f35d41']}
         image={{
           src: '/assets/hero.png',
           alt: 'Illustration',
@@ -31,11 +25,6 @@ export default function Index() {
           },
         }}
       />
-
-      <div style={{ paddingTop: '100px' }} />
-
-      {/* Features */}
-
       <HeroIllustration
         title="Queries, Mutations & Subscriptions"
         description="SwiftGraphQL comes with a lightweight client that supports queries, mutations and subscriptions. And they all work the same way."
@@ -54,9 +43,6 @@ export default function Index() {
           alt: 'If it compiles, it works.',
         }}
       />
-
-      <div style={{ paddingTop: '75px' }} />
-
       <HeroIllustration
         title="Develop Swift(ly)"
         description="You don’t have to worry about naming collisions, variables, anything. Just Swift. We use Swift in favour of GraphQL wherever possible."
@@ -66,9 +52,6 @@ export default function Index() {
         }}
         flipped
       />
-
-      <div style={{ paddingBottom: '100px' }} />
-
       <InfoList
         title="Learn more"
         itemLinkProps={{
@@ -109,8 +92,6 @@ export default function Index() {
           },
         ]}
       />
-
-      <div style={{ paddingBottom: '100px' }} />
     </>
   )
 }
