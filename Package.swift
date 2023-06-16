@@ -1,11 +1,11 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.7
 
 import PackageDescription
 
 let package = Package(
     name: "swift-graphql",
     platforms: [
-        .iOS(.v15_1),
+        .iOS(.v16),
         .macOS(.v10_15),
         .tvOS(.v13),
         .watchOS(.v6)
