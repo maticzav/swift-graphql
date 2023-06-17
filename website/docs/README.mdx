@@ -19,6 +19,9 @@ The library is centered around three core principles:
 SwiftGraphQLClient is heavily inspired by `urql` GraphQL client in the JavaScript community. It models the queries as streams of values and lets you create custom operation processors called exchanges.
 
 ```swift
+import SwiftGraphQLClient
+import GraphQL
+
 let request = URLRequest(url: URL(string: "http://127.0.0.1:4000/graphql")!)
 let client = SwiftGraphQLClient.Client(request: request)
 
