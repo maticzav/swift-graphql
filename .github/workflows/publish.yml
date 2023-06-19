@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'Sources/**/*'
+      - 'Package.swift'
+      - '.github/workflows/publish.yml'
 
 jobs:
   build:
