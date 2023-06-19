@@ -4,7 +4,7 @@ import { appWithTranslation } from 'next-i18next'
 import { chakra, Code, extendTheme, Text, theme as chakraTheme, UnorderedList, useColorModeValue } from '@chakra-ui/react'
 import { mode } from '@chakra-ui/theme-tools'
 import { AppSeoProps, CombinedThemeProvider, DocsPage, ExtendComponents, handlePushRoute } from '@guild-docs/client'
-import { Footer, Header, Subheader } from '@theguild/components'
+import { Subheader } from '@theguild/components'
 
 import type { AppProps } from 'next/app'
 
@@ -88,7 +88,6 @@ function AppContent(appProps: AppProps) {
 
   return (
     <>
-      <Header accentColor={accentColor} activeLink="/open-source" themeSwitch />
       <Subheader
         activeLink={router.asPath}
         product={{
@@ -135,7 +134,6 @@ function AppContent(appProps: AppProps) {
         }}
       />
       {isDocs ? <DocsPage accentColor={accentColor} appProps={appProps} mdxRoutes={mdxRoutes} /> : <Component {...pageProps} />}
-      <Footer />
     </>
   )
 }
