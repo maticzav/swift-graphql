@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "swift-graphql",
     platforms: [
-        .iOS(.v16),
+        .iOS(.v15),
         .macOS(.v10_15),
         .tvOS(.v13),
         .watchOS(.v6)
