@@ -488,6 +488,11 @@ public class GraphQLWebSocket: WebSocketDelegate {
         self.emitter.share().eraseToAnyPublisher()
     }
     
+    /// Correctly closes the connection with the server.
+    public func close(code: CloseCode = .normalClosure) {
+        close(code: code.rawValue)
+    }
+    
     /// Creates a publisher that emits results received from the server
     /// of the provided query.
     ///
