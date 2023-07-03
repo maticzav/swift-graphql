@@ -4,7 +4,15 @@ import GraphQL
 
 /// Operation describes a single request that may be processed by multiple exchange along the chain.
 public struct Operation: Identifiable, Equatable, Hashable {
-    
+    public init(id: String, kind: Operation.Kind, request: URLRequest, policy: Operation.Policy, types: [String], args: ExecutionArgs) {
+        self.id = id
+        self.kind = kind
+        self.request = request
+        self.policy = policy
+        self.types = types
+        self.args = args
+    }
+
     /// Unique identifier used to identify an operation.
     public var id: String
     
