@@ -46,6 +46,25 @@ final class SelectionDecodingTests: XCTestCase {
         XCTAssertEqual(decoded, nil)
         XCTAssertEqual(result.errors, nil)
     }
+    
+    func testMissingDataField() throws {
+        let result: ExecutionResult = """
+            {}
+            """.execution()
+
+        let selection = Selection<String?, String?> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try String?(from: data)
+            case .selecting:
+                return "wrong"
+            }
+        }
+        
+        let decoded = try selection.decode(raw: result.data)
+        XCTAssertEqual(decoded, nil)
+        XCTAssertEqual(result.errors, nil)
+    }
 
     func testNullableNSNull() throws {
         let result: ExecutionResult = """
