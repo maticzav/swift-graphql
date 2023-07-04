@@ -43,6 +43,8 @@ extension ExecutionArgs: Hashable {
 public struct ExecutionResult: Equatable, Encodable, Decodable {
     
     /// Result of a successfull execution of a query.
+    /// - NOTE: AnyCodable is represented as a non-nullable value because it's easier to handle results if we represent `nil` value as `AnyCodable(nil)` value.
+    /// Because GraphQL Specification allows the possibility of missing `data` field, we manually decode execution result.
     public var data: AnyCodable
     
     /// Any errors that occurred during the GraphQL execution of the server.
@@ -64,6 +66,20 @@ public struct ExecutionResult: Equatable, Encodable, Decodable {
         self.errors = errors
         self.hasNext = hasNext
         self.extensions = extensions
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // NOTE: GraphQL Specification allows the possibility of missing `data` field, but the
+        //       code in the library assumes that AnyCodable value is always present.
+        //       As a workaround, we manually construct a nil literal using AnyCodable to simplify further processing.
+        let data = try container.decodeIfPresent(AnyCodable.self, forKey: .data)
+        
+        self.data = data ?? AnyCodable.init(nilLiteral: ())
+        self.errors = try container.decodeIfPresent([GraphQLError].self, forKey: .errors)
+        self.hasNext = try container.decodeIfPresent(Bool.self, forKey: .hasNext)
+        self.extensions = try container.decodeIfPresent([String : AnyCodable].self, forKey: .extensions)
     }
 }
 
