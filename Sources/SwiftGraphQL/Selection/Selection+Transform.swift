@@ -55,7 +55,7 @@ public extension Selection {
             switch fields.__state {
             case let .decoding(data):
                 switch data.value {
-                case is Void:
+                case is Void, is NSNull:
                     throw ObjectDecodingError.unexpectedNilValue
                 default:
                     return try self.__decode(data: data)
