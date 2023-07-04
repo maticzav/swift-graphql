@@ -46,6 +46,25 @@ final class SelectionDecodingTests: XCTestCase {
         XCTAssertEqual(decoded, nil)
         XCTAssertEqual(result.errors, nil)
     }
+    
+    func testMissingDataField() throws {
+        let result: ExecutionResult = """
+            {}
+            """.execution()
+
+        let selection = Selection<String?, String?> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try String?(from: data)
+            case .selecting:
+                return "wrong"
+            }
+        }
+        
+        let decoded = try selection.decode(raw: result.data)
+        XCTAssertEqual(decoded, nil)
+        XCTAssertEqual(result.errors, nil)
+    }
 
     func testNullableNSNull() throws {
         let result: ExecutionResult = """
@@ -194,11 +213,37 @@ final class SelectionDecodingTests: XCTestCase {
 
         XCTAssertThrowsError(try selection.nonNullOrFail.decode(raw: result.data)) { (error) -> Void in
             switch error {
-            case let ScalarDecodingError.unexpectedScalarType(expected: expected, received: _):
-                XCTAssertEqual(expected, "String")
+            case ObjectDecodingError.unexpectedNilValue:
+                ()
             default:
                 XCTFail()
             } 
+        }
+    }
+    
+    func testInvalidScalarError() throws {
+        let result: ExecutionResult = """
+            {
+              "data": 1
+            }
+            """.execution()
+        
+        let selection = Selection<String, String> {
+            switch $0.__state {
+            case let .decoding(data):
+                return try String(from: data)
+            case .selecting:
+                return "wrong"
+            }
+        }
+
+        XCTAssertThrowsError(try selection.nonNullOrFail.decode(raw: result.data)) { (error) -> Void in
+            switch error {
+            case let ScalarDecodingError.unexpectedScalarType(expected: expected, received: _): 
+                XCTAssertEqual(expected, "String")
+            default:
+                XCTFail()
+            }
         }
     }
 
