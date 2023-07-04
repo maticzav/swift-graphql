@@ -119,7 +119,7 @@ extension GraphQLClient {
 extension OperationResult {
     
     /// Decodes data in operation result using the selection decoder.
-    fileprivate func decode<T, TypeLock>(selection: Selection<T, TypeLock>) throws -> DecodedOperationResult<T> {
+    public func decode<T, TypeLock>(selection: Selection<T, TypeLock>) throws -> DecodedOperationResult<T> {
         // NOTE: One of four things might happen as described in http://spec.graphql.org/October2021/#sec-Response-Format:
         //   1. execution was successful: `data` field is present, `error` is not;
         //   2. error was raised before the execution began: `error` field is present, `data` is not;
