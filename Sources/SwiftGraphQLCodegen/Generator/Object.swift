@@ -36,7 +36,7 @@ extension ObjectType {
         // Adds utility alias for the selection.
         code.append("""
         extension Selection where T == Never, TypeLock == Never {
-            public typealias \(apiName)<T> = Selection<T, Objects.\(apiName)>
+            public typealias \(apiName)<W> = Selection<W, Objects.\(apiName)>
         }
         """)
         
