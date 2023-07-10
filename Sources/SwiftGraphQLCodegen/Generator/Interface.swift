@@ -31,7 +31,7 @@ extension InterfaceType {
         \(possibleTypes.selection(name: "Interfaces.\(name)", objects: objects))
 
         extension Selection where T == Never, TypeLock == Never {
-            public typealias \(name)<T> = Selection<T, Interfaces.\(name)>
+            public typealias \(name)<W> = Selection<W, Interfaces.\(name)>
         }
         """
     }
