@@ -6,7 +6,7 @@
 
 ![CI Tests](https://github.com/maticzav/swift-graphql/workflows/Test/badge.svg)
 
-https://graphql.org/swapi-graphql/
+[www.swift-graphql.com](https://www.swift-graphql.com)
 
 ## Features
 
@@ -30,7 +30,7 @@ The library is centered around three core principles:
 
 ## Documentation
 
-You can find detailed documentation on the SwiftGraphQL page at [https://www.swift-graphql.com/](https://www.swift-graphql.com/).
+You can find detailed documentation on the SwiftGraphQL page at [www.swift-graphql.com](https://www.swift-graphql.com).
 
 ## Examples
 
