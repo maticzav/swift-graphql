@@ -5,7 +5,7 @@ Pod::Spec.new do |spec|
   spec.summary      = 'GraphQL query generator and client for Swift'
   spec.license      = { :type => 'MIT' }
 
-  spec.version      = '5.0.5'
+  spec.version      = '5.0.7'
   spec.source       = { 
 		:git => 'https://github.com/maticzav/swift-graphql.git', 
 		:tag => spec.version.to_s 
