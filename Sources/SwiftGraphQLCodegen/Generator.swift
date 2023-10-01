@@ -87,6 +87,6 @@ public struct GraphQLCodegen {
         """
 
         let formatted = try code.format()
-        return formatted
+        return formatted // ?? code
     }
 }

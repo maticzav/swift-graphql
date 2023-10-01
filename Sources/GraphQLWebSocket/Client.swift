@@ -10,7 +10,6 @@ import Starscream
 /// - NOTE: The client assumes that you'll manually establish the socket connection
 ///         and that it may send requests.
 public class GraphQLWebSocket: WebSocketDelegate {
-    
     /// Configuration of the behaviour of the client.
     private let config: GraphQLWebSocketConfiguration
     
@@ -143,7 +142,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
 
     // MARK: - Internals
     
-    public func didReceive(event: WebSocketEvent, client: WebSocket) {
+    public func didReceive(event: Starscream.WebSocketEvent, client: Starscream.WebSocketClient) {
         self.config.logger.debug("Received a new message from the server!")
         
         switch event {
@@ -151,7 +150,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
             self.config.logger.debug("Socket connected!")
             
             // Immediatelly notify all listeners about the health change.
-            self.emitter.send(Event.opened(socket: client))
+            self.emitter.send(Event.opened(socket: client as! WebSocket))
             self.health = .connected
             
             // Once the connection opens, we start recursively processing server messages.
@@ -219,6 +218,9 @@ public class GraphQLWebSocket: WebSocketDelegate {
             self.close(code: closeCode)
             break
             
+        case .peerClosed:
+            self.close(code: 1000)
+            break
         }
     }
     
