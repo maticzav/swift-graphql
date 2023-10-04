@@ -27,7 +27,7 @@ private extension Collection where Element == ObjectTypeRef {
     /// Returns an enumerator that we use to decode typename field.
     func typenamesEnum() -> String {
         let types = self
-            .map { "case \($0.name.camelCase.normalize) = \"\($0.name)\"" }
+            .map { "case \($0.name.camelCasePreservingSurroundingUnderscores.normalize) = \"\($0.name)\"" }
             .joined(separator: "\n")
 
         return """

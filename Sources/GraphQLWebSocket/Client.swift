@@ -75,7 +75,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
         
         /// WebSocket has opened.
         case opened(socket: WebSocketClient)
-        
+
         /// Open WebSocket connection has been acknowledged
         case acknowledged(payload: [String: AnyCodable]?)
         
@@ -219,6 +219,8 @@ public class GraphQLWebSocket: WebSocketDelegate {
             self.close(code: closeCode)
             break
             
+        case .peerClosed:
+            self.close(code: 1000)
         }
     }
     

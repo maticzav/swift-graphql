@@ -48,19 +48,19 @@ extension Collection where Element == ObjectTypeRef {
 
     /// Type used to 
     private var mock: String {
-        self.first!.namedType.name.camelCase
+        self.first!.namedType.name.camelCasePreservingSurroundingUnderscores
     }
 }
 
 private extension ObjectTypeRef {
     /// Returns a parameter definition for a given type reference.
     var parameter: String {
-        "\(namedType.name.camelCase): Selection<T, Objects.\(namedType.name.pascalCase)>"
+        "\(namedType.name.camelCasePreservingSurroundingUnderscores): Selection<T, Objects.\(namedType.name.pascalCase)>"
     }
 
     /// Returns a SwiftGraphQL Fragment selection.
     func fragment(interface: String) -> String {
-        #"GraphQLField.fragment(type: "\#(namedType.name)", interface: "\#(interface)", selection: \#(namedType.name.camelCase).__selection())"#
+        #"GraphQLField.fragment(type: "\#(namedType.name)", interface: "\#(interface)", selection: \#(namedType.name.camelCasePreservingSurroundingUnderscores).__selection())"#
     }
 
     /// Returns a decoder for a fragment.
@@ -70,7 +70,7 @@ private extension ObjectTypeRef {
         let name = namedType.name
         return """
         case "\(name)":
-            return try \(name.camelCase).__decode(data: data)
+            return try \(name.camelCasePreservingSurroundingUnderscores).__decode(data: data)
         """
     }
 }

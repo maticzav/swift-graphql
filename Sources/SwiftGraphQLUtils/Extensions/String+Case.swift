@@ -73,9 +73,21 @@ extension String {
         return result
     }
 
-    /// Returns the string camelCased.
-    public var camelCase: String {
+    /// Returns the string – camelCased – while retaining all leading and trailing underscores
+    ///
+    ///     _foo_             // returns _foo_
+    ///     ___foo_bar___     // returns ___fooBar___
+    ///     
+    public var camelCasePreservingSurroundingUnderscores: String {
+        let leading = prefix { $0 == "_" }
+        let remainder = dropFirst(leading.count)
+        let trimmed = remainder.trimmingCharacters(in: CharacterSet(["_"]))
+        let trailing = String.SubSequence(repeating: "_", count: remainder.count - trimmed.count)
+
         let pascal = pascalCase
-        return pascal[pascal.startIndex].lowercased() + pascal.dropFirst()
+        return String(leading)
+        + pascal[pascal.startIndex].lowercased()
+        + pascal.dropFirst()
+        + String(trailing)
     }
 }

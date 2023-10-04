@@ -45,19 +45,19 @@ extension InputValue {
     fileprivate func declaration(context: Context) throws -> String {
         """
         \(docs)
-        public var \(name.camelCase.normalize): \(try type.type(scalars: context.scalars))
+        public var \(name.camelCasePreservingSurroundingUnderscores.normalize): \(try type.type(scalars: context.scalars))
         """
     }
     
     fileprivate func initDeclaration(context: Context, isLast: Bool) throws -> String {
         """
-        \(name.camelCase.normalize): \(try type.type(scalars: context.scalars))\(self.default)
+        \(name.camelCasePreservingSurroundingUnderscores.normalize): \(try type.type(scalars: context.scalars))\(self.default)
         """
     }
     
     fileprivate func initFields(context: Context) throws -> String {
         """
-        self.\(name.camelCase.normalize) = \(name.camelCase.normalize)
+        self.\(name.camelCasePreservingSurroundingUnderscores.normalize) = \(name.camelCasePreservingSurroundingUnderscores.normalize)
         """
     }
 
@@ -138,7 +138,7 @@ private extension Collection where Element == InputValue {
 private extension InputValue {
     /// Returns an encoder for this input value.
     var encoder: String {
-        let key = name.camelCase.normalize
+        let key = name.camelCasePreservingSurroundingUnderscores.normalize
 
         switch type.inverted {
         case .nullable:
@@ -152,6 +152,6 @@ private extension InputValue {
 
     /// Returns a coding key for this input value.
     var codingKey: String {
-        "case \(name.camelCase.normalize) = \"\(name)\""
+        "case \(name.camelCasePreservingSurroundingUnderscores.normalize) = \"\(name)\""
     }
 }
