@@ -220,7 +220,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
             break
             
         case .peerClosed:
-            self.close(code: 1000)
+            self.close(code: 1006)
         }
     }
     
