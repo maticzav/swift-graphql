@@ -78,6 +78,51 @@ final class FieldTests: XCTestCase {
            """)
     }
 
+    func testMultilineDeprecationReason() throws {
+        let field = Field(
+            name: "id",
+            description: "Deprecation\nMultiline.",
+            args: [],
+            type: .named(.scalar("ID")),
+            isDeprecated: true,
+            deprecationReason: """
+            Use ID instead.
+            See: <link> for more detail.
+            """
+        )
+
+        let generated = try field.getDynamicSelection(
+            parent: "TestType",
+            context: Context.from(scalars: ["ID": "String"])
+        ).format()
+
+        let expected = """
+           /// Deprecation
+           /// Multiline.
+           @available(*, deprecated, message: \"\"\"
+           Use ID instead.
+           See: <link> for more detail.
+           \"\"\")
+           public func id() throws -> String? {
+             let field = GraphQLField.leaf(
+               field: "id",
+               parent: "TestType",
+               arguments: []
+             )
+             self.__select(field)
+
+             switch self.__state {
+             case .decoding:
+               return try self.__decode(field: field.alias!) { try String?(from: $0) }
+             case .selecting:
+               return nil
+             }
+           }
+           """
+
+        generated.assertInlineSnapshot(matching: expected)
+    }
+
     // MARK: - Scalar
 
     func testScalarField() throws {
