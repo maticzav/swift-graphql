@@ -52,7 +52,7 @@ public enum GraphQLField {
         switch self {
         case let .leaf(name, parent, arguments),
             let .composite(name, parent, _, arguments, _):
-            return "\(name.camelCase)\(parent.camelCase)_\(arguments.hash)"
+            return "\(name.camelCasePreservingSurroundingUnderscores)\(parent.camelCasePreservingSurroundingUnderscores)_\(arguments.hash)"
         case .fragment:
             return nil
         }

@@ -58,7 +58,7 @@ extension EnumType {
     /// Mock value declaration.
     private var mock: String {
         let value = self.enumValues.first!
-        return "public static var mockValue = Self.\(value.name.camelCase.normalize)"
+        return "public static var mockValue = Self.\(value.name.camelCasePreservingSurroundingUnderscores.normalize)"
     }
 }
 
@@ -70,7 +70,7 @@ extension EnumValue {
     fileprivate var declaration: String {
         """
         \(docs)
-        case \(name.camelCase.normalize) = "\(name)"
+        case \(name.camelCasePreservingSurroundingUnderscores.normalize) = "\(name)"
         """
     }
 

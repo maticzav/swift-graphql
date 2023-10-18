@@ -98,7 +98,7 @@ extension Field {
     }
 
     private var fName: String {
-        name.camelCase.normalize
+        name.camelCasePreservingSurroundingUnderscores.normalize
     }
 
     private func fParameters(context: Context) throws -> String {
@@ -148,7 +148,7 @@ private extension Collection where Element == InputValue {
     /// Returns a one-to-one argument mapping.
     func arguments(field: Field, context: Context) -> String {
         let args = self
-            .map { $0.name.camelCase }.map { "\($0): \($0.normalize)" }
+            .map { $0.name.camelCasePreservingSurroundingUnderscores }.map { "\($0): \($0.normalize)" }
             .joined(separator: ", ")
         
         switch field.type.namedType {
@@ -166,7 +166,7 @@ private extension Collection where Element == InputValue {
 extension InputValue {
     /// Generates a function parameter for this input value.
     fileprivate func parameter(context: Context) throws -> String {
-        "\(name.camelCase.normalize): \(try type.type(scalars: context.scalars)) \(self.default)"
+        "\(name.camelCasePreservingSurroundingUnderscores.normalize): \(try type.type(scalars: context.scalars)) \(self.default)"
     }
 
     /// Returns the default value of the parameter.
@@ -224,7 +224,7 @@ private extension Collection where Element == InputValue {
 private extension InputValue {
     /// Returns a SwiftGraphQL Argument definition for a given input value.
     var argument: String {
-        #"Argument(name: "\#(name)", type: "\#(type.argument)", value: \#(name.camelCase.normalize))"#
+        #"Argument(name: "\#(name)", type: "\#(type.argument)", value: \#(name.camelCasePreservingSurroundingUnderscores.normalize))"#
     }
 }
 

@@ -3,11 +3,11 @@ import XCTest
 
 final class StringExtensionsTest: XCTestCase {
     func testCamelCase() {
-        XCTAssertEqual("___a very peculiarNameIndeed__wouldNot.you.agree.AMAZING?____".camelCase, "aVeryPeculiarNameIndeedWouldNotYouAgreeAmazing")
-        XCTAssertEqual("ENUM".camelCase, "enum")
-        XCTAssertEqual("linkToURL".camelCase, "linkToUrl")
-        XCTAssertEqual("grandfather_father.son grandson".camelCase, "grandfatherFatherSonGrandson")
-        XCTAssertEqual("queryDBShortcuts".camelCase, "queryDbShortcuts")
+        XCTAssertEqual("___a very peculiarNameIndeed__wouldNot.you.agree.AMAZING?____".camelCasePreservingSurroundingUnderscores, "___aVeryPeculiarNameIndeedWouldNotYouAgreeAmazing____")
+        XCTAssertEqual("ENUM".camelCasePreservingSurroundingUnderscores, "enum")
+        XCTAssertEqual("linkToURL".camelCasePreservingSurroundingUnderscores, "linkToUrl")
+        XCTAssertEqual("grandfather_father.son grandson".camelCasePreservingSurroundingUnderscores, "grandfatherFatherSonGrandson")
+        XCTAssertEqual("queryDBShortcuts".camelCasePreservingSurroundingUnderscores, "queryDbShortcuts")
     }
 
     func testPascalCase() {

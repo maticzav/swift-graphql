@@ -30,7 +30,7 @@ final class EnumTests: XCTestCase {
                     deprecationReason: "Was too good."
                 ),
                 EnumValue(
-                    name: "SKYWALKER",
+                    name: "_SKYWALKER__",
                     description: nil,
                     isDeprecated: true,
                     deprecationReason: nil
@@ -53,7 +53,7 @@ final class EnumTests: XCTestCase {
                /// Released in 1983.
                case jedi = "JEDI"
            
-               case skywalker = "SKYWALKER"
+               case _skywalker__ = "_SKYWALKER__"
              }
            }
            
