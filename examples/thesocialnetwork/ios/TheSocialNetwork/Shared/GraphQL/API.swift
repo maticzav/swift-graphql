@@ -61,7 +61,7 @@ extension Fields where TypeLock == Objects.Query {
   }
 }
 extension Selection where T == Never, TypeLock == Never {
-  public typealias Query<T> = Selection<T, Objects.Query>
+  public typealias Query<W> = Selection<W, Objects.Query>
 }
 extension Objects {
   public struct Mutation {}
@@ -157,7 +157,7 @@ extension Fields where TypeLock == Objects.Mutation {
   }
 }
 extension Selection where T == Never, TypeLock == Never {
-  public typealias Mutation<T> = Selection<T, Objects.Mutation>
+  public typealias Mutation<W> = Selection<W, Objects.Mutation>
 }
 extension Objects {
   public struct AuthPayloadSuccess {}
@@ -182,7 +182,7 @@ extension Fields where TypeLock == Objects.AuthPayloadSuccess {
   }
 }
 extension Selection where T == Never, TypeLock == Never {
-  public typealias AuthPayloadSuccess<T> = Selection<T, Objects.AuthPayloadSuccess>
+  public typealias AuthPayloadSuccess<W> = Selection<W, Objects.AuthPayloadSuccess>
 }
 extension Objects {
   public struct AuthPayloadFailure {}
@@ -207,7 +207,7 @@ extension Fields where TypeLock == Objects.AuthPayloadFailure {
   }
 }
 extension Selection where T == Never, TypeLock == Never {
-  public typealias AuthPayloadFailure<T> = Selection<T, Objects.AuthPayloadFailure>
+  public typealias AuthPayloadFailure<W> = Selection<W, Objects.AuthPayloadFailure>
 }
 extension Objects {
   public struct SignedUrl {}
@@ -264,7 +264,7 @@ extension Fields where TypeLock == Objects.SignedUrl {
   }
 }
 extension Selection where T == Never, TypeLock == Never {
-  public typealias SignedUrl<T> = Selection<T, Objects.SignedUrl>
+  public typealias SignedUrl<W> = Selection<W, Objects.SignedUrl>
 }
 extension Objects {
   public struct Subscription {}
@@ -378,7 +378,7 @@ extension Fields where TypeLock == Objects.User {
   }
 }
 extension Selection where T == Never, TypeLock == Never {
-  public typealias User<T> = Selection<T, Objects.User>
+  public typealias User<W> = Selection<W, Objects.User>
 }
 extension Objects {
   public struct Message {}
@@ -453,7 +453,7 @@ extension Fields where TypeLock == Objects.Message {
   }
 }
 extension Selection where T == Never, TypeLock == Never {
-  public typealias Message<T> = Selection<T, Objects.Message>
+  public typealias Message<W> = Selection<W, Objects.Message>
 }
 extension Objects.Query {
 
@@ -662,7 +662,7 @@ extension Fields where TypeLock == Unions.AuthPayload {
 }
 
 extension Selection where T == Never, TypeLock == Never {
-  public typealias AuthPayload<T> = Selection<T, Unions.AuthPayload>
+  public typealias AuthPayload<W> = Selection<W, Unions.AuthPayload>
 }
 
 // MARK: - Enums
