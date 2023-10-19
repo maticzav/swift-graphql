@@ -44,7 +44,7 @@ enum AuthClient {
                 guard let _ = token else {
                     return
                 }
-                
+            
                 NetworkClient.shared.query(User.viewer, policy: .cacheAndNetwork)
                     .receive(on: DispatchQueue.main)
                     .map { res -> User? in res.data }

@@ -92,7 +92,11 @@ extension Field {
             // NOTE: It's possible that a string contains double-quoted characters in deprecation reason.
             //       http://spec.graphql.org/October2021/#sec-Language.Directives
             let message = deprecationReason?.replacingOccurrences(of: "\"", with: "\\\"") ?? ""
-            return "@available(*, deprecated, message: \"\(message)\")"
+            if message.contains("\n") {
+                return "@available(*, deprecated, message: \"\"\"\n\(message)\n\"\"\")"
+            } else {
+                return "@available(*, deprecated, message: \"\(message)\")"
+            }
         }
         return ""
     }
