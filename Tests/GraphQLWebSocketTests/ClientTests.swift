@@ -36,7 +36,9 @@ final class ClientTests: XCTestCase {
         let ysexpect = expectation(description: "ys complete")
         
         let request = URLRequest(url: URL(string: "ws://127.0.0.1:4000/graphql")!)
-        let client = GraphQLWebSocket(request: request)
+        let config = GraphQLWebSocketConfiguration()
+        config.logger.logLevel = .debug
+        let client = GraphQLWebSocket(request: request, config: config)
         
         client.onEvent()
             .compactMap({ msg -> Error? in
