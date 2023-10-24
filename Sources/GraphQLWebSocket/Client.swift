@@ -411,7 +411,9 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
                 guard let self else { return }
                 if let error {
                     self.config.logger.debug("Failed to send \(message.description) to the server: \(error)")
-                    self.tick(result: .failure(error))
+                    self.dataQueue.async {
+                        self.tick(result: .failure(error))
+                    }
                 } else {
                     self.config.logger.debug("\(message.description) sent to the server!")
                 }
@@ -443,24 +445,26 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
     private func ping() {
         self.socket?.sendPing(pongReceiveHandler: { [weak self] error in
             guard let self else { return }
-            if let error {
-                self.config.logger.debug("Failed to send a PING message: \(error)")
-                self.tick(result: .failure(error))
-            } else {
-                self.emitter.send(Event.ping(received: false, payload: nil))
-                self.config.logger.debug("Emitted a PING message!")
-                
-                // We schedule a response timeout that has to be cleared
-                // in a timely manner by receiveing a new message from the server.
-                self.connectionDroppedTimer = Timer.scheduledTimer(
-                    withTimeInterval: TimeInterval(3 * self.config.keepAlive),
-                    repeats: true,
-                    block: { [weak self] _ in
-                        guard let self = self else {
-                            return
-                        }
-                        self.socket?.cancel(with: .noStatusReceived, reason: nil)
-                    })
+            self.dataQueue.async {
+                if let error {
+                    self.config.logger.debug("Failed to send a PING message: \(error)")
+                    self.tick(result: .failure(error))
+                } else {
+                    self.emitter.send(Event.ping(received: false, payload: nil))
+                    self.config.logger.debug("Emitted a PING message!")
+                    
+                    // We schedule a response timeout that has to be cleared
+                    // in a timely manner by receiveing a new message from the server.
+                    self.connectionDroppedTimer = Timer.scheduledTimer(
+                        withTimeInterval: TimeInterval(3 * self.config.keepAlive),
+                        repeats: true,
+                        block: { [weak self] _ in
+                            guard let self = self else {
+                                return
+                            }
+                            self.socket?.cancel(with: .noStatusReceived, reason: nil)
+                        })
+                }
             }
         })
 
