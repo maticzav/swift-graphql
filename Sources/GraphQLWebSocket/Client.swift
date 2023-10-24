@@ -28,7 +28,8 @@ public class GraphQLWebSocket: NSObject, URLSessionWebSocketDelegate {
     /// The task used to receive messages from the server.
     private var receiveTask: Task<Void, Never>?
     
-    private let dataQueue = DispatchQueue(label: "GraphQLWebSocket-\(UUID().uuidString)")
+    // use the main queue which is by default used by Starscream and was assumed in previous implementation
+    private let dataQueue = DispatchQueue.main
     
     /// Holds information about the connection health and what the client is doing about it.
     private var health: Health = Health.notconnected
