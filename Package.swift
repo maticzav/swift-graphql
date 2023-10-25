@@ -6,9 +6,9 @@ let package = Package(
     name: "swift-graphql",
     platforms: [
         .iOS(.v15),
-        .macOS(.v10_15),
-        .tvOS(.v13),
-        .watchOS(.v6)
+        .macOS(.v12),
+        .tvOS(.v15),
+        .watchOS(.v8)
     ],
     products: [
         // SwiftGraphQL
@@ -27,7 +27,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-format", "508.0.0"..<"510.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
-        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.0"),
         .package(url: "https://github.com/dominicegginton/Spinner", from: "2.0.0"),
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
@@ -41,7 +40,6 @@ let package = Package(
             dependencies: [
                 "GraphQL",
                 .product(name: "Logging", package: "swift-log"),
-                "Starscream"
             ],
             path: "Sources/GraphQLWebSocket",
             exclude: ["README.md"]

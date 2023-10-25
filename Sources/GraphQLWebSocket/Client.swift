@@ -3,7 +3,6 @@
 import Combine
 import GraphQL
 import Foundation
-import Starscream
 
 /// A GraphQL client that lets you send queries over WebSocket protocol.
 ///
