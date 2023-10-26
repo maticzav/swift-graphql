@@ -23,9 +23,9 @@ public class GraphQLWebSocket: WebSocketDelegate {
     private var socket: WebSocket?
     
     /// Holds information about the connection health and what the client is doing about it.
-    private var health: Health = Health.notconnected
+    private(set) var health: Health = Health.notconnected
     
-    private enum Health: Equatable {
+    enum Health: Equatable {
 
         /// Connection is healthy and client can communicate with the server.
         case acknowledged
@@ -124,7 +124,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     /// query identifier that the client used to identify the subscription.
     ///
     /// - NOTE: We also use pipelines to tell how many ongoing connections the client is managing.
-    private var pipelines = [String: AnyCancellable]()
+    private(set) var pipelines = [String: AnyCancellable]()
     
     // MARK: - Initializer
     
@@ -280,7 +280,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     
     /// Correctly closes the connection with the server.
     private func close(code: UInt16) {
-        self.config.logger.debug("Connection with the server closed (\(code))!")
+        self.config.logger.debug("Connection with the server closed (\(code))!") // TODO: no, its not!
         
         // The server shouldn't reconnect, we tell all listenerss to stop listening.
         guard shouldRetryToConnect(code: code) else {
@@ -492,6 +492,9 @@ public class GraphQLWebSocket: WebSocketDelegate {
     
     /// Correctly closes the connection with the server.
     public func close(code: CloseCode = .normalClosure) {
+        // NOTE: this does NOT close connection if there are not complete subscriptions
+        // TODO: does it make sense to expose it? this is confusing, add `force` flag at the very least?
+        // TODO: does it make sense to allow client set closeCode?
         close(code: code.rawValue)
     }
     
