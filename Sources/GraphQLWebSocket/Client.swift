@@ -78,13 +78,11 @@ public class GraphQLWebSocket: WebSocketDelegate {
         /// Open WebSocket connection has been acknowledged
         case acknowledged(payload: [String: AnyCodable]?)
         
-        /// Ping has been received or sent.
-        ///
-        /// - parameter received: Tells whether the ping was received from the server. If `false` the client sent the ping.
-        case ping(received: Bool, payload: [String: AnyCodable]?)
+        /// Ping has been sent.
+        case pingSent
         
         /// Pong has been received.
-        case pong
+        case pongReceived
         
         /// A message from the server has been received.
         case message(ServerMessage)
@@ -195,7 +193,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
 
         case .pong:
             self.config.logger.debug("Received pong from the server...")
-            self.emitter.send(.pong)
+            self.emitter.send(.pongReceived)
             self.connectionDroppedTimer?.invalidate()
             break
             
@@ -344,7 +342,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     /// Sends a ping request and starts the response timeout.
     private func ping() {
         self.socket?.sendPing(pongReceiveHandler: { _ in }) // NOTE: sent also via delegate
-        self.emitter.send(Event.ping(received: false, payload: nil))
+        self.emitter.send(Event.pingSent)
         self.config.logger.debug("Emitted a PING message!")
         
         // We schedule a response timeout that has to be cleared
