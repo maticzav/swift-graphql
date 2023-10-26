@@ -1,5 +1,4 @@
 import Foundation
-import Starscream
 
 extension WebSocketClient {
     
