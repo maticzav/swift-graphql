@@ -1,4 +1,4 @@
-// The spec follow https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md.
+// The spec follow https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
 
 import Foundation
 import GraphQL
@@ -23,9 +23,6 @@ public enum ClientMessage: Encodable {
     ///         the server will close the socket with the event `4429: Too many initialisation requests`.
     case initialise(ConnectionInit)
     
-    /// A biderctional message used for detailing connection's health.
-    case ping(Ping), pong(Pong)
-    
     /// A message sent to create sw subscription.
     case subscribe(Subscribe)
     
@@ -34,10 +31,6 @@ public enum ClientMessage: Encodable {
     
     public var description: String {
         switch self {
-        case .ping:
-            return "PING"
-        case .pong:
-            return "PONG"
         case .initialise:
             return "INIT"
         case .subscribe:
@@ -52,16 +45,6 @@ public enum ClientMessage: Encodable {
     /// Returns an init message with a given payload.
     public static func initalise(payload: [String: AnyCodable]? = nil) -> Self {
         ClientMessage.initialise(ConnectionInit(payload: payload))
-    }
-    
-    /// Returns a pong message with a given payload.
-    public static func pong(payload: [String: AnyCodable]? = nil) -> Self {
-        ClientMessage.pong(Pong(payload: payload))
-    }
-    
-    /// Returns a ping message with a given payload.
-    public static func ping(payload: [String: AnyCodable]? = nil) -> Self {
-        ClientMessage.ping(Ping(payload: payload))
     }
     
     /// Returns a subscribe message that may create a new connection with a given ID.
@@ -83,7 +66,6 @@ public enum ClientMessage: Encodable {
     
     public enum MessageType: String, CaseIterable, Codable {
         case connection_init = "connection_init"
-        case ping = "ping", pong = "pong"
         case subscribe = "subscribe"
         case complete = "complete"
     }
@@ -132,41 +114,12 @@ public enum ClientMessage: Encodable {
             self.id = id
         }
     }
-
-    ///  Useful for detecting failed connections, displaying latency metrics or other types of network probing.
-    ///
-    ///  - NOTE: A Pong message must be sent in response from the receiving party as soon as possible.
-    public struct Ping: ClientMessageInterface, Codable {
-        public var type: MessageType = .ping
-        public var payload: [String: AnyCodable]?
-        
-        public init(payload: [String: AnyCodable]? = nil) {
-            self.payload = payload
-        }
-    }
-
-    /// Response to the ping message. Must be sent as soon as the ping message is received.
-    ///
-    /// - NOTE: The pong message can be sent at any time within the established socket. Furthermore,
-    ///         the pong message may even be sent unsolicited as an unidirectional heartbeat.
-    public struct Pong: ClientMessageInterface, Codable {
-        public var type: MessageType = .pong
-        public var payload: [String: AnyCodable]?
-        
-        public init(payload: [String: AnyCodable]? = nil) {
-            self.payload = payload
-        }
-    }
     
     // MARK: - Encoder
     
     public func encode(to encoder: Encoder) throws {
         switch self {
         case .initialise(let message):
-            try message.encode(to: encoder)
-        case .ping(let message):
-            try message.encode(to: encoder)
-        case .pong(let message):
             try message.encode(to: encoder)
         case .subscribe(let message):
             try message.encode(to: encoder)
@@ -182,9 +135,6 @@ protocol ServerMessageInterface: Decodable, Equatable {}
 public enum ServerMessage: Equatable, Decodable {
     case acknowledge(ConnectionAck)
     
-    /// A biderctional message used for detailing connection's health.
-    case ping(Ping), pong(Pong)
-    
     /// Server result carrying the next payload.
     case next(Next)
     
@@ -198,7 +148,6 @@ public enum ServerMessage: Equatable, Decodable {
     
     public enum MessageType: String, CaseIterable, Codable {
         case connection_ack = "connection_ack"
-        case ping = "ping", pong = "pong"
         case next = "next"
         case error = "error"
         case complete = "complete"
@@ -208,31 +157,6 @@ public enum ServerMessage: Equatable, Decodable {
     /// successfully be created. The client is now ready to request a new subscription.
     public struct ConnectionAck: ServerMessageInterface, Codable {
         public var type: MessageType = .connection_ack
-        public var payload: [String: AnyCodable]?
-        
-        public init(payload: [String: AnyCodable]? = nil) {
-            self.payload = payload
-        }
-    }
-    
-    ///  Useful for detecting failed connections, displaying latency metrics or other types of network probing.
-    ///
-    ///  - NOTE: A Pong message must be sent in response from the receiving party as soon as possible.
-    public struct Ping: ServerMessageInterface, Codable {
-        public var type: MessageType = .ping
-        public var payload: [String: AnyCodable]?
-        
-        public init(payload: [String: AnyCodable]? = nil) {
-            self.payload = payload
-        }
-    }
-
-    /// Response to the ping message. Must be sent as soon as the ping message is received.
-    ///
-    /// - NOTE: The pong message can be sent at any time within the established socket. Furthermore,
-    ///         the pong message may even be sent unsolicited as an unidirectional heartbeat.
-    public struct Pong: ServerMessageInterface, Codable {
-        public var type: MessageType = .pong
         public var payload: [String: AnyCodable]?
         
         public init(payload: [String: AnyCodable]? = nil) {
@@ -285,10 +209,6 @@ public enum ServerMessage: Equatable, Decodable {
         switch type {
         case .connection_ack:
             self = .acknowledge(try ConnectionAck(from: decoder))
-        case .ping:
-            self = .ping(try Ping(from: decoder))
-        case .pong:
-            self = .pong(try Pong(from: decoder))
         case .next:
             self = .next(try Next(from: decoder))
         case .error:
@@ -306,7 +226,7 @@ public enum ServerMessage: Equatable, Decodable {
 // MARK: - Close Code
 
 /// Standard close codes of the GraphQLWS protocol.
-public enum CloseCode: UInt16, CaseIterable {
+public enum CloseCode: Int, CaseIterable {
     case normalClosure = 1000
     case goingAway = 1001
     case noStatusReceived = 1005
@@ -330,8 +250,8 @@ public enum CloseCode: UInt16, CaseIterable {
     case tooManyInitialisationRequests = 4429
     
     /// Tells whether the provided close code is unrecoverable by the client.
-    static func isFatalInternalCloseCode(code: UInt16) -> Bool {
-        let recoverable: [UInt16] = [
+    static func isFatalInternalCloseCode(code: Int) -> Bool {
+        let recoverable: [Int] = [
             CloseCode.normalClosure.rawValue,
             CloseCode.goingAway.rawValue,
             CloseCode.abnormalClosure.rawValue,
@@ -348,7 +268,7 @@ public enum CloseCode: UInt16, CaseIterable {
         return 1000 <= code && code <= 1999
     }
     
-    static func isTerminatingCloseCode(code: UInt16) -> Bool {
+    static func isTerminatingCloseCode(code: Int) -> Bool {
         let terminatingCloseCodes = [
             CloseCode.internalServerError.rawValue,
             CloseCode.internalClientError.rawValue,
@@ -365,5 +285,3 @@ public enum CloseCode: UInt16, CaseIterable {
         return terminatingCloseCodes.contains(code)
     }
 }
-
-

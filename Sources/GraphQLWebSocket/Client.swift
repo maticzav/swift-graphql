@@ -78,15 +78,13 @@ public class GraphQLWebSocket: WebSocketDelegate {
         /// Open WebSocket connection has been acknowledged
         case acknowledged(payload: [String: AnyCodable]?)
         
-        /// Ping message has been received or sent.
+        /// Ping has been received or sent.
         ///
         /// - parameter received: Tells whether the ping was received from the server. If `false` the client sent the ping.
         case ping(received: Bool, payload: [String: AnyCodable]?)
         
-        /// Pong message has been received or sent.
-        ///
-        /// - parameter received: Tells whether the pong was received from the server. If `false` the client sent the event.
-        case pong(received: Bool, payload: [String: AnyCodable]?)
+        /// Pong has been received.
+        case pong
         
         /// A message from the server has been received.
         case message(ServerMessage)
@@ -146,8 +144,10 @@ public class GraphQLWebSocket: WebSocketDelegate {
         self.config.logger.debug("Received a new message from the server!")
         
         switch event {
-        case .connected:
+        case let .connected(protocolName):
             self.config.logger.debug("Socket connected!")
+            // NOTE: only 1 protocol is supported
+            assert(ClientMessage.PROTOCOL == protocolName, "Unsupported protocol")
             
             // Immediatelly notify all listeners about the health change.
             self.emitter.send(Event.opened(socket: client))
@@ -161,7 +161,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
                     withTimeInterval: TimeInterval(self.config.connectionAckTimeout),
                     repeats: false,
                     block: { _ in
-                        self.socket?.disconnect(closeCode: CloseCode.connectionAcknowledgementTimeout.rawValue)
+                        self.socket?.disconnect(closeCode: CloseCode.connectionAcknowledgementTimeout)
                     })
             }
             
@@ -192,34 +192,16 @@ public class GraphQLWebSocket: WebSocketDelegate {
                 self.tick(result: .failure(error))
             }
             break
-            
-        case .ping:
-            self.config.logger.debug("Received ping from the server...")
-            self.socket?.write(pong: Data())
-            self.config.logger.debug("Sent pong to the server!")
-            
+
         case .pong:
             self.config.logger.debug("Received pong from the server...")
-            break
-            
-        case .viabilityChanged(_):
-            self.config.logger.debug("Server viability changed...")
-            break
-            
-        case .reconnectSuggested(_):
-            self.config.logger.debug("Server suggested reconnect...")
-            break
-        
-        case .cancelled:
-            self.close(code: 1000)
+            self.emitter.send(.pong)
+            self.connectionDroppedTimer?.invalidate()
             break
             
         case .disconnected(_, let closeCode):
             self.close(code: closeCode)
             break
-            
-        case .peerClosed:
-            self.close(code: 1006)
         }
     }
     
@@ -278,7 +260,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     }
     
     /// Correctly closes the connection with the server.
-    private func close(code: UInt16) {
+    private func close(code: Int) {
         self.config.logger.debug("Connection with the server closed (\(code))!")
         
         // The server shouldn't reconnect, we tell all listenerss to stop listening.
@@ -334,7 +316,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
         switch (self.health, message) {
         case (.acknowledged, _), (.disposed, _), (_, .initialise):
             // We can send any message when the connection has been ACK and meta messages when the server hasn't ACK the connection yet.
-            socket.write(data: data)
+            socket.write(data: data) { _ in }
             self.config.logger.debug("\(message.description) sent to the server!")
             
         default:
@@ -361,7 +343,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     
     /// Sends a ping request and starts the response timeout.
     private func ping() {
-        self.send(message: ClientMessage.ping())
+        self.socket?.sendPing(pongReceiveHandler: { _ in }) // NOTE: sent also via delegate
         self.emitter.send(Event.ping(received: false, payload: nil))
         self.config.logger.debug("Emitted a PING message!")
         
@@ -422,27 +404,6 @@ public class GraphQLWebSocket: WebSocketDelegate {
             // message before acknowledgement.
             self.socket?.disconnect(closeCode: CloseCode.badResponse)
             return
-            
-        case (_, .success(.ping(let msg))):
-            self.config.logger.debug("Received a PING request...")
-            
-            self.emitter.send(Event.message(.ping(msg)))
-            
-            self.emitter.send(Event.ping(received: true, payload: nil))
-            self.send(message: ClientMessage.pong(payload: msg.payload))
-            self.emitter.send(Event.pong(received: false, payload: msg.payload))
-            
-            self.config.logger.debug("Sent a PONG response!")
-            
-            break
-            
-        case (_, .success(.pong(let msg))):
-            self.config.logger.debug("Processing a PONG message...")
-            
-            self.emitter.send(Event.message(.pong(msg)))
-            self.emitter.send(Event.pong(received: true, payload: msg.payload))
-            
-            break
         
         case (_, .success(let msg)):
             self.emitter.send(Event.message(msg))
@@ -451,14 +412,14 @@ public class GraphQLWebSocket: WebSocketDelegate {
             // As soon as the reading of the message fails, emit an error and stop
             // processing new messages.
             self.emitter.send(Event.error(err))
-            self.socket?.disconnect(closeCode: CloseCode.badResponse.rawValue)
+            self.socket?.disconnect(closeCode: CloseCode.badResponse)
             return
         }
     }
     
     /// Checks the state of the client and tells whether the client should try reconnecting to the
     /// server given the received event.
-    private func shouldRetryToConnect(code: UInt16) -> Bool {
+    private func shouldRetryToConnect(code: Int) -> Bool {
         
         // Client was disposed and we shouldn't retry to reconnect.
         if case .disposed = self.health {
@@ -591,4 +552,3 @@ public class GraphQLWebSocket: WebSocketDelegate {
     }
     
 }
-
