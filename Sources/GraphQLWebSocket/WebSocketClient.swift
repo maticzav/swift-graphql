@@ -163,13 +163,8 @@ class WebSocket: NSObject, WebSocketClient, URLSessionWebSocketDelegate {
     }
     
     func write(pong: Data, completion: (() -> ())?) {
-        assert(socket.state == .running)
-        // TODO: test, check if URLSessionWebSocketTask responds to ping
-        struct Pong: Encodable {
-            var type = "pong"
-        }
-        let data = try! JSONEncoder().encode(Pong())
-        write(data: data, completion: completion)
+        // NOTE: URLSessionWebSocketTask reponds to PINGs sent by server
+        completion?()
     }
     
     // MARK: URLSessionWebSocketDelegate
