@@ -93,7 +93,6 @@ class WebSocket: NSObject, WebSocketClient, URLSessionWebSocketDelegate {
     }
 
     func disconnect(closeCode: Int) {
-        assert(socket.state == .running)
         // NOTE: URLSessionWebSocketTask.CloseCode limits allowed close codes
         let closeCode = URLSessionWebSocketTask.CloseCode(rawValue: Int(closeCode)) ?? .normalClosure
         socket.cancel(with: closeCode, reason: nil)
