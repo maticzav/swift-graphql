@@ -314,7 +314,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
         switch (self.health, message) {
         case (.acknowledged, _), (.disposed, _), (_, .initialise):
             // We can send any message when the connection has been ACK and meta messages when the server hasn't ACK the connection yet.
-            socket.write(data: data) { _ in }
+            socket.send(data) { _ in }
             self.config.logger.debug("\(message.description) sent to the server!")
             
         default:

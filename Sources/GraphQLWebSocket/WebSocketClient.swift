@@ -14,8 +14,8 @@ import Foundation
 public protocol WebSocketClient: AnyObject {
     func connect()
     func disconnect(closeCode: Int)
-    func write(string: String, completion: ((Error?) -> ())?)
-    func write(data: Data, completion: ((Error?) -> ())?)
+    func send(_ string: String, completion: ((Error?) -> ())?)
+    func send(_ data: Data, completion: ((Error?) -> ())?)
     /// Note that the callback is called after PING is sent and PONG received.
     func sendPing(pongReceiveHandler: ((Error?) -> ())?)
 }
@@ -62,6 +62,7 @@ class WebSocket: NSObject, WebSocketClient, URLSessionWebSocketDelegate {
 
     /// Starts receiving incoming messages.
     private func receive() {
+        assert(delegate != nil, "Delegate not set")
         socket.receive { [weak self] result in
             guard let self else { return }
             self.callbackQueue.async {
@@ -98,14 +99,14 @@ class WebSocket: NSObject, WebSocketClient, URLSessionWebSocketDelegate {
         socket.cancel(with: closeCode, reason: nil)
     }
 
-    func write(string: String, completion: ((Error?) -> ())?) {
+    func send(_ string: String, completion: ((Error?) -> ())?) {
         assert(socket.state == .running)
         socket.send(.string(string)) { error in
             completion?(error)
         }
     }
 
-    func write(data: Data, completion: ((Error?) -> ())?) {
+    func send(_ data: Data, completion: ((Error?) -> ())?) {
         assert(socket.state == .running)
         socket.send(.data(data)) { error in
             completion?(error)
