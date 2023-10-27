@@ -116,4 +116,24 @@ final class PublishersExtensionsTests: XCTestCase {
         
         XCTAssertEqual(received, [1])
     }
+
+    func testTakeTheFirstEmittedValueAsynchronously() async throws {
+        let value = await Just(1).first()
+        XCTAssertEqual(value, 1)
+    }
+
+    func testTakeTheFirstEmittedValueAsynchronouslyFromThrowingPublisher() async throws {
+        struct TestError: Error {}
+
+        let value = try await Just(1).setFailureType(to: TestError.self).first()
+        XCTAssertEqual(value, 1)
+    }
+
+    func testThrowEmittedErrorAsynchronously() async throws {
+        struct TestError: Error {}
+
+        await XCTAssertThrowsError(of: TestError.self) {
+            try await Fail<Int, TestError>(error: TestError()).first()
+        }
+    }
 }

@@ -255,7 +255,21 @@ public class Client: GraphQLClient, ObservableObject {
         
         return self.execute(operation: operation)
     }
-    
+
+    /// Executes a query request with given execution parameters.
+    ///
+    /// Note: While this behaves much the same as the published-based
+    /// APIs, async/await inherently does __not__ support multiple
+    /// return values. If you expect multiple values from an async/await
+    /// API, please use the corresponding publisher API instead.
+    public func query(
+        _ args: ExecutionArgs,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) async -> OperationResult {
+        await self.query(args, request: request, policy: policy).first()
+    }
+
     /// Executes a mutation request with given execution parameters.
     public func mutate(
         _ args: ExecutionArgs,
@@ -273,7 +287,21 @@ public class Client: GraphQLClient, ObservableObject {
         
         return self.execute(operation: operation)
     }
-    
+
+    /// Executes a mutation request with given execution parameters.
+    ///
+    /// Note: While this behaves much the same as the published-based
+    /// APIs, async/await inherently does __not__ support multiple
+    /// return values. If you expect multiple values from an async/await
+    /// API, please use the corresponding publisher API instead.
+    public func mutate(
+        _ args: ExecutionArgs,
+        request: URLRequest? = nil,
+        policy: Operation.Policy = .cacheFirst
+    ) async -> OperationResult {
+        await self.mutate(args, request: request, policy: policy).first()
+    }
+
     /// Executes a subscription request with given execution parameters.
     public func subscribe(
         _ args: ExecutionArgs,
