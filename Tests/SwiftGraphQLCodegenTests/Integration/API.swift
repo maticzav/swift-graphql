@@ -63,7 +63,7 @@ extension Fields where TypeLock == Objects.User {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias User<T> = Selection<T, Objects.User>
+  typealias User<W> = Selection<W, Objects.User>
 }
 extension Objects {
   struct Query {
@@ -225,7 +225,7 @@ extension Fields where TypeLock == Objects.Query {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias Query<T> = Selection<T, Objects.Query>
+  typealias Query<W> = Selection<W, Objects.Query>
 }
 extension Objects {
   struct Character {
@@ -323,7 +323,7 @@ extension Fields where TypeLock == Objects.Character {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias Character<T> = Selection<T, Objects.Character>
+  typealias Character<W> = Selection<W, Objects.Character>
 }
 extension Objects {
   struct Comic {
@@ -452,7 +452,7 @@ extension Fields where TypeLock == Objects.Comic {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias Comic<T> = Selection<T, Objects.Comic>
+  typealias Comic<W> = Selection<W, Objects.Comic>
 }
 extension Objects {
   struct Mutation {
@@ -564,7 +564,7 @@ extension Fields where TypeLock == Objects.Mutation {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias Mutation<T> = Selection<T, Objects.Mutation>
+  typealias Mutation<W> = Selection<W, Objects.Mutation>
 }
 extension Objects {
   struct AuthPayloadSuccess {
@@ -613,7 +613,7 @@ extension Fields where TypeLock == Objects.AuthPayloadSuccess {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias AuthPayloadSuccess<T> = Selection<T, Objects.AuthPayloadSuccess>
+  typealias AuthPayloadSuccess<W> = Selection<W, Objects.AuthPayloadSuccess>
 }
 extension Objects {
   struct AuthPayloadFailure {
@@ -644,7 +644,7 @@ extension Fields where TypeLock == Objects.AuthPayloadFailure {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias AuthPayloadFailure<T> = Selection<T, Objects.AuthPayloadFailure>
+  typealias AuthPayloadFailure<W> = Selection<W, Objects.AuthPayloadFailure>
 }
 extension Objects {
   struct File {
@@ -709,7 +709,7 @@ extension Fields where TypeLock == Objects.File {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias File<T> = Selection<T, Objects.File>
+  typealias File<W> = Selection<W, Objects.File>
 }
 extension Objects {
   struct Subscription {
@@ -857,7 +857,7 @@ extension Fields where TypeLock == Objects.Message {
   }
 }
 extension Selection where TypeLock == Never, T == Never {
-  typealias Message<T> = Selection<T, Objects.Message>
+  typealias Message<W> = Selection<W, Objects.Message>
 }
 extension Objects.User {
 
@@ -1257,7 +1257,7 @@ extension Fields where TypeLock == Interfaces.Node {
 }
 
 extension Selection where TypeLock == Never, T == Never {
-  typealias Node<T> = Selection<T, Interfaces.Node>
+  typealias Node<W> = Selection<W, Interfaces.Node>
 }
 
 // MARK: - Unions
@@ -1303,7 +1303,7 @@ extension Fields where TypeLock == Unions.SearchResult {
 }
 
 extension Selection where TypeLock == Never, T == Never {
-  typealias SearchResult<T> = Selection<T, Unions.SearchResult>
+  typealias SearchResult<W> = Selection<W, Unions.SearchResult>
 }
 extension Unions {
   struct AuthPayload {
@@ -1349,7 +1349,7 @@ extension Fields where TypeLock == Unions.AuthPayload {
 }
 
 extension Selection where TypeLock == Never, T == Never {
-  typealias AuthPayload<T> = Selection<T, Unions.AuthPayload>
+  typealias AuthPayload<W> = Selection<W, Unions.AuthPayload>
 }
 
 // MARK: - Enums
