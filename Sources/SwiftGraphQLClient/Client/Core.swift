@@ -262,6 +262,12 @@ public class Client: GraphQLClient, ObservableObject {
     /// APIs, async/await inherently does __not__ support multiple
     /// return values. If you expect multiple values from an async/await
     /// API, please use the corresponding publisher API instead.
+    ///
+    /// Additionally, due to the differences between async/await and
+    /// Combine publishers, the async APIs will only return a single value,
+    /// even if the query is invalidated. Therefore if you currently 
+    /// rely on invalidation behaviour provided by publishers we suggest
+    /// you continue to use the Combine APIs.
     public func query(
         _ args: ExecutionArgs,
         request: URLRequest? = nil,
