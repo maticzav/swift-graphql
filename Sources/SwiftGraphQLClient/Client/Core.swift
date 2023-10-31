@@ -270,10 +270,9 @@ public class Client: GraphQLClient, ObservableObject {
     /// you continue to use the Combine APIs.
     public func query(
         _ args: ExecutionArgs,
-        request: URLRequest? = nil,
-        policy: Operation.Policy = .cacheFirst
+        request: URLRequest? = nil
     ) async -> OperationResult {
-        await self.query(args, request: request, policy: policy).first()
+        await self.query(args, request: request, policy: .networkOnly).first()
     }
 
     /// Executes a mutation request with given execution parameters.
@@ -302,10 +301,9 @@ public class Client: GraphQLClient, ObservableObject {
     /// API, please use the corresponding publisher API instead.
     public func mutate(
         _ args: ExecutionArgs,
-        request: URLRequest? = nil,
-        policy: Operation.Policy = .cacheFirst
+        request: URLRequest? = nil
     ) async -> OperationResult {
-        await self.mutate(args, request: request, policy: policy).first()
+        await self.mutate(args, request: request, policy: .networkOnly).first()
     }
 
     /// Executes a subscription request with given execution parameters.
