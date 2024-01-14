@@ -1,17 +1,7 @@
 {
   "name": "swift-graphql",
   "private": true,
-  "workspaces": [
-    "server",
-    "website",
-    "examples/thesocialnetwork/server"
-  ],
-  "scripts": {
-    "g:tsc": "cd $INIT_CWD && tsc",
-    "g:tsn": "cd $INIT_CWD && ts-node",
-    "g:tsnd": "cd $INIT_CWD && ts-node-dev",
-    "g:prettier": "cd $INIT_CWD && prettier"
-  },
+  "scripts": {},
   "devDependencies": {
     "@types/marked": "^1.2.2",
     "@types/node": "^16.7.10",
