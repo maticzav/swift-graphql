@@ -39,6 +39,7 @@ extension String {
                     with: #".assertInlineSnapshot(matching: """"#
                 ))
                 codeWithInlineTest.append(contentsOf: self
+                    .replacingOccurrences(of: #"""""#, with: #"\"\"\""#)
                     .split(separator: "\n", omittingEmptySubsequences: false)
                     .map { String($0) }
                     .map { $0.indent(by: indentation) })
