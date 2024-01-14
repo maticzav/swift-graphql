@@ -5,7 +5,7 @@
     "dark": "/logo/swift.svg",
     "light": "/logo/swift.svg"
   },
-  "favicon": "/favicon/favicon-96x96.png",
+  "favicon": "/favicon.svg",
   "colors": {
     "primary": "#F25C40",
     "light": "#F25C40",
