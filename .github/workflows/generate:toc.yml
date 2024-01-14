@@ -11,14 +11,22 @@ jobs:
 
     steps:
       # Setup
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v1
+      - name: Checkout Main
+        uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.6
+
+      - name: Setup Node Environment
+        uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
+          cache: 'pnpm'
 
       # Build
-      - run: yarn install --skip-builds
+      - name: Install Dependencies
+        run: pnpm i --frozen-lockfile
 
       # Generate TOC
       - name: Generate Table of Contents

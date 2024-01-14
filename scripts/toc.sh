@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd scripts
-yarn g:tsn index.ts
+pnpm ts-node index.ts
 
 CHANGED=$(git diff-index --name-only HEAD --)
 

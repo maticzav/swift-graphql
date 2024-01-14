@@ -29,11 +29,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version-file: '.nvmrc'
-          cache: 'yarn'
-      - name: Install Server Dependencies
-        run: yarn install
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm i --frozen-lockfile
+
       - name: Start Test Server
-        run: yarn workspace server start &
+        run: pnpm run --dir server start &
+
       - name: Wait for Server to Start
         run: |
           sleep 5
