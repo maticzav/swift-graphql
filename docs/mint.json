@@ -1,0 +1,49 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "SwiftGraphQL",
+  "logo": {
+    "dark": "/logo/swift.svg",
+    "light": "/logo/swift.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#F25C40",
+    "light": "#F25C40",
+    "dark": "#F25C40",
+    "anchors": {
+      "from": "#F25C40",
+      "to": "#F25C40"
+    }
+  },
+  "topbarLinks": [],
+  "topbarCtaButton": {
+    "name": "Get Started",
+    "url": "installation"
+  },
+  "tabs": [],
+  "anchors": [
+    {
+      "name": "Documentation",
+      "icon": "book-open-cover",
+      "url": "introduction"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": ["introduction", "why", "installation", "network", "querying", "subscriptions", "errors", "faq"]
+    },
+    {
+      "group": "Essentials",
+      "pages": ["guides/auth", "guides/uploads", "guides/filestructure"]
+    },
+    {
+      "group": "Advanced",
+      "pages": ["advanced/scalars", "advanced/cache", "advanced/exchanges", "advanced/how", "advanced/selection"]
+    }
+  ],
+  "footerSocials": {
+    "twitter": "https://twitter.com/maticzav",
+    "github": "https://github.com/maticzav"
+  }
+}

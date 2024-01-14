@@ -18,7 +18,6 @@ SwiftGraphQL's cache works like cache in the browser - once you've queried somet
 
 Each SwiftGraphQL query contains a deterministic key that's constructed from the selection and variables.
 
-<!-- Image? -->
 
 Once a result comes in, it's indefinitely cached using this key. Therefore, if you send the same query again, we check the in-memory cache for possible existing results and use them instead.
 
