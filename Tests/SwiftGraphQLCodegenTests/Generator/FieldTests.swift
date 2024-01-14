@@ -96,13 +96,14 @@ final class FieldTests: XCTestCase {
             context: Context.from(scalars: ["ID": "String"])
         ).format()
 
-        let expected = """
+        generated.assertInlineSnapshot(matching: """
            /// Deprecation
            /// Multiline.
-           @available(*, deprecated, message: \"\"\"
-           Use ID instead.
-           See: <link> for more detail.
-           \"\"\")
+           @available(
+             *, deprecated,
+             message: \"\"\"Use ID instead.
+             See: <link> for more detail.\"\"\"
+           )
            public func id() throws -> String? {
              let field = GraphQLField.leaf(
                field: "id",
@@ -110,7 +111,7 @@ final class FieldTests: XCTestCase {
                arguments: []
              )
              self.__select(field)
-
+           
              switch self.__state {
              case .decoding:
                return try self.__decode(field: field.alias!) { try String?(from: $0) }
@@ -118,9 +119,7 @@ final class FieldTests: XCTestCase {
                return nil
              }
            }
-           """
-
-        generated.assertInlineSnapshot(matching: expected)
+           """)
     }
 
     // MARK: - Scalar
