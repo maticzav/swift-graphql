@@ -16,23 +16,26 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Main
+        uses: actions/checkout@v3
 
       # Build the Library
       - name: Swift Resolve
         run: swift package resolve
+
       - name: Swift Build
         run: swift build
 
       # Start Test Server
-      - name: Use Node
-        uses: actions/setup-node@v2
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.6
+
+      - name: Setup Node Environment
+        uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm i --frozen-lockfile
 
       - name: Start Test Server
         run: pnpm run --dir server start &
