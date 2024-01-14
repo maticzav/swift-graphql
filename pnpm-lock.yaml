@@ -197,7 +197,7 @@ importers:
         specifier: ^16.7.10
         version: 16.18.70
       '@types/react':
-        specifier: ^17.0.74
+        specifier: ^17.0.19
         version: 17.0.74
       '@types/react-dom':
         specifier: ^17.0.9

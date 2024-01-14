@@ -31,6 +31,9 @@ jobs:
         with:
           version: 8.6.6
 
+      - name: Install Dependencies
+        run: pnpm i --frozen-lockfile
+
       - name: Setup Node Environment
         uses: actions/setup-node@v3
         with:
