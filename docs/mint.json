@@ -25,13 +25,13 @@
     {
       "name": "Documentation",
       "icon": "book-open-cover",
-      "url": "installation"
+      "url": "introduction"
     }
   ],
   "navigation": [
     {
       "group": "Get Started",
-      "pages": ["why", "installation", "network", "querying", "subscriptions", "errors", "faq"]
+      "pages": ["introduction", "why", "installation", "network", "querying", "subscriptions", "errors", "faq"]
     },
     {
       "group": "Essentials",
