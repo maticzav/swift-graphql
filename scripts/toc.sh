@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd scripts
-pnpm ts-node index.ts
+pnpm ts-node ./index.ts
 
 CHANGED=$(git diff-index --name-only HEAD --)
 
