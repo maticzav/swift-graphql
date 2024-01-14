@@ -105,6 +105,9 @@ importers:
       '@types/uuid':
         specifier: ^8
         version: 8.3.4
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
       ts-node:
         specifier: ^10.2.1
         version: 10.9.2(@types/node@16.18.70)(typescript@4.3.5)
