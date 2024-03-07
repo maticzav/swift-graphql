@@ -1,7 +1,7 @@
 import GraphQL
 import SwiftGraphQLClient
 import XCTest
-import Combine
+import RxSwiftCombine
 import SwiftGraphQL
 
 final class AsyncInterfaceTests: XCTestCase {

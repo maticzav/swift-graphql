@@ -31,6 +31,7 @@ let package = Package(
         .package(url: "https://github.com/dominicegginton/Spinner", from: "2.0.0"),
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
+        .package(url: "https://github.com/ReactiveX/RxSwift.git", from: "6.0.0"),
     ],
     targets: [
         // Spec
@@ -41,7 +42,8 @@ let package = Package(
             dependencies: [
                 "GraphQL",
                 .product(name: "Logging", package: "swift-log"),
-                "Starscream"
+                "Starscream",
+                "RxSwiftCombine",
             ],
             path: "Sources/GraphQLWebSocket",
             exclude: ["README.md"]
@@ -51,7 +53,11 @@ let package = Package(
         
         .target(
             name: "SwiftGraphQL",
-            dependencies: ["GraphQL", "SwiftGraphQLUtils"],
+            dependencies: [
+                "GraphQL",
+				"SwiftGraphQLUtils",
+                "RxSwiftCombine",
+            ],
             path: "Sources/SwiftGraphQL"
         ),
         .target(
@@ -61,6 +67,7 @@ let package = Package(
                 "GraphQLWebSocket",
                 .product(name: "Logging", package: "swift-log"),
                 "SwiftGraphQL",
+                "RxSwiftCombine",
             ],
             path: "Sources/SwiftGraphQLClient"
         ),
@@ -75,7 +82,12 @@ let package = Package(
             path: "Sources/SwiftGraphQLCodegen"
         ),
         .target(name: "SwiftGraphQLUtils", dependencies: [], path: "Sources/SwiftGraphQLUtils"),
-        
+        .target(
+            name: "RxSwiftCombine",
+            dependencies: [
+                .product(name: "RxSwift", package: "RxSwift"),
+            ]
+        ),
         // Executables
         
         .executableTarget(

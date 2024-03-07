@@ -1,4 +1,4 @@
-import Combine
+import RxSwiftCombine
 import Foundation
 
 /// Exchange that lets you naively cache GraphQL resutls of your queries.

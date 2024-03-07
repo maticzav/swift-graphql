@@ -1,4 +1,4 @@
-import Combine
+import RxSwiftCombine
 import Foundation
 import Logging
 import SwiftGraphQLClient
@@ -28,7 +28,7 @@ class MockClient: GraphQLClient {
     
     func execute(operation: SwiftGraphQLClient.Operation) -> AnyPublisher<OperationResult, Never> {
         guard let customExecute = customExecute else {
-            return Empty<OperationResult, Never>().eraseToAnyPublisher()
+            return Observable<OperationResult>.empty().eraseToAnyPublisher()
         }
 
         return customExecute(operation)

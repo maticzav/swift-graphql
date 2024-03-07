@@ -1,4 +1,4 @@
-import Combine
+import RxSwiftCombine
 import GraphQL
 @testable import SwiftGraphQLClient
 import XCTest
@@ -18,7 +18,7 @@ final class FallbackExchangeTests: XCTestCase {
         let exchange = FallbackExchange(debug: true)
         exchange
             .register(client: client, operations: operations) { _ in
-                Empty<OperationResult, Never>().eraseToAnyPublisher()
+                Observable<OperationResult>.empty().eraseToAnyPublisher()
             }
             .sink(receiveCompletion: { _ in
                 expectation.fulfill()

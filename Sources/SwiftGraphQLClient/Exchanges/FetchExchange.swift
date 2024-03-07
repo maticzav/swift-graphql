@@ -1,4 +1,4 @@
-import Combine
+import RxSwiftCombine
 import Foundation
 import GraphQL
 
@@ -60,7 +60,7 @@ public class FetchExchange: Exchange {
         
         let upstream = next(downstream)
         
-        let fetchstream = shared
+        let fetchstream: Observable<OperationResult> = shared
             .filter({ $0.kind == .query || $0.kind == .mutation })
             .flatMap({ operation -> AnyPublisher<OperationResult, Never> in
                 let body = try! self.encoder.encode(operation.args)
@@ -69,7 +69,7 @@ public class FetchExchange: Exchange {
                     .filter { $0.kind == .teardown && $0.id == operation.id }
                     .eraseToAnyPublisher()
                 
-                let publisher = self.session
+                let publisher: Observable<OperationResult> = self.session
                     .dataTaskPublisher(for: operation.request, with: body)
                     // NOTE: If the client emits the teardown event, we want to clear up
                     //  the initialised source to prevent memory laeks.
@@ -120,7 +120,7 @@ public class FetchExchange: Exchange {
                 
                 return publisher
             })
-        
+
         return fetchstream.merge(with: upstream).eraseToAnyPublisher()
     }
 
@@ -137,7 +137,17 @@ extension URLSession: FetchSession {
         gqlrequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         gqlrequest.httpBody = body
         
-        let publisher: DataTaskPublisher = self.dataTaskPublisher(for: gqlrequest)
-        return publisher.eraseToAnyPublisher()
+        return Observable<(data: Data, response: URLResponse)>.create({ observer in
+            self.dataTask(with: gqlrequest, completionHandler: { data, response, error in
+                if let error {
+                    observer.onError(error)
+                } else if let data, let response {
+                    observer.onNext((data, response))
+                } else {
+                    observer.onCompleted()
+                }
+            })
+            return Disposables.create()
+        })
     }
 }

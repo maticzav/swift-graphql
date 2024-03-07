@@ -1,6 +1,5 @@
 import Foundation
-
-import Combine
+import RxSwiftCombine
 import Foundation
 import GraphQL
 

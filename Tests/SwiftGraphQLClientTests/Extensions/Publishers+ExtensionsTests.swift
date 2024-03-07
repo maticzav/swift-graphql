@@ -1,4 +1,4 @@
-import Combine
+import RxSwiftCombine
 @testable import SwiftGraphQLClient
 import XCTest
 
@@ -109,7 +109,6 @@ final class PublishersExtensionsTests: XCTestCase {
             })
         
         publisher.send(1)
-        cancellable?.cancel()
         cancellable = nil
         
         waitForExpectations(timeout: 1)
@@ -118,14 +117,14 @@ final class PublishersExtensionsTests: XCTestCase {
     }
 
     func testTakeTheFirstEmittedValueAsynchronously() async throws {
-        let value = await Just(1).first()
+        let value = try await Observable.just(1).first()
         XCTAssertEqual(value, 1)
     }
 
     func testTakeTheFirstEmittedValueAsynchronouslyFromThrowingPublisher() async throws {
         struct TestError: Error {}
 
-        let value = try await Just(1).setFailureType(to: TestError.self).first()
+        let value = try await Observable.just(1).first()
         XCTAssertEqual(value, 1)
     }
 
@@ -133,7 +132,7 @@ final class PublishersExtensionsTests: XCTestCase {
         struct TestError: Error {}
 
         await XCTAssertThrowsError(of: TestError.self) {
-            try await Fail<Int, TestError>(error: TestError()).first()
+            try await Observable<Int>.error(TestError()).first()
         }
     }
 }

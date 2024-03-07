@@ -1,5 +1,5 @@
 import Foundation
-import Combine
+import RxSwiftCombine
 
 class TheSocialNetworkAppViewModel: ObservableObject {
     

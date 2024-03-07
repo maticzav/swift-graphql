@@ -1,4 +1,4 @@
-import Combine
+import RxSwiftCombine
 import Foundation
 import GraphQL
 import Logging
@@ -7,7 +7,7 @@ import Logging
 ///
 /// - NOTE: SwiftUI bindings and Selection interloop aren't bound to the default implementation.
 ///         You may use them with a custom implementation as well.
-public class Client: GraphQLClient, ObservableObject {
+public class Client: GraphQLClient {
     
     /// Request to use to perform operations.
     public let request: URLRequest
@@ -47,8 +47,8 @@ public class Client: GraphQLClient, ObservableObject {
         config: ClientConfiguration = ClientConfiguration()
     ) {
         // A publisher that never emits anything.
-        let noop = Empty<OperationResult, Never>().eraseToAnyPublisher()
-        
+        let noop = Observable<OperationResult>.empty().eraseToAnyPublisher()
+
         self.request = request
         self.config = config
         self.results = noop
@@ -271,8 +271,8 @@ public class Client: GraphQLClient, ObservableObject {
     public func query(
         _ args: ExecutionArgs,
         request: URLRequest? = nil
-    ) async -> OperationResult {
-        await self.query(args, request: request, policy: .networkOnly).first()
+    ) async throws -> OperationResult {
+        try await self.query(args, request: request, policy: .networkOnly).first()
     }
 
     /// Executes a mutation request with given execution parameters.
@@ -302,8 +302,8 @@ public class Client: GraphQLClient, ObservableObject {
     public func mutate(
         _ args: ExecutionArgs,
         request: URLRequest? = nil
-    ) async -> OperationResult {
-        await self.mutate(args, request: request, policy: .networkOnly).first()
+    ) async throws -> OperationResult {
+        try await self.mutate(args, request: request, policy: .networkOnly).first()
     }
 
     /// Executes a subscription request with given execution parameters.

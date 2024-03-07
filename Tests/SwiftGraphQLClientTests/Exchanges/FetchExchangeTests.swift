@@ -1,4 +1,4 @@
-import Combine
+import RxSwiftCombine
 import GraphQL
 @testable import SwiftGraphQLClient
 import XCTest
@@ -29,12 +29,11 @@ final class FetchExchangeTests: XCTestCase {
                 )
                 
                 return Just((data: data, response: response))
-                    .setFailureType(to: URLError.self)
                     .eraseToAnyPublisher()
                 
             case .error(let code):
                 let error = URLError(rawValue: code)
-                return Fail<(data: Data, response: URLResponse), URLError>(error: error)
+                    return Observable<(data: Data, response: URLResponse)>.error(error)
                     .eraseToAnyPublisher()
             }
         }

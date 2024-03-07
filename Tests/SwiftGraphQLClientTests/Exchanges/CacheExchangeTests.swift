@@ -1,4 +1,4 @@
-import Combine
+import RxSwiftCombine
 import GraphQL
 import Foundation
 @testable import SwiftGraphQLClient

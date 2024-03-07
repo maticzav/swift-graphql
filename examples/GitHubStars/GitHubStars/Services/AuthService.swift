@@ -1,5 +1,5 @@
 import AuthenticationServices
-import Combine
+import RxSwiftCombine
 import Foundation
 import Valet
 
