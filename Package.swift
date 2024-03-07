@@ -27,10 +27,12 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-format", "508.0.0"..<"510.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
-        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.5"),
         .package(url: "https://github.com/dominicegginton/Spinner", from: "2.0.0"),
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
+        .package(url: "https://github.com/vapor/websocket-kit.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.0.0"),
     ],
     targets: [
         // Spec
@@ -41,7 +43,11 @@ let package = Package(
             dependencies: [
                 "GraphQL",
                 .product(name: "Logging", package: "swift-log"),
-                "Starscream"
+                .product(name: "WebSocketKit", package: "websocket-kit"),
+                .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
+                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+                .product(name: "NIOWebSocket", package: "swift-nio"),
+                .product(name: "NIOCore", package: "swift-nio"),
             ],
             path: "Sources/GraphQLWebSocket",
             exclude: ["README.md"]
