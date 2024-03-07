@@ -44,7 +44,6 @@ let package = Package(
             name: "SwiftGraphQL",
             dependencies: [
                 "GraphQL",
-                "SwiftGraphQLUtils",
             ],
             path: "Sources/SwiftGraphQL"
         ),
@@ -58,7 +57,6 @@ let package = Package(
             ],
             path: "Sources/SwiftGraphQLClient"
         ),
-        .target(name: "SwiftGraphQLUtils", dependencies: [], path: "Sources/SwiftGraphQLUtils"),
 
         // Tests
 
@@ -70,7 +68,6 @@ let package = Package(
                 "GraphQLWebSocket",
                 "SwiftGraphQL",
                 "SwiftGraphQLClient",
-                "SwiftGraphQLUtils",
             ],
             path: "Tests",
             exclude: [
