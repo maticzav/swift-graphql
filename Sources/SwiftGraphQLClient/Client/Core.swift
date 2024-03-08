@@ -21,12 +21,12 @@ public class Client: GraphQLClient {
     private var operations = PassthroughSubject<Operation, Never>()
     
     /// Stream of results that may be used as the base for sources.
-    private var results: AnyPublisher<OperationResult, Never>
+    private var results: Observable<OperationResult>
     
     // MARK: - Sources
     
     /// Stream of results related to a given operation.
-    public typealias Source = AnyPublisher<OperationResult, Never>
+    public typealias Source = Observable<OperationResult>
     
     /// Map of currently active sources identified by their operation identifier.
     ///
@@ -176,7 +176,7 @@ public class Client: GraphQLClient {
         let torndown = self.operations
             .filter { $0.kind == .teardown && $0.id == operation.id }
         
-        let result: AnyPublisher<OperationResult, Never> = source
+        let result: Observable<OperationResult> = source
             .do(onCompleted: {
                 // Once the publisher stops the stream (i.e. the stream ended because we
                 // received all relevant results), we dismantle the pipeline by sending
@@ -186,7 +186,7 @@ public class Client: GraphQLClient {
                 self.active.removeValue(forKey: operation.id)
                 self.operations.onNext(operation.with(kind: .teardown))
             })
-            .map { result -> AnyPublisher<OperationResult, Never> in
+            .map { result -> Observable<OperationResult> in
                 self.config.logger.debug("Processing result of operation \(operation.id)")
                 
                 // Mark a result as stale when a new operation is sent with the same key.
@@ -196,7 +196,7 @@ public class Client: GraphQLClient {
                 
                 // Mark the current result as `stale` when the client
                 // requests a query with the same key again.
-                let staleResult: AnyPublisher<OperationResult, Never> = self.operations
+                let staleResult: Observable<OperationResult> = self.operations
                     .filter { $0.kind == .query && $0.id == operation.id && $0.policy != .cacheOnly }
                     .take(1).asSingle().asObservable()
                     .map { operation -> OperationResult in

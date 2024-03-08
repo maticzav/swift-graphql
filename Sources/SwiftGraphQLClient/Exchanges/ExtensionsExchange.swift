@@ -19,9 +19,9 @@ public struct ExtensionsExchange: Exchange {
     
     public func register(
         client: GraphQLClient,
-        operations: AnyPublisher<Operation, Never>,
+        operations: Observable<Operation>,
         next: @escaping ExchangeIO
-    ) -> AnyPublisher<OperationResult, Never> {
+    ) -> Observable<OperationResult> {
         let downstream = operations
             .map { operation -> Operation in
                 guard let extensions = self.getExtensions(operation) else {

@@ -486,7 +486,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     // MARK: - Methods
     
     /// Returns a stream of events that get triggered when the client's state changes.
-    public func onEvent() -> AnyPublisher<Event, Never> {
+    public func onEvent() -> Observable<Event> {
         self.emitter.share()
     }
     
@@ -500,7 +500,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     ///
     /// - NOTE: The client sends the request to the server once a subscriber has
     ///         subscribed - not as soon as you call `subscribe` method.
-    public func subscribe(_ args: ExecutionArgs) -> AnyPublisher<ExecutionResult, Never> {
+    public func subscribe(_ args: ExecutionArgs) -> Observable<ExecutionResult> {
         let id = UUID().uuidString
         
         // We create a new publisher that is bound to the pipeline

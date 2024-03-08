@@ -15,9 +15,9 @@ final class ComposeExchangeTests: XCTestCase {
         
         func register(
             client: GraphQLClient,
-            operations: AnyPublisher<SwiftGraphQLClient.Operation, Never>,
+            operations: Observable<SwiftGraphQLClient.Operation>,
             next: @escaping ExchangeIO
-        ) -> AnyPublisher<OperationResult, Never> {
+        ) -> Observable<OperationResult> {
             let downstream = operations
                 .do(onNext: { _ in
                     self.trace("going down: \(name)")

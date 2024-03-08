@@ -34,7 +34,7 @@ extension GraphQLClient {
         as operationName: String? = nil,
         url request: URLRequest? = nil,
         policy: Operation.Policy
-    ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLHttpOperation {
+    ) -> Observable<OperationResult> where TypeLock: GraphQLHttpOperation {
         let operation = self.createRequestOperation(
             for: selection,
             as: operationName,
@@ -50,7 +50,7 @@ extension GraphQLClient {
         as operationName: String? = nil,
         url request: URLRequest? = nil,
         policy: Operation.Policy
-    ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLHttpOperation {
+    ) -> Observable<OperationResult> where TypeLock: GraphQLHttpOperation {
         let operation = self.createRequestOperation(
             for: selection,
             as: operationName,
@@ -66,7 +66,7 @@ extension GraphQLClient {
         as operationName: String? = nil,
         url request: URLRequest? = nil,
         policy: Operation.Policy
-    ) -> AnyPublisher<OperationResult, Never> where TypeLock: GraphQLWebSocketOperation {
+    ) -> Observable<OperationResult> where TypeLock: GraphQLWebSocketOperation {
         let operation = self.createRequestOperation(
             for: selection,
             as: operationName,
@@ -84,7 +84,7 @@ extension GraphQLClient {
         as operationName: String? = nil,
         request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
-    ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLHttpOperation {
+    ) -> Observable<DecodedOperationResult<T>> where TypeLock: GraphQLHttpOperation {
         self.executeQuery(for: selection, as: operationName, url: request, policy: policy)
             .map { result in
                 // NOTE: If there was an error during the execution, we want to raise it before running
@@ -112,7 +112,7 @@ extension GraphQLClient {
         as operationName: String? = nil,
         request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
-    ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLHttpOperation {
+    ) -> Observable<DecodedOperationResult<T>> where TypeLock: GraphQLHttpOperation {
         self.executeMutation(for: selection, as: operationName, url: request, policy: policy)
             .map { result in
                 // NOTE: If there was an error during the execution, we want to raise it before running
@@ -139,7 +139,7 @@ extension GraphQLClient {
         as operationName: String? = nil,
         request: URLRequest? = nil,
         policy: Operation.Policy = .cacheFirst
-    ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLWebSocketOperation {
+    ) -> Observable<DecodedOperationResult<T>> where TypeLock: GraphQLWebSocketOperation {
         self.executeSubscription(of: selection, as: operationName, url: request, policy: policy)
             .map { result in
                 // NOTE: If there was an error during the execution, we want to raise it before running

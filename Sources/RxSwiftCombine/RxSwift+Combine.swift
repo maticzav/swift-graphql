@@ -26,7 +26,6 @@ extension DisposeBag: Equatable {
     public static func ==(_ lhs: DisposeBag, _ rhs: DisposeBag) -> Bool { lhs === rhs }
 }
 
-public typealias AnyPublisher<Element, Error> = Observable<Element>
 public typealias PassthroughSubject<Element, Error> = PublishSubject<Element>
 public typealias AnyCancellable = DisposeBag
 public func Just<Element>(_ element: Element) -> Observable<Element> { Observable.just(element) }

@@ -28,7 +28,7 @@ extension GraphQLWebSocket {
         as operationName: String? = nil,
         extensions: [String: AnyCodable]? = nil,
         decoder: JSONDecoder = JSONDecoder()
-    ) -> AnyPublisher<DecodedExecutionResult<T>, Error> where TypeLock: GraphQLWebSocketOperation {
+    ) -> Observable<DecodedExecutionResult<T>> where TypeLock: GraphQLWebSocketOperation {
         let args = selection.encode(operationName: operationName, extensions: extensions)
         
         let publisher = self.subscribe(args)

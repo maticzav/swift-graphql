@@ -16,9 +16,9 @@ public struct FallbackExchange: Exchange {
     
     public func register(
         client: GraphQLClient,
-        operations: AnyPublisher<Operation, Never>,
+        operations: Observable<Operation>,
         next: ExchangeIO
-    ) -> AnyPublisher<OperationResult, Never> {
+    ) -> Observable<OperationResult> {
         operations
             .compactMap { operation -> OperationResult? in
                 if operation.kind != .teardown && debug {

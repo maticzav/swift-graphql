@@ -13,7 +13,7 @@ public protocol FetchSession {
     /// The publisher publishes data when the task completes, or terminates if the task fails with an error.
     /// - Parameter request: The URL request for which to create a data task.
     /// - Returns: A publisher that wraps a data task for the URL request.
-    func dataTaskPublisher(for: URLRequest, with: Data) -> AnyPublisher<(data: Data, response: URLResponse), URLError>
+    func dataTaskPublisher(for: URLRequest, with: Data) -> Observable<(data: Data, response: URLResponse)>
 }
 
 /// Exchange that performs query and mutation operations following the [GraphQL over HTTP](https://github.com/graphql/graphql-over-http/blob/main/spec/GraphQLOverHTTP.md) spec.
@@ -47,9 +47,9 @@ public class FetchExchange: Exchange {
     
     public func register(
         client: GraphQLClient,
-        operations: AnyPublisher<Operation, Never>,
+        operations: Observable<Operation>,
         next: ExchangeIO
-    ) -> AnyPublisher<OperationResult, Never> {
+    ) -> Observable<OperationResult> {
         let shared = operations.share()
         
         let downstream = shared
@@ -61,7 +61,7 @@ public class FetchExchange: Exchange {
         
         let fetchstream: Observable<OperationResult> = shared
             .filter({ $0.kind == .query || $0.kind == .mutation })
-            .flatMap({ operation -> AnyPublisher<OperationResult, Never> in
+            .flatMap({ operation -> Observable<OperationResult> in
                 let body = try! self.encoder.encode(operation.args)
                 
                 let torndown = shared
@@ -104,7 +104,7 @@ public class FetchExchange: Exchange {
                             )
                         }
                     }
-                    .catch { (error: Error) -> AnyPublisher<OperationResult, Never> in
+                    .catch { (error: Error) -> Observable<OperationResult> in
                         let error: CombinedError = if let error = error as? URLError { .network(error) } else { .unknown(error) }
 
                         let result = OperationResult(
@@ -129,7 +129,7 @@ extension URLSession: FetchSession {
     public func dataTaskPublisher(
         for request: URLRequest,
         with body: Data
-    ) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
+    ) -> Observable<(data: Data, response: URLResponse)> {
         var gqlrequest = request
         
         gqlrequest.httpMethod = "POST"

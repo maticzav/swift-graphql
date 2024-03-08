@@ -53,8 +53,8 @@ public class WebSocketExchange: Exchange {
     }
     
     /// Creates a new stream of events related to the given operation.
-    private func createSubscriptionSource(operation: Operation) -> AnyPublisher<OperationResult, Never> {
-        let publisher: AnyPublisher<OperationResult, Never> = self.client
+    private func createSubscriptionSource(operation: Operation) -> Observable<OperationResult> {
+        let publisher: Observable<OperationResult> = self.client
             .subscribe(operation.args)
             .map { exec -> OperationResult in
                 var op = OperationResult(
@@ -75,9 +75,9 @@ public class WebSocketExchange: Exchange {
     
     public func register(
         client: GraphQLClient,
-        operations: AnyPublisher<Operation, Never>,
+        operations: Observable<Operation>,
         next: ExchangeIO
-    ) -> AnyPublisher<OperationResult, Never> {
+    ) -> Observable<OperationResult> {
         let shared = operations.share()
         
         // Fowarded operations.
@@ -88,7 +88,7 @@ public class WebSocketExchange: Exchange {
         // Handled operations.
         let socketstream = shared
             .filter { self.shouldHandle(operation: $0) }
-            .flatMap { operation -> AnyPublisher<OperationResult, Never> in
+            .flatMap { operation -> Observable<OperationResult> in
                 let torndown = shared
                     .filter { $0.kind == .teardown && $0.id == operation.id }
                 

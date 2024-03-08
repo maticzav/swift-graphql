@@ -17,7 +17,7 @@ final class FetchExchangeTests: XCTestCase {
         func dataTaskPublisher(
             for request: URLRequest,
             with _: Data
-        ) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
+        ) -> Observable<(data: Data, response: URLResponse)> {
             switch self.handler(request) {
             case .succcess(let body):
                 let data = Data(body.utf8)

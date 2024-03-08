@@ -21,9 +21,9 @@ public class DedupExchange: Exchange {
     
     public func register(
         client: GraphQLClient,
-        operations: AnyPublisher<Operation, Never>,
+        operations: Observable<Operation>,
         next: ExchangeIO
-    ) -> AnyPublisher<OperationResult, Never> {
+    ) -> Observable<OperationResult> {
         let downstream = operations
             .filter { operation in
                 if operation.kind == .teardown {

@@ -4,7 +4,7 @@ import Foundation
 enum FeedClient {
     
     /// Publisher that emits the number of unread posts.
-    public static var unread: AnyPublisher<Int, Never> {
+    public static var unread: Observable<Int> {
         self.client.$posts
     }
     

@@ -5,7 +5,7 @@ import Foundation
 ///
 /// - NOTE: Even though it may seem like the operation stream (downstream) and result stream (upstream) are separate,
 ///         we usually map operations to results and preserve the stream.
-public typealias ExchangeIO = (AnyPublisher<Operation, Never>) -> AnyPublisher<OperationResult, Never>
+public typealias ExchangeIO = (Observable<Operation>) -> Observable<OperationResult>
 
 /// Exchange is a link in the chain of operation processors.
 public protocol Exchange {
@@ -16,7 +16,7 @@ public protocol Exchange {
     /// ID as the operation of the source and of type `teardown` it clears that source to prevent memory leaks.
     func register(
         client: GraphQLClient,
-        operations: AnyPublisher<Operation, Never>,
+        operations: Observable<Operation>,
         next: @escaping ExchangeIO
-    ) -> AnyPublisher<OperationResult, Never>
+    ) -> Observable<OperationResult>
 }

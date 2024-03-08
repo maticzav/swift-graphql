@@ -13,7 +13,7 @@ enum AuthClient {
     }
     
     /// A publisher that tells whether the user is authenticated or not.
-    static var state: AnyPublisher<AuthState, Never> {
+    static var state: Observable<AuthState> {
         AuthClient.cache.$state
     }
     

@@ -43,13 +43,13 @@ public class CacheExchange: Exchange {
     
     public func register(
         client: GraphQLClient,
-        operations: AnyPublisher<Operation, Never>,
+        operations: Observable<Operation>,
         next: @escaping ExchangeIO
-    ) -> AnyPublisher<OperationResult, Never> {
+    ) -> Observable<OperationResult> {
         let shared = operations.share()
         
         // We synchronously send cached results upstream.
-        let cachedOps: AnyPublisher<OperationResult, Never> = shared
+        let cachedOps: Observable<OperationResult> = shared
             .compactMap { operation in
                 guard self.shouldUseCache(operation: operation) else {
                     return nil
@@ -82,7 +82,7 @@ public class CacheExchange: Exchange {
                 return operation.policy != .cacheFirst || !wasHit
             })
         
-        let forwardedOps: AnyPublisher<OperationResult, Never> = next(downstream)
+        let forwardedOps: Observable<OperationResult> = next(downstream)
         
         let upstream = forwardedOps
             .do(onNext: { result in
