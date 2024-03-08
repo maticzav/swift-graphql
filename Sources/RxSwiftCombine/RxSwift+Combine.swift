@@ -11,8 +11,6 @@ public extension Disposable {
 }
 
 public extension Observable {
-    func switchToLatest() -> Observable<Element.Element> where Element: ObservableConvertibleType { switchLatest() }
-
     func `catch`(_ handler: @escaping (URLError) -> Observable<Element>) -> Observable<Element> {
         self.catch({ (error: Error) -> Observable<Element> in
             if let error = error as? URLError {

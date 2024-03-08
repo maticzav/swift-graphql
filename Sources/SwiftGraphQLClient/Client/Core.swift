@@ -207,7 +207,7 @@ public class Client: GraphQLClient {
                 
                 return Observable.merge(Just(result), staleResult)
             }
-            .switchToLatest()
+            .switchLatest()
             // NOTE: We use `takeUntil` teardown operator here to emit finished event
             // if the source has finished sending events and requested a teardown.
             // This is necessary to correctly propagate down the completion since the
