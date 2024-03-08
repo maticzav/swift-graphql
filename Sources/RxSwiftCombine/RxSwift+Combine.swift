@@ -11,10 +11,6 @@ public extension Disposable {
 }
 
 public extension Observable {
-    func merge(with other: Observable<Element>) -> Observable<Element> {
-        Observable.merge(self, other)
-    }
-
     func eraseToAnyPublisher() -> Observable<Element> { self }
 
     func switchToLatest() -> Observable<Element.Element> where Element: ObservableConvertibleType { switchLatest() }

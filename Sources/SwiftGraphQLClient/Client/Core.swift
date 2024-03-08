@@ -211,7 +211,7 @@ public class Client: GraphQLClient {
                     }
                     .eraseToAnyPublisher()
                 
-                return Just(result).merge(with: staleResult).eraseToAnyPublisher()
+                return Observable.merge(Just(result), staleResult).eraseToAnyPublisher()
             }
             .switchToLatest()
             // NOTE: We use `takeUntil` teardown operator here to emit finished event

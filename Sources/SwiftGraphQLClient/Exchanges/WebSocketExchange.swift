@@ -108,7 +108,7 @@ public class WebSocketExchange: Exchange {
                     .eraseToAnyPublisher()
             }
             
-        return upstream.merge(with: socketstream).eraseToAnyPublisher()
+        return Observable.merge(upstream, socketstream).eraseToAnyPublisher()
     }
 }
 #endif

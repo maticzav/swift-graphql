@@ -121,7 +121,7 @@ public class FetchExchange: Exchange {
                 return publisher
             })
 
-        return fetchstream.merge(with: upstream).eraseToAnyPublisher()
+        return Observable.merge(fetchstream, upstream).eraseToAnyPublisher()
     }
 
 }

@@ -54,8 +54,7 @@ final class DedupExchangeTests: XCTestCase {
                 })
                 .eraseToAnyPublisher()
             
-            let upstream = downstream
-                .merge(with: results.eraseToAnyPublisher())
+            let upstream = Observable.merge(downstream, results.eraseToAnyPublisher())
                 .eraseToAnyPublisher()
             
             return upstream

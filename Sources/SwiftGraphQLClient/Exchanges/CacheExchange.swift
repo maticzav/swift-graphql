@@ -131,6 +131,6 @@ public class CacheExchange: Exchange {
             .eraseToAnyPublisher()
         
         
-        return cachedOps.merge(with: upstream).eraseToAnyPublisher()
+        return Observable.merge(cachedOps, upstream).eraseToAnyPublisher()
     }
 }
