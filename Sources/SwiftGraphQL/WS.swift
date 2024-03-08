@@ -32,7 +32,7 @@ extension GraphQLWebSocket {
         let args = selection.encode(operationName: operationName, extensions: extensions)
         
         let publisher = self.subscribe(args)
-            .tryMap { result -> DecodedExecutionResult<T> in
+            .map { result -> DecodedExecutionResult<T> in
                 let data = try selection.decode(raw: result.data)
                 let result = DecodedExecutionResult<T>(
                     data: data,

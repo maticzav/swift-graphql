@@ -11,10 +11,6 @@ public extension Disposable {
 }
 
 public extension Observable {
-    func tryMap<T>(_ transform: @escaping (Element) throws -> T) -> Observable<T> {
-        self.map(transform)
-    }
-
     func merge(with other: Observable<Element>) -> Observable<Element> {
         Observable.merge(self, other)
     }

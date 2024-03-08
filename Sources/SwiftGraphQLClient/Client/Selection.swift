@@ -86,7 +86,7 @@ extension GraphQLClient {
         policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLHttpOperation {
         self.executeQuery(for: selection, as: operationName, url: request, policy: policy)
-            .tryMap { result in
+            .map { result in
                 // NOTE: If there was an error during the execution, we want to raise it before running
                 //       the decoder on the `data` which will most likely fail.
                 if let error = result.error {
@@ -115,7 +115,7 @@ extension GraphQLClient {
         policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLHttpOperation {
         self.executeMutation(for: selection, as: operationName, url: request, policy: policy)
-            .tryMap { result in
+            .map { result in
                 // NOTE: If there was an error during the execution, we want to raise it before running
                 //       the decoder on the `data` which will most likely fail.
                 if let error = result.error {
@@ -143,7 +143,7 @@ extension GraphQLClient {
         policy: Operation.Policy = .cacheFirst
     ) -> AnyPublisher<DecodedOperationResult<T>, Error> where TypeLock: GraphQLWebSocketOperation {
         self.executeSubscription(of: selection, as: operationName, url: request, policy: policy)
-            .tryMap { result in
+            .map { result in
                 // NOTE: If there was an error during the execution, we want to raise it before running
                 //       the decoder on the `data` which will most likely fail.
                 if let error = result.error {
