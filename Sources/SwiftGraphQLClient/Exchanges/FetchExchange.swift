@@ -104,11 +104,13 @@ public class FetchExchange: Exchange {
                             )
                         }
                     }
-                    .catch { (error: URLError) -> AnyPublisher<OperationResult, Never> in
+                    .catch { (error: Error) -> AnyPublisher<OperationResult, Never> in
+                        let error: CombinedError = if let error = error as? URLError { .network(error) } else { .unknown(error) }
+
                         let result = OperationResult(
                             operation: operation,
                             data: nil,
-                            error: .network(error),
+                            error: error,
                             stale: false
                         )
                         

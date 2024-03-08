@@ -1,5 +1,4 @@
 @_exported import RxSwift
-import struct Foundation.URLError
 
 
 public extension Disposable {
@@ -7,18 +6,6 @@ public extension Disposable {
         let bag = DisposeBag()
         collection.insert(bag)
         self.disposed(by: bag)
-    }
-}
-
-public extension Observable {
-    func `catch`(_ handler: @escaping (URLError) -> Observable<Element>) -> Observable<Element> {
-        self.catch({ (error: Error) -> Observable<Element> in
-            if let error = error as? URLError {
-                handler(error)
-            } else {
-                throw error
-            }
-        })
     }
 }
 
