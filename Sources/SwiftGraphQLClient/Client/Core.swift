@@ -106,7 +106,7 @@ public class Client: GraphQLClient {
         }
         
         self.config.logger.debug("Reexecuting operation \(operation.id)...")
-        self.operations.send(operation)
+        self.operations.onNext(operation)
     }
     
     /// Executes an operation by sending it down the exchange pipeline.
@@ -144,7 +144,7 @@ public class Client: GraphQLClient {
         // To sum up both cases, client shouldn't handle processing of the operations.
         return source
             .do(onSubscribe: {
-                self.operations.send(operation)
+                self.operations.onNext(operation)
             })
     }
     
@@ -161,7 +161,7 @@ public class Client: GraphQLClient {
         if operation.kind == .mutation {
             return source
                 .do(onSubscribe: {
-                    self.operations.send(operation)
+                    self.operations.onNext(operation)
                 })
                 .first()
         }
@@ -184,7 +184,7 @@ public class Client: GraphQLClient {
                 self.config.logger.debug("Operation \(operation.id) source has completed.")
                 
                 self.active.removeValue(forKey: operation.id)
-                self.operations.send(operation.with(kind: .teardown))
+                self.operations.onNext(operation.with(kind: .teardown))
             })
             .map { result -> AnyPublisher<OperationResult, Never> in
                 self.config.logger.debug("Processing result of operation \(operation.id)")
@@ -219,7 +219,7 @@ public class Client: GraphQLClient {
                 self.config.logger.debug("Operation \(operation.id) source has been canceled.")
                 
                 self.active.removeValue(forKey: operation.id)
-                self.operations.send(operation.with(kind: .teardown))
+                self.operations.onNext(operation.with(kind: .teardown))
             })
             // NOTE: We create a sharable source because a single source may be
             // reused multiple times for operation with the same identifier

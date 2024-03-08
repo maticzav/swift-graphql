@@ -24,10 +24,10 @@ final class PublishersExtensionsTests: XCTestCase {
             })
             .store(in: &self.cancellables)
         
-        publisher.send(1)
-        publisher.send(2)
-        terminator.send(())
-        publisher.send(3)
+        publisher.onNext(1)
+        publisher.onNext(2)
+        terminator.onNext(())
+        publisher.onNext(3)
         
         waitForExpectations(timeout: 1)
         
@@ -53,9 +53,9 @@ final class PublishersExtensionsTests: XCTestCase {
             })
             .store(in: &self.cancellables)
         
-        publisher.send(1)
-        terminator.send(())
-        publisher.send(2)
+        publisher.onNext(1)
+        terminator.onNext(())
+        publisher.onNext(2)
         
         waitForExpectations(timeout: 1)
         
@@ -80,7 +80,7 @@ final class PublishersExtensionsTests: XCTestCase {
             })
             .store(in: &self.cancellables)
         
-        publisher.send(1)
+        publisher.onNext(1)
         publisher.send(completion: .finished)
         
         waitForExpectations(timeout: 1)
@@ -108,7 +108,7 @@ final class PublishersExtensionsTests: XCTestCase {
                 XCTFail()
             })
         
-        publisher.send(1)
+        publisher.onNext(1)
         disposable?.dispose()
         disposable = nil
         

@@ -74,7 +74,7 @@ final class ComposeExchangeTests: XCTestCase {
             types: [],
             args: ExecutionArgs(query: "", variables: [:])
         )
-        subject.send(operation)
+        subject.onNext(operation)
         
         waitForExpectations(timeout: 1)
         XCTAssertEqual(trace, [

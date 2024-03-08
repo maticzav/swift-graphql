@@ -89,8 +89,8 @@ final class CacheExchangeTests: XCTestCase {
     
     func testOnQueryCacheFirstHitDoesNotForwardRequest() throws {
         let trace = environment { operations, results in
-            operations.send(CacheExchangeTests.queryOperation.with(policy: .cacheFirst))
-            operations.send(CacheExchangeTests.queryOperation.with(policy: .cacheFirst))
+            operations.onNext(CacheExchangeTests.queryOperation.with(policy: .cacheFirst))
+            operations.onNext(CacheExchangeTests.queryOperation.with(policy: .cacheFirst))
         }
         
         XCTAssertEqual(trace, [
@@ -105,14 +105,14 @@ final class CacheExchangeTests: XCTestCase {
         let trace = environment { operations, results in
             let op = CacheExchangeTests.queryOperation.with(policy: .cacheFirst)
             
-            operations.send(op)
-            results.send(SwiftGraphQLClient.OperationResult(
+            operations.onNext(op)
+            results.onNext(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
                 error: nil,
                 stale: false
             ))
-            operations.send(op)
+            operations.onNext(op)
         }
         
         XCTAssertEqual(trace, [
@@ -128,15 +128,15 @@ final class CacheExchangeTests: XCTestCase {
         let trace = environment { operations, results in
             let op = CacheExchangeTests.queryOperation.with(policy: .cacheAndNetwork)
             
-            operations.send(op)
-            results.send(SwiftGraphQLClient.OperationResult(
+            operations.onNext(op)
+            results.onNext(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
                 error: nil,
                 stale: false
             ))
-            operations.send(op)
-            results.send(SwiftGraphQLClient.OperationResult(
+            operations.onNext(op)
+            results.onNext(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("world"),
                 error: nil,
@@ -165,17 +165,17 @@ final class CacheExchangeTests: XCTestCase {
         let trace = environment { operations, results in
             let op = CacheExchangeTests.queryOperation.with(policy: .cacheOnly)
             
-            operations.send(op)
+            operations.onNext(op)
             
             // randomly, unexplicably receive the result
-            results.send(SwiftGraphQLClient.OperationResult(
+            results.onNext(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
                 error: nil,
                 stale: false
             ))
             
-            operations.send(op)
+            operations.onNext(op)
         }
         
         // Forwarded operation and cached result may come in arbitrary order but both synchronously.
@@ -191,17 +191,17 @@ final class CacheExchangeTests: XCTestCase {
         let trace = environment { operations, results in
             let op = CacheExchangeTests.queryOperation.with(policy: .networkOnly)
             
-            operations.send(op)
+            operations.onNext(op)
             
             // randomly, unexplicably receive the result
-            results.send(SwiftGraphQLClient.OperationResult(
+            results.onNext(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
                 error: nil,
                 stale: false
             ))
             
-            operations.send(op)
+            operations.onNext(op)
         }
         
         // Forwarded operation and cached result may come in arbitrary order but both synchronously.
@@ -218,8 +218,8 @@ final class CacheExchangeTests: XCTestCase {
     
     func testOnMutationDoesNotCache() throws {
         let trace = environment { operations, results in
-            operations.send(CacheExchangeTests.mutationOperation)
-            operations.send(CacheExchangeTests.mutationOperation)
+            operations.onNext(CacheExchangeTests.mutationOperation)
+            operations.onNext(CacheExchangeTests.mutationOperation)
         }
         
         XCTAssertEqual(trace, [
@@ -234,9 +234,9 @@ final class CacheExchangeTests: XCTestCase {
         let trace = environment { operations, results in
             let op = CacheExchangeTests.queryOperation.with(policy: .cacheAndNetwork)
             
-            operations.send(op)
+            operations.onNext(op)
             
-            results.send(SwiftGraphQLClient.OperationResult(
+            results.onNext(SwiftGraphQLClient.OperationResult(
                 operation: op,
                 data: AnyCodable("hello"),
                 error: nil,
@@ -244,7 +244,7 @@ final class CacheExchangeTests: XCTestCase {
             ))
             
             // somehow receive mutation result
-            results.send(SwiftGraphQLClient.OperationResult(
+            results.onNext(SwiftGraphQLClient.OperationResult(
                 operation: CacheExchangeTests.mutationOperation,
                 data: AnyCodable("much data"),
                 error: nil,
@@ -267,8 +267,8 @@ final class CacheExchangeTests: XCTestCase {
     
     func testOnSubscriptionForwardsSubscription() throws {
         let trace = environment { operations, results in
-            operations.send(CacheExchangeTests.subscriptionOperation)
-            operations.send(CacheExchangeTests.subscriptionOperation)
+            operations.onNext(CacheExchangeTests.subscriptionOperation)
+            operations.onNext(CacheExchangeTests.subscriptionOperation)
         }
         
         XCTAssertEqual(trace, [

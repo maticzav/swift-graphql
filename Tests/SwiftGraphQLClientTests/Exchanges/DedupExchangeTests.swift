@@ -70,7 +70,7 @@ final class DedupExchangeTests: XCTestCase {
     
     func testForwardsQueryOperationsCorrectly() throws {
         let trace = environment { operations, results in
-            operations.send(DedupExchangeTests.queryOperation)
+            operations.onNext(DedupExchangeTests.queryOperation)
         }
         
         XCTAssertEqual(trace, [
@@ -80,8 +80,8 @@ final class DedupExchangeTests: XCTestCase {
     
     func testForwardsOnlyNonPendingQueryOperations() throws {
         let trace = environment { operations, results in
-            operations.send(DedupExchangeTests.queryOperation)
-            operations.send(DedupExchangeTests.queryOperation)
+            operations.onNext(DedupExchangeTests.queryOperation)
+            operations.onNext(DedupExchangeTests.queryOperation)
         }
         
         XCTAssertEqual(trace, [
@@ -91,14 +91,14 @@ final class DedupExchangeTests: XCTestCase {
     
     func testForwardsDuplicateQueryOperationsAfterGettingResult() throws {
         let trace = environment { operations, results in
-            operations.send(DedupExchangeTests.queryOperation)
-            results.send(SwiftGraphQLClient.OperationResult(
+            operations.onNext(DedupExchangeTests.queryOperation)
+            results.onNext(SwiftGraphQLClient.OperationResult(
                 operation: DedupExchangeTests.queryOperation,
                 data: nil,
                 error: nil,
                 stale: false
             ))
-            operations.send(DedupExchangeTests.queryOperation)
+            operations.onNext(DedupExchangeTests.queryOperation)
         }
         
         XCTAssertEqual(trace, [
@@ -110,9 +110,9 @@ final class DedupExchangeTests: XCTestCase {
     
     func testForwardsDuplicateQueryOperationsAfterOneWasTornDown() throws {
         let trace = environment { operations, results in
-            operations.send(DedupExchangeTests.queryOperation)
-            operations.send(DedupExchangeTests.queryOperation.with(kind: .teardown))
-            operations.send(DedupExchangeTests.queryOperation)
+            operations.onNext(DedupExchangeTests.queryOperation)
+            operations.onNext(DedupExchangeTests.queryOperation.with(kind: .teardown))
+            operations.onNext(DedupExchangeTests.queryOperation)
         }
         
         XCTAssertEqual(trace, [
@@ -124,8 +124,8 @@ final class DedupExchangeTests: XCTestCase {
     
     func testAlwaysForwardsMutationOperationsWithoutDeduplication() throws {
         let trace = environment { operations, results in
-            operations.send(DedupExchangeTests.mutationOperation)
-            operations.send(DedupExchangeTests.mutationOperation)
+            operations.onNext(DedupExchangeTests.mutationOperation)
+            operations.onNext(DedupExchangeTests.mutationOperation)
         }
         
         XCTAssertEqual(trace, [

@@ -10,10 +10,6 @@ public extension Disposable {
 }
 
 public extension PublishSubject {
-    func send(_ element: Element) {
-        onNext(element)
-    }
-
     enum Completion {
         /// The subject finished normally.
         case finished

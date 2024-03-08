@@ -151,7 +151,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
             self.config.logger.debug("Socket connected!")
             
             // Immediatelly notify all listeners about the health change.
-            self.emitter.send(Event.opened(socket: client))
+            self.emitter.onNext(Event.opened(socket: client))
             self.health = .connected
             
             // Once the connection opens, we start recursively processing server messages.
@@ -284,7 +284,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
         
         // The server shouldn't reconnect, we tell all listenerss to stop listening.
         guard shouldRetryToConnect(code: code) else {
-            self.emitter.send(Event.closed)
+            self.emitter.onNext(Event.closed)
             
             self.pingTimer = nil
             self.lazyCloseTimer = nil
@@ -363,7 +363,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     /// Sends a ping request and starts the response timeout.
     private func ping() {
         self.send(message: ClientMessage.ping())
-        self.emitter.send(Event.ping(received: false, payload: nil))
+        self.emitter.onNext(Event.ping(received: false, payload: nil))
         self.config.logger.debug("Emitted a PING message!")
         
         // We schedule a response timeout that has to be cleared
@@ -390,8 +390,8 @@ public class GraphQLWebSocket: WebSocketDelegate {
         case (.connected,.success(.acknowledge(let msg))):
             self.config.logger.debug("Received ACK message!")
             
-            self.emitter.send(Event.message(.acknowledge(msg)))
-            self.emitter.send(Event.acknowledged(payload: msg.payload))
+            self.emitter.onNext(Event.message(.acknowledge(msg)))
+            self.emitter.onNext(Event.acknowledged(payload: msg.payload))
             
             self.health = .acknowledged
             self.ackTimer?.invalidate()
@@ -427,11 +427,11 @@ public class GraphQLWebSocket: WebSocketDelegate {
         case (_, .success(.ping(let msg))):
             self.config.logger.debug("Received a PING request...")
             
-            self.emitter.send(Event.message(.ping(msg)))
+            self.emitter.onNext(Event.message(.ping(msg)))
             
-            self.emitter.send(Event.ping(received: true, payload: nil))
+            self.emitter.onNext(Event.ping(received: true, payload: nil))
             self.send(message: ClientMessage.pong(payload: msg.payload))
-            self.emitter.send(Event.pong(received: false, payload: msg.payload))
+            self.emitter.onNext(Event.pong(received: false, payload: msg.payload))
             
             self.config.logger.debug("Sent a PONG response!")
             
@@ -440,18 +440,18 @@ public class GraphQLWebSocket: WebSocketDelegate {
         case (_, .success(.pong(let msg))):
             self.config.logger.debug("Processing a PONG message...")
             
-            self.emitter.send(Event.message(.pong(msg)))
-            self.emitter.send(Event.pong(received: true, payload: msg.payload))
+            self.emitter.onNext(Event.message(.pong(msg)))
+            self.emitter.onNext(Event.pong(received: true, payload: msg.payload))
             
             break
         
         case (_, .success(let msg)):
-            self.emitter.send(Event.message(msg))
+            self.emitter.onNext(Event.message(msg))
             
         case (_, .failure(let err)):
             // As soon as the reading of the message fails, emit an error and stop
             // processing new messages.
-            self.emitter.send(Event.error(err))
+            self.emitter.onNext(Event.error(err))
             self.socket?.disconnect(closeCode: CloseCode.badResponse.rawValue)
             return
         }
@@ -542,7 +542,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
                 case .next(let payload):
                     // NOTE: Payload may include execution errors alongside the
                     // data that don't result in stream termination.
-                    subject.send(payload.payload)
+                    subject.onNext(payload.payload)
                     
                 case .error(let payload):
                     // NOTE: Validation errors returned as standalone
@@ -555,7 +555,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
                         hasNext: false,
                         extensions: [:]
                     )
-                    subject.send(result)
+                    subject.onNext(result)
                     subject.send(completion: .finished)
                     
                 case .complete:

@@ -93,7 +93,7 @@ final class FetchExchangeTests: XCTestCase {
         })
         .store(in: &self.cancelables)
 
-        operations.send(FetchExchangeTests.queryOperation)
+        operations.onNext(FetchExchangeTests.queryOperation)
         waitForExpectations(timeout: 5)
     }
     
@@ -135,7 +135,7 @@ final class FetchExchangeTests: XCTestCase {
         })
         .store(in: &self.cancelables)
 
-        operations.send(FetchExchangeTests.queryOperation)
+        operations.onNext(FetchExchangeTests.queryOperation)
         waitForExpectations(timeout: 5)
     }
     
@@ -171,7 +171,7 @@ final class FetchExchangeTests: XCTestCase {
         })
         .store(in: &self.cancelables)
 
-        operations.send(FetchExchangeTests.queryOperation.with(kind: .teardown))
+        operations.onNext(FetchExchangeTests.queryOperation.with(kind: .teardown))
         
         waitForExpectations(timeout: 5)
     }
