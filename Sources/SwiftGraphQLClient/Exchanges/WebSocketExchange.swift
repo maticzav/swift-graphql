@@ -18,7 +18,7 @@ public class WebSocketExchange: Exchange {
     private var handleAllOperations: Bool = false
     
     /// Subscriptions that are currently active identified by their operation IDs.
-    private var sources: [String: AnyCancellable]
+    private var sources: [String: DisposeBag]
     
     // MARK: - Initializers
     

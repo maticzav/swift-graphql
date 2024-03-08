@@ -58,7 +58,7 @@ final class FetchExchangeTests: XCTestCase {
         args: ExecutionArgs(query: "", variables: [:])
     )
     
-    private var cancelables = Set<AnyCancellable>()
+    private var cancelables = Set<DisposeBag>()
     
     // MARK: - On Success
     

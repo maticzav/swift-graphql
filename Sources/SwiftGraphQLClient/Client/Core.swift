@@ -33,7 +33,7 @@ public class Client: GraphQLClient {
     /// - NOTE: Removing the source from the active list should start its deallocation.
     private var active: [String: Source]
     
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<DisposeBag>()
     
     // MARK: - Initializer
     

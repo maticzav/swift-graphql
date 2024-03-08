@@ -4,7 +4,7 @@ import XCTest
 
 final class PublishersExtensionsTests: XCTestCase {
     
-    var cancellables = Set<AnyCancellable>()
+    var cancellables = Set<DisposeBag>()
 
     // MARK: - TakeUntil tests
     

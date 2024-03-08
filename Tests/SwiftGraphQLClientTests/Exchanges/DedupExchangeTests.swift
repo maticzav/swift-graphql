@@ -5,7 +5,7 @@ import XCTest
 
 final class DedupExchangeTests: XCTestCase {
 
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<DisposeBag>()
 
     /// Mock operation that we use in the tests.
     private static let queryOperation = SwiftGraphQLClient.Operation(

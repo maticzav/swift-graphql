@@ -5,7 +5,7 @@ import XCTest
 
 final class FallbackExchangeTests: XCTestCase {
     
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<DisposeBag>()
     
     func testFiltersResults() throws {
         let expectation = expectation(description: "deallocated")

@@ -124,7 +124,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     /// query identifier that the client used to identify the subscription.
     ///
     /// - NOTE: We also use pipelines to tell how many ongoing connections the client is managing.
-    private var pipelines = [String: AnyCancellable]()
+    private var pipelines = [String: DisposeBag]()
     
     // MARK: - Initializer
     

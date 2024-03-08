@@ -6,7 +6,7 @@ import XCTest
 
 final class CacheExchangeTests: XCTestCase {
     
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<DisposeBag>()
     
     /// Function that executes desired operations in prepared environment and returns the trace.
     func environment(

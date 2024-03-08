@@ -32,7 +32,7 @@ final class ComposeExchangeTests: XCTestCase {
         }
     }
     
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<DisposeBag>()
     
     func testComposesExchangesCorrectly() throws {
         let expectation = expectation(description: "Received Logs")
