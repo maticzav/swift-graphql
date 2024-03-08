@@ -1,5 +1,4 @@
 import Foundation
-import SwiftGraphQLUtils
 
 /// GraphQLField represents a value in the selection. It contains information about
 /// what the selection should be and what the selected types are.

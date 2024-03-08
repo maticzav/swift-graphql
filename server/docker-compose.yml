@@ -1,0 +1,16 @@
+version: '3'
+name: graphqlserver
+services:
+  server:
+    image: node:latest
+    working_dir: /root
+    entrypoint: ["/bin/bash", "-c"]
+    ports:
+      - 4000:4000
+    command: 
+      - |
+        npm --version
+        npm install
+        npm run start
+    volumes:
+      - ./:/root/
