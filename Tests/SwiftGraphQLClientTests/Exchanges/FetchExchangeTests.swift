@@ -65,7 +65,7 @@ final class FetchExchangeTests: XCTestCase {
     func testReturnsResponseData() throws {
         let expectation = expectation(description: "Received Result")
         
-        let operations = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
+        let operations = PublishSubject<SwiftGraphQLClient.Operation>()
         
         let client = MockClient()
         let session = MockURLSession { _ in .succcess("{ \"data\": \"hello\" }") }
@@ -102,7 +102,7 @@ final class FetchExchangeTests: XCTestCase {
     func testReturnsError() throws {
         let expectation = expectation(description: "Received Result")
         
-        let operations = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
+        let operations = PublishSubject<SwiftGraphQLClient.Operation>()
         
         let client = MockClient()
         let session = MockURLSession { request in
@@ -144,7 +144,7 @@ final class FetchExchangeTests: XCTestCase {
     func testTeardownDoesNotPerformFetch() throws {
         let expectation = expectation(description: "Received Result")
         
-        let operations = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
+        let operations = PublishSubject<SwiftGraphQLClient.Operation>()
         
         let client = MockClient()
         let session = MockURLSession { _ in

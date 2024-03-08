@@ -100,7 +100,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     }
     
     /// The central subject that publishes all events to the pipelines.
-    private let emitter = PassthroughSubject<Event, Never>()
+    private let emitter = PublishSubject<Event>()
     
     /// A timer reference responsible for checking that the server has ACK the connection in timely manner.
     /// https://stackoverflow.com/a/26808801/2946444
@@ -506,7 +506,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
         // We create a new publisher that is bound to the pipeline
         // that watches server events and forwards them to the subscriber.
         // There's one pipeline for every subscription.
-        let subject = PassthroughSubject<ExecutionResult, Never>()
+        let subject = PublishSubject<ExecutionResult>()
         
         let disposeBag = DisposeBag()
         self.pipelines[id] = disposeBag

@@ -30,10 +30,10 @@ final class DedupExchangeTests: XCTestCase {
     /// Function that executes desired operations in prepared environment
     /// and returns the trace.
     func environment(
-        _ fn: (PassthroughSubject<SwiftGraphQLClient.Operation, Never>, PassthroughSubject<SwiftGraphQLClient.OperationResult, Never>) -> Void
+        _ fn: (PublishSubject<SwiftGraphQLClient.Operation>, PublishSubject<SwiftGraphQLClient.OperationResult>) -> Void
     ) -> [String] {
-        let operations = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
-        let results = PassthroughSubject<SwiftGraphQLClient.OperationResult, Never>()
+        let operations = PublishSubject<SwiftGraphQLClient.Operation>()
+        let results = PublishSubject<SwiftGraphQLClient.OperationResult>()
         
         let client = MockClient()
         

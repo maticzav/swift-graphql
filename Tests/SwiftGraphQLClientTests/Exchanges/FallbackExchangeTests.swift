@@ -10,7 +10,7 @@ final class FallbackExchangeTests: XCTestCase {
     func testFiltersResults() throws {
         let expectation = expectation(description: "deallocated")
         
-        let subject = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
+        let subject = PublishSubject<SwiftGraphQLClient.Operation>()
         let operations = subject.share()
         
         let client = MockClient()

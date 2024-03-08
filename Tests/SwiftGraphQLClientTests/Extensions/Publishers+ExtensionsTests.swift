@@ -12,8 +12,8 @@ final class PublishersExtensionsTests: XCTestCase {
         let expectation = expectation(description: "terminated")
         var received = [Int]()
         
-        let terminator = PassthroughSubject<(), Never>()
-        let publisher = PassthroughSubject<Int, Never>()
+        let terminator = PublishSubject<()>()
+        let publisher = PublishSubject<Int>()
         
         publisher
             .takeUntil(terminator)
@@ -40,8 +40,8 @@ final class PublishersExtensionsTests: XCTestCase {
         let expectation = expectation(description: "terminated")
         var received = [Int]()
         
-        let terminator = PassthroughSubject<(), Never>()
-        let publisher = PassthroughSubject<Int, Never>()
+        let terminator = PublishSubject<()>()
+        let publisher = PublishSubject<Int>()
         
         publisher
             .do(onDispose: {
@@ -68,8 +68,8 @@ final class PublishersExtensionsTests: XCTestCase {
         let expectation = expectation(description: "finished")
         var received: [Int] = []
         
-        let terminator = PassthroughSubject<(), Never>()
-        let publisher = PassthroughSubject<Int, Never>()
+        let terminator = PublishSubject<()>()
+        let publisher = PublishSubject<Int>()
         
         publisher
             .takeUntil(terminator)
@@ -94,8 +94,8 @@ final class PublishersExtensionsTests: XCTestCase {
         let expectation = expectation(description: "cancelled")
         var received: [Int] = []
         
-        let terminator = PassthroughSubject<(), Never>()
-        let publisher = PassthroughSubject<Int, Never>()
+        let terminator = PublishSubject<()>()
+        let publisher = PublishSubject<Int>()
         
         var disposable: Disposable? = publisher
             .do(onDispose: {

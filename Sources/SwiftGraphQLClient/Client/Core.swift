@@ -18,7 +18,7 @@ public class Client: GraphQLClient {
     // MARK: - Exchange Pipeline
     
     /// The operations stream that lets the client send and listen for them.
-    private var operations = PassthroughSubject<Operation, Never>()
+    private var operations = PublishSubject<Operation>()
     
     /// Stream of results that may be used as the base for sources.
     private var results: Observable<OperationResult>

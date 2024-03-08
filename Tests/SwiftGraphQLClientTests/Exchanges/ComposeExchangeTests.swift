@@ -37,7 +37,7 @@ final class ComposeExchangeTests: XCTestCase {
     func testComposesExchangesCorrectly() throws {
         let expectation = expectation(description: "Received Logs")
         
-        let subject = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
+        let subject = PublishSubject<SwiftGraphQLClient.Operation>()
         let operations = subject.share()
         
         let client = MockClient()
