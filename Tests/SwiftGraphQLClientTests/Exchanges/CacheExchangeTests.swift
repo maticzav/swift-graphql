@@ -46,13 +46,13 @@ final class CacheExchangeTests: XCTestCase {
             
             return upstream
         }
-        .sink { result in
+        .subscribe(onNext: { result in
             let op = result.operation
             let stale = result.stale ?? false
             let value = result.data
             
             trace.append("resulted (\(stale)): \(op.id) \(value) (\(op.kind.rawValue))")
-        }
+        })
         .store(in: &self.cancellables)
         
         fn(operations, results)

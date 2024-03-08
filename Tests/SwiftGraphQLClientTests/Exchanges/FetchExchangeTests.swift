@@ -84,7 +84,7 @@ final class FetchExchangeTests: XCTestCase {
             
             return downstream
         }
-        .sink { result in
+        .subscribe(onNext: { result in
             XCTAssertEqual(result, OperationResult(
                 operation: result.operation,
                 data: AnyCodable("hello"),
@@ -93,7 +93,7 @@ final class FetchExchangeTests: XCTestCase {
             )
             
             expectation.fulfill()
-        }
+        })
         .store(in: &self.cancelables)
 
         operations.send(FetchExchangeTests.queryOperation)
@@ -124,7 +124,7 @@ final class FetchExchangeTests: XCTestCase {
             
             return downstream
         }
-        .sink { result in
+        .subscribe(onNext: { result in
             XCTAssertEqual(
                 result,
                 OperationResult(
@@ -136,7 +136,7 @@ final class FetchExchangeTests: XCTestCase {
             )
             
             expectation.fulfill()
-        }
+        })
         .store(in: &self.cancelables)
 
         operations.send(FetchExchangeTests.queryOperation)
@@ -171,9 +171,9 @@ final class FetchExchangeTests: XCTestCase {
             
             return downstream
         }
-        .sink { result in
+        .subscribe(onNext: { result in
             XCTFail()
-        }
+        })
         .store(in: &self.cancelables)
 
         operations.send(FetchExchangeTests.queryOperation.with(kind: .teardown))

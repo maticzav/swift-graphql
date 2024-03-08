@@ -20,11 +20,11 @@ final class FallbackExchangeTests: XCTestCase {
             .register(client: client, operations: operations) { _ in
                 Observable<OperationResult>.empty().eraseToAnyPublisher()
             }
-            .sink(receiveCompletion: { _ in
-                expectation.fulfill()
-            }, receiveValue: { _ in
+            .subscribe(onNext: { _ in
                 // Check that everything is filtered.
                 XCTFail()
+            }, onCompleted: {
+                expectation.fulfill()
             })
             .store(in: &self.cancellables)
         

@@ -17,10 +17,10 @@ final class PublishersExtensionsTests: XCTestCase {
         
         publisher
             .takeUntil(terminator.eraseToAnyPublisher())
-            .sink(receiveCompletion: { completion in
-                expectation.fulfill()
-            }, receiveValue: { value in
+            .subscribe(onNext: { value in
                 received.append(value)
+            }, onCompleted: {
+                expectation.fulfill()
             })
             .store(in: &self.cancellables)
         
@@ -48,7 +48,7 @@ final class PublishersExtensionsTests: XCTestCase {
                 expectation.fulfill()
             })
             .takeUntil(terminator.eraseToAnyPublisher())
-            .sink(receiveValue: { value in
+            .subscribe(onNext: { value in
                 received.append(value)
             })
             .store(in: &self.cancellables)
@@ -73,10 +73,10 @@ final class PublishersExtensionsTests: XCTestCase {
         
         publisher
             .takeUntil(terminator.eraseToAnyPublisher())
-            .sink(receiveCompletion: { completion in
-                expectation.fulfill()
-            }, receiveValue: { value in
+            .subscribe(onNext: { value in
                 received.append(value)
+            }, onCompleted: {
+                expectation.fulfill()
             })
             .store(in: &self.cancellables)
         

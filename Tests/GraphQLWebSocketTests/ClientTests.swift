@@ -47,9 +47,9 @@ final class ClientTests: XCTestCase {
                     return nil
                 }
             })
-            .sink { err in
+            .subscribe(onNext:{ err in
                 XCTFail()
-            }
+            })
             .store(in: &self.cancellables)
         
         var xs = [Int]()
@@ -57,19 +57,19 @@ final class ClientTests: XCTestCase {
         
         // We parallely check two GraphQL subscriptions.
         client.subscribe(self.count(from: 10, to: 5))
-            .sink { completion in
-                xsexpect.fulfill()
-            } receiveValue: { result in
+            .subscribe(onNext: { result in
                 xs.append(self.decode(result))
-            }
+            }, onCompleted: {
+                xsexpect.fulfill()
+            })
             .store(in: &self.cancellables)
         
         client.subscribe(self.count(from: 100, to: 105))
-            .sink { completion in
-                ysexpect.fulfill()
-            } receiveValue: { result in
+            .subscribe(onNext: { result in
                 ys.append(self.decode(result))
-            }
+            }, onCompleted: {
+                ysexpect.fulfill()
+            })
             .store(in: &self.cancellables)
         
         waitForExpectations(timeout: 5)

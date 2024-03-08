@@ -60,10 +60,10 @@ final class DedupExchangeTests: XCTestCase {
             
             return upstream
         }
-        .sink { result in
+        .subscribe(onNext: { result in
             let op = result.operation
             trace.append("resulted: \(op.id) (\(op.kind.rawValue))")
-        }
+        })
         .store(in: &self.cancellables)
         
         fn(operations, results)

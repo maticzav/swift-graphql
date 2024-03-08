@@ -69,7 +69,7 @@ public class Client: GraphQLClient {
         //  This is important to make sure all exchanges are fully initialised
         //  even if there are no active subscribers yet.
         self.results
-            .sink { _ in }
+            .subscribe()
             .store(in: &self.cancellables)
         
         self.config.logger.info("GraphQL Client ready!")

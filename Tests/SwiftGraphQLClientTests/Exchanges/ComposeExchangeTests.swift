@@ -64,9 +64,9 @@ final class ComposeExchangeTests: XCTestCase {
                     }
                     .eraseToAnyPublisher()
             }
-            .sink { result in
+            .subscribe(onNext: { result in
                 expectation.fulfill()
-            }
+            })
             .store(in: &self.cancellables)
         
         let operation = SwiftGraphQLClient.Operation(

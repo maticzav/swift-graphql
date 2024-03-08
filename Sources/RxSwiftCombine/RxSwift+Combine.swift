@@ -15,13 +15,6 @@ public extension Observable {
     func sink(
         receiveCompletion onCompleted: ((()) -> Void)? = nil,
         receiveValue onNext: @escaping (Element) -> Void
-    ) -> Disposable {
-        self.subscribe(onNext: onNext, onCompleted: { onCompleted?(()) })
-    }
-
-    func sink(
-        receiveCompletion onCompleted: ((()) -> Void)? = nil,
-        receiveValue onNext: @escaping (Element) -> Void
     ) -> DisposeBag {
         let bag = DisposeBag()
         self.subscribe(onNext: onNext, onCompleted: { onCompleted?(()) })
