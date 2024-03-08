@@ -46,7 +46,7 @@ final class DedupExchangeTests: XCTestCase {
             operations: operations.eraseToAnyPublisher()
         ) { ops in
             let downstream = ops
-                .handleEvents(receiveOutput: { operation in
+                .do(onNext: { operation in
                     trace.append("requested: \(operation.id) (\(operation.kind.rawValue))")
                 })
                 .compactMap({ op in

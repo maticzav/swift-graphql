@@ -44,7 +44,7 @@ final class PublishersExtensionsTests: XCTestCase {
         let publisher = PassthroughSubject<Int, Never>()
         
         publisher
-            .handleEvents(receiveCancel: {
+            .do(onDispose: {
                 expectation.fulfill()
             })
             .takeUntil(terminator.eraseToAnyPublisher())
@@ -98,7 +98,7 @@ final class PublishersExtensionsTests: XCTestCase {
         let publisher = PassthroughSubject<Int, Never>()
         
         var disposable: Disposable? = publisher
-            .handleEvents(receiveCancel: {
+            .do(onDispose: {
                 expectation.fulfill()
             })
             .takeUntil(terminator.eraseToAnyPublisher())

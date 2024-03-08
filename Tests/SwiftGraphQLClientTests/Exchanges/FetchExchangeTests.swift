@@ -78,7 +78,7 @@ final class FetchExchangeTests: XCTestCase {
             operations: operations.eraseToAnyPublisher()
         ) { ops in
             let downstream = ops
-                .handleEvents(receiveOutput: { _ in XCTFail() })
+                .do(onNext: { _ in XCTFail() })
                 .compactMap { _ in OperationResult?.none }
                 .eraseToAnyPublisher()
             
@@ -118,7 +118,7 @@ final class FetchExchangeTests: XCTestCase {
             operations: operations.eraseToAnyPublisher()
         ) { ops in
             let downstream = ops
-                .handleEvents(receiveOutput: { _ in XCTFail() })
+                .do(onNext: { _ in XCTFail() })
                 .compactMap { _ in OperationResult?.none }
                 .eraseToAnyPublisher()
             
@@ -163,7 +163,7 @@ final class FetchExchangeTests: XCTestCase {
             operations: operations.eraseToAnyPublisher()
         ) { ops in
             let downstream = ops
-                .handleEvents(receiveOutput: { _ in
+                .do(onNext: { _ in
                     expectation.fulfill()
                 })
                 .compactMap { _ in OperationResult?.none }

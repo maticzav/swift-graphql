@@ -26,13 +26,13 @@ final class CacheExchangeTests: XCTestCase {
         exchange.register(
             client: client,
             operations: operations
-                .handleEvents(receiveOutput: { operation in
+                .do(onNext: { operation in
                     trace.append("requested: \(operation.id) (\(operation.kind.rawValue), \(operation.policy.rawValue))")
                 })
                 .eraseToAnyPublisher()
         ) { ops in
             let downstream = ops
-                .handleEvents(receiveOutput: { operation in
+                .do(onNext: { operation in
                     trace.append("forwarded: \(operation.id) (\(operation.kind.rawValue), \(operation.policy.rawValue))")
                 })
                 .compactMap({ op in

@@ -96,7 +96,7 @@ public class WebSocketExchange: Exchange {
                     .eraseToAnyPublisher()
                 
                 return self.createSubscriptionSource(operation: operation)
-                    .handleEvents(receiveCompletion: { _ in
+                    .do(onCompleted: {
                         // Once the subscription ends because socket stream stopped sending events,
                         // we inform the client-pipeline that it should be dismantled.
                         client.reexecute(operation: operation.with(kind: .teardown))

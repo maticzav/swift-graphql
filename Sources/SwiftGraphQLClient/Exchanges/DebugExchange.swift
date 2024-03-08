@@ -34,13 +34,13 @@ public struct DebugExchange: Exchange {
         }
         
         let downstream = operations
-            .handleEvents(receiveOutput: { operation in
+            .do(onNext: { operation in
                 client.logger.debug("[debug exchange]: Incoming Operation: \(operation)")
             })
             .eraseToAnyPublisher()
         
         let upstream = next(downstream)
-            .handleEvents(receiveOutput: { result in
+            .do(onNext: { result in
                 client.logger.debug("[debug exchange]: Completed Operation: \(result)")
             })
             .eraseToAnyPublisher()

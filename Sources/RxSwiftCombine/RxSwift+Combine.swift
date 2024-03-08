@@ -11,21 +11,6 @@ public extension Disposable {
 }
 
 public extension Observable {
-    func handleEvents(
-        receiveSubscription: ((()) -> Void)? = nil,
-        receiveOutput: ((Element) -> Void)? = nil,
-        receiveCompletion: ((()) -> Void)? = nil,
-        receiveCancel: (() -> Void)? = nil
-//        receiveRequest: ((Subscribers.Demand) -> Void)? = nil
-    ) -> Observable<Element> {
-        self.do(
-            onNext: receiveOutput,
-            onCompleted: { receiveCompletion?(()) },
-            onSubscribe: { receiveSubscription?(()) },
-            onDispose: receiveCancel
-        )
-    }
-
     func tryMap<T>(_ transform: @escaping (Element) throws -> T) -> Observable<T> {
         self.map(transform)
     }

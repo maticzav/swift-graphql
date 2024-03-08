@@ -144,7 +144,7 @@ public class Client: GraphQLClient {
         //
         // To sum up both cases, client shouldn't handle processing of the operations.
         return source
-            .handleEvents(receiveSubscription: { _ in
+            .do(onSubscribe: {
                 self.operations.send(operation)
             })
             .eraseToAnyPublisher()
@@ -163,7 +163,7 @@ public class Client: GraphQLClient {
         // (i.e. the result of the mutation).
         if operation.kind == .mutation {
             return source
-                .handleEvents(receiveSubscription: { _ in
+                .do(onSubscribe: {
                     self.operations.send(operation)
                 })
                 .first()
@@ -182,7 +182,7 @@ public class Client: GraphQLClient {
             .eraseToAnyPublisher()
         
         let result: AnyPublisher<OperationResult, Never> = source
-            .handleEvents(receiveCompletion: { _ in
+            .do(onCompleted: {
                 // Once the publisher stops the stream (i.e. the stream ended because we
                 // received all relevant results), we dismantle the pipeline by sending
                 // the teardown event to all exchanges in the chain.
@@ -219,7 +219,7 @@ public class Client: GraphQLClient {
             // This is necessary to correctly propagate down the completion since the
             // finished event sent by the publisher may have been lost in the pipeline.
             .takeUntil(torndown)
-            .handleEvents(receiveCancel: {
+            .do(onDispose: {
                 // Once the source has been canceled because the application is no longer interested
                 // in results, we start the teardown process.
                 self.config.logger.debug("Operation \(operation.id) source has been canceled.")

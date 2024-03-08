@@ -569,18 +569,18 @@ public class GraphQLWebSocket: WebSocketDelegate {
             }).disposed(by: disposeBag)
 
         let results = subject
-            .handleEvents(receiveSubscription: { subscription in
+            .do(onCompleted: {
+                // Server has stopped sending requests, we just clear up the resources.
+                self.pipelines.removeValue(forKey: id)
+                self.config.logger.debug("Subscription \(id) completed!")
+            }, onSubscribe: {
                 // User has started listening for events, we ask the server
                 // to start sending results.
                 self.connect()
                 self.send(message: ClientMessage.subscribe(id: id, payload: args))
-                
+
                 self.config.logger.debug("Subscription \(id) initializing...")
-            }, receiveCompletion: { completion in
-                // Server has stopped sending requests, we just clear up the resources.
-                self.pipelines.removeValue(forKey: id)
-                self.config.logger.debug("Subscription \(id) completed!")
-            }, receiveCancel: {
+            }, onDispose: {
                 // User has cancelled the subscription. We notify the server
                 // to stop sending results and free memory allocated to processing the subscription.
                 self.send(message: ClientMessage.complete(id: id))

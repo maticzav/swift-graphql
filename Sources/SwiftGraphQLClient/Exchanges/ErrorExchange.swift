@@ -19,7 +19,7 @@ public struct ErrorExchange: Exchange {
         next: @escaping ExchangeIO
     ) -> AnyPublisher<OperationResult, Never> {
         next(operations)
-            .handleEvents(receiveOutput: { result in
+            .do(onNext: { result in
                 if let error = result.error {
                     self.onError(error, result.operation)
                 }

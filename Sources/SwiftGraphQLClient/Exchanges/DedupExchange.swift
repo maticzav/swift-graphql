@@ -46,7 +46,7 @@ public class DedupExchange: Exchange {
             .eraseToAnyPublisher()
         
         let upstream = next(downstream)
-            .handleEvents(receiveOutput: { result in
+            .do(onNext: { result in
                 self.inFlightKeys.remove(result.operation.id)
             })
             .eraseToAnyPublisher()
