@@ -28,7 +28,7 @@ final class FetchExchangeTests: XCTestCase {
                     textEncodingName: nil
                 )
                 
-                return Just((data: data, response: response))
+                return Observable.just((data: data, response: response))
                 
             case .error(let code):
                 let error = URLError(rawValue: code)

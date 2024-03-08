@@ -26,5 +26,4 @@ extension DisposeBag: Equatable {
     public static func ==(_ lhs: DisposeBag, _ rhs: DisposeBag) -> Bool { lhs === rhs }
 }
 
-public func Just<Element>(_ element: Element) -> Observable<Element> { Observable.just(element) }
 

@@ -114,7 +114,7 @@ public class FetchExchange: Exchange {
                             stale: false
                         )
                         
-                        return Just(result)
+                        return Observable.just(result)
                     }
                 
                 return publisher

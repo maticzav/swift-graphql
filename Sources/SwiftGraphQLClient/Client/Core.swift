@@ -191,7 +191,7 @@ public class Client: GraphQLClient {
                 
                 // Mark a result as stale when a new operation is sent with the same key.
                 guard operation.kind == .query else {
-                    return Just(result)
+                    return Observable.just(result)
                 }
                 
                 // Mark the current result as `stale` when the client
@@ -205,7 +205,7 @@ public class Client: GraphQLClient {
                         return copy
                     }
                 
-                return Observable.merge(Just(result), staleResult)
+                return Observable.merge(Observable.just(result), staleResult)
             }
             .switchLatest()
             // NOTE: We use `takeUntil` teardown operator here to emit finished event
