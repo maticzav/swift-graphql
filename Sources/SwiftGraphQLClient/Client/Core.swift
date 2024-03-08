@@ -163,7 +163,7 @@ public class Client: GraphQLClient {
                 .do(onSubscribe: {
                     self.operations.onNext(operation)
                 })
-                .first()
+                .take(1).asSingle().asObservable()
         }
         
         // We create a new source that listenes for events until
@@ -198,7 +198,7 @@ public class Client: GraphQLClient {
                 // requests a query with the same key again.
                 let staleResult: AnyPublisher<OperationResult, Never> = self.operations
                     .filter { $0.kind == .query && $0.id == operation.id && $0.policy != .cacheOnly }
-                    .first()
+                    .take(1).asSingle().asObservable()
                     .map { operation -> OperationResult in
                         var copy = result
                         copy.stale = true

@@ -13,10 +13,6 @@ public extension Observable {
     func first() async throws -> Element {
         try await take(1).asSingle().values.first(where: { _ in true })!
     }
-
-    func first() -> Observable<Element> {
-        take(1).asSingle().asObservable()
-    }
 }
 
 
