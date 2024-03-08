@@ -97,19 +97,20 @@ final class PublishersExtensionsTests: XCTestCase {
         let terminator = PassthroughSubject<(), Never>()
         let publisher = PassthroughSubject<Int, Never>()
         
-        var cancellable: AnyCancellable? = publisher
+        var disposable: Disposable? = publisher
             .handleEvents(receiveCancel: {
                 expectation.fulfill()
             })
             .takeUntil(terminator.eraseToAnyPublisher())
-            .sink(receiveCompletion: { completion in
-                XCTFail()
-            }, receiveValue: { value in
+            .subscribe(onNext: { value in
                 received.append(value)
+            }, onCompleted: {
+                XCTFail()
             })
         
         publisher.send(1)
-        cancellable = nil
+        disposable?.dispose()
+        disposable = nil
         
         waitForExpectations(timeout: 1)
         

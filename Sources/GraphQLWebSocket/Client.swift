@@ -508,7 +508,9 @@ public class GraphQLWebSocket: WebSocketDelegate {
         // There's one pipeline for every subscription.
         let subject = PassthroughSubject<ExecutionResult, Never>()
         
-        self.pipelines[id] = self.emitter
+        let disposeBag = DisposeBag()
+        self.pipelines[id] = disposeBag
+        self.emitter
             .share()
             .compactMap({ state -> ServerMessage? in
                 switch state {
@@ -535,7 +537,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
                     return true
                 }
             })
-            .sink { message in
+            .subscribe(onNext:{ message in
                 switch message {
                 case .next(let payload):
                     // NOTE: Payload may include execution errors alongside the
@@ -564,8 +566,8 @@ public class GraphQLWebSocket: WebSocketDelegate {
                 default:
                     ()
                 }
-            }
-        
+            }).disposed(by: disposeBag)
+
         let results = subject
             .handleEvents(receiveSubscription: { subscription in
                 // User has started listening for events, we ask the server
