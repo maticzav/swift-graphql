@@ -30,7 +30,6 @@ class AccountViewModel: ObservableObject {
         self.cancellable = CDNClient.upload(data: data, extension: "jpeg", contentType: "image/jpeg")
             .flatMap({ file in
                 NetworkClient.shared.mutate(User.changeProfilePicture(file: file.id))
-                    .eraseToAnyPublisher()
             })
             .receive(on: RunLoop.main)
             .print()

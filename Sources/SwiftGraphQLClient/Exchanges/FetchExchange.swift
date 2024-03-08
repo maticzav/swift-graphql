@@ -56,7 +56,6 @@ public class FetchExchange: Exchange {
             .filter { operation in
                 operation.kind != .query && operation.kind != .mutation
             }
-            .eraseToAnyPublisher()
         
         let upstream = next(downstream)
         
@@ -67,7 +66,6 @@ public class FetchExchange: Exchange {
                 
                 let torndown = shared
                     .filter { $0.kind == .teardown && $0.id == operation.id }
-                    .eraseToAnyPublisher()
                 
                 let publisher: Observable<OperationResult> = self.session
                     .dataTaskPublisher(for: operation.request, with: body)
@@ -114,14 +112,13 @@ public class FetchExchange: Exchange {
                             stale: false
                         )
                         
-                        return Just(result).eraseToAnyPublisher()
+                        return Just(result)
                     }
-                    .eraseToAnyPublisher()
                 
                 return publisher
             })
 
-        return Observable.merge(fetchstream, upstream).eraseToAnyPublisher()
+        return Observable.merge(fetchstream, upstream)
     }
 
 }

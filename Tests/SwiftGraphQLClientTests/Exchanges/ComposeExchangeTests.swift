@@ -22,13 +22,11 @@ final class ComposeExchangeTests: XCTestCase {
                 .do(onNext: { _ in
                     self.trace("going down: \(name)")
                 })
-                .eraseToAnyPublisher()
             
             let upstream = next(downstream)
                 .do(onNext: { _ in
                     self.trace("going up: \(name)")
                 })
-                .eraseToAnyPublisher()
             
             return upstream
         }
@@ -40,7 +38,7 @@ final class ComposeExchangeTests: XCTestCase {
         let expectation = expectation(description: "Received Logs")
         
         let subject = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
-        let operations = subject.share().eraseToAnyPublisher()
+        let operations = subject.share()
         
         let client = MockClient()
         
@@ -62,7 +60,6 @@ final class ComposeExchangeTests: XCTestCase {
                             stale: false
                         )
                     }
-                    .eraseToAnyPublisher()
             }
             .subscribe(onNext: { result in
                 expectation.fulfill()

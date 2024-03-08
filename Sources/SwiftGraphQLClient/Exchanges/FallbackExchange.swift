@@ -33,6 +33,5 @@ public struct FallbackExchange: Exchange {
                 // Filter out all unprocessed operations from the stream.
                 return OperationResult?.none
             }
-            .eraseToAnyPublisher()
     }
 }

@@ -14,7 +14,7 @@ enum AuthClient {
     
     /// A publisher that tells whether the user is authenticated or not.
     static var state: AnyPublisher<AuthState, Never> {
-        AuthClient.cache.$state.eraseToAnyPublisher()
+        AuthClient.cache.$state
     }
     
     enum AuthState: Equatable {
@@ -50,7 +50,7 @@ enum AuthClient {
                     .map { res in res.data }
                     .catch({ _ -> AnyPublisher<User?, Never> in
                         self.logout()
-                        return Just(User?.none).eraseToAnyPublisher()
+                        return Just(User?.none)
                     })
                     .removeDuplicates()
                     .assign(to: &self.$user)

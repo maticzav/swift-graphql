@@ -69,7 +69,6 @@ public class WebSocketExchange: Exchange {
                 }
                 return op
             }
-            .eraseToAnyPublisher()
         
         return publisher
     }
@@ -84,7 +83,6 @@ public class WebSocketExchange: Exchange {
         // Fowarded operations.
         let downstream = shared
             .filter { !self.shouldHandle(operation: $0) }
-            .eraseToAnyPublisher()
         let upstream = next(downstream)
         
         // Handled operations.
@@ -93,7 +91,6 @@ public class WebSocketExchange: Exchange {
             .flatMap { operation -> AnyPublisher<OperationResult, Never> in
                 let torndown = shared
                     .filter { $0.kind == .teardown && $0.id == operation.id }
-                    .eraseToAnyPublisher()
                 
                 return self.createSubscriptionSource(operation: operation)
                     .do(onCompleted: {
@@ -105,10 +102,9 @@ public class WebSocketExchange: Exchange {
                     // the client (i.e. application) emits the teardown event because someone
                     // cancelled the subscription.
                     .takeUntil(torndown)
-                    .eraseToAnyPublisher()
             }
             
-        return Observable.merge(upstream, socketstream).eraseToAnyPublisher()
+        return Observable.merge(upstream, socketstream)
     }
 }
 #endif

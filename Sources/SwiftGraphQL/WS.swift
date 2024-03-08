@@ -43,7 +43,6 @@ extension GraphQLWebSocket {
                 
                 return result
             }
-            .eraseToAnyPublisher()
         
         return publisher
     }

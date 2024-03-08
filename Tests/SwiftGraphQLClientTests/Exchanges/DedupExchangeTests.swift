@@ -43,7 +43,7 @@ final class DedupExchangeTests: XCTestCase {
         let exchange = DedupExchange()
         exchange.register(
             client: client,
-            operations: operations.eraseToAnyPublisher()
+            operations: operations
         ) { ops in
             let downstream = ops
                 .do(onNext: { operation in
@@ -52,10 +52,8 @@ final class DedupExchangeTests: XCTestCase {
                 .compactMap({ op in
                     SwiftGraphQLClient.OperationResult?.none
                 })
-                .eraseToAnyPublisher()
             
-            let upstream = Observable.merge(downstream, results.eraseToAnyPublisher())
-                .eraseToAnyPublisher()
+            let upstream = Observable.merge(downstream, results)
             
             return upstream
         }

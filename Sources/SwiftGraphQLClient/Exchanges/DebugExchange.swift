@@ -37,13 +37,11 @@ public struct DebugExchange: Exchange {
             .do(onNext: { operation in
                 client.logger.debug("[debug exchange]: Incoming Operation: \(operation)")
             })
-            .eraseToAnyPublisher()
         
         let upstream = next(downstream)
             .do(onNext: { result in
                 client.logger.debug("[debug exchange]: Completed Operation: \(result)")
             })
-            .eraseToAnyPublisher()
         
         return upstream
     }

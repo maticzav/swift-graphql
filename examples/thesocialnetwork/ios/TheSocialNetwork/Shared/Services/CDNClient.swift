@@ -9,7 +9,7 @@ enum CDNClient {
             .flatMap { result -> AnyPublisher<File, Error> in
                 
                 guard let url = result.data else {
-                    return Fail<File, Error>(error: CDNError.badSignedURL).eraseToAnyPublisher()
+                    return Fail<File, Error>(error: CDNError.badSignedURL)
                 }
                 
                 let file = File(id: url.id, url: url.fileURL)
@@ -20,9 +20,8 @@ enum CDNClient {
                 
                 let upload = URLSession.shared.uploadTaskPublisher(with: request, from: data)
                 
-                return upload.map { _ in file }.eraseToAnyPublisher()
+                return upload.map { _ in file }
             }
-            .eraseToAnyPublisher()
     }
 }
 
@@ -48,7 +47,7 @@ extension URLSession {
             task.resume()
         }
         
-        return publisher.eraseToAnyPublisher()
+        return publisher
     }
 }
 

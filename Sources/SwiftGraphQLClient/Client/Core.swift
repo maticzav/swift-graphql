@@ -47,14 +47,14 @@ public class Client: GraphQLClient {
         config: ClientConfiguration = ClientConfiguration()
     ) {
         // A publisher that never emits anything.
-        let noop = Observable<OperationResult>.empty().eraseToAnyPublisher()
+        let noop = Observable<OperationResult>.empty()
 
         self.request = request
         self.config = config
         self.results = noop
         self.active = [:]
         
-        let operations = operations.share().eraseToAnyPublisher()
+        let operations = operations.share()
         
         // We think of all exchanges as a single flattened exchange - once
         //  we have sent a request through the pipeline there's nothing left to do
@@ -63,7 +63,6 @@ public class Client: GraphQLClient {
         self.results = exchange
             .register(client: self, operations: operations, next: { _ in noop })
             .share()
-            .eraseToAnyPublisher()
         
         // We start the chain to make sure the data is always flowing through the pipeline.
         //  This is important to make sure all exchanges are fully initialised
@@ -147,7 +146,6 @@ public class Client: GraphQLClient {
             .do(onSubscribe: {
                 self.operations.send(operation)
             })
-            .eraseToAnyPublisher()
     }
     
     /// Returns a new result source that
@@ -156,7 +154,6 @@ public class Client: GraphQLClient {
         
         let source = self.results
             .filter { $0.operation.kind == operation.kind && $0.operation.id == operation.id }
-            .eraseToAnyPublisher()
         
         // We aren't interested in composing a full-blown
         // pipeline for mutations because we only get a single result
@@ -167,7 +164,6 @@ public class Client: GraphQLClient {
                     self.operations.send(operation)
                 })
                 .first()
-                .eraseToAnyPublisher()
         }
         
         // We create a new source that listenes for events until
@@ -179,7 +175,6 @@ public class Client: GraphQLClient {
         //  and needs to be manually dismantled.
         let torndown = self.operations
             .filter { $0.kind == .teardown && $0.id == operation.id }
-            .eraseToAnyPublisher()
         
         let result: AnyPublisher<OperationResult, Never> = source
             .do(onCompleted: {
@@ -196,7 +191,7 @@ public class Client: GraphQLClient {
                 
                 // Mark a result as stale when a new operation is sent with the same key.
                 guard operation.kind == .query else {
-                    return Just(result).eraseToAnyPublisher()
+                    return Just(result)
                 }
                 
                 // Mark the current result as `stale` when the client
@@ -209,9 +204,8 @@ public class Client: GraphQLClient {
                         copy.stale = true
                         return copy
                     }
-                    .eraseToAnyPublisher()
                 
-                return Observable.merge(Just(result), staleResult).eraseToAnyPublisher()
+                return Observable.merge(Just(result), staleResult)
             }
             .switchToLatest()
             // NOTE: We use `takeUntil` teardown operator here to emit finished event
@@ -231,7 +225,6 @@ public class Client: GraphQLClient {
             // reused multiple times for operation with the same identifier
             // but a different subscriber.
             .share()
-            .eraseToAnyPublisher()
     
         return result
     }

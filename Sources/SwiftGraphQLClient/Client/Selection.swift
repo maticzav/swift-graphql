@@ -94,7 +94,6 @@ extension GraphQLClient {
                 }
                 return try result.decode(selection: selection)
             }
-            .eraseToAnyPublisher()
     }
 
     /// Executes a query request with given execution parameters.
@@ -123,7 +122,6 @@ extension GraphQLClient {
                 }
                 return try result.decode(selection: selection)
             }
-            .eraseToAnyPublisher()
     }
 
     public func mutate<T, TypeLock>(
@@ -151,7 +149,6 @@ extension GraphQLClient {
                 }
                 return try result.decode(selection: selection)
             }
-            .eraseToAnyPublisher()
     }
 }
 

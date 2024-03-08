@@ -29,7 +29,6 @@ final class CacheExchangeTests: XCTestCase {
                 .do(onNext: { operation in
                     trace.append("requested: \(operation.id) (\(operation.kind.rawValue), \(operation.policy.rawValue))")
                 })
-                .eraseToAnyPublisher()
         ) { ops in
             let downstream = ops
                 .do(onNext: { operation in
@@ -38,10 +37,8 @@ final class CacheExchangeTests: XCTestCase {
                 .compactMap({ op in
                     SwiftGraphQLClient.OperationResult?.none
                 })
-                .eraseToAnyPublisher()
             
-            let upstream = Observable.merge(downstream, results.eraseToAnyPublisher())
-                .eraseToAnyPublisher()
+            let upstream = Observable.merge(downstream, results)
             
             return upstream
         }

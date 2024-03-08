@@ -11,14 +11,14 @@ final class FallbackExchangeTests: XCTestCase {
         let expectation = expectation(description: "deallocated")
         
         let subject = PassthroughSubject<SwiftGraphQLClient.Operation, Never>()
-        let operations = subject.share().eraseToAnyPublisher()
+        let operations = subject.share()
         
         let client = MockClient()
         
         let exchange = FallbackExchange(debug: true)
         exchange
             .register(client: client, operations: operations) { _ in
-                Observable<OperationResult>.empty().eraseToAnyPublisher()
+                Observable<OperationResult>.empty()
             }
             .subscribe(onNext: { _ in
                 // Check that everything is filtered.

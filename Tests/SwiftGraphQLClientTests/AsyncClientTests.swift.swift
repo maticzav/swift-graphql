@@ -30,7 +30,7 @@ final class AsyncInterfaceTests: XCTestCase {
                 ],
                 error: nil
             )
-            return Just(result).eraseToAnyPublisher()
+            return Just(result)
         })
 
 
@@ -49,7 +49,7 @@ final class AsyncInterfaceTests: XCTestCase {
                 data: ["unknown_field": "123"],
                 error: nil
             )
-            return Just(result).eraseToAnyPublisher()
+            return Just(result)
         })
 
         await XCTAssertThrowsError(of: ObjectDecodingError.self) {
@@ -90,7 +90,7 @@ final class AsyncInterfaceTests: XCTestCase {
                 ],
                 error: nil
             )
-            return Just(result).eraseToAnyPublisher()
+            return Just(result)
         })
 
         let result = try await client.mutate(Objects.Mutation.auth(selection: selection))
@@ -115,7 +115,7 @@ final class AsyncInterfaceTests: XCTestCase {
                 data: ["unknown_field": "123"],
                 error: nil
             )
-            return Just(result).eraseToAnyPublisher()
+            return Just(result)
         })
 
         await XCTAssertThrowsError(of: ObjectDecodingError.self) {

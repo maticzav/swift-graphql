@@ -43,13 +43,11 @@ public class DedupExchange: Exchange {
                 
                 return !isInFlight
             }
-            .eraseToAnyPublisher()
         
         let upstream = next(downstream)
             .do(onNext: { result in
                 self.inFlightKeys.remove(result.operation.id)
             })
-            .eraseToAnyPublisher()
         
         return upstream
     }

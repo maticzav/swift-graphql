@@ -16,7 +16,7 @@ final class PublishersExtensionsTests: XCTestCase {
         let publisher = PassthroughSubject<Int, Never>()
         
         publisher
-            .takeUntil(terminator.eraseToAnyPublisher())
+            .takeUntil(terminator)
             .subscribe(onNext: { value in
                 received.append(value)
             }, onCompleted: {
@@ -47,7 +47,7 @@ final class PublishersExtensionsTests: XCTestCase {
             .do(onDispose: {
                 expectation.fulfill()
             })
-            .takeUntil(terminator.eraseToAnyPublisher())
+            .takeUntil(terminator)
             .subscribe(onNext: { value in
                 received.append(value)
             })
@@ -72,7 +72,7 @@ final class PublishersExtensionsTests: XCTestCase {
         let publisher = PassthroughSubject<Int, Never>()
         
         publisher
-            .takeUntil(terminator.eraseToAnyPublisher())
+            .takeUntil(terminator)
             .subscribe(onNext: { value in
                 received.append(value)
             }, onCompleted: {
@@ -101,7 +101,7 @@ final class PublishersExtensionsTests: XCTestCase {
             .do(onDispose: {
                 expectation.fulfill()
             })
-            .takeUntil(terminator.eraseToAnyPublisher())
+            .takeUntil(terminator)
             .subscribe(onNext: { value in
                 received.append(value)
             }, onCompleted: {

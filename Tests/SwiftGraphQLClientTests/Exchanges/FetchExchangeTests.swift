@@ -29,12 +29,10 @@ final class FetchExchangeTests: XCTestCase {
                 )
                 
                 return Just((data: data, response: response))
-                    .eraseToAnyPublisher()
                 
             case .error(let code):
                 let error = URLError(rawValue: code)
                     return Observable<(data: Data, response: URLResponse)>.error(error)
-                    .eraseToAnyPublisher()
             }
         }
         
@@ -75,12 +73,11 @@ final class FetchExchangeTests: XCTestCase {
         let exchange = FetchExchange(session: session)
         exchange.register(
             client: client,
-            operations: operations.eraseToAnyPublisher()
+            operations: operations
         ) { ops in
             let downstream = ops
                 .do(onNext: { _ in XCTFail() })
                 .compactMap { _ in OperationResult?.none }
-                .eraseToAnyPublisher()
             
             return downstream
         }
@@ -115,12 +112,11 @@ final class FetchExchangeTests: XCTestCase {
         let exchange = FetchExchange(session: session)
         exchange.register(
             client: client,
-            operations: operations.eraseToAnyPublisher()
+            operations: operations
         ) { ops in
             let downstream = ops
                 .do(onNext: { _ in XCTFail() })
                 .compactMap { _ in OperationResult?.none }
-                .eraseToAnyPublisher()
             
             return downstream
         }
@@ -160,14 +156,13 @@ final class FetchExchangeTests: XCTestCase {
         let exchange = FetchExchange(session: session)
         exchange.register(
             client: client,
-            operations: operations.eraseToAnyPublisher()
+            operations: operations
         ) { ops in
             let downstream = ops
                 .do(onNext: { _ in
                     expectation.fulfill()
                 })
                 .compactMap { _ in OperationResult?.none }
-                .eraseToAnyPublisher()
             
             return downstream
         }

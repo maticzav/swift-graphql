@@ -5,7 +5,7 @@ enum FeedClient {
     
     /// Publisher that emits the number of unread posts.
     public static var unread: AnyPublisher<Int, Never> {
-        self.client.$posts.eraseToAnyPublisher()
+        self.client.$posts
     }
     
     private static var client = Client()

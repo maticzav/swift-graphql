@@ -24,6 +24,5 @@ public struct ErrorExchange: Exchange {
                     self.onError(error, result.operation)
                 }
             })
-            .eraseToAnyPublisher()
     }
 }

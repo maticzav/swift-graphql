@@ -61,7 +61,6 @@ public class CacheExchange: Exchange {
                 }
                 return cachedResult
             }
-            .eraseToAnyPublisher()
         
         // We filter requests that hit cache and listen for results
         // to keep track of received results.
@@ -82,7 +81,6 @@ public class CacheExchange: Exchange {
                 let wasHit = operation.policy == .cacheFirst && self.resultCache[operation.id] != nil
                 return operation.policy != .cacheFirst || !wasHit
             })
-            .eraseToAnyPublisher()
         
         let forwardedOps: AnyPublisher<OperationResult, Never> = next(downstream)
         
@@ -128,9 +126,8 @@ public class CacheExchange: Exchange {
                     }
                 }
             })
-            .eraseToAnyPublisher()
         
         
-        return Observable.merge(cachedOps, upstream).eraseToAnyPublisher()
+        return Observable.merge(cachedOps, upstream)
     }
 }

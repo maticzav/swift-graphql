@@ -11,8 +11,6 @@ public extension Disposable {
 }
 
 public extension Observable {
-    func eraseToAnyPublisher() -> Observable<Element> { self }
-
     func switchToLatest() -> Observable<Element.Element> where Element: ObservableConvertibleType { switchLatest() }
 
     func `catch`(_ handler: @escaping (URLError) -> Observable<Element>) -> Observable<Element> {

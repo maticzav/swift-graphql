@@ -36,7 +36,6 @@ public class AuthExchange: Exchange {
                 copy.request.setValue(token, forHTTPHeaderField: self.header)
                 return copy
             }
-            .eraseToAnyPublisher()
         
         return next(downstream)
     }

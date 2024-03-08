@@ -32,7 +32,6 @@ public struct ExtensionsExchange: Exchange {
                 copy.args.extensions = extensions
                 return copy
             }
-            .eraseToAnyPublisher()
         
         return next(downstream)
     }

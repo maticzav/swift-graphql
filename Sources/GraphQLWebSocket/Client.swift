@@ -487,7 +487,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
     
     /// Returns a stream of events that get triggered when the client's state changes.
     public func onEvent() -> AnyPublisher<Event, Never> {
-        self.emitter.share().eraseToAnyPublisher()
+        self.emitter.share()
     }
     
     /// Correctly closes the connection with the server.
@@ -588,7 +588,6 @@ public class GraphQLWebSocket: WebSocketDelegate {
                 self.disconnect()
                 self.config.logger.debug("Subscription \(id) cancelled!")
             })
-            .eraseToAnyPublisher()
         
         return results
     }

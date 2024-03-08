@@ -68,11 +68,9 @@ struct LoggingExchange: Exchange {
     ) -> AnyPublisher<OperationResult, Never> {
         let downstream = operations
             .print()
-            .eraseToAnyPublisher()
 
         let upstream = next(downstream)
             .print()
-            .eraseToAnyPublisher()
 
         return upstream
     }

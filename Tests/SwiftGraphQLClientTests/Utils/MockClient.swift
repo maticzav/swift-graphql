@@ -28,7 +28,7 @@ class MockClient: GraphQLClient {
     
     func execute(operation: SwiftGraphQLClient.Operation) -> AnyPublisher<OperationResult, Never> {
         guard let customExecute = customExecute else {
-            return Observable<OperationResult>.empty().eraseToAnyPublisher()
+            return Observable<OperationResult>.empty()
         }
 
         return customExecute(operation)
