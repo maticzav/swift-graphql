@@ -517,7 +517,7 @@ public class GraphQLWebSocket: WebSocketDelegate {
                 case .message(let message):
                     return message
                 case .closed:
-                    subject.send(completion: .finished)
+                    subject.onCompleted()
                     return nil
                 case .error:
                     return nil
@@ -556,12 +556,12 @@ public class GraphQLWebSocket: WebSocketDelegate {
                         extensions: [:]
                     )
                     subject.onNext(result)
-                    subject.send(completion: .finished)
-                    
+                    subject.onCompleted()
+
                 case .complete:
                     // NOTE: We only forward the completion event since the
                     // results pipeline handles the clearing of resources on its own.
-                    subject.send(completion: .finished)
+                    subject.onCompleted()
                     
                 default:
                     ()

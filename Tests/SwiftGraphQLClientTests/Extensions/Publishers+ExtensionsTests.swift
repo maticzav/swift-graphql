@@ -81,7 +81,7 @@ final class PublishersExtensionsTests: XCTestCase {
             .store(in: &self.cancellables)
         
         publisher.onNext(1)
-        publisher.send(completion: .finished)
+        publisher.onCompleted()
         
         waitForExpectations(timeout: 1)
         

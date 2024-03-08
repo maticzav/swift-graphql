@@ -37,7 +37,7 @@ final class FallbackExchangeTests: XCTestCase {
             args: ExecutionArgs(query: "", variables: [:])
         )
         subject.onNext(operation)
-        subject.send(completion: .finished)
+        subject.onCompleted()
         
         waitForExpectations(timeout: 1)
     }

@@ -9,20 +9,6 @@ public extension Disposable {
     }
 }
 
-public extension PublishSubject {
-    enum Completion {
-        /// The subject finished normally.
-        case finished
-    }
-
-    func send(completion: Completion) {
-        switch completion {
-            case .finished:
-                onCompleted()
-        }
-    }
-}
-
 public extension Observable {
     func first() async throws -> Element {
         try await take(1).asSingle().values.first(where: { _ in true })!
