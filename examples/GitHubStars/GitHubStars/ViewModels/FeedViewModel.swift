@@ -1,4 +1,4 @@
-import RxSwiftCombine
+import RxSwift
 import Foundation
 
 class FeedViewModel: ObservableObject {

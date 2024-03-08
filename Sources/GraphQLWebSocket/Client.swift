@@ -1,6 +1,6 @@
 // This file is heavily inspired by https://github.com/enisdenjo/graphql-ws.
 
-import RxSwiftCombine
+import RxSwift
 import GraphQL
 import Foundation
 import Starscream

@@ -1,4 +1,4 @@
-import RxSwiftCombine
+import RxSwift
 @testable import SwiftGraphQLClient
 import XCTest
 

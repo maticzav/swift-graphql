@@ -1,4 +1,4 @@
-import RxSwiftCombine
+import RxSwift
 import Foundation
 
 /// An exchange that lets you listen to errors happening in the execution pipeline.

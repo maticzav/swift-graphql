@@ -43,7 +43,7 @@ let package = Package(
                 "GraphQL",
                 .product(name: "Logging", package: "swift-log"),
                 "Starscream",
-                "RxSwiftCombine",
+                "RxSwiftExtensions",
             ],
             path: "Sources/GraphQLWebSocket",
             exclude: ["README.md"]
@@ -56,7 +56,7 @@ let package = Package(
             dependencies: [
                 "GraphQL",
 				"SwiftGraphQLUtils",
-                "RxSwiftCombine",
+                "RxSwiftExtensions",
             ],
             path: "Sources/SwiftGraphQL"
         ),
@@ -67,7 +67,7 @@ let package = Package(
                 "GraphQLWebSocket",
                 .product(name: "Logging", package: "swift-log"),
                 "SwiftGraphQL",
-                "RxSwiftCombine",
+                "RxSwiftExtensions",
             ],
             path: "Sources/SwiftGraphQLClient"
         ),
@@ -83,7 +83,7 @@ let package = Package(
         ),
         .target(name: "SwiftGraphQLUtils", dependencies: [], path: "Sources/SwiftGraphQLUtils"),
         .target(
-            name: "RxSwiftCombine",
+            name: "RxSwiftExtensions",
             dependencies: [
                 .product(name: "RxSwift", package: "RxSwift"),
             ]

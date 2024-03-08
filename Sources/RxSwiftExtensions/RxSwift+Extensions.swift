@@ -1,5 +1,4 @@
-@_exported import RxSwift
-
+import RxSwift
 
 public extension Disposable {
     func store(in collection: inout Set<DisposeBag>) {

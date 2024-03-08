@@ -1,4 +1,4 @@
-import RxSwiftCombine
+import RxSwift
 import Foundation
 
 /// Exchange that composes multiple exchanges into one exchange.

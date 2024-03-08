@@ -1,4 +1,4 @@
-import RxSwiftCombine
+import RxSwift
 import GraphQL
 @testable import GraphQLWebSocket
 import XCTest

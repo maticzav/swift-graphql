@@ -1,4 +1,4 @@
-import RxSwiftCombine
+import RxSwift
 import Foundation
 
 /// Utility type for describing the exchange processor.
