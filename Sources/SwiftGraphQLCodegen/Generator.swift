@@ -20,27 +20,27 @@ public struct GraphQLCodegen {
         let context = Context(schema: schema, scalars: self.scalars)
         
         let subscription = schema.operations.first { $0.isSubscription }?.type.name
-        
+        let objects = schema.objects
         // Code Parts
         let operations = schema.operations.map { $0.declaration() }
-        let objectDefinitions = try schema.objects.map { object in
+        let objectDefinitions = try objects.map { object in
             try object.declaration(
-                objects: schema.objects,
+                objects: objects,
                 context: context,
                 alias: object.name != subscription
             )
         }
         
-        let staticFieldSelection = try schema.objects.map { object in
+        let staticFieldSelection = try objects.map { object in
             try object.statics(context: context)
         }
         
         let interfaceDefinitions = try schema.interfaces.map {
-            try $0.declaration(objects: schema.objects, context: context)
+            try $0.declaration(objects: objects, context: context)
         }
         
         let unionDefinitions = try schema.unions.map {
-            try $0.declaration(objects: schema.objects, context: context)
+            try $0.declaration(objects: objects, context: context)
         }
         
         let enumDefinitions = schema.enums.map { $0.declaration }
