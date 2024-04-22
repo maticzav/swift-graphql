@@ -115,7 +115,7 @@ struct SwiftGraphQLCLI: ParsableCommand {
         let files: [GeneratedFile]
 
         do {
-            files = try generator.generate(schema: schema)
+            files = try generator.generate(schema: schema, generateStaticFields: config.generateStaticFields)
             generateCodeSpinner.success("API generated successfully!")
         } catch CodegenError.formatting(let err) {
             generateCodeSpinner.error(err.localizedDescription)
@@ -179,6 +179,9 @@ struct SwiftGraphQLCLI: ParsableCommand {
 struct Config: Codable, Equatable {
     /// Key-Value dictionary of scalar mappings.
     let scalars: [String: String]
+
+    /// Whether to generate static lookups for object fields
+    var generateStaticFields = true
 
     // MARK: - Initializers
 

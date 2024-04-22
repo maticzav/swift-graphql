@@ -16,7 +16,7 @@ public struct GraphQLCodegen {
     // MARK: - Methods
 
     /// Generates a SwiftGraphQL Selection File (i.e. the code that tells how to define selections).
-    public func generate(schema: Schema) throws -> String {
+    public func generate(schema: Schema, generateStaticFields: Bool) throws -> [GeneratedFile] {
         let context = Context(schema: schema, scalars: self.scalars)
         
         let subscription = schema.operations.first { $0.isSubscription }?.type.name
@@ -67,8 +67,10 @@ public struct GraphQLCodegen {
                 alias: object.name != subscription
             )
 
-            let staticFieldSelection = try object.statics(context: context)
-            contents += "\n\n\(staticFieldSelection)"
+            if generateStaticFields {
+                let staticFieldSelection = try object.statics(context: context)
+                contents += "\n\n\(staticFieldSelection)"
+            }
             try addFile(name: "Objects/\(object.name)", contents: contents)
         }
 
