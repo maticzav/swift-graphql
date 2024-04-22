@@ -112,10 +112,10 @@ struct SwiftGraphQLCLI: ParsableCommand {
         
         let scalars = ScalarMap(scalars: config.scalars)
         let generator = GraphQLCodegen(scalars: scalars)
-        let code: String
-        
+        let files: [GeneratedFile]
+
         do {
-            code = try generator.generate(schema: schema)
+            files = try generator.generate(schema: schema)
             generateCodeSpinner.success("API generated successfully!")
         } catch CodegenError.formatting(let err) {
             generateCodeSpinner.error(err.localizedDescription)
@@ -131,9 +131,15 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
         // Write to target file or stdout.
         if let outputPath = output {
-            try Folder.current.createFile(at: outputPath).write(code)
+            try? Folder.current.subfolder(at: outputPath).delete()
+            for file in files {
+                try Folder.current.createFile(at: "\(outputPath)/\(file.name).swift").write(file.contents)
+            }
         } else {
-            FileHandle.standardOutput.write(code.data(using: .utf8)!)
+            for file in files {
+                let contents = "\n\n\(file.name).swift:\n" + file.contents
+                FileHandle.standardOutput.write(contents.data(using: .utf8)!)
+            }
         }
         
         let analyzeSchemaSpinner = Spinner(.dots, "Analyzing Schema")
