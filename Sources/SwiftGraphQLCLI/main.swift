@@ -114,10 +114,14 @@ struct SwiftGraphQLCLI: ParsableCommand {
         let generator = GraphQLCodegen(scalars: scalars)
         let files: [GeneratedFile]
 
+        // If the output is a Swift file generate a single file, otherwise multiple files in that directory
+        let singleFileOutput = output?.hasSuffix(".swift") ?? false
+
         do {
             files = try generator.generate(
                 schema: schema,
-                generateStaticFields: config.generateStaticFields != false
+                generateStaticFields: config.generateStaticFields != false,
+                singleFile: singleFileOutput
             )
             generateCodeSpinner.success("API generated successfully!")
         } catch CodegenError.formatting(let err) {
@@ -134,13 +138,19 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
         // Write to target file or stdout.
         if let outputPath = output {
-            try? Folder.current.subfolder(at: outputPath).delete()
-            for file in files {
-                try Folder.current.createFile(at: "\(outputPath)/\(file.name).swift").write(file.contents)
+            if singleFileOutput, let file = files.first {
+                // The generator returns a single file if asked to
+                try Folder.current.createFile(at: outputPath).write(file.contents)
+            } else {
+                // Clear the directory, in case some files were removed
+                try? Folder.current.subfolder(at: outputPath).delete()
+                for file in files {
+                    try Folder.current.createFile(at: "\(outputPath)/\(file.name).swift").write(file.contents)
+                }
             }
         } else {
             for file in files {
-                let contents = "\n\n\(file.name).swift:\n" + file.contents
+                let contents = "\n" + file.contents
                 FileHandle.standardOutput.write(contents.data(using: .utf8)!)
             }
         }
