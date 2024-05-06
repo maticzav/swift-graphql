@@ -112,10 +112,18 @@ struct SwiftGraphQLCLI: ParsableCommand {
         
         let scalars = ScalarMap(scalars: config.scalars)
         let generator = GraphQLCodegen(scalars: scalars)
-        let code: String
-        
+        let files: [GeneratedFile]
+
+        // If the output is a Swift file generate a single file, otherwise multiple files in that directory
+        // If there's no output generate a single file as well as it will be printed to standard out
+        let singleFileOutput = output?.hasSuffix(".swift") ?? true
+
         do {
-            code = try generator.generate(schema: schema)
+            files = try generator.generate(
+                schema: schema,
+                generateStaticFields: config.generateStaticFields != false,
+                singleFile: singleFileOutput
+            )
             generateCodeSpinner.success("API generated successfully!")
         } catch CodegenError.formatting(let err) {
             generateCodeSpinner.error(err.localizedDescription)
@@ -131,9 +139,21 @@ struct SwiftGraphQLCLI: ParsableCommand {
 
         // Write to target file or stdout.
         if let outputPath = output {
-            try Folder.current.createFile(at: outputPath).write(code)
+            if singleFileOutput, let file = files.first {
+                // The generator returns a single file if asked to
+                try Folder.current.createFile(at: outputPath).write(file.contents)
+            } else {
+                // Clear the directory, in case some files were removed
+                try? Folder.current.subfolder(at: outputPath).delete()
+                for file in files {
+                    try Folder.current.createFile(at: "\(outputPath)/\(file.name).swift").write(file.contents)
+                }
+            }
         } else {
-            FileHandle.standardOutput.write(code.data(using: .utf8)!)
+            for file in files {
+                // this should always be one file anyway
+                FileHandle.standardOutput.write(file.contents.data(using: .utf8)!)
+            }
         }
         
         let analyzeSchemaSpinner = Spinner(.dots, "Analyzing Schema")
@@ -174,11 +194,15 @@ struct Config: Codable, Equatable {
     /// Key-Value dictionary of scalar mappings.
     let scalars: [String: String]
 
+    /// Whether to generate static lookups for object fields
+    var generateStaticFields: Bool?
+
     // MARK: - Initializers
 
     /// Creates an empty configuration instance.
     init() {
         self.scalars = [:]
+        self.generateStaticFields = true
     }
 
     /// Tries to decode the configuration from a string.

@@ -14,79 +14,102 @@ public struct GraphQLCodegen {
     }
 
     // MARK: - Methods
-
-    /// Generates a SwiftGraphQL Selection File (i.e. the code that tells how to define selections).
-    public func generate(schema: Schema) throws -> String {
+    
+    /// Generates Swift files for the graph selections
+    /// - Parameters:
+    ///   - schema: The GraphQL schema
+    ///   - generateStaticFields: Whether to generate static selections for fields on objects
+    ///   - singleFile: Whether to return all the swift code in a single file
+    /// - Returns: A list of generated files
+    public func generate(schema: Schema, generateStaticFields: Bool, singleFile: Bool = false) throws -> [GeneratedFile] {
         let context = Context(schema: schema, scalars: self.scalars)
         
         let subscription = schema.operations.first { $0.isSubscription }?.type.name
-        
-        // Code Parts
+        let objects = schema.objects
         let operations = schema.operations.map { $0.declaration() }
-        let objectDefinitions = try schema.objects.map { object in
-            try object.declaration(
-                objects: schema.objects,
-                context: context,
-                alias: object.name != subscription
-            )
-        }
-        
-        let staticFieldSelection = try schema.objects.map { object in
-            try object.statics(context: context)
-        }
-        
-        let interfaceDefinitions = try schema.interfaces.map {
-            try $0.declaration(objects: schema.objects, context: context)
-        }
-        
-        let unionDefinitions = try schema.unions.map {
-            try $0.declaration(objects: schema.objects, context: context)
-        }
-        
-        let enumDefinitions = schema.enums.map { $0.declaration }
-        
-        let inputObjectDefinitions = try schema.inputObjects.map {
-            try $0.declaration(context: context)
-        }
-        
-        // API
-        let code = """
+
+        var files: [GeneratedFile] = []
+
+        let header = """
         // This file was auto-generated using maticzav/swift-graphql. DO NOT EDIT MANUALLY!
         import Foundation
         import GraphQL
         import SwiftGraphQL
+        """
 
-        // MARK: - Operations
+        let graphContents = """
         public enum Operations {}
         \(operations.lines)
 
-        // MARK: - Objects
         public enum Objects {}
-        \(objectDefinitions.lines)
-        \(staticFieldSelection.lines)
 
-        // MARK: - Interfaces
         public enum Interfaces {}
-        \(interfaceDefinitions.lines)
 
-        // MARK: - Unions
         public enum Unions {}
-        \(unionDefinitions.lines)
 
-        // MARK: - Enums
         public enum Enums {}
-        \(enumDefinitions.lines)
 
-        // MARK: - Input Objects
-        
         /// Utility pointer to InputObjects.
         public typealias Inputs = InputObjects
         
         public enum InputObjects {}
-        \(inputObjectDefinitions.lines)
         """
 
-        let formatted = try code.format()
-        return formatted
+        func addFile(name: String, contents: String) throws {
+            let fileContents: String
+            if singleFile {
+                fileContents = "\n// MARK: \(name)\n\(contents)"
+            } else {
+                fileContents = "\(header)\n\n\(contents)"
+            }
+            let file = GeneratedFile(name: name, contents: try fileContents.format())
+            files.append(file)
+        }
+
+        try addFile(name: "Graph", contents: graphContents)
+        for object in objects {
+            var contents = try object.declaration(
+                objects: objects,
+                context: context,
+                alias: object.name != subscription
+            )
+
+            if generateStaticFields {
+                let staticFieldSelection = try object.statics(context: context)
+                contents += "\n\n\(staticFieldSelection)"
+            }
+            try addFile(name: "Objects/\(object.name)", contents: contents)
+        }
+
+        for object in schema.inputObjects {
+            let contents = try object.declaration(context: context)
+            try addFile(name: "InputObjects/\(object.name)", contents: contents)
+        }
+
+        for enumSchema in schema.enums {
+            try addFile(name: "Enums/\(enumSchema.name)", contents: enumSchema.declaration)
+        }
+
+        for interface in schema.interfaces {
+            let contents = try interface.declaration(objects: objects, context: context)
+            try addFile(name: "Interfaces/\(interface.name)", contents: contents)
+        }
+
+        for union in schema.unions {
+            let contents = try union.declaration(objects: objects, context: context)
+            try addFile(name: "Unions/\(union.name)", contents: contents)
+        }
+
+        if singleFile {
+            let fileContent = "\(header)\n\n\(files.map(\.contents).joined(separator: "\n\n"))"
+            files = [GeneratedFile(name: "Graph", contents: fileContent)]
+        }
+
+        return files
     }
+}
+
+public struct GeneratedFile {
+    public let name: String
+    public let contents: String
 }
