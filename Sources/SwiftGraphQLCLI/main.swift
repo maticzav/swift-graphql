@@ -115,7 +115,8 @@ struct SwiftGraphQLCLI: ParsableCommand {
         let files: [GeneratedFile]
 
         // If the output is a Swift file generate a single file, otherwise multiple files in that directory
-        let singleFileOutput = output?.hasSuffix(".swift") ?? false
+        // If there's no output generate a single file as well as it will be printed to standard out
+        let singleFileOutput = output?.hasSuffix(".swift") ?? true
 
         do {
             files = try generator.generate(
@@ -150,8 +151,8 @@ struct SwiftGraphQLCLI: ParsableCommand {
             }
         } else {
             for file in files {
-                let contents = "\n" + file.contents
-                FileHandle.standardOutput.write(contents.data(using: .utf8)!)
+                // this should always be one file anyway
+                FileHandle.standardOutput.write(file.contents.data(using: .utf8)!)
             }
         }
         
